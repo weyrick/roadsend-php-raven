@@ -1,0 +1,7 @@
+
+# in order of complexity ;)
+ADD_SUBDIRECTORY(fact)
+ADD_SUBDIRECTORY(cool)
+ADD_SUBDIRECTORY(java)
+ADD_SUBDIRECTORY(csharp)
+ADD_SUBDIRECTORY(cpp)

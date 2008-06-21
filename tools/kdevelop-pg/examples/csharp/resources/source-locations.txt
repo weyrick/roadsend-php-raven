@@ -1,0 +1,78 @@
+Where I got the specifications, grammars and stuff.
+
+
+Different versions of the Language specification:
+
+ECMA-334 (C# Language specification), 3rd edition (June 2005):
+http://www.ecma-international.org/publications/standards/Ecma-334.htm
+...covers C# 2.0.
+
+ISO/IEC 23270:2003 (C# Language specification, 2nd edition, April 2004):
+http://isotc.iso.org/livelink/livelink/fetch/2000/2489/Ittf_Home/PubliclyAvailableStandards.htm
+...covers C# 1.0.
+
+HTML version of the ECMA-334 (2rd edition / C# 1.0, it seems) standard:
+http://www.jaggersoft.com/csharp_standard/index.htm
+
+For more information and more links, check out the page from the Mono project:
+http://www.mono-project.com/ECMA
+
+
+Grammars:
+
+- Every specification contains an example grammar, yay!
+
+Mono's C# 2.0 grammar (.jay format, very bison-like):
+http://svn.myrealbox.com/viewcvs/trunk/mcs/gmcs/cs-parser.jay?rev=60352&view=auto
+
+Mono's C# 1.0 grammar (.jay format, very bison-like):
+http://svn.myrealbox.com/viewcvs/trunk/mcs/mcs/cs-parser.jay?rev=60352&view=auto
+
+James Power's flex/bison C# parser:
+http://www.cs.nuim.ie/~jpower/Research/csharp/
+http://www.cs.may.ie/~jpower/
+
+ANTLR contains a C# parser in examples/csharp/csharp_v1/, which appears to be
+an approximate copy (or rather the origin) of kcsparse.
+
+From http://antlr.org/grammar/list:
+
+- kcsparse: parses C# 1.0 files
+Kunle Odutola Thu Dec 8, 2005 06:37
+"Yet Another C# Grammar For ANTLR implemented in C#. It is probably more
+complete and includes both an ANTLR and a C# Flex lexer. With kcsparse, you can
+(a) Parse C# 1.x source code including some with C# preprocessing directives,
+(b)Build and display an AST from C# source and,
+(c) Unparse the AST (i.e. pretty prints the AST)."
+
+- C# Grammar with minimal lookaheads
+Todd King Mon Sep 26, 2005 00:48
+"This C# antlr grammar implements most of the C# spec except for a few of the
+unsafe elements. I designed this grammar for speed so I avoided using arbitrary
+lookaheads where I could. I got it down to just 7 lookaheads. This grammar can
+parse large files very fast because it doesnýt waste time spinning in arbitrary
+lookaheads. (It can parse the entire NAnt project in 5 seconds, that is
+90986 LOC)"
+
+- C# grammar (based on ecma-334 spec)
+Robin Debreuil Fri Mar 5, 2004 11:50
+"A (mostly) complete cs parser. It parses into a tree structure loosely based
+on the CodeDom. Does not yet do #if preprocessor segments, and no unsafe code
+(as of yet). You can test by downloading the CSharp.zip file and dragging
+cs files into CSharp.exe. The zip includes the grammar file, as well as the
+cs token classes (the grammar uses a heterogeneous tree, though that should
+be simple to turn off). permalink: http://www.debreuil.com/CSharp. TJP: copied
+src, exe to antlr.org and changed link as debreuil's links are dead."
+
+- C# Grammar File
+Rajendra Kumar Komandur Wed Oct 29, 2003 20:07
+"Grammar file for cSharp language which supports most part of the cSharp
+language spec."
+
+
+Other resources:
+
+A Comparison Of Microsoft'S C# Programming Language
+To Sun Microsystems' Java Programming Language (by Dare Obasanjo)
+http://www.25hoursaday.com/CsharpVsJava.html
+
