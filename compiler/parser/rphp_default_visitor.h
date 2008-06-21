@@ -6,12 +6,10 @@
 
 #include "rphp_visitor.h"
 
-#include <parserexport.h>
-
 namespace rphp
   {
 
-  class KDEVPHPPARSER_EXPORT default_visitor:  public visitor
+  class  default_visitor:  public visitor
     {
 
     public:

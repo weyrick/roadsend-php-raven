@@ -5,9 +5,8 @@
 
 
 #include "phplexer.h"
-#include <QtCore/QDebug>
 
-namespace Php
+namespace rphp
   {
 
   void Parser::tokenize( const std::string& contents )
@@ -51,11 +50,11 @@ namespace Php
   void Parser::reportProblem( Parser::ProblemType type,  const std::string& message )
   {
     if  (type ==  Error)
-      qDebug() <<  "** ERROR:" <<  message;
+      cout <<  "** ERROR:" <<  message;
     else if  (type ==  Warning)
-      qDebug() <<  "** WARNING:" <<  message;
+      cout <<  "** WARNING:" <<  message;
     else if  (type ==  Info)
-      qDebug() <<  "** Info:" <<  message;
+      cout <<  "** Info:" <<  message;
   }
 
 
@@ -106,7 +105,7 @@ namespace Php
     m_state.varExpressionIsVariable =  state->varExpressionIsVariable;
   }
 
-} // end of namespace Php
+} // end of namespace rphp
 
 
 namespace rphp
@@ -3215,7 +3214,7 @@ namespace rphp
 
             yylex();
 
-            (*yynode)->numType =  Php::LongNumber;
+            (*yynode)->numType =  rphp::LongNumber;
           }
 
         else if  (yytoken ==  Token_DNUMBER)
@@ -3232,7 +3231,7 @@ namespace rphp
 
             yylex();
 
-            (*yynode)->numType =  Php::DoubleNumber;
+            (*yynode)->numType =  rphp::DoubleNumber;
           }
 
         else if  (yytoken ==  Token_CONSTANT_ENCAPSED_STRING)

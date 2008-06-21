@@ -6,10 +6,9 @@
 
 #include <kdev-pg-list.h>
 
-#include <parserexport.h>
 
 
-namespace RPHP
+namespace rphp
   {
 
   class Lexer;
@@ -217,7 +216,7 @@ namespace rphp
   struct whileStatement_ast;
 
 
-  struct KDEVPHPPARSER_EXPORT ast_node
+  struct  ast_node
     {
       enum ast_node_kind_enum {
         Kind_additiveExpression = 1000,
@@ -325,7 +324,7 @@ namespace rphp
       std::size_t end_token;
     };
 
-  struct KDEVPHPPARSER_EXPORT additiveExpression_ast: public ast_node
+  struct  additiveExpression_ast: public ast_node
     {
       enum
       {
@@ -336,7 +335,7 @@ namespace rphp
       const list_node<additiveExpressionRest_ast *> *additionalExpression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT additiveExpressionRest_ast: public ast_node
+  struct  additiveExpressionRest_ast: public ast_node
     {
       enum
       {
@@ -346,7 +345,7 @@ namespace rphp
       multiplicativeExpression_ast *expression;
     };
 
-  struct KDEVPHPPARSER_EXPORT arrayPairValue_ast: public ast_node
+  struct  arrayPairValue_ast: public ast_node
     {
       enum
       {
@@ -359,7 +358,7 @@ namespace rphp
       variable_ast *variable;
     };
 
-  struct KDEVPHPPARSER_EXPORT assignmentExpression_ast: public ast_node
+  struct  assignmentExpression_ast: public ast_node
     {
       enum
       {
@@ -371,7 +370,7 @@ namespace rphp
       assignmentExpression_ast *assignmentExpression;
     };
 
-  struct KDEVPHPPARSER_EXPORT assignmentExpressionCheckIfVariable_ast: public ast_node
+  struct  assignmentExpressionCheckIfVariable_ast: public ast_node
     {
       enum
       {
@@ -380,7 +379,7 @@ namespace rphp
 
     };
 
-  struct KDEVPHPPARSER_EXPORT assignmentExpressionEqual_ast: public ast_node
+  struct  assignmentExpressionEqual_ast: public ast_node
     {
       enum
       {
@@ -390,7 +389,7 @@ namespace rphp
       assignmentExpression_ast *assignmentExpression;
     };
 
-  struct KDEVPHPPARSER_EXPORT assignmentList_ast: public ast_node
+  struct  assignmentList_ast: public ast_node
     {
       enum
       {
@@ -400,7 +399,7 @@ namespace rphp
       const list_node<assignmentListElement_ast *> *element_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT assignmentListElement_ast: public ast_node
+  struct  assignmentListElement_ast: public ast_node
     {
       enum
       {
@@ -411,7 +410,7 @@ namespace rphp
       assignmentList_ast *assignmentList;
     };
 
-  struct KDEVPHPPARSER_EXPORT baseVariable_ast: public ast_node
+  struct  baseVariable_ast: public ast_node
     {
       enum
       {
@@ -423,7 +422,7 @@ namespace rphp
       staticMember_ast *staticMember;
     };
 
-  struct KDEVPHPPARSER_EXPORT baseVariableWithFunctionCalls_ast: public ast_node
+  struct  baseVariableWithFunctionCalls_ast: public ast_node
     {
       enum
       {
@@ -434,7 +433,7 @@ namespace rphp
       baseVariable_ast *baseVariable;
     };
 
-  struct KDEVPHPPARSER_EXPORT bitAndExpression_ast: public ast_node
+  struct  bitAndExpression_ast: public ast_node
     {
       enum
       {
@@ -444,7 +443,7 @@ namespace rphp
       const list_node<equalityExpression_ast *> *expression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT bitOrExpression_ast: public ast_node
+  struct  bitOrExpression_ast: public ast_node
     {
       enum
       {
@@ -454,7 +453,7 @@ namespace rphp
       const list_node<bitXorExpression_ast *> *expression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT bitXorExpression_ast: public ast_node
+  struct  bitXorExpression_ast: public ast_node
     {
       enum
       {
@@ -464,7 +463,7 @@ namespace rphp
       const list_node<bitAndExpression_ast *> *expression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT booleanAndExpression_ast: public ast_node
+  struct  booleanAndExpression_ast: public ast_node
     {
       enum
       {
@@ -474,7 +473,7 @@ namespace rphp
       const list_node<bitOrExpression_ast *> *expression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT booleanOrExpression_ast: public ast_node
+  struct  booleanOrExpression_ast: public ast_node
     {
       enum
       {
@@ -484,7 +483,7 @@ namespace rphp
       const list_node<booleanAndExpression_ast *> *expression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT caseList_ast: public ast_node
+  struct  caseList_ast: public ast_node
     {
       enum
       {
@@ -494,7 +493,7 @@ namespace rphp
       const list_node<case_item_ast *> *caseItems_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT case_item_ast: public ast_node
+  struct  case_item_ast: public ast_node
     {
       enum
       {
@@ -506,7 +505,7 @@ namespace rphp
       std::size_t def;
     };
 
-  struct KDEVPHPPARSER_EXPORT catch_item_ast: public ast_node
+  struct  catch_item_ast: public ast_node
     {
       enum
       {
@@ -517,7 +516,7 @@ namespace rphp
       innerStatementList_ast *statements;
     };
 
-  struct KDEVPHPPARSER_EXPORT classConstantDeclaration_ast: public ast_node
+  struct  classConstantDeclaration_ast: public ast_node
     {
       enum
       {
@@ -527,7 +526,7 @@ namespace rphp
       staticScalar_ast *scalar;
     };
 
-  struct KDEVPHPPARSER_EXPORT classDeclarationStatement_ast: public ast_node
+  struct  classDeclarationStatement_ast: public ast_node
     {
       enum
       {
@@ -541,7 +540,7 @@ namespace rphp
       const list_node<classStatement_ast *> *statements_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT classNameReference_ast: public ast_node
+  struct  classNameReference_ast: public ast_node
     {
       enum
       {
@@ -551,7 +550,7 @@ namespace rphp
       dynamicClassNameReference_ast *dynamicClassNameReference;
     };
 
-  struct KDEVPHPPARSER_EXPORT classStatement_ast: public ast_node
+  struct  classStatement_ast: public ast_node
     {
       enum
       {
@@ -564,7 +563,7 @@ namespace rphp
       methodBody_ast *body;
     };
 
-  struct KDEVPHPPARSER_EXPORT classVariable_ast: public ast_node
+  struct  classVariable_ast: public ast_node
     {
       enum
       {
@@ -575,7 +574,7 @@ namespace rphp
       staticScalar_ast *value;
     };
 
-  struct KDEVPHPPARSER_EXPORT classVariableDeclaration_ast: public ast_node
+  struct  classVariableDeclaration_ast: public ast_node
     {
       enum
       {
@@ -585,17 +584,17 @@ namespace rphp
       classVariable_ast *vars;
     };
 
-  struct KDEVPHPPARSER_EXPORT commonScalar_ast: public ast_node
+  struct  commonScalar_ast: public ast_node
     {
       enum
       {
         KIND = Kind_commonScalar
       };
 
-      Php::NumericType numType;
+      rphp::NumericType numType;
     };
 
-  struct KDEVPHPPARSER_EXPORT compoundVariable_ast: public ast_node
+  struct  compoundVariable_ast: public ast_node
     {
       enum
       {
@@ -606,7 +605,7 @@ namespace rphp
       expr_ast *expr;
     };
 
-  struct KDEVPHPPARSER_EXPORT compoundVariableWithSimpleIndirectReference_ast: public ast_node
+  struct  compoundVariableWithSimpleIndirectReference_ast: public ast_node
     {
       enum
       {
@@ -617,7 +616,7 @@ namespace rphp
       expr_ast *expr;
     };
 
-  struct KDEVPHPPARSER_EXPORT conditionalExpression_ast: public ast_node
+  struct  conditionalExpression_ast: public ast_node
     {
       enum
       {
@@ -629,7 +628,7 @@ namespace rphp
       conditionalExpression_ast *elseExpression;
     };
 
-  struct KDEVPHPPARSER_EXPORT ctorArguments_ast: public ast_node
+  struct  ctorArguments_ast: public ast_node
     {
       enum
       {
@@ -639,7 +638,7 @@ namespace rphp
       functionCallParameterList_ast *parameterList;
     };
 
-  struct KDEVPHPPARSER_EXPORT declareItem_ast: public ast_node
+  struct  declareItem_ast: public ast_node
     {
       enum
       {
@@ -649,7 +648,7 @@ namespace rphp
       staticScalar_ast *scalar;
     };
 
-  struct KDEVPHPPARSER_EXPORT declareStatement_ast: public ast_node
+  struct  declareStatement_ast: public ast_node
     {
       enum
       {
@@ -660,7 +659,7 @@ namespace rphp
       innerStatementList_ast *statements;
     };
 
-  struct KDEVPHPPARSER_EXPORT dimListItem_ast: public ast_node
+  struct  dimListItem_ast: public ast_node
     {
       enum
       {
@@ -671,7 +670,7 @@ namespace rphp
       expr_ast *expr;
     };
 
-  struct KDEVPHPPARSER_EXPORT dimOffset_ast: public ast_node
+  struct  dimOffset_ast: public ast_node
     {
       enum
       {
@@ -681,7 +680,7 @@ namespace rphp
       expr_ast *expr;
     };
 
-  struct KDEVPHPPARSER_EXPORT dynamicClassNameReference_ast: public ast_node
+  struct  dynamicClassNameReference_ast: public ast_node
     {
       enum
       {
@@ -693,7 +692,7 @@ namespace rphp
       dynamicClassNameVariableProperties_ast *properties;
     };
 
-  struct KDEVPHPPARSER_EXPORT dynamicClassNameVariableProperties_ast: public ast_node
+  struct  dynamicClassNameVariableProperties_ast: public ast_node
     {
       enum
       {
@@ -703,7 +702,7 @@ namespace rphp
       const list_node<dynamicClassNameVariableProperty_ast *> *properties_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT dynamicClassNameVariableProperty_ast: public ast_node
+  struct  dynamicClassNameVariableProperty_ast: public ast_node
     {
       enum
       {
@@ -713,7 +712,7 @@ namespace rphp
       objectProperty_ast *property;
     };
 
-  struct KDEVPHPPARSER_EXPORT elseSingle_ast: public ast_node
+  struct  elseSingle_ast: public ast_node
     {
       enum
       {
@@ -723,7 +722,7 @@ namespace rphp
       statement_ast *statement;
     };
 
-  struct KDEVPHPPARSER_EXPORT elseifList_ast: public ast_node
+  struct  elseifList_ast: public ast_node
     {
       enum
       {
@@ -733,7 +732,7 @@ namespace rphp
       const list_node<elseifListItem_ast *> *elseifListItem_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT elseifListItem_ast: public ast_node
+  struct  elseifListItem_ast: public ast_node
     {
       enum
       {
@@ -744,7 +743,7 @@ namespace rphp
       statement_ast *statement;
     };
 
-  struct KDEVPHPPARSER_EXPORT encaps_ast: public ast_node
+  struct  encaps_ast: public ast_node
     {
       enum
       {
@@ -755,7 +754,7 @@ namespace rphp
       std::size_t value;
     };
 
-  struct KDEVPHPPARSER_EXPORT encapsList_ast: public ast_node
+  struct  encapsList_ast: public ast_node
     {
       enum
       {
@@ -765,7 +764,7 @@ namespace rphp
       const list_node<encaps_ast *> *encaps_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT encapsVar_ast: public ast_node
+  struct  encapsVar_ast: public ast_node
     {
       enum
       {
@@ -776,7 +775,7 @@ namespace rphp
       encapsVarOffset_ast *offset;
     };
 
-  struct KDEVPHPPARSER_EXPORT encapsVarOffset_ast: public ast_node
+  struct  encapsVarOffset_ast: public ast_node
     {
       enum
       {
@@ -785,7 +784,7 @@ namespace rphp
 
     };
 
-  struct KDEVPHPPARSER_EXPORT equalityExpression_ast: public ast_node
+  struct  equalityExpression_ast: public ast_node
     {
       enum
       {
@@ -796,7 +795,7 @@ namespace rphp
       const list_node<equalityExpressionRest_ast *> *additionalExpression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT equalityExpressionRest_ast: public ast_node
+  struct  equalityExpressionRest_ast: public ast_node
     {
       enum
       {
@@ -806,7 +805,7 @@ namespace rphp
       relationalExpression_ast *expression;
     };
 
-  struct KDEVPHPPARSER_EXPORT expr_ast: public ast_node
+  struct  expr_ast: public ast_node
     {
       enum
       {
@@ -816,7 +815,7 @@ namespace rphp
       logicalOrExpression_ast *expression;
     };
 
-  struct KDEVPHPPARSER_EXPORT forExpr_ast: public ast_node
+  struct  forExpr_ast: public ast_node
     {
       enum
       {
@@ -826,7 +825,7 @@ namespace rphp
       const list_node<expr_ast *> *exprs_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT forStatement_ast: public ast_node
+  struct  forStatement_ast: public ast_node
     {
       enum
       {
@@ -837,7 +836,7 @@ namespace rphp
       innerStatementList_ast *statements;
     };
 
-  struct KDEVPHPPARSER_EXPORT foreachOptionalArg_ast: public ast_node
+  struct  foreachOptionalArg_ast: public ast_node
     {
       enum
       {
@@ -847,7 +846,7 @@ namespace rphp
       foreachVariable_ast *foreachVariable;
     };
 
-  struct KDEVPHPPARSER_EXPORT foreachStatement_ast: public ast_node
+  struct  foreachStatement_ast: public ast_node
     {
       enum
       {
@@ -858,7 +857,7 @@ namespace rphp
       innerStatementList_ast *statements;
     };
 
-  struct KDEVPHPPARSER_EXPORT foreachVariable_ast: public ast_node
+  struct  foreachVariable_ast: public ast_node
     {
       enum
       {
@@ -868,7 +867,7 @@ namespace rphp
       variable_ast *variable;
     };
 
-  struct KDEVPHPPARSER_EXPORT functionCall_ast: public ast_node
+  struct  functionCall_ast: public ast_node
     {
       enum
       {
@@ -882,7 +881,7 @@ namespace rphp
       functionCallParameterList_ast *varParameterList;
     };
 
-  struct KDEVPHPPARSER_EXPORT functionCallParameterList_ast: public ast_node
+  struct  functionCallParameterList_ast: public ast_node
     {
       enum
       {
@@ -892,7 +891,7 @@ namespace rphp
       const list_node<functionCallParameterListElement_ast *> *parameters_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT functionCallParameterListElement_ast: public ast_node
+  struct  functionCallParameterListElement_ast: public ast_node
     {
       enum
       {
@@ -903,7 +902,7 @@ namespace rphp
       expr_ast *expr;
     };
 
-  struct KDEVPHPPARSER_EXPORT functionDeclarationStatement_ast: public ast_node
+  struct  functionDeclarationStatement_ast: public ast_node
     {
       enum
       {
@@ -914,7 +913,7 @@ namespace rphp
       innerStatementList_ast *statements;
     };
 
-  struct KDEVPHPPARSER_EXPORT globalVar_ast: public ast_node
+  struct  globalVar_ast: public ast_node
     {
       enum
       {
@@ -926,7 +925,7 @@ namespace rphp
       expr_ast *expr;
     };
 
-  struct KDEVPHPPARSER_EXPORT innerStatementList_ast: public ast_node
+  struct  innerStatementList_ast: public ast_node
     {
       enum
       {
@@ -936,7 +935,7 @@ namespace rphp
       const list_node<topStatement_ast *> *statements_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT logicalAndExpression_ast: public ast_node
+  struct  logicalAndExpression_ast: public ast_node
     {
       enum
       {
@@ -946,7 +945,7 @@ namespace rphp
       const list_node<printExpression_ast *> *expression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT logicalOrExpression_ast: public ast_node
+  struct  logicalOrExpression_ast: public ast_node
     {
       enum
       {
@@ -956,7 +955,7 @@ namespace rphp
       const list_node<logicalXorExpression_ast *> *expression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT logicalXorExpression_ast: public ast_node
+  struct  logicalXorExpression_ast: public ast_node
     {
       enum
       {
@@ -966,7 +965,7 @@ namespace rphp
       const list_node<logicalAndExpression_ast *> *expression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT memberModifier_ast: public ast_node
+  struct  memberModifier_ast: public ast_node
     {
       enum
       {
@@ -975,7 +974,7 @@ namespace rphp
 
     };
 
-  struct KDEVPHPPARSER_EXPORT methodBody_ast: public ast_node
+  struct  methodBody_ast: public ast_node
     {
       enum
       {
@@ -985,7 +984,7 @@ namespace rphp
       innerStatementList_ast *statements;
     };
 
-  struct KDEVPHPPARSER_EXPORT multiplicativeExpression_ast: public ast_node
+  struct  multiplicativeExpression_ast: public ast_node
     {
       enum
       {
@@ -996,7 +995,7 @@ namespace rphp
       const list_node<multiplicativeExpression_rest_ast *> *additionalExpression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT multiplicativeExpression_rest_ast: public ast_node
+  struct  multiplicativeExpression_rest_ast: public ast_node
     {
       enum
       {
@@ -1006,7 +1005,7 @@ namespace rphp
       unaryExpression_ast *expression;
     };
 
-  struct KDEVPHPPARSER_EXPORT newElseSingle_ast: public ast_node
+  struct  newElseSingle_ast: public ast_node
     {
       enum
       {
@@ -1016,7 +1015,7 @@ namespace rphp
       innerStatementList_ast *statements;
     };
 
-  struct KDEVPHPPARSER_EXPORT newElseifList_ast: public ast_node
+  struct  newElseifList_ast: public ast_node
     {
       enum
       {
@@ -1026,7 +1025,7 @@ namespace rphp
       const list_node<newelseifListItem_ast *> *newElseifListItem_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT newelseifListItem_ast: public ast_node
+  struct  newelseifListItem_ast: public ast_node
     {
       enum
       {
@@ -1037,7 +1036,7 @@ namespace rphp
       innerStatementList_ast *statements;
     };
 
-  struct KDEVPHPPARSER_EXPORT objectDimList_ast: public ast_node
+  struct  objectDimList_ast: public ast_node
     {
       enum
       {
@@ -1048,7 +1047,7 @@ namespace rphp
       const list_node<dimListItem_ast *> *offsetItems_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT objectProperty_ast: public ast_node
+  struct  objectProperty_ast: public ast_node
     {
       enum
       {
@@ -1059,7 +1058,7 @@ namespace rphp
       variableWithoutObjects_ast *variableWithoutObjects;
     };
 
-  struct KDEVPHPPARSER_EXPORT parameter_ast: public ast_node
+  struct  parameter_ast: public ast_node
     {
       enum
       {
@@ -1069,7 +1068,7 @@ namespace rphp
       staticScalar_ast *defaultValue;
     };
 
-  struct KDEVPHPPARSER_EXPORT parameterList_ast: public ast_node
+  struct  parameterList_ast: public ast_node
     {
       enum
       {
@@ -1079,7 +1078,7 @@ namespace rphp
       const list_node<parameter_ast *> *params_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT postprefixOperator_ast: public ast_node
+  struct  postprefixOperator_ast: public ast_node
     {
       enum
       {
@@ -1089,7 +1088,7 @@ namespace rphp
       std::size_t op;
     };
 
-  struct KDEVPHPPARSER_EXPORT printExpression_ast: public ast_node
+  struct  printExpression_ast: public ast_node
     {
       enum
       {
@@ -1100,7 +1099,7 @@ namespace rphp
       assignmentExpression_ast *expression;
     };
 
-  struct KDEVPHPPARSER_EXPORT relationalExpression_ast: public ast_node
+  struct  relationalExpression_ast: public ast_node
     {
       enum
       {
@@ -1112,7 +1111,7 @@ namespace rphp
       classNameReference_ast *instanceofType;
     };
 
-  struct KDEVPHPPARSER_EXPORT relationalExpressionRest_ast: public ast_node
+  struct  relationalExpressionRest_ast: public ast_node
     {
       enum
       {
@@ -1122,7 +1121,7 @@ namespace rphp
       shiftExpression_ast *expression;
     };
 
-  struct KDEVPHPPARSER_EXPORT scalar_ast: public ast_node
+  struct  scalar_ast: public ast_node
     {
       enum
       {
@@ -1136,7 +1135,7 @@ namespace rphp
       encapsList_ast *encapsList;
     };
 
-  struct KDEVPHPPARSER_EXPORT semicolonOrCloseTag_ast: public ast_node
+  struct  semicolonOrCloseTag_ast: public ast_node
     {
       enum
       {
@@ -1145,7 +1144,7 @@ namespace rphp
 
     };
 
-  struct KDEVPHPPARSER_EXPORT shiftExpression_ast: public ast_node
+  struct  shiftExpression_ast: public ast_node
     {
       enum
       {
@@ -1156,7 +1155,7 @@ namespace rphp
       const list_node<shiftExpressionRest_ast *> *additionalExpression_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT shiftExpressionRest_ast: public ast_node
+  struct  shiftExpressionRest_ast: public ast_node
     {
       enum
       {
@@ -1166,7 +1165,7 @@ namespace rphp
       additiveExpression_ast *expression;
     };
 
-  struct KDEVPHPPARSER_EXPORT start_ast: public ast_node
+  struct  start_ast: public ast_node
     {
       enum
       {
@@ -1176,7 +1175,7 @@ namespace rphp
       innerStatementList_ast *statements;
     };
 
-  struct KDEVPHPPARSER_EXPORT statement_ast: public ast_node
+  struct  statement_ast: public ast_node
     {
       enum
       {
@@ -1217,7 +1216,7 @@ namespace rphp
       expr_ast *throwExpr;
     };
 
-  struct KDEVPHPPARSER_EXPORT staticArrayPairValue_ast: public ast_node
+  struct  staticArrayPairValue_ast: public ast_node
     {
       enum
       {
@@ -1228,7 +1227,7 @@ namespace rphp
       const list_node<staticScalar_ast *> *val2_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT staticMember_ast: public ast_node
+  struct  staticMember_ast: public ast_node
     {
       enum
       {
@@ -1239,7 +1238,7 @@ namespace rphp
       variableWithoutObjects_ast *variable;
     };
 
-  struct KDEVPHPPARSER_EXPORT staticScalar_ast: public ast_node
+  struct  staticScalar_ast: public ast_node
     {
       enum
       {
@@ -1252,7 +1251,7 @@ namespace rphp
       const list_node<staticArrayPairValue_ast *> *arrayValues_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT staticVar_ast: public ast_node
+  struct  staticVar_ast: public ast_node
     {
       enum
       {
@@ -1262,7 +1261,7 @@ namespace rphp
       staticScalar_ast *staticScalar;
     };
 
-  struct KDEVPHPPARSER_EXPORT switchCaseList_ast: public ast_node
+  struct  switchCaseList_ast: public ast_node
     {
       enum
       {
@@ -1272,7 +1271,7 @@ namespace rphp
       caseList_ast *caseList;
     };
 
-  struct KDEVPHPPARSER_EXPORT topStatement_ast: public ast_node
+  struct  topStatement_ast: public ast_node
     {
       enum
       {
@@ -1284,7 +1283,7 @@ namespace rphp
       classDeclarationStatement_ast *classDeclaration;
     };
 
-  struct KDEVPHPPARSER_EXPORT unaryExpression_ast: public ast_node
+  struct  unaryExpression_ast: public ast_node
     {
       enum
       {
@@ -1297,7 +1296,7 @@ namespace rphp
       unaryExpression_not_plusminus_ast *unaryExpressionNotPlusminus;
     };
 
-  struct KDEVPHPPARSER_EXPORT unaryExpression_not_plusminus_ast: public ast_node
+  struct  unaryExpression_not_plusminus_ast: public ast_node
     {
       enum
       {
@@ -1309,7 +1308,7 @@ namespace rphp
       const list_node<postprefixOperator_ast *> *postfixOperator_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT varExpression_ast: public ast_node
+  struct  varExpression_ast: public ast_node
     {
       enum
       {
@@ -1321,7 +1320,7 @@ namespace rphp
       varExpressionNormal_ast *varExpressionNormal;
     };
 
-  struct KDEVPHPPARSER_EXPORT varExpressionNewObject_ast: public ast_node
+  struct  varExpressionNewObject_ast: public ast_node
     {
       enum
       {
@@ -1332,7 +1331,7 @@ namespace rphp
       ctorArguments_ast *ctor;
     };
 
-  struct KDEVPHPPARSER_EXPORT varExpressionNormal_ast: public ast_node
+  struct  varExpressionNormal_ast: public ast_node
     {
       enum
       {
@@ -1350,7 +1349,7 @@ namespace rphp
       varExpressionNormal_ast *cloneCar;
     };
 
-  struct KDEVPHPPARSER_EXPORT variable_ast: public ast_node
+  struct  variable_ast: public ast_node
     {
       enum
       {
@@ -1361,7 +1360,7 @@ namespace rphp
       const list_node<variableProperty_ast *> *variableProperties_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT variableName_ast: public ast_node
+  struct  variableName_ast: public ast_node
     {
       enum
       {
@@ -1372,7 +1371,7 @@ namespace rphp
       expr_ast *expr;
     };
 
-  struct KDEVPHPPARSER_EXPORT variableProperty_ast: public ast_node
+  struct  variableProperty_ast: public ast_node
     {
       enum
       {
@@ -1383,7 +1382,7 @@ namespace rphp
       functionCallParameterList_ast *parameterList;
     };
 
-  struct KDEVPHPPARSER_EXPORT variableWithoutObjects_ast: public ast_node
+  struct  variableWithoutObjects_ast: public ast_node
     {
       enum
       {
@@ -1394,7 +1393,7 @@ namespace rphp
       const list_node<dimListItem_ast *> *offsetItems_sequence;
     };
 
-  struct KDEVPHPPARSER_EXPORT whileStatement_ast: public ast_node
+  struct  whileStatement_ast: public ast_node
     {
       enum
       {

@@ -22,7 +22,7 @@
 
 [:
 
-namespace RPHP
+namespace rphp
 {
     class Lexer;
     enum NumericType  {
@@ -36,8 +36,6 @@ namespace RPHP
 ------------------------------------------------------------
 -- Export macro to use the parser in a shared lib
 ------------------------------------------------------------
-%export_macro "KDEVPHPPARSER_EXPORT"
-%export_macro_header "parserexport.h"
 
 ------------------------------------------------------------
 -- Parser class members
@@ -622,8 +620,8 @@ LBRACKET dimOffset=dimOffset RBRACKET | LBRACE expr=expr RBRACE
 -> encapsVarOffset ;;
 
 
-    LNUMBER [: (*yynode)->numType = Php::LongNumber;      :]
-  | DNUMBER [: (*yynode)->numType = Php::DoubleNumber;      :]
+    LNUMBER [: (*yynode)->numType = rphp::LongNumber;      :]
+  | DNUMBER [: (*yynode)->numType = rphp::DoubleNumber;      :]
   | CONSTANT_ENCAPSED_STRING
   | LINE
   | FILE
@@ -631,7 +629,7 @@ LBRACKET dimOffset=dimOffset RBRACKET | LBRACE expr=expr RBRACE
   | METHOD_C
   | FUNC_C
 -> commonScalar [
-    member variable numType: Php::NumericType; ] ;;
+    member variable numType: rphp::NumericType; ] ;;
 
     FUNCTION (BIT_AND | 0) STRING
     LPAREN params=parameterList RPAREN LBRACE statements=innerStatementList RBRACE
@@ -708,9 +706,8 @@ LBRACKET dimOffset=dimOffset RBRACKET | LBRACE expr=expr RBRACE
 
 [:
 #include "phplexer.h"
-#include <QtCore/QDebug>
 
-namespace Php
+namespace rphp
 {
 
 void Parser::tokenize( const std::string& contents )
@@ -750,11 +747,11 @@ std::string Parser::tokenText(qint64 begin, qint64 end)
 void Parser::reportProblem( Parser::ProblemType type, const std::string& message )
 {
     if (type == Error)
-        qDebug() << "** ERROR:" << message;
+        cout << "** ERROR:" << message;
     else if (type == Warning)
-        qDebug() << "** WARNING:" << message;
+        cout << "** WARNING:" << message;
     else if (type == Info)
-        qDebug() << "** Info:" << message;
+        cout << "** Info:" << message;
 }
 
 
@@ -805,7 +802,7 @@ void Parser::restoreState( Parser::ParserState* state)
     m_state.varExpressionIsVariable = state->varExpressionIsVariable;
 }
 
-} // end of namespace Php
+} // end of namespace rphp
 
 :]
 

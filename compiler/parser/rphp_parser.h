@@ -9,12 +9,10 @@
 #include <kdev-pg-allocator.h>
 #include <kdev-pg-token-stream.h>
 
-#include <parserexport.h>
-
 namespace rphp
   {
 
-  class KDEVPHPPARSER_EXPORT parser
+  class  parser
     {
 
     public:

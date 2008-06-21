@@ -6,12 +6,10 @@
 
 #include "rphp_ast.h"
 
-#include <parserexport.h>
-
 namespace rphp
   {
 
-  class KDEVPHPPARSER_EXPORT visitor
+  class  visitor
     {
       typedef void (visitor::*parser_fun_t)(ast_node *);
       static parser_fun_t _S_parser_table[];
