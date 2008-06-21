@@ -10,7 +10,7 @@
 namespace Php
   {
 
-  void Parser::tokenize( const QString& contents )
+  void Parser::tokenize( const std::string& contents )
   {
     m_contents =  contents;
     Lexer lexer( this,  contents );
@@ -42,13 +42,13 @@ namespace Php
   }
 
 
-  QString Parser::tokenText(qint64 begin,  qint64 end)
+  std::string Parser::tokenText(qint64 begin,  qint64 end)
   {
     return  m_contents.mid(begin, end - begin + 1);
   }
 
 
-  void Parser::reportProblem( Parser::ProblemType type,  const QString& message )
+  void Parser::reportProblem( Parser::ProblemType type,  const std::string& message )
   {
     if  (type ==  Error)
       qDebug() <<  "** ERROR:" <<  message;
@@ -60,23 +60,26 @@ namespace Php
 
 
   // custom error recovery
-  void Parser::expectedToken(int /*expected*/,  qint64 /*where*/,  const QString& name)
+  void Parser::expectedToken(int /*expected*/,  qint64 /*where*/,  const std::string& name)
   {
-    reportProblem( Parser::Error,  QString("Expected token \"%1\"").arg(name));
+    // TODO port me
+    //    reportProblem( Parser::Error, QString("Expected token \"%1\"").arg(name));
   }
 
-  void Parser::expectedSymbol(int /*expectedSymbol*/,  const QString& name)
+  void Parser::expectedSymbol(int /*expectedSymbol*/,  const std::string& name)
   {
     qint64 line;
     qint64 col;
     qint64 index =  tokenStream->index() - 1;
     Token &token =  tokenStream->token(index);
-    kDebug() <<  "token starts at:" <<  token.begin;
-    kDebug() <<  "index is:" <<  index;
+    // TODO port me
+    //    kDebug() << "token starts at:" << token.begin;
+    //    kDebug() << "index is:" << index;
     tokenStream->startPosition(index,  &line,  &col);
-    QString tokenValue =  tokenText(token.begin,  token.end);
+    std::string tokenValue =  tokenText(token.begin,  token.end);
     reportProblem( Parser::Error,
-                   QString("Expected symbol \"%1\" (current token: \"%2\" [%3] at line: %4 col: %5)")
+                   // TODO port me
+                   //                   QString("Expected symbol \"%1\" (current token: \"%2\" [%3] at line: %4 col: %5)")
                    .arg(name)
                    .arg(token.kind !=  0 ?  tokenValue :  "EOF")
                    .arg(token.kind)

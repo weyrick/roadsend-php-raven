@@ -234,15 +234,15 @@ namespace rphp
        * When this method returns, the parser's token stream has been filled
        * and any parse*() method can be called.
        */
-      void tokenize( const QString& contents );
+      void tokenize( const std::string& contents );
 
       enum ProblemType {
         Error,
         Warning,
         Info
       };
-      void reportProblem( Parser::ProblemType type,  const QString& message );
-      QString tokenText(qint64 begin,  qint64 end);
+      void reportProblem( Parser::ProblemType type,  const std::string& message );
+      std::string tokenText(qint64 begin,  qint64 end);
       void setDebug(bool debug);
 
 
@@ -253,7 +253,7 @@ namespace rphp
         OnlyVariable,
         OnlyNewObject
       };
-      QString m_contents;
+      std::string m_contents;
       bool m_debug;
 
       struct ParserState

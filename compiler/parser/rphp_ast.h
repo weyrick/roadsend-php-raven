@@ -9,10 +9,7 @@
 #include <parserexport.h>
 
 
-#include <QtCore/QString>
-#include <kdebug.h>
-
-namespace Php
+namespace RPHP
   {
 
   class Lexer;
