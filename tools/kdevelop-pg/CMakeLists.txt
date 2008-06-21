@@ -1,6 +1,6 @@
 project(kdevelop-pg)
 
-find_package(KDE4)
+#find_package(KDE4)
 
 if(NOT KDE4_FOUND)
     set(DATA_INSTALL_DIR share)

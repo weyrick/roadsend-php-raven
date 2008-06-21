@@ -55,7 +55,7 @@ namespace rphp
       Warning,
       Info
   };
-  void reportProblem( Parser::ProblemType type, const std::string& message );
+  void reportProblem( parser::ProblemType type, const std::string& message );
   std::string tokenText(qint64 begin, qint64 end);
   void setDebug(bool debug);
 
@@ -71,11 +71,11 @@ namespace rphp
     std::string m_contents;
     bool m_debug;
 
-    struct ParserState {
+    struct parser_state {
         VarExpressionState varExpressionState;
         bool varExpressionIsVariable;
     };
-    ParserState m_state;
+    parser_state m_state;
 :]
 
 %parserclass (constructor)
@@ -710,41 +710,41 @@ LBRACKET dimOffset=dimOffset RBRACKET | LBRACE expr=expr RBRACE
 namespace rphp
 {
 
-void Parser::tokenize( const std::string& contents )
+void parser::tokenize( const std::string& contents )
 {
     m_contents = contents;
     Lexer lexer( this, contents );
-    int kind = Parser::Token_EOF;
+    int kind = parser::Token_EOF;
 
     do
     {
         kind = lexer.nextTokenKind();
-        while (kind == Parser::Token_WHITESPACE || kind == Parser::Token_COMMENT || kind == Parser::Token_DOC_COMMENT) {
+        while (kind == parser::Token_WHITESPACE || kind == parser::Token_COMMENT || kind == parser::Token_DOC_COMMENT) {
             kind = lexer.nextTokenKind();
         }
         if ( !kind ) // when the lexer returns 0, the end of file is reached
         {
-            kind = Parser::Token_EOF;
+            kind = parser::Token_EOF;
         }
-        Parser::Token &t = tokenStream->next();
+        parser::Token &t = tokenStream->next();
         t.begin = lexer.tokenBegin();
         t.end = lexer.tokenEnd();
         t.kind = kind;
         //if ( m_debug ) qDebug() << kind << tokenText(t.begin,t.end) << t.begin << t.end;
     }
-    while ( kind != Parser::Token_EOF );
+    while ( kind != parser::Token_EOF );
 
     yylex(); // produce the look ahead token
 }
 
 
-std::string Parser::tokenText(qint64 begin, qint64 end)
+std::string parser::tokenText(qint64 begin, qint64 end)
 {
     return m_contents.mid(begin,end-begin+1);
 }
 
 
-void Parser::reportProblem( Parser::ProblemType type, const std::string& message )
+void parser::reportProblem( parser::ProblemType type, const std::string& message )
 {
     if (type == Error)
         cout << "** ERROR:" << message;
@@ -756,13 +756,13 @@ void Parser::reportProblem( Parser::ProblemType type, const std::string& message
 
 
 // custom error recovery
-void Parser::expectedToken(int /*expected*/, qint64 /*where*/, const std::string& name)
+void parser::expectedToken(int /*expected*/, qint64 /*where*/, const std::string& name)
 {
 // TODO port me
-//    reportProblem( Parser::Error, QString("Expected token \"%1\"").arg(name));
+//    reportProblem( parser::Error, QString("Expected token \"%1\"").arg(name));
 }
 
-void Parser::expectedSymbol(int /*expectedSymbol*/, const std::string& name)
+void parser::expectedSymbol(int /*expectedSymbol*/, const std::string& name)
 {
     qint64 line;
     qint64 col;
@@ -773,7 +773,7 @@ void Parser::expectedSymbol(int /*expectedSymbol*/, const std::string& name)
 //    kDebug() << "index is:" << index;
     tokenStream->startPosition(index, &line, &col);
     std::string tokenValue = tokenText(token.begin, token.end);
-    reportProblem( Parser::Error,
+    reportProblem( parser::Error,
 // TODO port me
 //                   QString("Expected symbol \"%1\" (current token: \"%2\" [%3] at line: %4 col: %5)")
                   .arg(name)
@@ -783,20 +783,20 @@ void Parser::expectedSymbol(int /*expectedSymbol*/, const std::string& name)
                   .arg(col));
 }
 
-void Parser::setDebug( bool debug )
+void parser::setDebug( bool debug )
 {
     m_debug = debug;
 }
 
-Parser::ParserState *Parser::copyCurrentState()
+parser::parser_state *parser::copyCurrentState()
 {
-    ParserState *state = new ParserState();
+    parser_state *state = new parser_state();
     state->varExpressionState = m_state.varExpressionState;
     state->varExpressionIsVariable = m_state.varExpressionIsVariable;
     return state;
 }
 
-void Parser::restoreState( Parser::ParserState* state)
+void parser::restoreState( parser::parser_state* state)
 {
     m_state.varExpressionState = state->varExpressionState;
     m_state.varExpressionIsVariable = state->varExpressionIsVariable;

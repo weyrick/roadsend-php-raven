@@ -3,7 +3,7 @@
 
 #ifndef rphp_H_INCLUDED
 #define rphp_H_INCLUDED
-
+#include <string>
 #include "rphp_ast.h"
 #include <kdev-pg-memory-pool.h>
 #include <kdev-pg-allocator.h>
@@ -239,7 +239,7 @@ namespace rphp
         Warning,
         Info
       };
-      void reportProblem( Parser::ProblemType type,  const std::string& message );
+      void reportProblem( parser::ProblemType type,  const std::string& message );
       std::string tokenText(qint64 begin,  qint64 end);
       void setDebug(bool debug);
 
@@ -254,13 +254,13 @@ namespace rphp
       std::string m_contents;
       bool m_debug;
 
-      struct ParserState
+      struct parser_state
         {
           VarExpressionState varExpressionState;
           bool varExpressionIsVariable;
         };
 
-      ParserState m_state;
+      parser_state m_state;
 
 
     public:
