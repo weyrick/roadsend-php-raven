@@ -8,6 +8,9 @@
 
 
 
+#include <string>
+#include <iostream>
+
 namespace rphp
   {
 
@@ -16,6 +19,14 @@ namespace rphp
     LongNumber,
     DoubleNumber,
   };
+
+  // TODO define win macro
+#ifdef WIN
+  typedef __int64 rint64;
+#else
+  typedef long long rint64;
+#endif
+
 }
 
 namespace rphp

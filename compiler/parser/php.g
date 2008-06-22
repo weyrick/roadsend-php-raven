@@ -22,6 +22,9 @@
 
 [:
 
+#include <string>
+#include <iostream>
+
 namespace rphp
 {
     class Lexer;
@@ -29,6 +32,14 @@ namespace rphp
         LongNumber,
         DoubleNumber,
     };
+
+// TODO define win macro
+#ifdef WIN
+typedef __int64 rint64;
+#else
+typedef long long rint64;
+#endif
+
 }
 :]
 
@@ -56,7 +67,7 @@ namespace rphp
       Info
   };
   void reportProblem( parser::ProblemType type, const std::string& message );
-  std::string tokenText(qint64 begin, qint64 end);
+  std::string tokenText(rint64 begin, rint64 end);
   void setDebug(bool debug);
 
 :]
@@ -726,7 +737,7 @@ void parser::tokenize( const std::string& contents )
         {
             kind = parser::Token_EOF;
         }
-        parser::Token &t = tokenStream->next();
+        parser::token_type &t = token_stream->next();
         t.begin = lexer.tokenBegin();
         t.end = lexer.tokenEnd();
         t.kind = kind;
@@ -738,40 +749,43 @@ void parser::tokenize( const std::string& contents )
 }
 
 
-std::string parser::tokenText(qint64 begin, qint64 end)
+std::string parser::tokenText(rint64 begin, rint64 end)
 {
+#ifdef PENDING_THOMAS
+// TODO pending
     return m_contents.mid(begin,end-begin+1);
+#endif
+return "";
 }
 
 
 void parser::reportProblem( parser::ProblemType type, const std::string& message )
 {
     if (type == Error)
-        cout << "** ERROR:" << message;
+        std::cout << "** ERROR:" << message;
     else if (type == Warning)
-        cout << "** WARNING:" << message;
+        std::cout << "** WARNING:" << message;
     else if (type == Info)
-        cout << "** Info:" << message;
+        std::cout << "** Info:" << message;
 }
 
-
+#ifdef PEDNING_THOMAS
+// TODO pending
 // custom error recovery
-void parser::expectedToken(int /*expected*/, qint64 /*where*/, const std::string& name)
+void parser::expectedToken(int /*expected*/, rint64 /*where*/, const std::string& name)
 {
-// TODO port me
-//    reportProblem( parser::Error, QString("Expected token \"%1\"").arg(name));
+    reportProblem( parser::Error, QString("Expected token \"%1\"").arg(name));
 }
 
 void parser::expectedSymbol(int /*expectedSymbol*/, const std::string& name)
 {
-    qint64 line;
-    qint64 col;
-    qint64 index = tokenStream->index()-1;
-    Token &token = tokenStream->token(index);
-// TODO port me
-//    kDebug() << "token starts at:" << token.begin;
-//    kDebug() << "index is:" << index;
-    tokenStream->startPosition(index, &line, &col);
+    rint64 line;
+    rint64 col;
+    rint64 index = token_stream->index()-1;
+    token_type &token = token_stream->token(index);
+    kDebug() << "token starts at:" << token.begin;
+    kDebug() << "index is:" << index;
+    token_stream->startPosition(index, &line, &col);
     std::string tokenValue = tokenText(token.begin, token.end);
     reportProblem( parser::Error,
 // TODO port me
@@ -782,13 +796,14 @@ void parser::expectedSymbol(int /*expectedSymbol*/, const std::string& name)
                   .arg(line)
                   .arg(col));
 }
+#endif
 
 void parser::setDebug( bool debug )
 {
     m_debug = debug;
 }
 
-parser::parser_state *parser::copyCurrentState()
+parser::parser_state *parser::copy_current_state()
 {
     parser_state *state = new parser_state();
     state->varExpressionState = m_state.varExpressionState;
@@ -796,7 +811,7 @@ parser::parser_state *parser::copyCurrentState()
     return state;
 }
 
-void parser::restoreState( parser::parser_state* state)
+void parser::restore_state( parser::parser_state* state)
 {
     m_state.varExpressionState = state->varExpressionState;
     m_state.varExpressionIsVariable = state->varExpressionIsVariable;

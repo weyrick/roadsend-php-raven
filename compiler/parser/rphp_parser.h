@@ -3,7 +3,7 @@
 
 #ifndef rphp_H_INCLUDED
 #define rphp_H_INCLUDED
-#include <string>
+
 #include "rphp_ast.h"
 #include <kdev-pg-memory-pool.h>
 #include <kdev-pg-allocator.h>
@@ -240,7 +240,7 @@ namespace rphp
         Info
       };
       void reportProblem( parser::ProblemType type,  const std::string& message );
-      std::string tokenText(qint64 begin,  qint64 end);
+      std::string tokenText(rint64 begin,  rint64 end);
       void setDebug(bool debug);
 
 
