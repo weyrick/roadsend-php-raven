@@ -7,6 +7,7 @@ playing around with boost::variant, looking some something suitable to store php
 
 #include "boost/variant.hpp"
 #include <iostream>
+#include <typeinfo>
 
 // just a demo class, we'd also have php_object
 class php_hash {
@@ -128,4 +129,6 @@ int main()
 
     //std::cout << result << std::endl; // output: 11 (i.e., length of "hello world")
 
+    // output is ugly, it also might not be available everywhere
+    std::cout << typeid( u ).name() << std::endl;
 }
