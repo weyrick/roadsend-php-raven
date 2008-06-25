@@ -58,12 +58,12 @@ class my_visitor : public boost::static_visitor<int>
 public:
     int operator()(const RPHP::p3state &i) const
     {
-    	if (i >= 0) {
-    		std::cout << "i see a bool" << std::endl;
-    	}
-    	else {
-    		std::cout << "i see a null" << std::endl;
-    	}
+        if (i == RPHP::Null) {
+            std::cout << "i see a null" << std::endl;
+        }
+        else {
+            std::cout << "i see a bool" << std::endl;
+        }
         return i;
     }
 
@@ -104,22 +104,22 @@ public:
 
     pvartype operator()(const double &i) const
     {
-		return PVAR_DOUBLE;
+        return PVAR_DOUBLE;
     }
 
     pvartype operator()(const std::string &str) const
     {
-    	return PVAR_STRING;
+        return PVAR_STRING;
     }
 
     pvartype operator()(const php_hash &h) const
     {
-    	return PVAR_HASH;
+        return PVAR_HASH;
     }
 
     pvartype operator()(const RPHP::p3state &h) const
     {
-    	return (h >= 0) ? PVAR_BOOL : PVAR_NULL;
+        (h == RPHP::Null) ? PVAR_NULL : PVAR_BOOL;
     }
 
 };
@@ -142,21 +142,21 @@ public:
 
   void operator()(const double &i) const
   {
-	  // nothing, already numeric
+        // nothing, already numeric
   }
 
   void operator()(const php_hash &h) const
   {
-	  var = (long)h.getSize();
+        var = (long)h.getSize();
   }
 
     void operator()(const RPHP::p3state &h) const
   {
-	  (h <= 0) ? var = 0l : var = 1l;
+        (h == RPHP::True) ? var = 1l : var = 0l;
   }
 
   void operator()(const long &a) const {
-    // Do nothing - already correct type
+        // Do nothing - already correct type
   }
 };
 
