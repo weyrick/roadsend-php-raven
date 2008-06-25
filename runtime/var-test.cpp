@@ -31,16 +31,22 @@ std::ostream& operator << (std::ostream& os, const php_hash& h)
 
 
 // using the c++ bool as a type seems to cause problems, so we implement php bool
-// as an int. note that php integers are type long
+// as an enum. note that php integers are type long
 // we also use in to decide if this value is NULL. unfortunately a null value would evaluate
 // to true (in c++, since it's non 0). can we do this better?
-typedef int p3state;
-#define PFALSE 0
-#define PTRUE  1
-#define PNULL -1
+
+namespace RPHP {
+    enum p3state
+    {
+	False,
+	True,
+	Null
+    };
+}
+
 
 // this would be the typedef for a generic php variable in our runtime
-typedef boost::variant< p3state, long, double, std::string, php_hash> pvar;
+typedef boost::variant< RPHP::p3state, long, double, std::string, php_hash> pvar;
 
 // used for determining type at runtime
 typedef enum { PVAR_NULL, PVAR_BOOL, PVAR_LONG, PVAR_DOUBLE, PVAR_STRING, PVAR_HASH } pvartype;
@@ -50,7 +56,7 @@ typedef enum { PVAR_NULL, PVAR_BOOL, PVAR_LONG, PVAR_DOUBLE, PVAR_STRING, PVAR_H
 class my_visitor : public boost::static_visitor<int>
 {
 public:
-    int operator()(const p3state &i) const
+    int operator()(const RPHP::p3state &i) const
     {
     	if (i >= 0) {
     		std::cout << "i see a bool" << std::endl;
@@ -111,7 +117,7 @@ public:
     	return PVAR_HASH;
     }
 
-    pvartype operator()(const p3state &h) const
+    pvartype operator()(const RPHP::p3state &h) const
     {
     	return (h >= 0) ? PVAR_BOOL : PVAR_NULL;
     }
@@ -144,7 +150,7 @@ public:
 	  var = (long)h.getSize();
   }
 
-  void operator()(const p3state &h) const
+    void operator()(const RPHP::p3state &h) const
   {
 	  (h <= 0) ? var = 0l : var = 1l;
   }
@@ -179,17 +185,17 @@ int main()
     result = boost::apply_visitor( my_visitor(), u );
 
     // bool
-    u = PTRUE;
+    u = RPHP::True;
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
-    if (boost::get<p3state>(u) == PTRUE) {
+    if (boost::get<RPHP::p3state>(u) == RPHP::True) {
     	std::cout << "the bool was true" << std::endl;
     }
 
     // null
-    u = PNULL;
+    u = RPHP::Null;
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
