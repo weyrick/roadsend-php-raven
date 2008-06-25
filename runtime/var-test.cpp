@@ -29,7 +29,6 @@ std::ostream& operator << (std::ostream& os, const php_hash& h)
     return os << "php_hash" << std::endl;
 }
 
-
 // using the c++ bool as a type seems to cause problems, so we implement php bool
 // as an enum. note that php integers are type long
 // we also use in to decide if this value is NULL. unfortunately a null value would evaluate
@@ -161,10 +160,45 @@ public:
 };
 
 
+// non destructive cast (makes a copy)
+pvar pvar_cast_to_number(const pvar p) {
+
+    pvar r = p;
+    boost::apply_visitor( convert_to_num_visitor(r), r );
+    return r;
+    
+}
+
+
+// define operators for working with pvars
+// php hashes would concat, otherwise convert to number
+pvar pvar_add (const pvar lhs, const pvar rhs)
+{
+    pvar l,r,result;
+
+    int lhs_type = boost::apply_visitor( type_checker(), lhs );
+    int rhs_type = boost::apply_visitor( type_checker(), rhs );
+    if ( (lhs_type == PVAR_HASH) && (rhs_type == PVAR_HASH) ) {
+        std::cout << "fixme: concat hashes" << std::endl;
+        result = 0l;
+    }
+    else {
+        // convert to number, then add
+        l = pvar_cast_to_number(lhs);
+        std::cout << "pvar_add: l is " << l << std::endl;
+        r = pvar_cast_to_number(rhs);
+        std::cout << "pvar_add: r is " << r << std::endl;
+        result = boost::get<long>(l) + boost::get<long>(r);
+        std::cout << "pvar_add: result is " << result << std::endl;
+    }
+
+    return result;
+}
+
 // driver
 int main()
 {
-    pvar u;
+    pvar u,t,r;
 
     // string
     u = "hello world there";
@@ -234,5 +268,15 @@ int main()
     boost::apply_visitor( convert_to_num_visitor(u), u );
     boost::apply_visitor( my_visitor(), u );
     std::cout << "final: " << u << std::endl;
+
+    // operators
+    
+    // try adding a long and a numeric string
+    u = 10l;
+    t = "20";
+    r = pvar_add(u, t);
+    std::cout << "number add: " << r << std::endl;
+    std::cout << "u is: " << u << std::endl;
+    std::cout << "t is: " << t << std::endl;
 
 }
