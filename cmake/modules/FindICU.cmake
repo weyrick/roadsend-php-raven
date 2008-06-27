@@ -4,13 +4,17 @@
 #
 #  ICU_FOUND          - True if ICU found.
 #  ICU_I18N_FOUND     - True if ICU's internationalization library found.
+#  ICU_IO_FOUND       - True if ICU's ostream output lib is found.
 #  ICU_INCLUDE_DIRS   - Directory to include to get ICU headers
 #                       Note: always include ICU headers as, e.g., 
 #                       unicode/utypes.h
 #  ICU_LIBRARIES      - Libraries to link against for the common ICU
 #  ICU_I18N_LIBRARIES - Libraries to link against for ICU internationaliation
 #                       (note: in addition to ICU_LIBRARIES)
-
+#
+#  ICU_IO_LIBRARIES   - Libraries for ostream output
+#
+#
 # Look for the header file.
 find_path(
   ICU_INCLUDE_DIR 
@@ -37,6 +41,7 @@ if(ICU_INCLUDE_DIR AND ICU_LIBRARY)
     NAMES icuin icui18n cygicuin cygicuin32
     DOC "Libraries to link against for ICU internationalization")
   mark_as_advanced(ICU_I18N_LIBRARY)
+
   if (ICU_I18N_LIBRARY)
     set(ICU_I18N_FOUND 1)
     set(ICU_I18N_LIBRARIES ${ICU_I18N_LIBRARY})
@@ -44,10 +49,28 @@ if(ICU_INCLUDE_DIR AND ICU_LIBRARY)
     set(ICU_I18N_FOUND 0)
     set(ICU_I18N_LIBRARIES)
   endif (ICU_I18N_LIBRARY)
+
+  # Look for the ICU ostream library
+  find_library(
+    ICU_IO_LIBRARY
+    NAMES icuio
+    DOC "Libraries to link against for ICU ostream output")
+  mark_as_advanced(ICU_IO_LIBRARY)
+
+  if (ICU_IO_LIBRARY)
+    set(ICU_IO_FOUND 1)
+    set(ICU_IO_LIBRARIES ${ICU_IO_LIBRARY})
+  else (ICU_IO_LIBRARY)
+    set(ICU_IO_FOUND 0)
+    set(ICU_IO_LIBRARIES)
+  endif (ICU_IO_LIBRARY)
+
 else(ICU_INCLUDE_DIR AND ICU_LIBRARY)
   set(ICU_FOUND 0)
   set(ICU_I18N_FOUND 0)
+  set(ICU_IO_FOUND 0)
   set(ICU_LIBRARIES)
   set(ICU_I18N_LIBRARIES)
+  set(ICU_IO_LIBRARIES)
   set(ICU_INCLUDE_DIRS)
 endif(ICU_INCLUDE_DIR AND ICU_LIBRARY)

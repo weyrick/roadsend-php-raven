@@ -13,3 +13,5 @@ set(SRC_FILES
 )
 
 add_executable( var-test ${SRC_FILES} )
+target_link_libraries( var-test  ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES} )
+
