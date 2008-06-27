@@ -1,10 +1,10 @@
 project (rphp)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake/modules )
 FIND_PACKAGE(Boost REQUIRED)
 FIND_PACKAGE(ICU)
 
 cmake_minimum_required(VERSION 2.6)
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake/modules )
 
 include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${Boost_INCLUDE_DIRS})
 
