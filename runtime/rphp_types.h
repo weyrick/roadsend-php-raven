@@ -24,7 +24,7 @@
 namespace rphp {
 
 // a visitor for determining type of pvar
-class pvarTypeChecker : public boost::static_visitor<int>
+class pvarTypeChecker : public boost::static_visitor<pvarType>
 {
 public:
 
@@ -59,8 +59,9 @@ public:
 };
 
 
+
 // a visitor for converting to a number (long or float)
-class convertToNumber : public boost::static_visitor<>
+class convertToNumber : public boost::static_visitor<void>
 {
 protected:
 	pvar &var;
@@ -106,7 +107,7 @@ public:
 
 // convert to number (in place)
 inline pvarType pvar_getType(const pvar &p) {
-    return (pvarType)boost::apply_visitor(pvarTypeChecker(), p);
+    return boost::apply_visitor(pvarTypeChecker(), p);
 }
 
 // convert to number (in place)
