@@ -32,12 +32,12 @@ public:
         return (h == rphp::Null) ? PVAR_NULL : PVAR_BOOL;
     }
 
-	pvarType operator()(const long &i) const {
-        return PVAR_LONG;
+	pvarType operator()(const pint &i) const {
+        return PVAR_INT;
     }
 
-    pvarType operator()(const double &i) const {
-        return PVAR_DOUBLE;
+    pvarType operator()(const pfloat &i) const {
+        return PVAR_FLOAT;
     }
 
     pvarType operator()(const bstring &str) const {
@@ -48,12 +48,16 @@ public:
         return PVAR_USTRING;
     }
 
-    pvarType operator()(const php_hash &h) const {
+    pvarType operator()(const phash &h) const {
         return PVAR_HASH;
     }
 
-    pvarType operator()(const php_object &h) const {
+    pvarType operator()(const pobject &h) const {
         return PVAR_OBJ;
+    }
+
+    pvarType operator()(const pvarRef &p) const {
+        return PVAR_REF;
     }
 
 };
@@ -72,11 +76,11 @@ public:
 		(h == rphp::True) ? var = 1l : var = 0l;
 	}
 
-    void operator()(const long &a) const {
+    void operator()(const pint &a) const {
 		// nothing, already numeric
     }
 
-    void operator()(const double &i) const {
+    void operator()(const pfloat &i) const {
 		// nothing, already numeric
     }
 
@@ -95,12 +99,17 @@ public:
     	var = 0l;
     }
 
-    void operator()(const php_hash &h) const {
+    void operator()(const phash &h) const {
 		var = (long)h.getSize();
     }
 
-    void operator()(const php_object &h) const {
+    void operator()(const pobject &h) const {
     	var = 0l;
+    }
+
+    void operator()(const pvarRef &r) const {
+    	// unbox
+    	//boost::apply_visitor(convertToNumber(*r), *r);
     }
 
 };
@@ -121,8 +130,12 @@ inline p3state pvar_getVal_bool(const pvar &p) {
 	return boost::get<rphp::p3state>(p);
 }
 
-inline long pvar_getVal_long(const pvar &p) {
-	return boost::get<long>(p);
+inline long pvar_getVal_int(const pvar &p) {
+	return boost::get<pint>(p);
+}
+
+inline pvarRef pvar_getVal_ref(const pvar &p) {
+	return boost::get<pvarRef>(p);
 }
 
 
@@ -152,7 +165,7 @@ pvar pvar_add(const pvar lhs, const pvar rhs)
         //std::cout << "pvar_add: l is " << l << std::endl;
         r = pvar_castToNumber(rhs);
         //std::cout << "pvar_add: r is " << r << std::endl;
-        result = pvar_getVal_long(l) + pvar_getVal_long(r);
+        result = pvar_getVal_int(l) + pvar_getVal_int(r);
         //std::cout << "pvar_add: result is " << result << std::endl;
     }
 

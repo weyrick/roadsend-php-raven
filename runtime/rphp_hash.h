@@ -24,20 +24,21 @@
 namespace rphp {
 
 // XXX placeholder
-class php_hash {
+class phash {
     private:
         int size;
     public:
-        php_hash(int sizevar) : size(sizevar) { }
+        phash(int sizevar) : size(sizevar) { }
 
-        php_hash(const php_hash& h) {
+        phash(const phash& h) {
             size = h.size;
         }
         int getSize() const { return size; }
+        ~phash() { std::cout << "destorying php_hash with " << size << " fake elements" << std::endl; }
 
 };
 
-std::ostream& operator << (std::ostream& os, const rphp::php_hash& h)
+std::ostream& operator << (std::ostream& os, const rphp::phash& h)
 {
     return os << "php_hash" << std::endl;
 }

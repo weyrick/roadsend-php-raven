@@ -26,12 +26,12 @@ public:
         return i;
     }
 
-    int operator()(const long &i) const {
-        std::cout << "i see a long" << std::endl;
+    int operator()(const rphp::pint &i) const {
+        std::cout << "i see a pint" << std::endl;
         return i;
     }
 
-    int operator()(const double &i) const {
+    int operator()(const rphp::pfloat &i) const {
         std::cout << "i see a float" << std::endl;
         return 0;
     }
@@ -46,17 +46,33 @@ public:
         return str.length();
     }
 
-    int operator()(const rphp::php_hash &h) const {
-        std::cout << "i see a php_hash" << std::endl;
+    int operator()(const rphp::phash &h) const {
+        std::cout << "i see a phash" << std::endl;
         return 0;
     }
 
-    int operator()(const rphp::php_object &h) const {
-        std::cout << "i see a php_object" << std::endl;
+    int operator()(const rphp::pobject &h) const {
+        std::cout << "i see a pobject" << std::endl;
         return 0;
     }
 
+    int operator()(const rphp::pvarRef &h) const {
+        std::cout << "i see a php reference" << std::endl;
+        return 0;
+    }
 };
+
+void changeRef(rphp::pvar r) {
+
+	rphp::pvarRef rval;
+	if (rval = rphp::pvar_getVal_ref(r)) {
+		*rval = rphp::bstring("changed the ref to a string!");
+	}
+	else {
+		std::cout << "not a ref" << std::endl;
+	}
+
+}
 
 // driver
 int main()
@@ -77,13 +93,13 @@ int main()
 
 
     // long
-    u = 15l;
+    u = rphp::pint(15);
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
     // float
-    u = 2.3123;
+    u = rphp::pfloat(2.3123);
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
@@ -105,7 +121,7 @@ int main()
     result = boost::apply_visitor( my_visitor(), u );
 
     // php hash
-    rphp::php_hash h(5);
+    rphp::phash h(5);
     std::cout << h;
     u = h;
     std::cout << u << std::endl;
@@ -120,7 +136,7 @@ int main()
     case rphp::PVAR_HASH:
     	std::cout << "found a hash" << std::endl;
     	break;
-    case rphp::PVAR_DOUBLE:
+    case rphp::PVAR_FLOAT:
     	std::cout << "found a float" << std::endl;
     	break;
     default:
@@ -140,11 +156,35 @@ int main()
     // operators
 
     // try adding a long and a numeric string
-    u = 10l; // NOTE: this is a long. int's turn into p3state (bool/null)
+    u = rphp::pint(10); // NOTE: this is a long. int's turn into p3state (bool/null)
     t = std::string("20");
     r = pvar_add(u, t);
     std::cout << "number add: " << r << std::endl;
     std::cout << "u is: " << u << std::endl;
     std::cout << "t is: " << t << std::endl;
+
+    // references
+
+    // create a new reference. can only be comprise of pvarBase items (i.e., can't be a ref to a ref)
+    std::cout << "references----" << std::endl;
+    rphp::pvarRef r1(new rphp::pvarBase);
+
+    // assign a value to the pvar
+    *r1 = rphp::pint(5);
+    boost::apply_visitor( my_visitor(), *r1 );
+
+    // call a function which takes a pvar (not strictly a pvarRef)
+    changeRef(r1);
+    boost::apply_visitor( my_visitor(), *r1 );
+
+    // assign two variables to the same reference
+    rphp::pvarRef r2 = r1;
+    boost::apply_visitor( my_visitor(), *r1 );
+    boost::apply_visitor( my_visitor(), *r2 );
+
+	// change one
+    *r2 = rphp::pint(20);
+    boost::apply_visitor( my_visitor(), *r1 );
+    boost::apply_visitor( my_visitor(), *r2 );
 
 }

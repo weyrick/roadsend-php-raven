@@ -22,9 +22,13 @@
 
 #include "boost/variant.hpp"
 #include "boost/lexical_cast.hpp"
+#include "boost/shared_ptr.hpp"
+
 #include "unicode/unistr.h"
+
 #include "rphp_hash.h"
 #include "rphp_object.h"
+
 #include <iostream>
 
 namespace rphp {
@@ -38,23 +42,34 @@ enum p3state
 	True
 };
 
+// pvar numbers
+typedef long pint;
+typedef double pfloat;
+
 // string types: binary and unicode flavor
 typedef std::string bstring;
 typedef UnicodeString ustring;
 
 // a variant that represents a php variable
-typedef boost::variant< p3state/*int*/, long, double, bstring, ustring, php_hash, php_object> pvar;
+typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash, pobject> pvarBase;
+
+// reference to a pvar_base
+typedef boost::shared_ptr<pvarBase> pvarRef;
+
+// full pvar definition: a variant that can hold a base type or reference
+typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash, pobject, pvarRef> pvar;
 
 // associated enum for checking type
 typedef enum {
-	PVAR_NULL,     // p3state
-	PVAR_BOOL,     // p3state
-	PVAR_LONG,     // long
-	PVAR_DOUBLE,   // double
-	PVAR_BSTRING,  // bstring
-	PVAR_USTRING,  // ustring
-	PVAR_HASH,     // rphp::hash
-	PVAR_OBJ       // rphp::object
+	PVAR_NULL,     // rphp::p3state
+	PVAR_BOOL,     // rphp::p3state
+	PVAR_INT,      // rphp::pint
+	PVAR_FLOAT,    // rphp::pfloat
+	PVAR_BSTRING,  // rphp::bstring
+	PVAR_USTRING,  // rphp::ustring
+	PVAR_HASH,     // rphp::phash
+	PVAR_OBJ,      // rphp::pobject
+	PVAR_REF	   // rphp::pvarRef
 } pvarType;
 
 } /* namespace rphp */

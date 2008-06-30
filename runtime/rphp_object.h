@@ -25,18 +25,18 @@
 namespace rphp {
 
 // XXX placeholder
-class php_object {
+class pobject {
     private:
-        php_hash properties;
+        phash properties;
     public:
-        php_object() : properties(5) { }
+        pobject() : properties(5) { }
 
 };
 
 
-std::ostream& operator << (std::ostream& os, const rphp::php_object& h)
+std::ostream& operator << (std::ostream& os, const rphp::pobject& h)
 {
-    return os << "php_object" << std::endl;
+    return os << "pobject" << std::endl;
 }
 
 }
