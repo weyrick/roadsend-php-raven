@@ -47,16 +47,23 @@ typedef long pint;
 typedef double pfloat;
 
 // string types: binary and unicode flavor
+
+// STL basic string.
+// GNU stdc++ provides implicit sharing but this isn't part of the standard
 typedef std::string bstring;
+
+// UnicodeString uses 2 byte characters. Storage of base class is 32 bytes on 32bit, 40 on 64bit
+// implicitly shared
 typedef UnicodeString ustring;
 
-// a variant that represents a php variable
+// base variant that represents a php variable
 typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash, pobject> pvarBase;
 
-// reference to a pvar_base
+// reference to a pvarBase, i.e. a container for pvar variables
+// shared_ptr maintains a reference count and guarantees proper destruction
 typedef boost::shared_ptr<pvarBase> pvarRef;
 
-// full pvar definition: a variant that can hold a base type or reference
+// full pvar definition: a variant that can hold a base type or a reference
 typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash, pobject, pvarRef> pvar;
 
 // associated enum for checking type

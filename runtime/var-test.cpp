@@ -79,6 +79,18 @@ int main()
 {
     rphp::pvar u,t,r;
 
+    // sizes
+    std::cout << "p3state: " << sizeof(rphp::p3state) << std::endl;
+    std::cout << "pint: " << sizeof(rphp::pint) << std::endl;
+    std::cout << "pfloat: " << sizeof(rphp::pfloat) << std::endl;
+    std::cout << "bstring: " << sizeof(rphp::bstring) << std::endl;
+    std::cout << "ustring: " << sizeof(rphp::ustring) << std::endl;
+    std::cout << "phash: " << sizeof(rphp::phash) << std::endl;
+    std::cout << "pobj: " << sizeof(rphp::pobject) << std::endl;
+    std::cout << "pvarBase: " << sizeof(rphp::pvarBase) << std::endl;
+    std::cout << "pvarRef: " << sizeof(rphp::pvarRef) << std::endl;
+    std::cout << "pvar: " << sizeof(rphp::pvar) << std::endl;
+
     // binary string
     u = rphp::bstring("hello world there");
 
@@ -90,7 +102,6 @@ int main()
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
-
 
     // long
     u = rphp::pint(15);
@@ -165,7 +176,7 @@ int main()
 
     // references
 
-    // create a new reference. can only be comprise of pvarBase items (i.e., can't be a ref to a ref)
+    // create a new reference. can only be comprised of pvarBase items (i.e., can't be a ref to a ref)
     std::cout << "references----" << std::endl;
     rphp::pvarRef r1(new rphp::pvarBase);
 
