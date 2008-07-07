@@ -21,7 +21,6 @@
 #define RPHP_PVAR_H_
 
 #include "boost/variant.hpp"
-#include "boost/lexical_cast.hpp"
 #include "boost/shared_ptr.hpp"
 
 #include "unicode/unistr.h"

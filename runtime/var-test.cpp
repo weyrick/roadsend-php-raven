@@ -134,6 +134,7 @@ int main()
     // php hash
     rphp::phash h(5);
     std::cout << h;
+    h.dump();
     u = h;
     std::cout << u << std::endl;
 

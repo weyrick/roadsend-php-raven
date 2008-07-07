@@ -19,6 +19,8 @@
 #ifndef RPHP_TYPES_H_
 #define RPHP_TYPES_H_
 
+#include "boost/lexical_cast.hpp"
+
 #include "rphp_pvar.h"
 
 namespace rphp {
