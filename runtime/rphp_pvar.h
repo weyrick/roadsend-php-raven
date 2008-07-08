@@ -25,9 +25,6 @@
 
 #include "unicode/unistr.h"
 
-#include "rphp_hash.h"
-#include "rphp_object.h"
-
 #include <iostream>
 
 namespace rphp {
@@ -36,9 +33,9 @@ namespace rphp {
 // it is stored in the variant as an int type
 enum p3state
 {
-	Null,
-	False,
-	True
+    Null,
+    False,
+    True
 };
 
 // pvar numbers
@@ -55,30 +52,33 @@ typedef std::string bstring;
 // implicitly shared
 typedef UnicodeString ustring;
 
+// forward declarations for phash and pobject
+class phash;
+//class pobject;
+
 // base variant that represents a php variable
-typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash, pobject> pvarBase;
+typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, boost::recursive_wrapper< phash >/*, pobject*/> pvarBase;
 
 // reference to a pvarBase, i.e. a container for pvar variables
 // shared_ptr maintains a reference count and guarantees proper destruction
 typedef boost::shared_ptr<pvarBase> pvarRef;
 
 // full pvar definition: a variant that can hold a base type or a reference
-typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash, pobject, pvarRef> pvar;
+typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, boost::recursive_wrapper< phash >, /*pobject,*/ pvarRef> pvar;
 
 // associated enum for checking type
 typedef enum {
-	PVAR_NULL,     // rphp::p3state
-	PVAR_BOOL,     // rphp::p3state
-	PVAR_INT,      // rphp::pint
-	PVAR_FLOAT,    // rphp::pfloat
-	PVAR_BSTRING,  // rphp::bstring
-	PVAR_USTRING,  // rphp::ustring
-	PVAR_HASH,     // rphp::phash
-	PVAR_OBJ,      // rphp::pobject
-	PVAR_REF	   // rphp::pvarRef
+    PVAR_NULL,     // rphp::p3state
+    PVAR_BOOL,     // rphp::p3state
+    PVAR_INT,      // rphp::pint
+    PVAR_FLOAT,    // rphp::pfloat
+    PVAR_BSTRING,  // rphp::bstring
+    PVAR_USTRING,  // rphp::ustring
+    PVAR_HASH,     // rphp::phash
+    PVAR_OBJ,      // rphp::pobject
+    PVAR_REF	   // rphp::pvarRef
 } pvarType;
 
 } /* namespace rphp */
-
 
 #endif /* RPHP_PVAR_H_ */

@@ -22,6 +22,7 @@
 #include "boost/lexical_cast.hpp"
 
 #include "rphp_pvar.h"
+#include "rphp_hash.h"
 
 namespace rphp {
 
@@ -34,7 +35,7 @@ public:
         return (h == rphp::Null) ? PVAR_NULL : PVAR_BOOL;
     }
 
-	pvarType operator()(const pint &i) const {
+    pvarType operator()(const pint &i) const {
         return PVAR_INT;
     }
 
@@ -53,11 +54,11 @@ public:
     pvarType operator()(const phash &h) const {
         return PVAR_HASH;
     }
-
+/*
     pvarType operator()(const pobject &h) const {
         return PVAR_OBJ;
     }
-
+*/
     pvarType operator()(const pvarRef &p) const {
         return PVAR_REF;
     }
@@ -70,48 +71,48 @@ public:
 class convertToNumber : public boost::static_visitor<void>
 {
 protected:
-	pvar &var;
+    pvar &var;
 public:
-	convertToNumber(pvar &v) : var(v) {}
+    convertToNumber(pvar &v) : var(v) {}
 
-	void operator()(const p3state &h) const {
-		(h == rphp::True) ? var = 1l : var = 0l;
-	}
+    void operator()(const p3state &h) const {
+            (h == rphp::True) ? var = 1l : var = 0l;
+    }
 
     void operator()(const pint &a) const {
-		// nothing, already numeric
+        // nothing, already numeric
     }
 
     void operator()(const pfloat &i) const {
-		// nothing, already numeric
+        // nothing, already numeric
     }
 
     void operator()(const bstring &a) const {
-    	// TODO: handle floats
-		try {
-		  var = boost::lexical_cast<long>(a);
-		} catch(boost::bad_lexical_cast &) {
-		  var = 0l;
-		}
+        // TODO: handle floats
+        try {
+            var = boost::lexical_cast<long>(a);
+        } catch(boost::bad_lexical_cast &) {
+            var = 0l;
+        }
     }
 
     void operator()(const ustring &a) const {
-    	// TODO: do a real conversion here
-    	// should handle both integers and floats
-    	var = 0l;
+        // TODO: do a real conversion here
+        // should handle both integers and floats
+        var = 0l;
     }
 
     void operator()(const phash &h) const {
-		var = (long)h.getSize();
+        var = (long)h.getSize();
     }
-
+/*
     void operator()(const pobject &h) const {
-    	var = 0l;
+        var = 0l;
     }
-
+*/
     void operator()(const pvarRef &r) const {
-    	// unbox
-    	//boost::apply_visitor(convertToNumber(*r), *r);
+        // unbox
+        //boost::apply_visitor(convertToNumber(*r), *r);
     }
 
 };

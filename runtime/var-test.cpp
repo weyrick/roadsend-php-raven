@@ -51,10 +51,12 @@ public:
         return 0;
     }
 
+    /*
     int operator()(const rphp::pobject &h) const {
         std::cout << "i see a pobject" << std::endl;
         return 0;
     }
+    */
 
     int operator()(const rphp::pvarRef &h) const {
         std::cout << "i see a php reference" << std::endl;
@@ -86,7 +88,7 @@ int main()
     std::cout << "bstring: " << sizeof(rphp::bstring) << std::endl;
     std::cout << "ustring: " << sizeof(rphp::ustring) << std::endl;
     std::cout << "phash: " << sizeof(rphp::phash) << std::endl;
-    std::cout << "pobj: " << sizeof(rphp::pobject) << std::endl;
+    //std::cout << "pobj: " << sizeof(rphp::pobject) << std::endl;
     std::cout << "pvarBase: " << sizeof(rphp::pvarBase) << std::endl;
     std::cout << "pvarRef: " << sizeof(rphp::pvarRef) << std::endl;
     std::cout << "pvar: " << sizeof(rphp::pvar) << std::endl;

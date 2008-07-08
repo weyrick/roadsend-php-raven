@@ -20,38 +20,49 @@
 #define RPHP_HASH_H_
 
 #include <boost/multi_index_container.hpp>
-#include <boost/multi_index/identity.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
 
 #include <iostream>
 
+#include "rphp_pvar.h"
+
 using boost::multi_index_container;
 using namespace boost::multi_index;
 
+namespace rphp {
+
+struct _dataContainer {
+
+    pvar data;
+    bstring str_key;
+
+    _dataContainer(bstring key, pvar d) : data(d), str_key(key) { }
+
+};
+
+// a boost.multiindex that stores data with two indexes: hashed and sequenced
 typedef multi_index_container<
-  std::string,
+  _dataContainer,
   indexed_by<
-    hashed_unique<identity<std::string> >,
+    hashed_unique< member<_dataContainer, bstring, &_dataContainer::str_key> >,
     sequenced<>
   >
 > stableHash;
 
-typedef nth_index<stableHash,1>::type seq_hash;
+// sequenced index accessor
+typedef nth_index<stableHash,1>::type seq_index;
 
-namespace rphp {
-
-// XXX placeholder
 class phash {
     private:
         int size;
         stableHash hashData;
     public:
         phash(int sizevar) : size(sizevar) {
-            hashData.insert("foo");
-            hashData.insert("bar");
-            hashData.insert("baz");
+            hashData.insert(_dataContainer("foo", pvar(pint(5))));
+            hashData.insert(_dataContainer("bar", pvar(bstring("some string val"))));
+            hashData.insert(_dataContainer("baz", pvar(pfloat(5.3212))));
         }
 
         phash(const phash& h) {
@@ -59,9 +70,9 @@ class phash {
         }
         void dump() {
             std::cout << "hash has " << hashData.size() << " elements" << std::endl;
-            seq_hash& ot = get<1>(hashData);
-            for (seq_hash::iterator it = ot.begin(); it!=ot.end(); it++) {
-                std::cout << *it << std::endl;
+            seq_index& ot = get<1>(hashData);
+            for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
+                std::cout << "key: " << (*it).str_key << " | data: " << (*it).data << std::endl;
             }
         }
         int getSize() const { return size; }
