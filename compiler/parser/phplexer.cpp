@@ -20,24 +20,24 @@
 
 #include "phplexer.h"
 
-#include "phpparser.h"
+#include "rphp_parser.h"
 
 #include <kdev-pg-location-table.h>
 #include <kdev-pg-token-stream.h>
 
-#include <QtCore/QString>
-#include <QtCore/QStringList>
-#include <QtCore/QRegExp>
-#include <QtCore/QDebug>
-
 #include <iostream>
+#include <string>
+#include "unicode/utypes.h"
 
-namespace Php
-{
+// TODO check cursor position after returning from a method and if they change the former state, or not!
+// TODO pos and m_curpos the same?
 
-Lexer::Lexer( Parser* _parser, const QString& content ):
+    namespace rphp
+    {
+
+        Lexer::Lexer( parser* _parser, const UnicodeString& content ):
         m_content( content ), m_parser( _parser ),
-        m_curpos( 0 ), m_contentSize( m_content.size() ),
+        m_curpos( 0 ), m_contentSize( m_content.length() ),
         m_tokenBegin( 0 ), m_tokenEnd( 0 ), m_haltCompiler( 0 )
 {
     pushState( ErrorState );
@@ -46,33 +46,36 @@ Lexer::Lexer( Parser* _parser, const QString& content ):
 
 int Lexer::state(int deepness) const
 {
-    return m_state.at(m_state.size() - deepness - 1);
+    #ifdef PENDING_THOMAS
+    // TODO pending we need to look at other positions than top
+    return m_state[ m_state.size() - deepness - 1 ];
+    #endif
 }
 void Lexer::printState()
 {
     int s = state();
     if (s == ErrorState)
-        qDebug() << "ErrorState";
+        std::cout << "ErrorState";
     else if (s == HtmlState)
-        qDebug() << "HtmlState";
+        std::cout << "HtmlState";
     else if (s == DefaultState)
-        qDebug() << "DefaultState";
+        std::cout << "DefaultState";
     else if (s == String)
-        qDebug() << "String";
+        std::cout << "String";
     else if (s == StringVariable)
-        qDebug() << "StringVariable";
+        std::cout << "StringVariable";
     else if (s == StringVariableBracket)
-        qDebug() << "StringVariableBracket";
+        std::cout << "StringVariableBracket";
     else if (s == StringVariableObjectOperator)
-        qDebug() << "StringVariableObjectOperator";
+        std::cout << "StringVariableObjectOperator";
     else if (s == StringVariableCurly)
-        qDebug() << "StringVariableCurly";
+        std::cout << "StringVariableCurly";
     else if (s == StringVarname)
-        qDebug() << "StringVarname";
+        std::cout << "StringVarname";
     else if (s == StringHeredoc)
-        qDebug() << "StringHeredoc";
+        std::cout << "StringHeredoc";
     else if (s == StringBacktick)
-        qDebug() << "StringBacktick";
+        std::cout << "StringBacktick";
 }
 
 void Lexer::pushState( int state )
@@ -87,45 +90,49 @@ void Lexer::popState()
 
 int Lexer::nextTokenKind()
 {
-    int token = Parser::Token_INVALID;
+    int token = parser::Token_INVALID;
     if ( m_curpos >= m_contentSize )
     {
         m_tokenBegin = -1;
         m_tokenEnd = -1;
         return 0;
     }
-    QChar* it = m_content.data();
-    it += m_curpos;
+    int pos = m_curpos;
+    #ifdef THOMAS_TEMP_DISABLED
+    // TODO temp. disabled code, tokenBegin was not in use
     m_tokenBegin = m_curpos;
+    #endif
     switch ( state() )
     {
         case HtmlState:
-            if (it->unicode() == '<' && (it+1)->unicode() == '?') {
-                token = Parser::Token_OPEN_TAG;
-                if ((it+2)->unicode() == '=')
+            if (lookAt( pos ) == '<' && lookAt( pos + 1 ) == '?') {
+                token = parser::Token_OPEN_TAG;
+                if ( lookAt( pos + 2 ) == '=')
                 {
-                    token = Parser::Token_OPEN_TAG_WITH_ECHO;
+                    token = parser::Token_OPEN_TAG_WITH_ECHO;
                     m_curpos++;
-                    it++;
+                    pos++;
                 }
-                else if ((it+2)->toLower().unicode() == 'p'
-                    && (it+3)->toLower().unicode() == 'h'
-                    && (it+4)->toLower().unicode() == 'p'
-                    && (it+5)->isSpace())
+                // TODO toLower, isSpace
+                else if (
+                       (lookAt( pos + 2 )  == 'p' || lookAt( pos + 2 ) == 'P')
+                    && (lookAt( pos + 3 ) == 'h' || lookAt( pos + 3 ) == 'H')
+                    && (lookAt( pos + 4 ) == 'p' || lookAt( pos + 4 ) == 'P')
+                    && lookAt( pos + 5 ) == ' ')
                 {
                     m_curpos += 4;
                 }
                 m_curpos++;
                 pushState(DefaultState);
             } else {
-                token = Parser::Token_INLINE_HTML;
+                token = parser::Token_INLINE_HTML;
                 while( m_curpos < m_contentSize )
                 {
-                    if (it->unicode() == '\n') createNewline(m_curpos);
-                    if ((it+1)->unicode() == '<' && (it+2)->unicode() == '?') {
+                    if (lookAt( pos ) == '\n') createNewline(m_curpos);
+                    if ( lookAt( pos + 1 ) == '<' && lookAt( pos + 2 ) == '?') {
                         break;
                     }
-                    it++;
+                    pos++;
                     m_curpos++;
                 }
             }
@@ -133,678 +140,683 @@ int Lexer::nextTokenKind()
         case DefaultState:
         case StringVariableCurly:
         {
-            if (it->isSpace())
+            // isSpace
+            if ( lookAt( pos ) == ' ')
             {
-                token = Parser::Token_WHITESPACE;
-                while (m_curpos < m_contentSize && it->isSpace()) {
-                    if (it->unicode() == '\n') createNewline(m_curpos);
-                    it++;
+                token = parser::Token_WHITESPACE;
+                while (m_curpos < m_contentSize && lookAt( pos ) == ' ') {
+                    if ( lookAt( pos ) == '\n') createNewline(m_curpos);
+                    pos; // weiterspringen!!!!
                     m_curpos++;
                 }
                 m_curpos--;
             }
-            else if (it->isDigit() || (it->unicode() == '.' && (it+1)->isDigit()))
+            else if (u_isdigit( lookAt( pos ) )
+                    || ( lookAt( pos )  == '.' && u_isdigit( lookAt( pos + 1 ) ) ))
             {
-                QString num;bool hasPoint = false;
+		UnicodeString num;bool hasPoint = false;
                 bool hex = false;
-                if (it->unicode() == '0' && (it+1)->unicode() == 'x') {
-                    it += 2;
+                if ( lookAt( pos ) == '0' && ( lookAt( pos + 1 )) == 'x') {
+                    pos += 2;
                     m_curpos += 2;
                     hex = true;
                 }
                 while (m_curpos < m_contentSize && (
-                            it->isDigit()
-                        || (!hex && !hasPoint && it->unicode() == '.')
-                        || (hex && (it->toLower() == 'a' || it->toLower() == 'b' ||
-                                    it->toLower() == 'c' || it->toLower() == 'd' ||
-                                    it->toLower() == 'e' || it->toLower() == 'f'))))
+                            u_isdigit( lookAt( pos ) )
+                        || (!hex && !hasPoint && lookAt( pos ) == '.')
+                        || (hex && (u_tolower( lookAt( pos ) ) == 'a' || u_tolower( lookAt( pos ) ) == 'b' ||
+                                    u_tolower( lookAt( pos ) ) == 'c' || u_tolower( lookAt( pos ) ) == 'd' ||
+                                    u_tolower( lookAt( pos ) ) == 'e' || u_tolower( lookAt( pos ) ) == 'f'))))
                 {
-                    if (it->unicode() == '.') hasPoint = true;
-                    num.append(*it);
-                    it++;
+                    if (lookAt( pos ) == '.') hasPoint = true;
+                    num.append(lookAt( pos ));
+                    pos++;
                     m_curpos++;
                 }
-                if (!hex && it->toLower() == 'e' &&
-                        ((it+1)->isDigit() ||
-                            (((it+1)->unicode() == '-' || (it+1)->unicode() == '+') && (it+2)->isDigit())))
+                if (!hex && u_tolower( lookAt( pos ) ) == 'e' &&
+                        (u_isdigit( lookAt( pos ) ) ||
+                            ((lookAt( pos + 1 ) == '-' || lookAt( pos + 1 ) == '+') && u_isdigit( lookAt( pos + 2 ) ) )))
                 {
                     //exponential number
-                    token = Parser::Token_DNUMBER;
+                    token = parser::Token_DNUMBER;
                     m_curpos++;
-                    it++;
-                    if (it->unicode() == '-' || it->unicode() == '+') {
-                        it++;
+                    pos++;
+                    if (lookAt( pos ) == '-' || lookAt( pos ) == '+') {
+                        pos++;
                         m_curpos++;
                     }
-                    while (m_curpos < m_contentSize && (it->isDigit())) {
-                        it++;
+                    while (m_curpos < m_contentSize && ( u_isdigit( lookAt( pos ) ) )) {
+                        pos++;
                         m_curpos++;
                     }
                     m_curpos--;
                 } else {
                     m_curpos--;
                     if (hasPoint) {
-                        token = Parser::Token_DNUMBER;
+                        token = parser::Token_DNUMBER;
                     } else {
+                        #ifdef THOMAS_TEMP_DISABLED
+                        // TODO temp. disabled code, toLong()
                         bool ok;
                         //check if string can be converted to long
                         //if we get an overflow use double
                         num.toLong(&ok, hex ? 16 : 10);
                         if (ok) {
-                            token = Parser::Token_LNUMBER;
+                            token = parser::Token_LNUMBER;
                         } else {
-                            token = Parser::Token_DNUMBER;
+                            token = parser::Token_DNUMBER;
                         }
+                        #endif
                     }
                 }
 
             }
-            else if (processVariable(it))
+            else if (processVariable( lookAt( pos ) ))
             {
-                token = Parser::Token_VARIABLE;
+                token = parser::Token_VARIABLE;
             }
-            else if (it->unicode() == '$')
+            else if (lookAt( pos ) == '$')
             {
-                //when it was not recognized as variable
-                token = Parser::Token_DOLLAR;
+                //when *it was not recognized as variable
+                token = parser::Token_DOLLAR;
             }
-            else if (it->unicode() == '}')
+            else if (lookAt( pos ) == '}')
             {
-                token = Parser::Token_RBRACE;
+                token = parser::Token_RBRACE;
                 if (state() == StringVariableCurly) {
                     popState();
                 }
             }
-            else if (it->unicode() == '{')
+            else if (lookAt( pos ) == '{')
             {
-                token = Parser::Token_LBRACE;
+                token = parser::Token_LBRACE;
                 if (state() == StringVariableCurly) {
                     pushState(StringVariableCurly);
                 }
             }
-            else if (it->unicode() == ')')
+            else if (lookAt( pos ) == ')')
             {
-                token = Parser::Token_RPAREN;
+                token = parser::Token_RPAREN;
             }
-            else if (it->unicode() == '(')
+            else if (lookAt( pos ) == '(')
             {
-                it++;
-                int pos = m_curpos + 1;
-                while (pos < m_contentSize && it->isSpace())
+                pos++;
+                int _pos = m_curpos + 1;
+                while (_pos < m_contentSize && lookAt( pos ) == ' ')
                 {
-                    it++;
                     pos++;
+                    _pos++;
                 }
-                QString name;
-                while (pos < m_contentSize && it->isLetter())
+                UnicodeString name;
+                while (_pos < m_contentSize && u_isalnum( lookAt( pos ) ))
                 {
-                    name.append(*it);
-                    it++;
+                    name.append( lookAt( pos ) );
                     pos++;
+                    _pos++;
                 }
-                while (pos < m_contentSize && it->isSpace())
+                while (_pos < m_contentSize && lookAt( pos ) == ' ')
                 {
-                    it++;
                     pos++;
+                    _pos++;
                 }
                 name = name.toLower();
-                if (it->unicode() == ')')
+                if (lookAt( pos ) == ')')
                 {
                     if (name == "int" || name == "integer")
                     {
-                        token = Parser::Token_INT_CAST;
+                        token = parser::Token_INT_CAST;
                     }
                     else if (name == "real" || name == "double" || name == "float")
                     {
-                        token = Parser::Token_DOUBLE_CAST;
+                        token = parser::Token_DOUBLE_CAST;
                     }
                     else if (name == "string")
                     {
-                        token = Parser::Token_STRING_CAST;
+                        token = parser::Token_STRING_CAST;
                     }
                     else if (name == "binary")
                     {
                         //as in php
-                        token = Parser::Token_STRING_CAST;
+                        token = parser::Token_STRING_CAST;
                     }
                     else if (name == "array")
                     {
-                        token = Parser::Token_ARRAY_CAST;
+                        token = parser::Token_ARRAY_CAST;
                     }
                     else if (name == "object")
                     {
-                        token = Parser::Token_OBJECT_CAST;
+                        token = parser::Token_OBJECT_CAST;
                     }
                     else if (name == "bool" || name == "boolean")
                     {
-                        token = Parser::Token_BOOL_CAST;
+                        token = parser::Token_BOOL_CAST;
                     }
                     else if (name == "unset")
                     {
-                        token = Parser::Token_UNSET_CAST;
+                        token = parser::Token_UNSET_CAST;
                     }
                     else
                     {
-                        token = Parser::Token_LPAREN;
+                        token = parser::Token_LPAREN;
                     }
 
-                    if (token != Parser::Token_LPAREN)
+                    if (token != parser::Token_LPAREN)
                     {
-                        m_curpos = pos;
+                        m_curpos = _pos;
                     }
                 }
                 else
                 {
-                    token = Parser::Token_LPAREN;
+                    token = parser::Token_LPAREN;
                 }
             }
-            else if (it->unicode() == ']')
+            else if (lookAt( pos ) == ']')
             {
-                token = Parser::Token_RBRACKET;
+                token = parser::Token_RBRACKET;
             }
-            else if (it->unicode() == '[')
+            else if (lookAt( pos ) == '[')
             {
-                token = Parser::Token_LBRACKET;
+                token = parser::Token_LBRACKET;
             }
-            else if (it->unicode() == ',')
+            else if (lookAt( pos ) == ',')
             {
-                token = Parser::Token_COMMA;
+                token = parser::Token_COMMA;
             }
-            else if (it->unicode() == '@')
+            else if (lookAt( pos ) == '@')
             {
-                token = Parser::Token_AT;
+                token = parser::Token_AT;
             }
-            else if (it->unicode() == '!')
+            else if (lookAt( pos ) == '!')
             {
-                if ((it+1)->unicode() == '=')
+                if (lookAt( pos + 1 ) == '=')
                 {
                     m_curpos++;
-                    if ((it+2)->unicode() == '=')
+                    if (lookAt( pos + 2 ) == '=')
                     {
                         m_curpos++;
-                        token = Parser::Token_IS_NOT_IDENTICAL;
+                        token = parser::Token_IS_NOT_IDENTICAL;
                     }
                     else
                     {
-                        token = Parser::Token_IS_NOT_EQUAL;
+                        token = parser::Token_IS_NOT_EQUAL;
                     }
                 }
                 else
                 {
-                    token = Parser::Token_BANG;
+                    token = parser::Token_BANG;
                 }
             }
-            else if (it->unicode() == '<')
+            else if (lookAt( pos ) == '<')
             {
-                if ((it+1)->unicode() == '<')
+                if (lookAt( pos + 1 ) == '<')
                 {
                     m_curpos++;
-                    if ((it+2)->unicode() == '<' && state() != StringVariableCurly)
+                    if (lookAt( pos + 2 ) == '<' && state() != StringVariableCurly)
                     {
                         //HEREDOC string (<<< EOD\nfoo\nEOD;\n)
-                        int pos = 3;
-                        while (m_curpos+pos < m_contentSize &&
-                               ((it+pos)->unicode() == ' ' || (it+pos)->unicode() == '\t'))
+                        int _pos = 3;
+                        while (m_curpos+_pos < m_contentSize &&
+                               ( u_isalnum( lookAt( pos + _pos ) ) == ' ' || u_isalnum( lookAt( pos + _pos ) ) == '\t'))
                         {
-                            pos++;
+                            _pos++;
                         }
-                        if ((it+pos)->isLetter() || (it+pos)->unicode() == '_') //identifier must start with a letter
+                        if ( u_isalnum( lookAt( pos + _pos ) ) || lookAt( pos + _pos ) == '_') //identifier must start with a letter
                         {
-                            m_heredocIdentifier.clear();
-                            while (m_curpos+pos < m_contentSize &&
-                                ((it+pos)->isDigit() || (it+pos)->isLetter() || (it+pos)->unicode() == '_'))
+                            m_heredocIdentifier.remove();
+                            while (m_curpos+_pos < m_contentSize &&
+                                ( u_isdigit( lookAt( pos + _pos ) ) || u_isalnum( lookAt( pos + _pos ) ) || lookAt( pos + _pos ) == '_'))
                             {
-                                m_heredocIdentifier.append(*(it+pos));
-                                pos++;
+                                m_heredocIdentifier.append( lookAt( pos + _pos ) );
+                                _pos++;
                             }
-                            if ((it+pos)->unicode() == '\n') {
+                            if ( lookAt( pos + _pos ) == '\n') {
                                 //identifier must be followed by newline, newline is part of HEREDOC token
-                                token = Parser::Token_START_HEREDOC;
+                                token = parser::Token_START_HEREDOC;
                                 pushState(StringHeredoc);
-                                m_curpos += pos-1;
+                                m_curpos += _pos-1;
                             }
                         }
                     }
 
-                    if (token != Parser::Token_START_HEREDOC)
+                    if (token != parser::Token_START_HEREDOC)
                     {
-                        if ((it+2)->unicode() == '=')
+                        if (lookAt( pos + 2 ) == '=')
                         {
                             m_curpos++;
-                            token = Parser::Token_SL_ASSIGN;
+                            token = parser::Token_SL_ASSIGN;
                         }
                         else
                         {
-                            token = Parser::Token_SL;
+                            token = parser::Token_SL;
                         }
                     }
                 }
-                else if ((it+1)->unicode() == '=')
+                else if (lookAt( pos + 1 ) == '=')
                 {
                     m_curpos++;
-                    token = Parser::Token_IS_SMALLER_OR_EQUAL;
+                    token = parser::Token_IS_SMALLER_OR_EQUAL;
                 }
-                else if ((it+1)->unicode() == '>')
+                else if (lookAt( pos + 1 ) == '>')
                 {
                     m_curpos++;
-                    token = Parser::Token_IS_NOT_EQUAL;
+                    token = parser::Token_IS_NOT_EQUAL;
                 }
                 else
                 {
-                    token = Parser::Token_IS_SMALLER;
+                    token = parser::Token_IS_SMALLER;
                 }
             }
-            else if (it->unicode() == '>')
+            else if (lookAt( pos ) == '>')
             {
-                if ((it+1)->unicode() == '>')
+                if (lookAt( pos + 1 ) == '>')
                 {
                     m_curpos++;
-                    if ((it+2)->unicode() == '=')
+                    if (lookAt( pos + 2 ) == '=')
                     {
                         m_curpos++;
-                        token = Parser::Token_SR_ASSIGN;
+                        token = parser::Token_SR_ASSIGN;
                     }
                     else
                     {
-                        token = Parser::Token_SR;
+                        token = parser::Token_SR;
                     }
                 }
-                else if ((it+1)->unicode() == '=')
+                else if (lookAt( pos + 1 ) == '=')
                 {
                     m_curpos++;
-                    token = Parser::Token_IS_GREATER_OR_EQUAL;
+                    token = parser::Token_IS_GREATER_OR_EQUAL;
                 }
                 else
                 {
-                    token = Parser::Token_IS_GREATER;
+                    token = parser::Token_IS_GREATER;
                 }
             }
-            else if (it->unicode() == '~')
+            else if (lookAt( pos ) == '~')
             {
-                token = Parser::Token_TILDE;
+                token = parser::Token_TILDE;
             }
-            else if (it->unicode() == ':')
+            else if (lookAt( pos ) == ':')
             {
-                if ((it+1)->unicode() == ':') {
+                if (lookAt( pos + 1 ) == ':') {
                     m_curpos++;
-                    token = Parser::Token_PAAMAYIM_NEKUDOTAYIM;
+                    token = parser::Token_PAAMAYIM_NEKUDOTAYIM;
                 } else {
-                    token = Parser::Token_COLON;
+                    token = parser::Token_COLON;
                 }
             }
-            else if (it->unicode() == '?')
+            else if (lookAt( pos ) == '?')
             {
-                if ((it+1)->unicode() == '>')
+                if (lookAt( pos + 1 ) == '>')
                 {
                     //accept CLOSE_TAG inside StringVariableCurly too, as php does
-                    token = Parser::Token_CLOSE_TAG;
+                    token = parser::Token_CLOSE_TAG;
                     m_curpos++;
-                    if ((it+2)->unicode() == '\n') m_curpos++;
+                    if (lookAt( pos + 2 ) == '\n') m_curpos++;
                     while (state() != HtmlState) popState();
                 }
                 else
                 {
-                    token = Parser::Token_QUESTION;
+                    token = parser::Token_QUESTION;
                 }
             }
-            else if (it->unicode() == '-' && (it+1)->unicode() == '>')
+            else if (lookAt( pos ) == '-' && lookAt( pos + 1 ) == '>')
             {
                 m_curpos++;
-                token = Parser::Token_OBJECT_OPERATOR;
-                if (isValidVariableIdentifier(it+2)) {
+                token = parser::Token_OBJECT_OPERATOR;
+                if (isValidVariableIdentifier( lookAt( pos + 2 ) ) ) {
                     pushState(StringVariableObjectOperator);
                 }
             }
-            else if (it->unicode() == '%')
+            else if (lookAt( pos ) == '%')
             {
-                if ((it+1)->unicode() == '=') {
+                if (lookAt( pos + 1 ) == '=') {
                     m_curpos++;
-                    token = Parser::Token_MOD_ASSIGN;
+                    token = parser::Token_MOD_ASSIGN;
                 } else {
-                    token = Parser::Token_MOD;
+                    token = parser::Token_MOD;
                 }
             }
-            else if (it->unicode() == '/')
+            else if (lookAt( pos ) == '/')
             {
-                if ((it+1)->unicode() == '=')
+                if (lookAt( pos + 1 ) == '=')
                 {
                     m_curpos++;
-                    token = Parser::Token_DIV_ASSIGN;
+                    token = parser::Token_DIV_ASSIGN;
                 }
-                else if ((it+1)->unicode() == '/')
+                else if (lookAt( pos + 1 ) == '/')
                 {
                     //accept COMMENT inside StringVariableCurly too, as php does
-                    token = Parser::Token_COMMENT;
-                    while (m_curpos < m_contentSize && it->unicode() != '\n' &&
-                           !((it+1)->unicode() == '?' && (it+2)->unicode() == '>'))
+                    token = parser::Token_COMMENT;
+                    while (m_curpos < m_contentSize && lookAt( pos ) != '\n' &&
+                           !(lookAt( pos + 1 ) == '?' && lookAt( pos + 2 ) == '>'))
                     {
-                        it++;
+                        pos++;
                         m_curpos++;
                     }
                 }
-                else if ((it+1)->unicode() == '*')
+                else if (lookAt( pos + 1 ) == '*')
                 {
                     //accept COMMENT inside StringVariableCurly too, as php does
-                    if ((it+2)->unicode() == '*' && (it+3)->isSpace())
+                    if (lookAt( pos + 2 ) == '*' && lookAt( pos + 3 ) == ' ')
                     {
-                        token = Parser::Token_DOC_COMMENT;
+                        token = parser::Token_DOC_COMMENT;
                     }
                     else
                     {
-                        token = Parser::Token_COMMENT;
+                        token = parser::Token_COMMENT;
                     }
-                    it += 2;
+                    pos += 2;
                     m_curpos += 2;
-                    while (m_curpos < m_contentSize && !(it->unicode() == '*' && (it+1)->unicode() == '/'))
+                    while (m_curpos < m_contentSize && !(lookAt( pos ) == '*' && lookAt( pos + 1 ) == '/'))
                     {
-                        it++;
+                        pos++;
                         m_curpos++;
                     }
                     m_curpos++;
                 } else {
-                    token = Parser::Token_DIV;
+                    token = parser::Token_DIV;
                 }
             }
-            else if (it->unicode() == '#')
+            else if (lookAt( pos ) == '#')
             {
                 //accept COMMENT inside StringVariableCurly too, as php does
-                token = Parser::Token_COMMENT;
-                while (m_curpos < m_contentSize && it->unicode() != '\n')
+                token = parser::Token_COMMENT;
+                while (m_curpos < m_contentSize && lookAt( pos ) != '\n')
                 {
-                    it++;
+                    pos++;
                     m_curpos++;
                 }
             }
-            else if (it->unicode() == '^')
+            else if (lookAt( pos ) == '^')
             {
-                if ((it+1)->unicode() == '=') {
+                if (lookAt( pos + 1 ) == '=') {
                     m_curpos++;
-                    token = Parser::Token_XOR_ASSIGN;
+                    token = parser::Token_XOR_ASSIGN;
                 } else {
-                    token = Parser::Token_BIT_XOR;
+                    token = parser::Token_BIT_XOR;
                 }
             }
-            else if (it->unicode() == '*')
+            else if (lookAt( pos ) == '*')
             {
-                if ((it+1)->unicode() == '=') {
+                if (lookAt( pos + 1 ) == '=') {
                     m_curpos++;
-                    token = Parser::Token_MUL_ASSIGN;
+                    token = parser::Token_MUL_ASSIGN;
                 } else {
-                    token = Parser::Token_MUL;
+                    token = parser::Token_MUL;
                 }
             }
-            else if (it->unicode() == '|')
+            else if (lookAt( pos ) == '|')
             {
-                if ((it+1)->unicode() == '|') {
+                if (lookAt( pos + 1 ) == '|') {
                     m_curpos++;
-                    token = Parser::Token_BOOLEAN_OR;
-                } else if ((it+1)->unicode() == '=') {
+                    token = parser::Token_BOOLEAN_OR;
+                } else if (lookAt( pos + 1 ) == '=') {
                     m_curpos++;
-                    token = Parser::Token_OR_ASSIGN;
+                    token = parser::Token_OR_ASSIGN;
                 } else {
-                    token = Parser::Token_BIT_OR;
+                    token = parser::Token_BIT_OR;
                 }
             }
-            else if (it->unicode() == '&')
+            else if (lookAt( pos ) == '&')
             {
-                if ((it+1)->unicode() == '&') {
+                if (lookAt( pos + 1 ) == '&') {
                     m_curpos++;
-                    token = Parser::Token_BOOLEAN_AND;
-                } else if ((it+1)->unicode() == '=') {
+                    token = parser::Token_BOOLEAN_AND;
+                } else if (lookAt( pos + 1 ) == '=') {
                     m_curpos++;
-                    token = Parser::Token_AND_ASSIGN;
+                    token = parser::Token_AND_ASSIGN;
                 } else {
-                    token = Parser::Token_BIT_AND;
+                    token = parser::Token_BIT_AND;
                 }
             }
-            else if (it->unicode() == '+')
+            else if (lookAt( pos ) == '+')
             {
-                if ((it+1)->unicode() == '+') {
+                if (lookAt( pos + 1 ) == '+') {
                     m_curpos++;
-                    token = Parser::Token_INC;
-                } else if ((it+1)->unicode() == '=') {
+                    token = parser::Token_INC;
+                } else if (lookAt( pos + 1 ) == '=') {
                     m_curpos++;
-                    token = Parser::Token_PLUS_ASSIGN;
+                    token = parser::Token_PLUS_ASSIGN;
                 } else {
-                    token = Parser::Token_PLUS;
+                    token = parser::Token_PLUS;
                 }
             }
-            else if (it->unicode() == '-')
+            else if (lookAt( pos ) == '-')
             {
-                if ((it+1)->unicode() == '-') {
+                if (lookAt( pos + 1 ) == '-') {
                     m_curpos++;
-                    token = Parser::Token_DEC;
-                } else if ((it+1)->unicode() == '=') {
+                    token = parser::Token_DEC;
+                } else if (lookAt( pos + 1 ) == '=') {
                     m_curpos++;
-                    token = Parser::Token_MINUS_ASSIGN;
+                    token = parser::Token_MINUS_ASSIGN;
                 } else {
-                    token = Parser::Token_MINUS;
+                    token = parser::Token_MINUS;
                 }
             }
-            else if (it->unicode() == '.')
+            else if (lookAt( pos ) == '.')
             {
-                if ((it+1)->unicode() == '=') {
+                if (lookAt( pos + 1 ) == '=') {
                     m_curpos++;
-                    token = Parser::Token_CONCAT_ASSIGN;
+                    token = parser::Token_CONCAT_ASSIGN;
                 } else {
-                    token = Parser::Token_CONCAT;
+                    token = parser::Token_CONCAT;
                 }
 
             }
-            else if (it->unicode() == ';')
+            else if (lookAt( pos ) == ';')
             {
-                token = Parser::Token_SEMICOLON;
+                token = parser::Token_SEMICOLON;
             }
-            else if (it->unicode() == '\'')
+            else if (lookAt( pos ) == '\'')
             {
-                token = Parser::Token_CONSTANT_ENCAPSED_STRING;
-                it++;
+                token = parser::Token_CONSTANT_ENCAPSED_STRING;
+                pos++;
                 m_curpos++;
                 int startPos = m_curpos;
                 while (m_curpos < m_contentSize
-                        && (it->unicode() != '\'' || isEscapedWithBackslash(it, m_curpos, startPos)))
+                        && (lookAt( pos ) != '\'' || isEscapedWithBackslash(lookAt( pos ), m_curpos, startPos, pos)))
                 {
-                    it++;
+                    pos++;
                     m_curpos++;
                 }
             }
-            else if (it->unicode() == '"')
+            else if (lookAt( pos ) == '"')
             {
-                it++;
+                pos++;
                 int i = 0;
                 bool foundVar = false;
                 while (m_curpos < m_contentSize
-                        && (it->unicode() != '"' || isEscapedWithBackslash(it, m_curpos+i, m_curpos)))
+                        && (lookAt( pos ) != '"' || isEscapedWithBackslash(lookAt( pos ), m_curpos+i, m_curpos, pos)))
                 {
-                    if (it->unicode() == '$'  && !isEscapedWithBackslash(it, m_curpos+i, m_curpos)
-                            && ((it+1)->unicode() == '{'
-                                   || (isValidVariableIdentifier(it+1) && !(it+1)->isDigit()))) {
+                    if (lookAt( pos ) == '$'  && !isEscapedWithBackslash(lookAt( pos ), m_curpos+i, m_curpos, pos)
+                            && (lookAt( pos + 1 ) == '{'
+                                   || (isValidVariableIdentifier( lookAt( pos + 1 ) ) && ! u_isdigit( lookAt( pos + 1 ) )))) {
                         foundVar = true;
                     }
-                    it++;
+                    pos++;
                     i++;
                 }
                 if (!foundVar)
                 {
-                    token = Parser::Token_CONSTANT_ENCAPSED_STRING;
+                    token = parser::Token_CONSTANT_ENCAPSED_STRING;
                     m_curpos += i + 1;
                 }
                 else
                 {
-                    token = Parser::Token_DOUBLE_QUOTE;
+                    token = parser::Token_DOUBLE_QUOTE;
                     pushState(String);
                 }
             }
-            else if (it->unicode() == '`')
+            else if (lookAt( pos ) == '`')
             {
-                token = Parser::Token_BACKTICK;
+                token = parser::Token_BACKTICK;
                 pushState(StringBacktick);
             }
-            else if (it->unicode() == '=')
+            else if (lookAt( pos ) == '=')
             {
-                if ((it+1)->unicode() == '=')
+                if (lookAt( pos + 1 ) == '=')
                 {
                     m_curpos++;
-                    if ((it+2)->unicode() == '=')
+                    if (lookAt( pos + 2 ) == '=')
                     {
                         m_curpos++;
-                        token = Parser::Token_IS_IDENTICAL;
+                        token = parser::Token_IS_IDENTICAL;
                     }
                     else
                     {
-                        token = Parser::Token_IS_EQUAL;
+                        token = parser::Token_IS_EQUAL;
                     }
                 }
-                else if ((it+1)->unicode() == '>')
+                else if (lookAt( pos + 1 ) == '>')
                 {
                     m_curpos++;
-                    token = Parser::Token_DOUBLE_ARROW;
+                    token = parser::Token_DOUBLE_ARROW;
                 }
                 else
                 {
-                    token = Parser::Token_ASSIGN;
+                    token = parser::Token_ASSIGN;
                 }
             }
-            else if (isValidVariableIdentifier(it) && !it->isDigit())
+            else if (isValidVariableIdentifier(lookAt( pos )) && !u_isdigit( lookAt( pos ) ))
             {
-                QString name;
-                while (m_curpos < m_contentSize && (isValidVariableIdentifier(it))) {
-                    name.append(*it);
-                    it++;
+		UnicodeString name;
+                while (m_curpos < m_contentSize && (isValidVariableIdentifier(lookAt( pos )))) {
+                    name.append(lookAt( pos ));
+                    pos++;
                     m_curpos++;
                 }
                 m_curpos--;
                 name = name.toLower();
                 if (name == "echo") {
-                    token = Parser::Token_ECHO;
+                    token = parser::Token_ECHO;
                 } else if (name == "include") {
-                    token = Parser::Token_INCLUDE;
+                    token = parser::Token_INCLUDE;
                 } else if (name == "include_once") {
-                    token = Parser::Token_INCLUDE_ONCE;
+                    token = parser::Token_INCLUDE_ONCE;
                 } else if (name == "require") {
-                    token = Parser::Token_REQUIRE;
+                    token = parser::Token_REQUIRE;
                 } else if (name == "require_once") {
-                    token = Parser::Token_REQUIRE_ONCE;
+                    token = parser::Token_REQUIRE_ONCE;
                 } else if (name == "eval") {
-                    token = Parser::Token_EVAL;
+                    token = parser::Token_EVAL;
                 } else if (name == "print") {
-                    token = Parser::Token_PRINT;
+                    token = parser::Token_PRINT;
                 } else if (name == "abstract") {
-                    token = Parser::Token_ABSTRACT;
+                    token = parser::Token_ABSTRACT;
                 } else if (name == "break") {
-                    token = Parser::Token_BREAK;
+                    token = parser::Token_BREAK;
                 } else if (name == "case") {
-                    token = Parser::Token_CASE;
+                    token = parser::Token_CASE;
                 } else if (name == "catch") {
-                    token = Parser::Token_CATCH;
+                    token = parser::Token_CATCH;
                 } else if (name == "class") {
-                    token = Parser::Token_CLASS;
+                    token = parser::Token_CLASS;
                 } else if (name == "const") {
-                    token = Parser::Token_CONST;
+                    token = parser::Token_CONST;
                 } else if (name == "continue") {
-                    token = Parser::Token_CONTINUE;
+                    token = parser::Token_CONTINUE;
                 } else if (name == "default") {
-                    token = Parser::Token_DEFAULT;
+                    token = parser::Token_DEFAULT;
                 } else if (name == "do") {
-                    token = Parser::Token_DO;
+                    token = parser::Token_DO;
                 } else if (name == "else") {
-                    token = Parser::Token_ELSE;
+                    token = parser::Token_ELSE;
                 } else if (name == "extends") {
-                    token = Parser::Token_EXTENDS;
+                    token = parser::Token_EXTENDS;
                 } else if (name == "final") {
-                    token = Parser::Token_FINAL;
+                    token = parser::Token_FINAL;
                 } else if (name == "for") {
-                    token = Parser::Token_FOR;
+                    token = parser::Token_FOR;
                 } else if (name == "if") {
-                    token = Parser::Token_IF;
+                    token = parser::Token_IF;
                 } else if (name == "implements") {
-                    token = Parser::Token_IMPLEMENTS;
+                    token = parser::Token_IMPLEMENTS;
                 } else if (name == "instanceof") {
-                    token = Parser::Token_INSTANCEOF;
+                    token = parser::Token_INSTANCEOF;
                 } else if (name == "interface") {
-                    token = Parser::Token_INTERFACE;
+                    token = parser::Token_INTERFACE;
                 } else if (name == "new") {
-                    token = Parser::Token_NEW;
+                    token = parser::Token_NEW;
                 } else if (name == "private") {
-                    token = Parser::Token_PRIVATE;
+                    token = parser::Token_PRIVATE;
                 } else if (name == "protected") {
-                    token = Parser::Token_PROTECTED;
+                    token = parser::Token_PROTECTED;
                 } else if (name == "public") {
-                    token = Parser::Token_PUBLIC;
+                    token = parser::Token_PUBLIC;
                 } else if (name == "return") {
-                    token = Parser::Token_RETURN;
+                    token = parser::Token_RETURN;
                 } else if (name == "static") {
-                    token = Parser::Token_STATIC;
+                    token = parser::Token_STATIC;
                 } else if (name == "switch") {
-                    token = Parser::Token_SWITCH;
+                    token = parser::Token_SWITCH;
                 } else if (name == "throw") {
-                    token = Parser::Token_THROW;
+                    token = parser::Token_THROW;
                 } else if (name == "try") {
-                    token = Parser::Token_TRY;
+                    token = parser::Token_TRY;
                 } else if (name == "while") {
-                    token = Parser::Token_WHILE;
+                    token = parser::Token_WHILE;
                 } else if (name == "clone") {
-                    token = Parser::Token_CLONE;
+                    token = parser::Token_CLONE;
                 } else if (name == "exit" || name == "die") {
-                    token = Parser::Token_EXIT;
+                    token = parser::Token_EXIT;
                 } else if (name == "elseif") {
-                    token = Parser::Token_ELSEIF;
+                    token = parser::Token_ELSEIF;
                 } else if (name == "endif") {
-                    token = Parser::Token_ENDIF;
+                    token = parser::Token_ENDIF;
                 } else if (name == "endwhile") {
-                    token = Parser::Token_ENDWHILE;
+                    token = parser::Token_ENDWHILE;
                 } else if (name == "endfor") {
-                    token = Parser::Token_ENDFOR;
+                    token = parser::Token_ENDFOR;
                 } else if (name == "foreach") {
-                    token = Parser::Token_FOREACH;
+                    token = parser::Token_FOREACH;
                 } else if (name == "endforeach") {
-                    token = Parser::Token_ENDFOREACH;
+                    token = parser::Token_ENDFOREACH;
                 } else if (name == "declare") {
-                    token = Parser::Token_DECLARE;
+                    token = parser::Token_DECLARE;
                 } else if (name == "enddeclare") {
-                    token = Parser::Token_ENDDECLARE;
+                    token = parser::Token_ENDDECLARE;
                 } else if (name == "as") {
-                    token = Parser::Token_AS;
+                    token = parser::Token_AS;
                 } else if (name == "endswitch") {
-                    token = Parser::Token_ENDSWITCH;
+                    token = parser::Token_ENDSWITCH;
                 } else if (name == "function") {
-                    token = Parser::Token_FUNCTION;
+                    token = parser::Token_FUNCTION;
                 } else if (name == "use") {
-                    token = Parser::Token_USE;
+                    token = parser::Token_USE;
                 } else if (name == "global") {
-                    token = Parser::Token_GLOBAL;
+                    token = parser::Token_GLOBAL;
                 } else if (name == "var") {
-                    token = Parser::Token_VAR;
+                    token = parser::Token_VAR;
                 } else if (name == "unset") {
-                    token = Parser::Token_UNSET;
+                    token = parser::Token_UNSET;
                 } else if (name == "isset") {
-                    token = Parser::Token_ISSET;
+                    token = parser::Token_ISSET;
                 } else if (name == "empty") {
-                    token = Parser::Token_EMPTY;
+                    token = parser::Token_EMPTY;
                 } else if (name == "__halt_compiler") {
-                    token = Parser::Token_HALT_COMPILER;
+                    token = parser::Token_HALT_COMPILER;
                 } else if (name == "list") {
-                    token = Parser::Token_LIST;
+                    token = parser::Token_LIST;
                 } else if (name == "array") {
-                    token = Parser::Token_ARRAY;
+                    token = parser::Token_ARRAY;
                 } else if (name == "__class__") {
-                    token = Parser::Token_CLASS_C;
+                    token = parser::Token_CLASS_C;
                 } else if (name == "__method__") {
-                    token = Parser::Token_METHOD_C;
+                    token = parser::Token_METHOD_C;
                 } else if (name == "__function__") {
-                    token = Parser::Token_FUNC_C;
+                    token = parser::Token_FUNC_C;
                 } else if (name == "__line__") {
-                    token = Parser::Token_LINE;
+                    token = parser::Token_LINE;
                 } else if (name == "__file__") {
-                    token = Parser::Token_FILE;
+                    token = parser::Token_FILE;
                 } else if (name == "or") {
-                    token = Parser::Token_LOGICAL_OR;
+                    token = parser::Token_LOGICAL_OR;
                 } else if (name == "and") {
-                    token = Parser::Token_LOGICAL_AND;
+                    token = parser::Token_LOGICAL_AND;
                 } else if (name == "xor") {
-                    token = Parser::Token_LOGICAL_XOR;
+                    token = parser::Token_LOGICAL_XOR;
                 } else {
-                    token = Parser::Token_STRING;
+                    token = parser::Token_STRING;
                 }
             }
             break;
@@ -814,98 +826,98 @@ int Lexer::nextTokenKind()
         case String:
         case StringHeredoc:
         case StringBacktick:
-            if ((state() == String || state(1) == String) && it->unicode() == '"')
+            if ((state() == String || state(1) == String) && lookAt( pos ) == '"')
             {
-                token = Parser::Token_DOUBLE_QUOTE;
+                token = parser::Token_DOUBLE_QUOTE;
                 if (state() == StringVariable) popState();
                 popState();
             }
-            else if ((state() == StringBacktick || state(1) == StringBacktick) && it->unicode() == '`')
+            else if ((state() == StringBacktick || state(1) == StringBacktick) && lookAt( pos ) == '`')
             {
-                token = Parser::Token_BACKTICK;
+                token = parser::Token_BACKTICK;
                 if (state() == StringVariable) popState();
                 popState();
             }
-            else if ((state() == StringHeredoc || state(1) == StringHeredoc) && isHeredocEnd(it))
+            else if ((state() == StringHeredoc || state(1) == StringHeredoc) && isHeredocEnd(lookAt( pos ), pos))
             {
-                token = Parser::Token_END_HEREDOC;
+                token = parser::Token_END_HEREDOC;
                 m_curpos += m_heredocIdentifier.length()-1;
                 if (state() == StringVariable) popState();
                 popState();
             }
-            else if (processVariable(it))
+            else if (processVariable(lookAt( pos )))
             {
-                token = Parser::Token_VARIABLE;
+                token = parser::Token_VARIABLE;
                 if (state() != StringVariable) pushState(StringVariable);
             }
-            else if (state() != StringVariable  && it->unicode() == '$' && (it+1)->unicode() == '{')
+            else if (state() != StringVariable  && lookAt( pos ) == '$' && lookAt( pos + 1 ) == '{')
             {
-                token = Parser::Token_DOLLAR_OPEN_CURLY_BRACES;
+                token = parser::Token_DOLLAR_OPEN_CURLY_BRACES;
                 m_curpos++;
-                it += 2;
+                pos += 2;
                 //check if a valid variable follows
-                if ((isValidVariableIdentifier(it) && !it->isDigit()))
+                if ((isValidVariableIdentifier(lookAt( pos )) && ! u_isdigit( lookAt( pos ) )))
                 {
                     pushState(StringVarname);
                 }
 
             }
-            else if (state() == StringVariable && it->unicode() == '[')
+            else if (state() == StringVariable && lookAt( pos ) == '[')
             {
-                token = Parser::Token_LBRACKET;
+                token = parser::Token_LBRACKET;
                 pushState(StringVariableBracket);
             }
-            else if (state() != StringVariable && it->unicode() == '{' && (it+1)->unicode() == '$'
-                    && (isValidVariableIdentifier(it+2) && !(it+2)->isDigit() || (it+2)->unicode() == '{'))
+            else if (state() != StringVariable && lookAt( pos ) == '{' && lookAt( pos + 1 ) == '$'
+                    && (isValidVariableIdentifier( lookAt( pos + 2 ) ) && ! u_isdigit( lookAt( pos + 2 ) ) || lookAt( pos + 2 ) == '{'))
             {
-                token = Parser::Token_CURLY_OPEN;
+                token = parser::Token_CURLY_OPEN;
                 pushState(StringVariableCurly);
             }
             else if (state() == StringVariable
-                    && it->unicode() == '-' && (it+1)->unicode() == '>'
-                    && isValidVariableIdentifier(it+2) && !(it+2)->isDigit())
+                    && lookAt( pos ) == '-' && lookAt( pos + 1 ) == '>'
+                    && isValidVariableIdentifier( lookAt( pos + 2 ) ) && ! u_isdigit( lookAt( pos + 2 ) ))
             {
-                token = Parser::Token_OBJECT_OPERATOR;
+                token = parser::Token_OBJECT_OPERATOR;
                 m_curpos++;
                 pushState(StringVariableObjectOperator);
             }
             else
             {
                 if (state() == StringVariable) popState();
-                token = Parser::Token_ENCAPSED_AND_WHITESPACE;
+                token = parser::Token_ENCAPSED_AND_WHITESPACE;
                 int startPos = m_curpos;
                 while ( m_curpos < m_contentSize )
                 {
 
-                    if (!isEscapedWithBackslash(it, m_curpos, startPos) &&
-                         (it->unicode() == '$' && (it+1)->unicode() == '{' ||
-                          it->unicode() == '{' && (it+1)->unicode() == '$' ||
-                          it->unicode() == '$' && isValidVariableIdentifier(it+1) && !(it+1)->isDigit()))
+                    if (!isEscapedWithBackslash(lookAt( pos ), m_curpos, startPos, pos) &&
+                         (lookAt( pos ) == '$' && lookAt( pos + 1 ) == '{' ||
+                          lookAt( pos ) == '{' && lookAt( pos + 1 ) == '$' ||
+                          lookAt( pos ) == '$' && isValidVariableIdentifier( lookAt( pos + 1 ) ) && ! u_isdigit( lookAt( pos + 1 ) )))
                     {
                         //variable is next ${var} or {$var}
                         break;
                     }
-                    if (state() == String && it->unicode() == '"'
-                        && !isEscapedWithBackslash(it, m_curpos, startPos))
+                    if (state() == String && lookAt( pos ) == '"'
+                        && !isEscapedWithBackslash(lookAt( pos ), m_curpos, startPos, pos))
                     {
                         //end of string
                         break;
                     }
-                    if (state() == StringBacktick && it->unicode() == '`'
-                        && !isEscapedWithBackslash(it, m_curpos, startPos))
+                    if (state() == StringBacktick && lookAt( pos ) == '`'
+                        && !isEscapedWithBackslash(lookAt( pos ), m_curpos, startPos, pos))
                     {
                         //end of string
                         break;
                     }
 
-                    if (it->unicode() == '\n') createNewline(m_curpos);
+                    if ( lookAt( pos ) == '\n') createNewline(m_curpos);
                     m_curpos++;
-                    it++;
+                    pos++;
 
-                    if (state() == StringHeredoc && (it-1)->unicode() == '\n')
+                    if (state() == StringHeredoc && lookAt( pos - 1 ) == '\n')
                     {
                         //check for end of heredoc (\nEOD;\n)
-                        if (state() == StringHeredoc && isHeredocEnd(it)) {
+                        if (state() == StringHeredoc && isHeredocEnd(lookAt( pos ), pos)) {
                             break;
                         }
                     }
@@ -914,39 +926,39 @@ int Lexer::nextTokenKind()
             }
             break;
         case StringVariableBracket:
-            if (it->unicode() == ']')
+            if (lookAt( pos ) == ']')
             {
-                token = Parser::Token_RBRACKET;
+                token = parser::Token_RBRACKET;
                 popState();
                 popState();
             }
-            else if (it->isDigit())
+            else if ( u_isdigit( lookAt( pos ) ))
             {
-                token = Parser::Token_NUM_STRING;
-                while (m_curpos < m_contentSize && it->isDigit())
+                token = parser::Token_NUM_STRING;
+                while (m_curpos < m_contentSize && u_isdigit( lookAt( pos ) ))
                 {
-                    it++;
+                    pos++;
                     m_curpos++;
                 }
                 m_curpos--;
             }
             else
             {
-                token = Parser::Token_STRING;
-                while (m_curpos < m_contentSize && (it->unicode() != ']'))
+                token = parser::Token_STRING;
+                while (m_curpos < m_contentSize && (lookAt( pos ) != ']'))
                 {
-                    if (it->unicode() == '\n') createNewline(m_curpos);
-                    it++;
+                    if (lookAt( pos ) == '\n') createNewline(m_curpos);
+                    pos++;
                     m_curpos++;
                 }
                 m_curpos--;
             }
             break;
         case StringVariableObjectOperator:
-            token = Parser::Token_STRING;
-            while (m_curpos < m_contentSize && isValidVariableIdentifier(it))
+            token = parser::Token_STRING;
+            while (m_curpos < m_contentSize && isValidVariableIdentifier(lookAt( pos )))
             {
-                it++;
+                pos++;
                 m_curpos++;
             }
             m_curpos--;
@@ -956,16 +968,16 @@ int Lexer::nextTokenKind()
         case StringVarname:
             popState();
             pushState(StringVariableCurly);
-            token = Parser::Token_STRING_VARNAME;
-            while (m_curpos < m_contentSize && isValidVariableIdentifier(it))
+            token = parser::Token_STRING_VARNAME;
+            while (m_curpos < m_contentSize && isValidVariableIdentifier(lookAt( pos )))
             {
-                it++;
+                pos++;
                 m_curpos++;
             }
             m_curpos--;
             break;
         default:
-            token = Parser::Token_INVALID;
+            token = parser::Token_INVALID;
             break;
     }
     if ( m_curpos >= m_contentSize )
@@ -981,46 +993,46 @@ int Lexer::nextTokenKind()
         //look for __halt_compiler(); and stop lexer there
         if (m_haltCompiler == 4) {
             token = 0; //EOF
-        } else if (token == Parser::Token_WHITESPACE || token == Parser::Token_COMMENT || token == Parser::Token_DOC_COMMENT) {
+        } else if (token == parser::Token_WHITESPACE || token == parser::Token_COMMENT || token == parser::Token_DOC_COMMENT) {
             //ignore
-        } else if (m_haltCompiler == 1 && token == Parser::Token_LPAREN) {
+        } else if (m_haltCompiler == 1 && token == parser::Token_LPAREN) {
             m_haltCompiler++;
-        } else if (m_haltCompiler == 2 && token == Parser::Token_RPAREN) {
+        } else if (m_haltCompiler == 2 && token == parser::Token_RPAREN) {
             m_haltCompiler++;
-        } else if (m_haltCompiler == 3 && token == Parser::Token_SEMICOLON) {
+        } else if (m_haltCompiler == 3 && token == parser::Token_SEMICOLON) {
             m_haltCompiler++;
         } else {
             m_haltCompiler = 0;
         }
     }
-    if (token == Parser::Token_HALT_COMPILER && !m_haltCompiler) {
+    if (token == parser::Token_HALT_COMPILER && !m_haltCompiler) {
         m_haltCompiler = 1;
     }
     return token;
 }
 
-qint64 Lexer::tokenBegin() const
+rint64 Lexer::tokenBegin() const
 {
     return m_tokenBegin;
 }
 
-qint64 Lexer::tokenEnd() const
+rint64 Lexer::tokenEnd() const
 {
     return m_tokenEnd;
 }
 
-bool Lexer::isHeredocEnd(QChar* it)
+bool Lexer::isHeredocEnd(const UChar32& it, int pos)
 {
     int identiferLen = m_heredocIdentifier.length();
-    QString lineStart;
+    UnicodeString lineStart;
     for (int i = 0; i < identiferLen; i++) {
         if (m_curpos+i >= m_contentSize) break;
-        lineStart.append(*(it+i));
+        lineStart.append( lookAt( pos + i ) );
     }
     if (lineStart == m_heredocIdentifier &&
-        ((it+identiferLen)->unicode() == '\n'
-            || ((it+identiferLen)->unicode() == ';' &&
-                (it+identiferLen+1)->unicode() == '\n')))
+        (lookAt( pos + identiferLen ) == '\n'
+            || (lookAt( pos + identiferLen ) == ';' &&
+                    lookAt( pos + identiferLen + 1 ) == '\n')))
     {
         return true;
     }
@@ -1028,28 +1040,28 @@ bool Lexer::isHeredocEnd(QChar* it)
 }
 
 //used for strings, to check if " is escaped (\" is, \\" not)
-bool Lexer::isEscapedWithBackslash(QChar* it, int curPos, int startPos)
+bool Lexer::isEscapedWithBackslash(const UChar32& it, int curPos, int startPos, int pos)
 {
     int cnt = 0;
-    it--;
-    while (curPos > startPos && it->unicode() == '\\') {
+    pos--;
+    while (curPos > startPos && lookAt( pos ) == '\\') {
         cnt++;
-        it--;
+        pos--;
     }
     return (cnt % 2) == 1;
 }
 
-bool Lexer::processVariable(QChar* it)
+bool Lexer::processVariable(int pos)
 {
-    QChar* c2 = it + 1;
-    if (it->unicode() == '$' && (isValidVariableIdentifier(c2) && !c2->isDigit()))
+    UChar32 c2 = lookAt( pos + 1 );
+    if ( lookAt( pos ) == '$' && (isValidVariableIdentifier(c2) && ! u_isdigit( c2 )))
     {
-        it++;
+        pos++;
         m_curpos++;
         while (m_curpos < m_contentSize
-                && (isValidVariableIdentifier(it)))
+                && (isValidVariableIdentifier( lookAt( pos ) )))
         {
-            it++;
+            pos++;
             m_curpos++;
         }
         m_curpos--;
@@ -1060,15 +1072,19 @@ bool Lexer::processVariable(QChar* it)
         return false;
     }
 }
-bool Lexer::isValidVariableIdentifier(QChar* it)
+bool Lexer::isValidVariableIdentifier(const UChar32& it)
 {
-    return it->isLetter() || it->isDigit() || it->unicode() == '_' || it->unicode() > 0x7f;
+    // TODO check: it > 0x7f
+    return u_isalnum( it ) || u_isdigit( it ) || it == '_' || it > 0x7f;
 }
 
 void Lexer::createNewline( int pos )
 {
+    #ifdef PENDING_THOMAS
+    // TODO pending add newline to the tokenStream
     if( m_parser )
         m_parser->tokenStream->locationTable()->newline( pos );
+    #endif
 }
 
 }

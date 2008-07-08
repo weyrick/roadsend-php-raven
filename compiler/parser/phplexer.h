@@ -21,16 +21,15 @@
 #ifndef PHPLEXER_H
 #define PHPLEXER_H
 
-#include <QtCore/QStack>
-#include <QtCore/QString>
+#include "rphp_ast.h"
+#include <stack>
+//#include <string>
+#include <unistr.h>
 
-#include "parserexport.h"
-
-class QString;
-
-namespace Php
+namespace rphp
 {
-class Parser;
+
+class parser;
 
 /**
  * Hand-written Lexer that generates the same tokens as php uses.
@@ -39,34 +38,36 @@ class Parser;
  * For debugging output can be compared to php-tokens using the
  * test/test-tokenize.php script
  **/
-class KDEVPHPPARSER_EXPORT Lexer {
+class Lexer {
 public:
-    Lexer(Parser* _parser, const QString& contents);
+    Lexer(parser* _parser, const UnicodeString& contents);
 
     int nextTokenKind();
-    qint64 tokenBegin() const;
-    qint64 tokenEnd() const;
+    rint64 tokenBegin() const;
+    rint64 tokenEnd() const;
 
 private:
-    QString m_content;
-    Parser* m_parser;
+    UnicodeString m_content;
+    parser* m_parser;
     int m_curpos;
     int m_contentSize;
-    qint64 m_tokenBegin;
-    qint64 m_tokenEnd;
+    rint64 m_tokenBegin;
+    rint64 m_tokenEnd;
 
     int state(int deepness = 0) const;
     void pushState(int state);
     void popState();
     void printState();
 
-    bool processVariable(QChar* it);
-    bool isValidVariableIdentifier(QChar* it);
+    bool processVariable(int pos);
+    bool isValidVariableIdentifier(const UChar32& it);
     void createNewline( int pos );
-    bool isEscapedWithBackslash(QChar* it, int curPos, int startPos);
-    bool isHeredocEnd(QChar* it);
+    bool isEscapedWithBackslash(const UChar32& it, int curPos, int startPos, int pos);
+    bool isHeredocEnd(const UChar32& it, int pos);
 
-    QStack<int> m_state;
+    UChar32 lookAt( int pos ){ return m_content.char32At( m_curpos ); }
+
+    std::stack<int> m_state;
     enum State
     {
         ErrorState = -1,
@@ -81,7 +82,7 @@ private:
         StringHeredoc = 8,
         StringBacktick = 9
     };
-    QString m_heredocIdentifier;
+    UnicodeString m_heredocIdentifier;
     int m_haltCompiler;
 };
 
