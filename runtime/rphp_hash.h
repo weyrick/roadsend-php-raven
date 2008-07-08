@@ -36,9 +36,13 @@ namespace rphp {
 struct _dataContainer {
 
     pvar data;
-    bstring str_key;
+    bstring key;
+    bool isNumKey;
 
-    _dataContainer(bstring key, pvar d) : data(d), str_key(key) { }
+    _dataContainer(bstring k, pvar d) : data(d), key(k), isNumKey(false) {
+        // TODO: set isNumKey based on isNumeric check on key
+        // we will need this to emulate their numeric keys
+    }
 
 };
 
@@ -46,7 +50,7 @@ struct _dataContainer {
 typedef multi_index_container<
   _dataContainer,
   indexed_by<
-    hashed_unique< member<_dataContainer, bstring, &_dataContainer::str_key> >,
+    hashed_unique< member<_dataContainer, bstring, &_dataContainer::key> >,
     sequenced<>
   >
 > stableHash;
@@ -56,26 +60,32 @@ typedef nth_index<stableHash,1>::type seq_index;
 
 class phash {
     private:
-        int size;
         stableHash hashData;
     public:
-        phash(int sizevar) : size(sizevar) {
+        
+        phash() {
             hashData.insert(_dataContainer("foo", pvar(pint(5))));
             hashData.insert(_dataContainer("bar", pvar(bstring("some string val"))));
             hashData.insert(_dataContainer("baz", pvar(pfloat(5.3212))));
         }
 
-        phash(const phash& h) {
-            size = h.size;
+        void insert(const bstring &key, pvar data) {
+
+            hashData.insert(_dataContainer(key, data));
+
         }
-        void dump() {
-            std::cout << "hash has " << hashData.size() << " elements" << std::endl;
+
+        void varDump() {
+            std::cout << "array(" << hashData.size() << ") {" << std::endl;
             seq_index& ot = get<1>(hashData);
             for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
-                std::cout << "key: " << (*it).str_key << " | data: " << (*it).data << std::endl;
+                std::cout << "   ['" << (*it).key << "'] => " << (*it).data << std::endl;
             }
+            std::cout << "}" << std::endl;
         }
-        int getSize() const { return size; }
+        
+        int getSize() const { return hashData.size(); }
+        
         ~phash() { std::cout << "destorying php_hash" << std::endl; }
 
 };

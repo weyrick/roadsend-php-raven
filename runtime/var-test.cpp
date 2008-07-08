@@ -134,9 +134,12 @@ int main()
     result = boost::apply_visitor( my_visitor(), u );
 
     // php hash
-    rphp::phash h(5);
+    rphp::phash h;
+    h.insert("var-test", rphp::pint(971));
+    rphp::pvar hole = rphp::pfloat(1.234);
+    h.insert("var-test2", hole);
     std::cout << h;
-    h.dump();
+    h.varDump();
     u = h;
     std::cout << u << std::endl;
 
