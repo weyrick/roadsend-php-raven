@@ -24,6 +24,7 @@
 #include "boost/shared_ptr.hpp"
 
 #include "unicode/unistr.h"
+#include "unicode/ustream.h" // ostream API for UnicodeString
 
 #include <iostream>
 

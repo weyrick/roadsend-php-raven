@@ -69,11 +69,7 @@ class phash {
             hashData.insert(_dataContainer("baz", pvar(pfloat(5.3212))));
         }
 
-        void insert(const bstring &key, pvar data) {
-
-            hashData.insert(_dataContainer(key, data));
-
-        }
+        void insert(const bstring &key, pvar data);
 
         void varDump() {
             std::cout << "array(" << hashData.size() << ") {" << std::endl;
@@ -90,10 +86,7 @@ class phash {
 
 };
 
-std::ostream& operator << (std::ostream& os, const rphp::phash& h)
-{
-     return os << "php_hash:" << std::endl;
-}
+std::ostream& operator << (std::ostream& os, const rphp::phash& h);
 
 } /* namespace rphp */
 

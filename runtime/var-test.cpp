@@ -6,8 +6,6 @@ driver for testing pvars
 */
 
 #include "rphp_runtime.h"
-#include "unicode/ustream.h" // ostream API for UnicodeString
-#include "boost/variant.hpp"
 #include <iostream>
 
 // generic visitor which can be applied to any pvar
