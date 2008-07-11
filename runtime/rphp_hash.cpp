@@ -22,9 +22,25 @@ namespace rphp {
 
 void phash::insert(const bstring &key, pvar data) {
 
-    hashData.insert(_dataContainer(key, data));
+    hashData->insert(_dataContainer(key, data));
 
 }
+
+void phash::varDump() {
+    
+
+    std::cout << "array(" << hashData->size() << ") {" << std::endl;
+
+    seq_index& ot = get<1>(*hashData);
+
+    for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
+        std::cout << "   ['" << (*it).key << "'] => " << (*it).data << std::endl;
+    }
+
+    std::cout << "}" << std::endl;
+    
+}
+
 
 std::ostream& operator << (std::ostream& os, const rphp::phash& h)
 {

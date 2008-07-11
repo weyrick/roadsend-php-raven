@@ -23,9 +23,9 @@
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/sequenced_index.hpp>
-
 #include <iostream>
 
+#include "cowptr.h"
 #include "rphp_pvar.h"
 
 using boost::multi_index_container;
@@ -60,27 +60,21 @@ typedef nth_index<stableHash,1>::type seq_index;
 
 class phash {
     private:
-        stableHash hashData;
+        CowPtr< stableHash > hashData;
     public:
         
-        phash() {
-            hashData.insert(_dataContainer("foo", pvar(pint(5))));
-            hashData.insert(_dataContainer("bar", pvar(bstring("some string val"))));
-            hashData.insert(_dataContainer("baz", pvar(pfloat(5.3212))));
-        }
-
+        phash() : hashData(new stableHash()) { std::cout << "creating fresh php_hash" << std::endl; }
+/*
+        phash(phash const& p) {
+            std::cout << "phash copy construct" << std::endl;
+            hashData = p.hashData;
+        } 
+*/
         void insert(const bstring &key, pvar data);
 
-        void varDump() {
-            std::cout << "array(" << hashData.size() << ") {" << std::endl;
-            seq_index& ot = get<1>(hashData);
-            for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
-                std::cout << "   ['" << (*it).key << "'] => " << (*it).data << std::endl;
-            }
-            std::cout << "}" << std::endl;
-        }
+        void varDump();
         
-        int getSize() const { return hashData.size(); }
+        int getSize() const { return hashData->size(); }
         
         ~phash() { std::cout << "destorying php_hash" << std::endl; }
 

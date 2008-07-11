@@ -15,11 +15,10 @@ set(RUNTIME_SRC_FILES
 
 add_library( rphp_runtime SHARED ${RUNTIME_SRC_FILES} )
 
-# test app
-set(TEST_SRC_FILES
-  var-test.cpp
-)
-
-add_executable( var-test ${TEST_SRC_FILES} )
+# test apps
+add_executable( var-test var-test.cpp )
 target_link_libraries( var-test  rphp_runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES} )
+
+add_executable( hash-test hash-test.cpp )
+target_link_libraries( hash-test  rphp_runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES} )
 
