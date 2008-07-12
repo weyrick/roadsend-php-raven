@@ -142,38 +142,8 @@ inline pvarRef pvar_getVal_ref(const pvar &p) {
 }
 
 
-// non destructive cast (explicit copy)
-pvar pvar_castToNumber(const pvar p) {
-
-    pvar r = p;
-    boost::apply_visitor(convertToNumber(r), r);
-    return r;
-
-}
-
-// TODO: belongs in rphp_operators.cpp
-pvar pvar_add(const pvar lhs, const pvar rhs)
-{
-    pvar l,r,result;
-
-    pvarType lhs_type = pvar_getType(lhs);
-    pvarType rhs_type = pvar_getType(rhs);
-    if ( (lhs_type == PVAR_HASH) && (rhs_type == PVAR_HASH) ) {
-        //std::cout << "fixme: concat hashes" << std::endl;
-        result = 0l;
-    }
-    else {
-        // convert to number, then add
-        l = pvar_castToNumber(lhs);
-        //std::cout << "pvar_add: l is " << l << std::endl;
-        r = pvar_castToNumber(rhs);
-        //std::cout << "pvar_add: r is " << r << std::endl;
-        result = pvar_getVal_int(l) + pvar_getVal_int(r);
-        //std::cout << "pvar_add: result is " << result << std::endl;
-    }
-
-    return result;
-}
+pvar pvar_castToNumber(const pvar p);
+pvar pvar_add(const pvar lhs, const pvar rhs);
 
 
 } /* namespace rphp */

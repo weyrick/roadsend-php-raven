@@ -4,11 +4,11 @@
 
 #include "rphp_runtime.h"
 
-#include "HashTestCase.h"
+#include "phashTestCase.h"
 
-CPPUNIT_TEST_SUITE_REGISTRATION( HashTestCase );
+CPPUNIT_TEST_SUITE_REGISTRATION( phashTestCase );
 
-void HashTestCase::basic()
+void phashTestCase::basic()
 {
     /*
   CPPUNIT_ASSERT_DOUBLES_EQUAL( 1.0, 1.1, 0.05 );
@@ -31,12 +31,12 @@ void HashTestCase::basic()
 }
 
 /*
-void HashTestCase::anotherExample()
+void phashTestCase::anotherExample()
 {
   CPPUNIT_ASSERT (1 == 2);
 }
 */
-void HashTestCase::setUp()
+void phashTestCase::setUp()
 {
     /*
   m_value1 = 2.0;
@@ -45,14 +45,14 @@ void HashTestCase::setUp()
 }
 
 /*
-void HashTestCase::testAdd()
+void phashTestCase::testAdd()
 {
   double result = m_value1 + m_value2;
   CPPUNIT_ASSERT( result == 6.0 );
 }
 
 
-void HashTestCase::testEquals()
+void phashTestCase::testEquals()
 {
   long* l1 = new long(12);
   long* l2 = new long(12);

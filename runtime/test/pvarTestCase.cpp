@@ -5,8 +5,13 @@ driver for testing pvars
 
 */
 
-#include "rphp_runtime.h"
+#include <cppunit/config/SourcePrefix.h>
 #include <iostream>
+
+#include "rphp_runtime.h"
+#include "pvarTestCase.h"
+
+CPPUNIT_TEST_SUITE_REGISTRATION( pvarTestCase );
 
 // generic visitor which can be applied to any pvar
 // correct method runs based on the appropriate type
@@ -75,7 +80,7 @@ void changeRef(rphp::pvar r) {
 }
 
 // driver
-int main()
+void pvarTestCase::basic()
 {
     rphp::pvar u,t,r;
 

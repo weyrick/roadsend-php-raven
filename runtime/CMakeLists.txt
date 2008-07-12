@@ -11,12 +11,9 @@ include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${Boost_INCLUDE_DIR
 # runtime library
 set(RUNTIME_SRC_FILES
   rphp_hash.cpp
+  rphp_types.cpp
 )
 
 add_library( rphp_runtime SHARED ${RUNTIME_SRC_FILES} )
-
-# test apps
-add_executable( var-test var-test.cpp )
-target_link_libraries( var-test  rphp_runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES} )
 
 

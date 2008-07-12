@@ -11,5 +11,5 @@ link_directories (${CMAKE_SOURCE_DIR}/../build/)
 include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/../)
 
 # test apps
-add_executable( RuntimeTestSuite Main.cpp HashTestCase.cpp )
-target_link_libraries( RuntimeTestSuite cppunit rphp_runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES})
+add_executable( rphp_runtime_suite main.cpp phashTestCase.cpp pvarTestCase.cpp )
+target_link_libraries( rphp_runtime_suite cppunit rphp_runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES})

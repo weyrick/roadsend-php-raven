@@ -1,6 +1,6 @@
 
-#ifndef CPP_UNIT_EXAMPLETESTCASE_H
-#define CPP_UNIT_EXAMPLETESTCASE_H
+#ifndef PHASHTESTCASE_H
+#define PHASHTESTCASE_H
 
 #include <cppunit/extensions/HelperMacros.h>
 
@@ -9,9 +9,9 @@
  *
  */
 
-class HashTestCase : public CPPUNIT_NS::TestFixture
+class phashTestCase : public CPPUNIT_NS::TestFixture
 {
-  CPPUNIT_TEST_SUITE( HashTestCase );
+  CPPUNIT_TEST_SUITE( phashTestCase );
   CPPUNIT_TEST( basic );
   /*
   CPPUNIT_TEST( anotherExample );
