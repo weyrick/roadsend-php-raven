@@ -58,14 +58,14 @@ class phash;
 //class pobject;
 
 // base variant that represents a php variable
-typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, boost::recursive_wrapper< phash >/*, pobject*/> pvarBase;
+typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash/*, pobject*/> pvarBase;
 
 // reference to a pvarBase, i.e. a container for pvar variables
 // shared_ptr maintains a reference count and guarantees proper destruction
 typedef boost::shared_ptr<pvarBase> pvarRef;
 
 // full pvar definition: a variant that can hold a base type or a reference
-typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, boost::recursive_wrapper< phash >, /*pobject,*/ pvarRef> pvar;
+typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash, /*pobject,*/ pvarRef> pvar;
 
 // associated enum for checking type
 typedef enum {

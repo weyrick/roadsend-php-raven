@@ -137,6 +137,7 @@ void pvarTestCase::basic()
     result = boost::apply_visitor( my_visitor(), u );
 
     // php hash
+    /*
     rphp::phash h;
     h.insert("var-test", rphp::pint(971));
     rphp::pvar hole = rphp::pfloat(1.234);
@@ -147,7 +148,7 @@ void pvarTestCase::basic()
     std::cout << u << std::endl;
 
     result = boost::apply_visitor( my_visitor(), u );
-
+    */
     ////
 
     // type checking?

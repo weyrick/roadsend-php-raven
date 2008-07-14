@@ -18,23 +18,30 @@
 
 #include "rphp_hash.h"
 
+// hash function for rphp::ustring
+namespace icu_3_8 {
+    std::size_t hash_value(rphp::ustring const& s) {
+        return static_cast<std::size_t>(s.hashCode());
+    }
+}
+
 namespace rphp {
 
-void phash::insert(const bstring &key, pvar data) {
+void phash::insert(const ustring &key, pvar *data) {
 
-    hashData->insert(_dataContainer(key, data));
+    hashData.insert(h_container(key, data));
 
 }
 
 void phash::varDump() {
     
 
-    std::cout << "array(" << hashData->size() << ") {" << std::endl;
+    std::cout << "array(" << hashData.size() << ") {" << std::endl;
 
-    seq_index& ot = get<1>(*hashData);
+    seq_index& ot = get<1>(hashData);
 
     for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
-        std::cout << "   ['" << (*it).key << "'] => " << (*it).data << std::endl;
+        std::cout << "   ['" << (*it).key << "'] => " << *(*it).data << std::endl;
     }
 
     std::cout << "}" << std::endl;

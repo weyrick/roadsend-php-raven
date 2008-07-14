@@ -25,21 +25,26 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #include <iostream>
 
-#include "cowptr.h"
 #include "rphp_pvar.h"
 
 using boost::multi_index_container;
 using namespace boost::multi_index;
 
+// hash function for rphp::ustring
+namespace icu_3_8 {
+    std::size_t hash_value(rphp::ustring const& s);
+}
+
 namespace rphp {
 
-struct _dataContainer {
+// container we store in our stable hash
+struct h_container {
 
-    pvar data;
-    bstring key;
+    pvar *data;
+    const ustring key;
     bool isNumKey;
 
-    _dataContainer(bstring k, pvar d) : data(d), key(k), isNumKey(false) {
+    h_container(const ustring k, pvar *d) : data(d), key(k), isNumKey(false) {
         // TODO: set isNumKey based on isNumeric check on key
         // we will need this to emulate their numeric keys
     }
@@ -48,9 +53,11 @@ struct _dataContainer {
 
 // a boost.multiindex that stores data with two indexes: hashed and sequenced
 typedef multi_index_container<
-  _dataContainer,
+  // the container structure we store for each item in the hash
+  h_container,
+  // index definitions: hash and sequence
   indexed_by<
-    hashed_unique< member<_dataContainer, bstring, &_dataContainer::key> >,
+    hashed_unique< member<h_container, const ustring, &h_container::key> >,
     sequenced<>
   >
 > stableHash;
@@ -60,23 +67,32 @@ typedef nth_index<stableHash,1>::type seq_index;
 
 class phash {
     private:
-        CowPtr< stableHash > hashData;
+        stableHash hashData;
     public:
         
-        phash() : hashData(new stableHash()) { std::cout << "creating fresh php_hash" << std::endl; }
-/*
+        phash() { std::cout << "creating fresh phash" << std::endl; }
+
         phash(phash const& p) {
             std::cout << "phash copy construct" << std::endl;
             hashData = p.hashData;
-        } 
-*/
-        void insert(const bstring &key, pvar data);
+        }
+
+        void insert(const ustring &key, pvar *data);
 
         void varDump();
         
-        int getSize() const { return hashData->size(); }
+        int getSize() const { return hashData.size(); }
         
-        ~phash() { std::cout << "destorying php_hash" << std::endl; }
+        pvar* operator[] ( const ustring &key ) {
+            stableHash::iterator k = hashData.find(key);
+            if (k == hashData.end())
+                return NULL;
+            else
+                return (*k).data;
+        }
+
+        
+        ~phash() { std::cout << "destroying phash" << std::endl; }
 
 };
 
