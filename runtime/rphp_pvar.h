@@ -20,24 +20,25 @@
 #ifndef RPHP_PVAR_H_
 #define RPHP_PVAR_H_
 
-#include "boost/variant.hpp"
-#include "boost/shared_ptr.hpp"
+#include <boost/logic/tribool.hpp>
+#include <boost/variant.hpp>
+#include <boost/shared_ptr.hpp>
 
-#include "unicode/unistr.h"
-#include "unicode/ustream.h" // ostream API for UnicodeString
+#include <unicode/unistr.h>
+#include <unicode/ustream.h> // ostream API for UnicodeString
 
 #include <iostream>
 
+BOOST_TRIBOOL_THIRD_STATE(pNull)
+
 namespace rphp {
 
-// this represents a php bool and null value
-// it is stored in the variant as an int type
-enum p3state
-{
-    Null,
-    False,
-    True
-};
+// a boost::tribool represents php true, false and null values
+typedef boost::logic::tribool p3state;
+
+// pNull is defined above
+#define pTrue rphp::p3state(true)
+#define pFalse rphp::p3state(false)
 
 // pvar numbers
 typedef long pint;

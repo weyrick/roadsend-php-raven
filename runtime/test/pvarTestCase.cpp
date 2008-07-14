@@ -20,13 +20,13 @@ class my_visitor : public boost::static_visitor<int>
 public:
 
     int operator()(const rphp::p3state &i) const {
-        if (i == rphp::Null) {
+        if (pNull(i)) {
             std::cout << "i see a null" << std::endl;
         }
         else {
             std::cout << "i see a bool" << std::endl;
         }
-        return i;
+        return (i) ? 1 : 0;
     }
 
     int operator()(const rphp::pint &i) const {
@@ -121,17 +121,32 @@ void pvarTestCase::basic()
     result = boost::apply_visitor( my_visitor(), u );
 
     // bool
-    u = rphp::True;
+    u = pTrue;
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
-    if (rphp::pvar_getVal_bool(u) == rphp::True) {
+    if (rphp::pvar_getVal_bool(u)) {
     	std::cout << "the bool was true" << std::endl;
+    }
+    else {
+        std::cout << "the bool was false" << std::endl;
+    }
+    
+    u = pFalse;
+
+    std::cout << u << std::endl;
+    result = boost::apply_visitor( my_visitor(), u );
+
+    if (rphp::pvar_getVal_bool(u)) {
+        std::cout << "the bool was true" << std::endl;
+    }
+    else {
+        std::cout << "the bool was false" << std::endl;
     }
 
     // null
-    u = rphp::Null;
+    u = pNull;
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
@@ -160,6 +175,9 @@ void pvarTestCase::basic()
     case rphp::PVAR_FLOAT:
     	std::cout << "found a float" << std::endl;
     	break;
+    case rphp::PVAR_NULL:
+        std::cout << "found a null" << std::endl;
+        break;
     default:
     	std::cout << "woops, what type was it?" << std::endl;
     }

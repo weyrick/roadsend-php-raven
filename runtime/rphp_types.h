@@ -32,7 +32,7 @@ class pvarTypeChecker : public boost::static_visitor<pvarType>
 public:
 
     pvarType operator()(const p3state &h) const {
-        return (h == rphp::Null) ? PVAR_NULL : PVAR_BOOL;
+        return (pNull(h)) ? PVAR_NULL : PVAR_BOOL;
     }
 
     pvarType operator()(const pint &i) const {
@@ -76,7 +76,7 @@ public:
     convertToNumber(pvar &v) : var(v) {}
 
     void operator()(const p3state &h) const {
-            (h == rphp::True) ? var = 1l : var = 0l;
+            (h) ? var = 1l : var = 0l;
     }
 
     void operator()(const pint &a) const {
