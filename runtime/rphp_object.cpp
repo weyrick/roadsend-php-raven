@@ -16,30 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_OBJECT_H_
-#define RPHP_OBJECT_H_
-
-#include "rphp_hash.h"
+#include "rphp_object.h"
 #include <iostream>
 
 namespace rphp {
 
-// XXX placeholder
-class pobject {
-    private:
-        phash properties;
-    public:
-        pobject() : properties() { }
-
-        const phash::size_type getNumProperties() {
-            return properties.getSize();
-        }
-
-};
-
-
-std::ostream& operator << (std::ostream& os, const rphp::pobject& h);
+std::ostream& operator << (std::ostream& os, const rphp::pobject& h) {
+    return os << "pobject" << std::endl;
+}
 
 }
 
-#endif /* RPHP_OBJECT_H_ */
+

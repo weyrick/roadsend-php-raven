@@ -44,22 +44,20 @@ public:
         return str.length();
     }
 
-    int operator()(const rphp::ustring &str) const {
+    int operator()(const rphp::ustringP &str) const {
         std::cout << "i see a unicode string" << std::endl;
-        return str.length();
+        return str->length();
     }
 
-    int operator()(const rphp::phash &h) const {
+    int operator()(const rphp::phashP &h) const {
         std::cout << "i see a phash" << std::endl;
         return 0;
     }
 
-    /*
-    int operator()(const rphp::pobject &h) const {
+    int operator()(const rphp::pobjectP &h) const {
         std::cout << "i see a pobject" << std::endl;
         return 0;
     }
-    */
 
     int operator()(const rphp::pvarRef &h) const {
         std::cout << "i see a php reference" << std::endl;
@@ -85,13 +83,17 @@ void pvarTestCase::basic()
     rphp::pvar u,t,r;
 
     // sizes
+    std::cout << std::endl;
     std::cout << "p3state: " << sizeof(rphp::p3state) << std::endl;
     std::cout << "pint: " << sizeof(rphp::pint) << std::endl;
     std::cout << "pfloat: " << sizeof(rphp::pfloat) << std::endl;
     std::cout << "bstring: " << sizeof(rphp::bstring) << std::endl;
     std::cout << "ustring: " << sizeof(rphp::ustring) << std::endl;
+    std::cout << "ustringP: " << sizeof(rphp::ustringP) << std::endl;
     std::cout << "phash: " << sizeof(rphp::phash) << std::endl;
-    //std::cout << "pobj: " << sizeof(rphp::pobject) << std::endl;
+    std::cout << "phashP: " << sizeof(rphp::phashP) << std::endl;
+    std::cout << "pobject: " << sizeof(rphp::pobject) << std::endl;
+    std::cout << "pobjectP: " << sizeof(rphp::pobjectP) << std::endl;
     std::cout << "pvarBase: " << sizeof(rphp::pvarBase) << std::endl;
     std::cout << "pvarRef: " << sizeof(rphp::pvarRef) << std::endl;
     std::cout << "pvar: " << sizeof(rphp::pvar) << std::endl;
@@ -103,7 +105,7 @@ void pvarTestCase::basic()
     int result = boost::apply_visitor( my_visitor(), u );
 
     // unicode string
-    u = rphp::ustring("hello world there -- unicode style");
+    u = new rphp::ustring("hello world there -- unicode style");
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );

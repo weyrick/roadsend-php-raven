@@ -53,20 +53,26 @@ typedef std::string bstring;
 // UnicodeString uses 2 byte characters. Storage of base class is 32 bytes on 32bit, 40 on 64bit
 // implicitly shared
 typedef UnicodeString ustring;
+typedef boost::shared_ptr<ustring> ustringP;
 
-// forward declarations for phash and pobject
+// php hash tables
 class phash;
-//class pobject;
+typedef boost::shared_ptr<phash> phashP;
+
+// php objects
+class pobject;
+typedef boost::shared_ptr<pobject> pobjectP;
 
 // base variant that represents a php variable
-typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash/*, pobject*/> pvarBase;
+typedef boost::variant< p3state, pint, pfloat, bstring, ustringP, phashP, pobjectP> pvarBase;
 
 // reference to a pvarBase, i.e. a container for pvar variables
 // shared_ptr maintains a reference count and guarantees proper destruction
 typedef boost::shared_ptr<pvarBase> pvarRef;
 
 // full pvar definition: a variant that can hold a base type or a reference
-typedef boost::variant< p3state/*int*/, pint/*long*/, pfloat/*double*/, bstring, ustring, phash, /*pobject,*/ pvarRef> pvar;
+typedef boost::variant< p3state, pint, pfloat, bstring, ustringP, phashP, pobjectP, pvarRef> pvar;
+typedef boost::shared_ptr<pvar> pvarP;
 
 // associated enum for checking type
 typedef enum {

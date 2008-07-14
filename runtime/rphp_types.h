@@ -23,6 +23,7 @@
 
 #include "rphp_pvar.h"
 #include "rphp_hash.h"
+#include "rphp_object.h"
 
 namespace rphp {
 
@@ -47,18 +48,18 @@ public:
         return PVAR_BSTRING;
     }
 
-    pvarType operator()(const ustring &str) const {
+    pvarType operator()(const ustringP &str) const {
         return PVAR_USTRING;
     }
 
-    pvarType operator()(const phash &h) const {
+    pvarType operator()(const phashP &h) const {
         return PVAR_HASH;
     }
-/*
-    pvarType operator()(const pobject &h) const {
+
+    pvarType operator()(const pobjectP &h) const {
         return PVAR_OBJ;
     }
-*/
+
     pvarType operator()(const pvarRef &p) const {
         return PVAR_REF;
     }
@@ -96,20 +97,20 @@ public:
         }
     }
 
-    void operator()(const ustring &a) const {
+    void operator()(const ustringP &a) const {
         // TODO: do a real conversion here
         // should handle both integers and floats
         var = 0l;
     }
 
-    void operator()(const phash &h) const {
-        var = (long)h.getSize();
+    void operator()(const phashP &h) const {
+        var = (pint)h->getSize();
     }
-/*
-    void operator()(const pobject &h) const {
-        var = 0l;
+
+    void operator()(const pobjectP &h) const {
+        var = (pint)h->getNumProperties();
     }
-*/
+
     void operator()(const pvarRef &r) const {
         // unbox
         //boost::apply_visitor(convertToNumber(*r), *r);

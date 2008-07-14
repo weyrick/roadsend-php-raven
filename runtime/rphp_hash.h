@@ -40,11 +40,11 @@ namespace rphp {
 // container we store in our stable hash
 struct h_container {
 
-    pvar *data;
+    pvarP data;
     const ustring key;
     bool isNumKey;
 
-    h_container(const ustring k, pvar *d) : data(d), key(k), isNumKey(false) {
+    h_container(const ustring k, pvarP d) : data(d), key(k), isNumKey(false) {
         // TODO: set isNumKey based on isNumeric check on key
         // we will need this to emulate their numeric keys
     }
@@ -69,6 +69,8 @@ class phash {
     private:
         stableHash hashData;
     public:
+
+        typedef stableHash::size_type size_type;
         
         phash() { std::cout << "creating fresh phash" << std::endl; }
 
@@ -77,16 +79,16 @@ class phash {
             hashData = p.hashData;
         }
 
-        void insert(const ustring &key, pvar *data);
+        void insert(const ustring &key, pvarP data);
 
         void varDump();
         
-        int getSize() const { return hashData.size(); }
+        const size_type getSize() { return hashData.size(); }
         
-        pvar* operator[] ( const ustring &key ) {
+        pvarP operator[] ( const ustring &key ) {
             stableHash::iterator k = hashData.find(key);
             if (k == hashData.end())
-                return NULL;
+                return pvarP();
             else
                 return (*k).data;
         }

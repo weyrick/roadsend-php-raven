@@ -11,6 +11,7 @@ include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} ${Boost_INCLUDE_DIR
 # runtime library
 set(RUNTIME_SRC_FILES
   rphp_hash.cpp
+  rphp_object.cpp
   rphp_types.cpp
 )
 

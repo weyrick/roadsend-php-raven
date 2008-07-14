@@ -27,7 +27,7 @@ namespace icu_3_8 {
 
 namespace rphp {
 
-void phash::insert(const ustring &key, pvar *data) {
+void phash::insert(const ustring &key, pvarP data) {
 
     hashData.insert(h_container(key, data));
 
