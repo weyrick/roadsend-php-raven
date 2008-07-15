@@ -21,9 +21,9 @@
 
 namespace rphp {
 
-std::ostream& operator << (std::ostream& os, const rphp::pobject& h) {
-    return os << "pobject" << std::endl;
-}
+    std::ostream& operator << (std::ostream& os, const rphp::pObject& h) {
+        return os << "pobject" << std::endl;
+    }
 
 }
 

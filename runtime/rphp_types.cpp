@@ -20,38 +20,38 @@
 
 namespace rphp {
 
-// non destructive cast (explicit copy)
-pvar pvar_castToNumber(const pvar p) {
+    // non destructive cast (explicit copy)
+    pVar pVar_castToNumber(const pVar p) {
 
-    pvar r = p;
-    boost::apply_visitor(convertToNumber(r), r);
-    return r;
+        pVar r = p;
+        boost::apply_visitor(convertToNumber(r), r);
+        return r;
 
-}
-
-// TODO: belongs in rphp_operators.cpp
-pvar pvar_add(const pvar lhs, const pvar rhs)
-{
-    pvar l,r,result;
-
-    pvarType lhs_type = pvar_getType(lhs);
-    pvarType rhs_type = pvar_getType(rhs);
-    if ( (lhs_type == PVAR_HASH) && (rhs_type == PVAR_HASH) ) {
-        //std::cout << "fixme: concat hashes" << std::endl;
-        result = 0l;
-    }
-    else {
-        // convert to number, then add
-        l = pvar_castToNumber(lhs);
-        //std::cout << "pvar_add: l is " << l << std::endl;
-        r = pvar_castToNumber(rhs);
-        //std::cout << "pvar_add: r is " << r << std::endl;
-        result = pvar_getVal_int(l) + pvar_getVal_int(r);
-        //std::cout << "pvar_add: result is " << result << std::endl;
     }
 
-    return result;
-}
+    // TODO: belongs in rphp_operators.cpp
+    pVar pVar_add(const pVar lhs, const pVar rhs)
+    {
+        pVar l,r,result;
+
+        pVarType lhs_type = pVar_getType(lhs);
+        pVarType rhs_type = pVar_getType(rhs);
+        if ( (lhs_type == pVarHashType) && (rhs_type == pVarHashType) ) {
+            //std::cout << "fixme: concat hashes" << std::endl;
+            result = 0l;
+        }
+        else {
+            // convert to number, then add
+            l = pVar_castToNumber(lhs);
+            //std::cout << "pVar_add: l is " << l << std::endl;
+            r = pVar_castToNumber(rhs);
+            //std::cout << "pVar_add: r is " << r << std::endl;
+            result = pVar_getVal_int(l) + pVar_getVal_int(r);
+            //std::cout << "pVar_add: result is " << result << std::endl;
+        }
+
+        return result;
+    }
 
 
 } /* namespace rphp */

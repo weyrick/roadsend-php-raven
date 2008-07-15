@@ -17,42 +17,42 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "rphp_hash.h"
+#include <iostream>
 
-// hash function for rphp::ustring
-namespace icu_3_8 {
-    std::size_t hash_value(rphp::ustring const& s) {
+U_NAMESPACE_BEGIN
+    // this is used by the multi_index for hashing unicode strings
+    std::size_t hash_value(rphp::pUString const& s) {
         return static_cast<std::size_t>(s.hashCode());
     }
-}
+U_NAMESPACE_END
 
 namespace rphp {
 
-void phash::insert(const ustring &key, pvarP data) {
+    void pHash::insert(const pUString &key, pVarP data) {
 
-    hashData.insert(h_container(key, data));
+        hashData.insert(h_container(key, data));
 
-}
-
-void phash::varDump() {
-    
-
-    std::cout << "array(" << hashData.size() << ") {" << std::endl;
-
-    seq_index& ot = get<1>(hashData);
-
-    for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
-        std::cout << "   ['" << (*it).key << "'] => " << *(*it).data << std::endl;
     }
 
-    std::cout << "}" << std::endl;
-    
-}
+    void pHash::varDump() {
 
 
-std::ostream& operator << (std::ostream& os, const rphp::phash& h)
-{
-     return os << "php_hash:" << std::endl;
-}
+        std::cout << "array(" << hashData.size() << ") {" << std::endl;
+
+        seq_index& ot = get<1>(hashData);
+
+        for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
+            std::cout << "   ['" << (*it).key << "'] => " << *(*it).data << std::endl;
+        }
+
+        std::cout << "}" << std::endl;
+
+    }
+
+    std::ostream& operator << (std::ostream& os, const rphp::pHash& h)
+    {
+        return os << "php_hash:" << std::endl;
+    }
 
 } /* namespace rphp */
 

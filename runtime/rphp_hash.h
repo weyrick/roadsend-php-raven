@@ -27,78 +27,95 @@
 
 #include "rphp_pvar.h"
 
+// hash function for use with rphp::pUString
+U_NAMESPACE_BEGIN
+    std::size_t hash_value(rphp::pUString const& s);
+U_NAMESPACE_END
+
 using boost::multi_index_container;
 using namespace boost::multi_index;
 
-// hash function for rphp::ustring
-namespace icu_3_8 {
-    std::size_t hash_value(rphp::ustring const& s);
-}
-
 namespace rphp {
 
-// container we store in our stable hash
-struct h_container {
+    /*
+     * defines an interface to a hash table class which implements php style
+     * hash table/array semantics
+     *
+     */
 
-    pvarP data;
-    const ustring key;
-    bool isNumKey;
+    // container stored in stableHash
+    struct h_container {
 
-    h_container(const ustring k, pvarP d) : data(d), key(k), isNumKey(false) {
-        // TODO: set isNumKey based on isNumeric check on key
-        // we will need this to emulate their numeric keys
-    }
+        pVarP data;
+        const pUString key;
+        // TODO: php has support for numeric keys
 
-};
+        h_container(const pUString k, pVarP d) : data(d), key(k) { }
 
-// a boost.multiindex that stores data with two indexes: hashed and sequenced
-typedef multi_index_container<
-  // the container structure we store for each item in the hash
-  h_container,
-  // index definitions: hash and sequence
-  indexed_by<
-    hashed_unique< member<h_container, const ustring, &h_container::key> >,
-    sequenced<>
-  >
-> stableHash;
+    };
 
-// sequenced index accessor
-typedef nth_index<stableHash,1>::type seq_index;
+    // the stableHash container
+    // a boost.multiindex that stores data with two indexes: hashed and sequenced
+    typedef multi_index_container<
+        // the container structure we store for each item in the hash
+        h_container,
+        // index definitions: hash and sequence
+        indexed_by<
+            hashed_unique< member<h_container, const pUString, &h_container::key> >,
+            sequenced<>
+        >
+    > stableHash;
 
-class phash {
-    private:
-        stableHash hashData;
-    public:
+    // sequenced index accessor
+    typedef nth_index<stableHash,1>::type seq_index;
 
-        typedef stableHash::size_type size_type;
-        
-        phash() { std::cout << "creating fresh phash" << std::endl; }
+    /**
+     * pHash definition
+     *
+     */
+    class pHash {
 
-        phash(phash const& p) {
-            std::cout << "phash copy construct" << std::endl;
-            hashData = p.hashData;
-        }
+        private:
+            stableHash hashData;
 
-        void insert(const ustring &key, pvarP data);
+        public:
 
-        void varDump();
-        
-        const size_type getSize() { return hashData.size(); }
-        
-        pvarP operator[] ( const ustring &key ) {
-            stableHash::iterator k = hashData.find(key);
-            if (k == hashData.end())
-                return pvarP();
-            else
-                return (*k).data;
-        }
+            // types
+            typedef stableHash::size_type size_type;
 
-        
-        ~phash() { std::cout << "destroying phash" << std::endl; }
+            // construct/destroy/copy
+            pHash() { std::cout << "creating fresh pHash" << std::endl; }
 
-};
+            pHash(pHash const& p) {
+                std::cout << "pHash copy construct" << std::endl;
+                hashData = p.hashData;
+            }
 
-std::ostream& operator << (std::ostream& os, const rphp::phash& h);
+            ~pHash() { std::cout << "destroying pHash" << std::endl; }
+
+            // modifiers
+            void insert(const pUString &key, pVarP data);
+
+            // size
+            const size_type getSize() { return hashData.size(); }
+
+            // dump of contents
+            void varDump();
+
+            // lookup
+            pVarP operator[] ( const pUString &key ) {
+                stableHash::iterator k = hashData.find(key);
+                if (k == hashData.end())
+                    return pVarP();
+                else
+                    return (*k).data;
+            }
+
+
+    };
+
+    // stream interface
+    std::ostream& operator << (std::ostream& os, const rphp::pHash& h);
 
 } /* namespace rphp */
 

@@ -27,125 +27,132 @@
 
 namespace rphp {
 
-// a visitor for determining type of pvar
-class pvarTypeChecker : public boost::static_visitor<pvarType>
-{
-public:
+    // a visitor for determining type of pVar
+    class pVarTypeChecker : public boost::static_visitor<pVarType> {
 
-    pvarType operator()(const p3state &h) const {
-        return (pNull(h)) ? PVAR_NULL : PVAR_BOOL;
-    }
+    public:
 
-    pvarType operator()(const pint &i) const {
-        return PVAR_INT;
-    }
+        pVarType operator()(const pTriState &h) const {
+            return (pNull(h)) ? pVarNullType : pVarBoolType;
+        }
 
-    pvarType operator()(const pfloat &i) const {
-        return PVAR_FLOAT;
-    }
+        pVarType operator()(const pInt &i) const {
+            return pVarIntType;
+        }
 
-    pvarType operator()(const bstring &str) const {
-        return PVAR_BSTRING;
-    }
+        pVarType operator()(const pFloat &i) const {
+            return pVarFloatType;
+        }
 
-    pvarType operator()(const ustringP &str) const {
-        return PVAR_USTRING;
-    }
+        pVarType operator()(const pBString &str) const {
+            return pVarBStringType;
+        }
 
-    pvarType operator()(const phashP &h) const {
-        return PVAR_HASH;
-    }
+        pVarType operator()(const pUStringP &str) const {
+            return pVarUStringType;
+        }
 
-    pvarType operator()(const pobjectP &h) const {
-        return PVAR_OBJ;
-    }
+        pVarType operator()(const pHashP &h) const {
+            return pVarHashType;
+        }
 
-    pvarType operator()(const pvarRef &p) const {
-        return PVAR_REF;
-    }
+        pVarType operator()(const pObjectP &h) const {
+            return pVarObjectType;
+        }
 
-};
+        pVarType operator()(const pVarRef &p) const {
+            return pVarRefType;
+        }
+
+    };
 
 
+    // a visitor for converting to a number (long or float)
+    class convertToNumber : public boost::static_visitor<void> {
+    protected:
+        pVar &var;
 
-// a visitor for converting to a number (long or float)
-class convertToNumber : public boost::static_visitor<void>
-{
-protected:
-    pvar &var;
-public:
-    convertToNumber(pvar &v) : var(v) {}
+    public:
+        convertToNumber(pVar &v) : var(v) { }
 
-    void operator()(const p3state &h) const {
-            (h) ? var = 1l : var = 0l;
-    }
+        void operator()(pTriState &h) const {
+                (h) ? var = 1l : var = 0l;
+        }
 
-    void operator()(const pint &a) const {
-        // nothing, already numeric
-    }
+        void operator()(pInt &a) const {
+            // nothing, already numeric
+        }
 
-    void operator()(const pfloat &i) const {
-        // nothing, already numeric
-    }
+        void operator()(pFloat &i) const {
+            // nothing, already numeric
+        }
 
-    void operator()(const bstring &a) const {
-        // TODO: handle floats
-        try {
-            var = boost::lexical_cast<long>(a);
-        } catch(boost::bad_lexical_cast &) {
+        void operator()(pBString &a) const {
+            // TODO: handle floats
+            try {
+                var = boost::lexical_cast<long>(a);
+            } catch(boost::bad_lexical_cast &) {
+                var = 0l;
+            }
+        }
+
+        void operator()(pUStringP &a) const {
+            // TODO: do a real conversion here
+            // should handle both integers and floats
             var = 0l;
         }
+
+        void operator()(pHashP &h) const {
+            var = (pInt)h->getSize();
+        }
+        
+        void operator()(pObjectP &h) const {
+            var = (pInt)h->getNumProperties();
+        }
+
+        void operator()(pVarRef &r) const {
+            // unbox
+            //boost::apply_visitor(convertToNumber(*r), *r);
+        }
+
+    };
+
+
+    /*
+     * convenience accessors
+     *
+     */
+
+    // convert to number (in place)
+    inline pVarType pVar_getType(const pVar &p) {
+        return boost::apply_visitor(pVarTypeChecker(), p);
     }
 
-    void operator()(const ustringP &a) const {
-        // TODO: do a real conversion here
-        // should handle both integers and floats
-        var = 0l;
+    // convert to number (in place)
+    inline void pVar_convertToNumber(pVar &p) {
+        boost::apply_visitor(convertToNumber(p), p);
     }
 
-    void operator()(const phashP &h) const {
-        var = (pint)h->getSize();
+    // get the boolean value of a pVar. does NOT convert so pVar
+    // must already be a pTriState
+    inline pTriState pVar_getVal_bool(const pVar &p) {
+            return boost::get<rphp::pTriState>(p);
     }
 
-    void operator()(const pobjectP &h) const {
-        var = (pint)h->getNumProperties();
+    inline long pVar_getVal_int(const pVar &p) {
+            return boost::get<pInt>(p);
     }
 
-    void operator()(const pvarRef &r) const {
-        // unbox
-        //boost::apply_visitor(convertToNumber(*r), *r);
+    inline pVarRef pVar_getVal_ref(const pVar &p) {
+            return boost::get<pVarRef>(p);
     }
 
-};
-
-// convert to number (in place)
-inline pvarType pvar_getType(const pvar &p) {
-    return boost::apply_visitor(pvarTypeChecker(), p);
-}
-
-// convert to number (in place)
-inline void pvar_convertToNumber(pvar &p) {
-    boost::apply_visitor(convertToNumber(p), p);
-}
-
-// get the boolean value of a pvar. does NOT convert so pvar
-// must already be a p3state
-inline p3state pvar_getVal_bool(const pvar &p) {
-	return boost::get<rphp::p3state>(p);
-}
-
-inline long pvar_getVal_int(const pvar &p) {
-	return boost::get<pint>(p);
-}
-
-inline pvarRef pvar_getVal_ref(const pvar &p) {
-	return boost::get<pvarRef>(p);
-}
-
-
-pvar pvar_castToNumber(const pvar p);
-pvar pvar_add(const pvar lhs, const pvar rhs);
-
+    /*
+     * type conversions
+     *
+     */
+    pVar pVar_castToNumber(const pVar p);
+    pVar pVar_add(const pVar lhs, const pVar rhs);
 
 } /* namespace rphp */
 

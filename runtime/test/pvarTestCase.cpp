@@ -1,7 +1,7 @@
 
 /*
 
-driver for testing pvars
+driver for testing pVars
 
 */
 
@@ -19,8 +19,8 @@ class my_visitor : public boost::static_visitor<int>
 {
 public:
 
-    int operator()(const rphp::p3state &i) const {
-        if (pNull(i)) {
+    int operator()(const rphp::pTriState &i) const {
+        if (rphp::pNull(i)) {
             std::cout << "i see a null" << std::endl;
         }
         else {
@@ -29,47 +29,47 @@ public:
         return (i) ? 1 : 0;
     }
 
-    int operator()(const rphp::pint &i) const {
-        std::cout << "i see a pint" << std::endl;
+    int operator()(const rphp::pInt &i) const {
+        std::cout << "i see a pInt" << std::endl;
         return i;
     }
 
-    int operator()(const rphp::pfloat &i) const {
+    int operator()(const rphp::pFloat &i) const {
         std::cout << "i see a float" << std::endl;
         return 0;
     }
 
-    int operator()(const rphp::bstring &str) const {
+    int operator()(const rphp::pBString &str) const {
         std::cout << "i see a binary string" << std::endl;
         return str.length();
     }
 
-    int operator()(const rphp::ustringP &str) const {
+    int operator()(const rphp::pUStringP &str) const {
         std::cout << "i see a unicode string" << std::endl;
         return str->length();
     }
 
-    int operator()(const rphp::phashP &h) const {
-        std::cout << "i see a phash" << std::endl;
+    int operator()(const rphp::pHashP &h) const {
+        std::cout << "i see a pHash" << std::endl;
         return 0;
     }
 
-    int operator()(const rphp::pobjectP &h) const {
-        std::cout << "i see a pobject" << std::endl;
+    int operator()(const rphp::pObjectP &h) const {
+        std::cout << "i see a pObject" << std::endl;
         return 0;
     }
 
-    int operator()(const rphp::pvarRef &h) const {
+    int operator()(const rphp::pVarRef &h) const {
         std::cout << "i see a php reference" << std::endl;
         return 0;
     }
 };
 
-void changeRef(rphp::pvar r) {
+void changeRef(rphp::pVar r) {
 
-	rphp::pvarRef rval;
-	if (rval = rphp::pvar_getVal_ref(r)) {
-		*rval = rphp::bstring("changed the ref to a string!");
+	rphp::pVarRef rval;
+	if (rval = rphp::pVar_getVal_ref(r)) {
+		*rval = rphp::pBString("changed the ref to a string!");
 	}
 	else {
 		std::cout << "not a ref" << std::endl;
@@ -80,67 +80,67 @@ void changeRef(rphp::pvar r) {
 // driver
 void pvarTestCase::basic()
 {
-    rphp::pvar u,t,r;
+    rphp::pVar u,t,r;
 
     // sizes
     std::cout << std::endl;
-    std::cout << "p3state: " << sizeof(rphp::p3state) << std::endl;
-    std::cout << "pint: " << sizeof(rphp::pint) << std::endl;
-    std::cout << "pfloat: " << sizeof(rphp::pfloat) << std::endl;
-    std::cout << "bstring: " << sizeof(rphp::bstring) << std::endl;
-    std::cout << "ustring: " << sizeof(rphp::ustring) << std::endl;
-    std::cout << "ustringP: " << sizeof(rphp::ustringP) << std::endl;
-    std::cout << "phash: " << sizeof(rphp::phash) << std::endl;
-    std::cout << "phashP: " << sizeof(rphp::phashP) << std::endl;
-    std::cout << "pobject: " << sizeof(rphp::pobject) << std::endl;
-    std::cout << "pobjectP: " << sizeof(rphp::pobjectP) << std::endl;
-    std::cout << "pvarBase: " << sizeof(rphp::pvarBase) << std::endl;
-    std::cout << "pvarRef: " << sizeof(rphp::pvarRef) << std::endl;
-    std::cout << "pvar: " << sizeof(rphp::pvar) << std::endl;
+    std::cout << "pTriState: " << sizeof(rphp::pTriState) << std::endl;
+    std::cout << "pInt: " << sizeof(rphp::pInt) << std::endl;
+    std::cout << "pFloat: " << sizeof(rphp::pFloat) << std::endl;
+    std::cout << "pBString: " << sizeof(rphp::pBString) << std::endl;
+    std::cout << "pUString: " << sizeof(rphp::pUString) << std::endl;
+    std::cout << "pUStringP: " << sizeof(rphp::pUStringP) << std::endl;
+    std::cout << "pHash: " << sizeof(rphp::pHash) << std::endl;
+    std::cout << "pHashP: " << sizeof(rphp::pHashP) << std::endl;
+    std::cout << "pObject: " << sizeof(rphp::pObject) << std::endl;
+    std::cout << "pObjectP: " << sizeof(rphp::pObjectP) << std::endl;
+    std::cout << "pVarBase: " << sizeof(rphp::pVarBase) << std::endl;
+    std::cout << "pVarRef: " << sizeof(rphp::pVarRef) << std::endl;
+    std::cout << "pVar: " << sizeof(rphp::pVar) << std::endl;
 
     // binary string
-    u = rphp::bstring("hello world there");
+    u = rphp::pBString("hello world there");
 
     std::cout << u << std::endl;
     int result = boost::apply_visitor( my_visitor(), u );
 
     // unicode string
-    u = new rphp::ustring("hello world there -- unicode style");
+    u = new rphp::pUString("hello world there -- unicode style");
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
     // long
-    u = rphp::pint(15);
+    u = rphp::pInt(15);
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
     // float
-    u = rphp::pfloat(2.3123);
+    u = rphp::pFloat(2.3123);
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
     // bool
-    u = pTrue;
+    u = rphp::pTrue;
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
-    if (rphp::pvar_getVal_bool(u)) {
+    if (rphp::pVar_getVal_bool(u)) {
     	std::cout << "the bool was true" << std::endl;
     }
     else {
         std::cout << "the bool was false" << std::endl;
     }
     
-    u = pFalse;
+    u = rphp::pFalse;
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
-    if (rphp::pvar_getVal_bool(u)) {
+    if (rphp::pVar_getVal_bool(u)) {
         std::cout << "the bool was true" << std::endl;
     }
     else {
@@ -148,16 +148,16 @@ void pvarTestCase::basic()
     }
 
     // null
-    u = pNull;
+    u = rphp::pNull;
 
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
     // php hash
     /*
-    rphp::phash h;
-    h.insert("var-test", rphp::pint(971));
-    rphp::pvar hole = rphp::pfloat(1.234);
+    rphp::pHash h;
+    h.insert("var-test", rphp::pInt(971));
+    rphp::pVar hole = rphp::pFloat(1.234);
     h.insert("var-test2", hole);
     std::cout << h;
     h.varDump();
@@ -169,15 +169,15 @@ void pvarTestCase::basic()
     ////
 
     // type checking?
-    int pt = rphp::pvar_getType(u);
+    int pt = rphp::pVar_getType(u);
     switch (pt) {
-    case rphp::PVAR_HASH:
+    case rphp::pVarHashType:
     	std::cout << "found a hash" << std::endl;
     	break;
-    case rphp::PVAR_FLOAT:
+    case rphp::pVarFloatType:
     	std::cout << "found a float" << std::endl;
     	break;
-    case rphp::PVAR_NULL:
+    case rphp::pVarNullType:
         std::cout << "found a null" << std::endl;
         break;
     default:
@@ -190,41 +190,41 @@ void pvarTestCase::basic()
     std::cout << "type conversion:" << std::endl;
     u = std::string("55");
     boost::apply_visitor( my_visitor(), u );
-    rphp::pvar_convertToNumber(u);
+    rphp::pVar_convertToNumber(u);
     boost::apply_visitor( my_visitor(), u );
     std::cout << "final: " << u << std::endl;
 
     // operators
 
     // try adding a long and a numeric string
-    u = rphp::pint(10); // NOTE: this is a long. int's turn into p3state (bool/null)
+    u = rphp::pInt(10); // NOTE: this is a long. int's turn into p3state (bool/null)
     t = std::string("20");
-    r = pvar_add(u, t);
+    r = pVar_add(u, t);
     std::cout << "number add: " << r << std::endl;
     std::cout << "u is: " << u << std::endl;
     std::cout << "t is: " << t << std::endl;
 
     // references
 
-    // create a new reference. can only be comprised of pvarBase items (i.e., can't be a ref to a ref)
+    // create a new reference. can only be comprised of pVarBase items (i.e., can't be a ref to a ref)
     std::cout << "references----" << std::endl;
-    rphp::pvarRef r1(new rphp::pvarBase);
+    rphp::pVarRef r1(new rphp::pVarBase);
 
-    // assign a value to the pvar
-    *r1 = rphp::pint(5);
+    // assign a value to the pVar
+    *r1 = rphp::pInt(5);
     boost::apply_visitor( my_visitor(), *r1 );
 
-    // call a function which takes a pvar (not strictly a pvarRef)
+    // call a function which takes a pVar (not strictly a pVarRef)
     changeRef(r1);
     boost::apply_visitor( my_visitor(), *r1 );
 
     // assign two variables to the same reference
-    rphp::pvarRef r2 = r1;
+    rphp::pVarRef r2 = r1;
     boost::apply_visitor( my_visitor(), *r1 );
     boost::apply_visitor( my_visitor(), *r2 );
 
 	// change one
-    *r2 = rphp::pint(20);
+    *r2 = rphp::pInt(20);
     boost::apply_visitor( my_visitor(), *r1 );
     boost::apply_visitor( my_visitor(), *r2 );
 

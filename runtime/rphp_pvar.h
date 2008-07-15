@@ -23,69 +23,68 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
-
 #include <unicode/unistr.h>
-#include <unicode/ustream.h> // ostream API for UnicodeString
-
+#include <unicode/ustream.h>
 #include <iostream>
-
-BOOST_TRIBOOL_THIRD_STATE(pNull)
 
 namespace rphp {
 
-// a boost::tribool represents php true, false and null values
-typedef boost::logic::tribool p3state;
+    /*
+     * Definition of the various types used in the rphp runtime, including the
+     * main pVar variant
+     */
 
-// pNull is defined above
-#define pTrue rphp::p3state(true)
-#define pFalse rphp::p3state(false)
+    // a boost::tribool represents php true, false and null values
+    // pTrue, pFalse and pNull are defined
+    typedef boost::logic::tribool pTriState;
+    // convenience accesors
+    BOOST_TRIBOOL_THIRD_STATE(pNull)
+    #define pTrue  pTriState(true)
+    #define pFalse pTriState(false)
 
-// pvar numbers
-typedef long pint;
-typedef double pfloat;
+    // numeric types
+    typedef long   pInt;
+    typedef double pFloat;
 
-// string types: binary and unicode flavor
+    // string types: binary and unicode flavor
+    // "binary" strings
+    typedef std::string pBString;
 
-// STL basic string.
-// GNU stdc++ provides implicit sharing but this isn't part of the standard
-typedef std::string bstring;
+    // unicode strings, using the ICU library
+    typedef UnicodeString pUString;
+    typedef boost::shared_ptr<pUString> pUStringP;
 
-// UnicodeString uses 2 byte characters. Storage of base class is 32 bytes on 32bit, 40 on 64bit
-// implicitly shared
-typedef UnicodeString ustring;
-typedef boost::shared_ptr<ustring> ustringP;
+    // php hash tables
+    class pHash;
+    typedef boost::shared_ptr<pHash> pHashP;
 
-// php hash tables
-class phash;
-typedef boost::shared_ptr<phash> phashP;
+    // php objects
+    class pObject;
+    typedef boost::shared_ptr<pObject> pObjectP;
 
-// php objects
-class pobject;
-typedef boost::shared_ptr<pobject> pobjectP;
+    // base variant that represents a php variable
+    typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP > pVarBase;
 
-// base variant that represents a php variable
-typedef boost::variant< p3state, pint, pfloat, bstring, ustringP, phashP, pobjectP> pvarBase;
+    // reference to a pvarBase, i.e. a container for pvar variables
+    // shared_ptr maintains a reference count and guarantees proper destruction
+    typedef boost::shared_ptr<pVarBase> pVarRef;
 
-// reference to a pvarBase, i.e. a container for pvar variables
-// shared_ptr maintains a reference count and guarantees proper destruction
-typedef boost::shared_ptr<pvarBase> pvarRef;
+    // full pvar definition: a variant that can hold a base type or a reference
+    typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pVarRef > pVar;
+    typedef boost::shared_ptr<pVar> pVarP;
 
-// full pvar definition: a variant that can hold a base type or a reference
-typedef boost::variant< p3state, pint, pfloat, bstring, ustringP, phashP, pobjectP, pvarRef> pvar;
-typedef boost::shared_ptr<pvar> pvarP;
-
-// associated enum for checking type
-typedef enum {
-    PVAR_NULL,     // rphp::p3state
-    PVAR_BOOL,     // rphp::p3state
-    PVAR_INT,      // rphp::pint
-    PVAR_FLOAT,    // rphp::pfloat
-    PVAR_BSTRING,  // rphp::bstring
-    PVAR_USTRING,  // rphp::ustring
-    PVAR_HASH,     // rphp::phash
-    PVAR_OBJ,      // rphp::pobject
-    PVAR_REF	   // rphp::pvarRef
-} pvarType;
+    // associated enum for checking type
+    typedef enum {
+        pVarNullType,
+        pVarBoolType,
+        pVarIntType,
+        pVarFloatType,
+        pVarBStringType,
+        pVarUStringType,
+        pVarHashType,
+        pVarObjectType,
+        pVarRefType
+    } pVarType;
 
 } /* namespace rphp */
 

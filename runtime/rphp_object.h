@@ -24,21 +24,21 @@
 
 namespace rphp {
 
-// XXX placeholder
-class pobject {
-    private:
-        phash properties;
-    public:
-        pobject() : properties() { }
+    // XXX placeholder
+    class pObject {
+        private:
+            pHash properties;
+        public:
+            pObject() : properties() { }
 
-        const phash::size_type getNumProperties() {
-            return properties.getSize();
-        }
+            const pHash::size_type getNumProperties() {
+                return properties.getSize();
+            }
 
-};
+    };
 
 
-std::ostream& operator << (std::ostream& os, const rphp::pobject& h);
+    std::ostream& operator << (std::ostream& os, const rphp::pObject& h);
 
 }
 
