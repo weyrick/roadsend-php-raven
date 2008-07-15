@@ -8,7 +8,7 @@ driver for testing pVars
 #include <cppunit/config/SourcePrefix.h>
 #include <iostream>
 
-#include "rphp_runtime.h"
+#include "pRuntime.h"
 #include "pvarTestCase.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( pvarTestCase );

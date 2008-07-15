@@ -16,43 +16,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include "rphp_hash.h"
+#ifndef RPHP_POBJECT_H_
+#define RPHP_POBJECT_H_
+
 #include <iostream>
 
-U_NAMESPACE_BEGIN
-    // this is used by the multi_index for hashing unicode strings
-    std::size_t hash_value(rphp::pUString const& s) {
-        return static_cast<std::size_t>(s.hashCode());
-    }
-U_NAMESPACE_END
+#include "pHash.h"
 
 namespace rphp {
 
-    void pHash::insert(const pUString &key, pVarP data) {
+    // XXX placeholder
+    class pObject {
+        private:
+            pHash properties;
+        public:
+            pObject() : properties() { }
 
-        hashData.insert(h_container(key, data));
+            const pHash::size_type getNumProperties() {
+                return properties.getSize();
+            }
 
-    }
-
-    void pHash::varDump() {
+    };
 
 
-        std::cout << "array(" << hashData.size() << ") {" << std::endl;
+    std::ostream& operator << (std::ostream& os, const rphp::pObject& h);
 
-        seq_index& ot = get<1>(hashData);
+}
 
-        for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
-            std::cout << "   ['" << (*it).key << "'] => " << *(*it).data << std::endl;
-        }
-
-        std::cout << "}" << std::endl;
-
-    }
-
-    std::ostream& operator << (std::ostream& os, const rphp::pHash& h)
-    {
-        return os << "php_hash:" << std::endl;
-    }
-
-} /* namespace rphp */
-
+#endif /* RPHP_POBJECT_H_ */

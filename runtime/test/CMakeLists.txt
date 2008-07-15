@@ -8,8 +8,8 @@ FIND_PACKAGE(ICU)
 
 # XXX fixme
 link_directories (${CMAKE_SOURCE_DIR}/../build/)
-include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/../)
+include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/../include/)
 
 # test apps
-add_executable( rphp_runtime_suite main.cpp phashTestCase.cpp pvarTestCase.cpp )
-target_link_libraries( rphp_runtime_suite cppunit rphp_runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES})
+add_executable( rphp-runtime-suite main.cpp phashTestCase.cpp pvarTestCase.cpp )
+target_link_libraries( rphp-runtime-suite cppunit rphp-runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES})

@@ -16,14 +16,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_TYPES_H_
-#define RPHP_TYPES_H_
+#ifndef RPHP_PTYPES_H_
+#define RPHP_PTYPES_H_
 
-#include "boost/lexical_cast.hpp"
+#include <boost/lexical_cast.hpp>
 
-#include "rphp_pvar.h"
-#include "rphp_hash.h"
-#include "rphp_object.h"
+#include "pVar.h"
+#include "pHash.h"
+#include "pObject.h"
 
 namespace rphp {
 
@@ -157,4 +157,4 @@ namespace rphp {
 } /* namespace rphp */
 
 
-#endif /* RPHP_TYPES_H_ */
+#endif /* RPHP_PTYPES_H_ */

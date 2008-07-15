@@ -16,8 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_HASH_H_
-#define RPHP_HASH_H_
+#ifndef RPHP_PHASH_H_
+#define RPHP_PHASH_H_
 
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
@@ -25,7 +25,7 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #include <iostream>
 
-#include "rphp_pvar.h"
+#include "pVar.h"
 
 // hash function for use with rphp::pUString
 U_NAMESPACE_BEGIN
@@ -71,7 +71,6 @@ namespace rphp {
 
     /**
      * pHash definition
-     *
      */
     class pHash {
 
@@ -119,4 +118,4 @@ namespace rphp {
 
 } /* namespace rphp */
 
-#endif /* RPHP_HASH_H_ */
+#endif /* RPHP_PHASH_H_ */

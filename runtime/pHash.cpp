@@ -16,15 +16,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include "rphp_object.h"
 #include <iostream>
+#include "pHash.h"
+
+U_NAMESPACE_BEGIN
+    // this is used by the multi_index for hashing unicode strings
+    std::size_t hash_value(rphp::pUString const& s) {
+        return static_cast<std::size_t>(s.hashCode());
+    }
+U_NAMESPACE_END
 
 namespace rphp {
 
-    std::ostream& operator << (std::ostream& os, const rphp::pObject& h) {
-        return os << "pobject" << std::endl;
+    void pHash::insert(const pUString &key, pVarP data) {
+
+        hashData.insert(h_container(key, data));
+
     }
 
-}
+    void pHash::varDump() {
 
+
+        std::cout << "array(" << hashData.size() << ") {" << std::endl;
+
+        seq_index& ot = get<1>(hashData);
+
+        for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
+            std::cout << "   ['" << (*it).key << "'] => " << *(*it).data << std::endl;
+        }
+
+        std::cout << "}" << std::endl;
+
+    }
+
+    std::ostream& operator << (std::ostream& os, const rphp::pHash& h)
+    {
+        return os << "php_hash:" << std::endl;
+    }
+
+} /* namespace rphp */
 

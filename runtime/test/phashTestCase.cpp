@@ -2,7 +2,7 @@
 #include <cppunit/config/SourcePrefix.h>
 #include <iostream>
 
-#include "rphp_runtime.h"
+#include "pRuntime.h"
 
 #include "phashTestCase.h"
 
