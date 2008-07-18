@@ -1,6 +1,7 @@
 project (rphp)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake/modules )
+
 FIND_PACKAGE(Boost REQUIRED)
 FIND_PACKAGE(ICU)
 
@@ -15,4 +16,4 @@ set(RUNTIME_SRC_FILES
 )
 
 add_library( rphp-runtime SHARED ${RUNTIME_SRC_FILES} )
-
+target_link_libraries( rphp-runtime ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES} )
