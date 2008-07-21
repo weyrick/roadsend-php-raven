@@ -19,21 +19,30 @@
 #include <iostream>
 #include "pHash.h"
 
-U_NAMESPACE_BEGIN
-    // this is used by the multi_index for hashing unicode strings
-    std::size_t hash_value(rphp::pUString const& s) {
-        return static_cast<std::size_t>(s.hashCode());
+
+namespace boost {
+    std::size_t hash_value(rphp::hKeyVar const& k) {
+        return boost::apply_visitor(rphp::hKeyHasher(), k);
     }
-U_NAMESPACE_END
+}
 
 namespace rphp {
-
+    
     void pHash::insert(const pUString &key, pVarP data) {
-
+        // TODO check numeric string, set maxIntKey accordingly
         hashData.insert(h_container(key, data));
-
     }
 
+    void pHash::insert(const pInt &key, pVarP data) {
+        if (key > maxIntKey)
+            maxIntKey = key+1;
+        hashData.insert(h_container(key, data));
+    }
+    
+    void pHash::insertNext(pVarP data) {
+        hashData.insert(h_container(maxIntKey++, data));
+    }
+    
     void pHash::varDump() {
 
 
@@ -41,8 +50,14 @@ namespace rphp {
 
         seq_index& ot = get<1>(hashData);
 
+        hKeyType kType;
+        
         for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
-            std::cout << "   ['" << (*it).key << "'] => " << *(*it).data << std::endl;
+            kType = boost::apply_visitor(rphp::hKeyGetType(), (*it).key);
+            if (kType == hKeyInt)
+                std::cout << "   [" << (*it).key << "] => " << *(*it).pData << std::endl;
+            else
+                std::cout << "   ['" << (*it).key << "'] => " << *(*it).pData << std::endl;
         }
 
         std::cout << "}" << std::endl;

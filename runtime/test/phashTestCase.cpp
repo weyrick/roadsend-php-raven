@@ -26,6 +26,14 @@ void phashTestCase::basic()
     int2 = h["foo"];
     CPPUNIT_ASSERT( int2.get() == 0 );
 
+    // int key
+    rphp::pVarP str1(new rphp::pVar(rphp::pBString("int key 1")));
+    h.insert(55, str1);
+    
+    // next key
+    rphp::pVarP str2(new rphp::pVar(rphp::pBString("next key")));
+    h.insertNext(str2);
+    
     h.varDump();
 
 }

@@ -19,6 +19,7 @@
 #ifndef RPHP_PHASH_H_
 #define RPHP_PHASH_H_
 
+#include <boost/variant.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
@@ -27,30 +28,61 @@
 
 #include "pVar.h"
 
-// hash function for use with rphp::pUString
-U_NAMESPACE_BEGIN
-    std::size_t hash_value(rphp::pUString const& s);
-U_NAMESPACE_END
-
 using boost::multi_index_container;
 using namespace boost::multi_index;
 
+// custom key type
+namespace rphp {
+    typedef boost::variant< pInt, pUString > hKeyVar;
+    typedef enum { hKeyInt, hKeyStr  } hKeyType;
+}
+
+// customer key hasher
+namespace boost {
+    std::size_t hash_value(rphp::hKeyVar const& k);
+}
+
 namespace rphp {
 
-    /*
-     * defines an interface to a hash table class which implements php style
-     * hash table/array semantics
-     *
-     */
+    // a visitor for hashing phash keys
+    class hKeyHasher : public boost::static_visitor<std::size_t> {
 
-    // container stored in stableHash
+    public:
+
+        std::size_t operator()(const pInt &k) const {
+            return static_cast<std::size_t>(k);
+        }
+
+        std::size_t operator()(const pUString &k) const {
+            return static_cast<std::size_t>(k.hashCode());
+        }
+
+    };
+    
+    // a visitor for determining phash key type
+    class hKeyGetType : public boost::static_visitor<hKeyType> {
+
+    public:
+
+        hKeyType operator()(const pInt &k) const {
+            return hKeyInt;
+        }
+
+        hKeyType operator()(const pUString &k) const {
+            return hKeyStr;
+        }
+
+    };
+
+    // define the container stored in stableHash
     struct h_container {
 
-        pVarP data;
-        const pUString key;
-        // TODO: php has support for numeric keys
+        pVarP pData;
+        hKeyVar key;
 
-        h_container(const pUString k, pVarP d) : data(d), key(k) { }
+        h_container(const pUString k, pVarP d) : pData(d), key(k) { }
+
+        h_container(const pInt k, pVarP d) : pData(d), key(k) { }
 
     };
 
@@ -61,7 +93,7 @@ namespace rphp {
         h_container,
         // index definitions: hash and sequence
         indexed_by<
-            hashed_unique< member<h_container, const pUString, &h_container::key> >,
+            hashed_unique< member<h_container, hKeyVar, &h_container::key> >,
             sequenced<>
         >
     > stableHash;
@@ -76,6 +108,7 @@ namespace rphp {
 
         private:
             stableHash hashData;
+            pInt maxIntKey;
 
         public:
 
@@ -83,9 +116,9 @@ namespace rphp {
             typedef stableHash::size_type size_type;
 
             // construct/destroy/copy
-            pHash() { std::cout << "creating fresh pHash" << std::endl; }
+            pHash() : maxIntKey(0) { std::cout << "creating fresh pHash" << std::endl; }
 
-            pHash(pHash const& p) {
+            pHash(pHash const& p) : maxIntKey(p.maxIntKey) {
                 std::cout << "pHash copy construct" << std::endl;
                 hashData = p.hashData;
             }
@@ -94,6 +127,8 @@ namespace rphp {
 
             // modifiers
             void insert(const pUString &key, pVarP data);
+            void insert(const pInt &key, pVarP data);
+            void insertNext(pVarP data);
 
             // size
             const size_type getSize() { return hashData.size(); }
@@ -107,7 +142,7 @@ namespace rphp {
                 if (k == hashData.end())
                     return pVarP();
                 else
-                    return (*k).data;
+                    return (*k).pData;
             }
 
 
