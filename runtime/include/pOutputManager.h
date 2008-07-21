@@ -16,24 +16,29 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_PRUNTIME_H_
-#define RPHP_PRUNTIME_H_
+#ifndef RPHP_POUTPUTMANAGER_H_
+#define RPHP_POUTPUTMANAGER_H_
 
-#include "pTypes.h"
-#include "pOutputManager.h"
+#include <stack>
+#include "pOutputBuffer.h"
 
 namespace rphp {
 
-    class pRuntimeEngine {
+    class pOutputManager {
 
         private:
-            pOutputManager outputManager;
+            std::stack<pOutputBuffer> bufferStack;
 
         public:
-            pRuntimeEngine() { }
+
+            // constructors
+            pOutputManager() {
+                // default output buffer
+                bufferStack.push(pOutputBuffer());
+            }
 
     };
 
 }
 
-#endif /* RPHP_PRUNTIME_H_ */
+#endif /* RPHP_POUTPUTMANAGER_H_ */

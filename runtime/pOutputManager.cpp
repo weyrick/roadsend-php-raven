@@ -16,24 +16,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_PRUNTIME_H_
-#define RPHP_PRUNTIME_H_
-
-#include "pTypes.h"
 #include "pOutputManager.h"
 
 namespace rphp {
 
-    class pRuntimeEngine {
-
-        private:
-            pOutputManager outputManager;
-
-        public:
-            pRuntimeEngine() { }
-
-    };
 
 }
 
-#endif /* RPHP_PRUNTIME_H_ */
+

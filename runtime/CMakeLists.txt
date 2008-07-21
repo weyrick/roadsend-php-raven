@@ -13,6 +13,9 @@ set(RUNTIME_SRC_FILES
   pHash.cpp
   pObject.cpp
   pTypes.cpp
+  pRuntime.cpp
+  pOutputBuffer.cpp
+  pOutputManager.cpp
 )
 
 add_library( rphp-runtime SHARED ${RUNTIME_SRC_FILES} )
