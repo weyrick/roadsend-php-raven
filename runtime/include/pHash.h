@@ -33,8 +33,8 @@ using namespace boost::multi_index;
 
 // custom key type
 namespace rphp {
-    typedef boost::variant< pInt, pUString > hKeyVar;
-    typedef enum { hKeyInt, hKeyStr  } hKeyType;
+    typedef boost::variant< pInt, pBString, pUString > hKeyVar;
+    typedef enum { hKeyInt, hKeyBStr, hKeyUStr  } hKeyType;
 }
 
 // customer key hasher
@@ -52,6 +52,10 @@ namespace rphp {
         std::size_t operator()(const pInt &k) const {
             return static_cast<std::size_t>(k);
         }
+        
+        std::size_t operator()(const pBString &k) const {
+            return boost::hash_value(k);
+        }
 
         std::size_t operator()(const pUString &k) const {
             return static_cast<std::size_t>(k.hashCode());
@@ -67,9 +71,13 @@ namespace rphp {
         hKeyType operator()(const pInt &k) const {
             return hKeyInt;
         }
+        
+        hKeyType operator()(const pBString &k) const {
+            return hKeyBStr;
+        }
 
         hKeyType operator()(const pUString &k) const {
-            return hKeyStr;
+            return hKeyUStr;
         }
 
     };
@@ -81,6 +89,8 @@ namespace rphp {
         hKeyVar key;
 
         h_container(const pUString k, pVarP d) : pData(d), key(k) { }
+        
+        h_container(const pBString k, pVarP d) : pData(d), key(k) { }
 
         h_container(const pInt k, pVarP d) : pData(d), key(k) { }
 
