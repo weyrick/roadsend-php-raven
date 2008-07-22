@@ -33,8 +33,8 @@ using namespace boost::multi_index;
 
 // custom key type
 namespace rphp {
-    typedef boost::variant< pInt, pBString, pUString > hKeyVar;
-    typedef enum { hKeyInt, hKeyBStr, hKeyUStr  } hKeyType;
+    typedef boost::variant< pInt, /*pBString,*/ pUString > hKeyVar;
+    typedef enum { hKeyInt, /*hKeyBStr,*/ hKeyUStr  } hKeyType;
 }
 
 // customer key hasher
@@ -52,10 +52,12 @@ namespace rphp {
         std::size_t operator()(const pInt &k) const {
             return static_cast<std::size_t>(k);
         }
-        
+
+        /*
         std::size_t operator()(const pBString &k) const {
             return boost::hash_value(k);
         }
+        */
 
         std::size_t operator()(const pUString &k) const {
             return static_cast<std::size_t>(k.hashCode());
@@ -71,10 +73,12 @@ namespace rphp {
         hKeyType operator()(const pInt &k) const {
             return hKeyInt;
         }
-        
+
+        /*
         hKeyType operator()(const pBString &k) const {
             return hKeyBStr;
         }
+        */
 
         hKeyType operator()(const pUString &k) const {
             return hKeyUStr;
@@ -90,7 +94,7 @@ namespace rphp {
 
         h_container(const pUString k, pVarP d) : pData(d), key(k) { }
         
-        h_container(const pBString k, pVarP d) : pData(d), key(k) { }
+//        h_container(const pBString k, pVarP d) : pData(d), key(k) { }
 
         h_container(const pInt k, pVarP d) : pData(d), key(k) { }
 
@@ -137,30 +141,27 @@ namespace rphp {
 
             // modifiers
             void insert(const pUString &key, pVarP data);
+            //void insert(const pBString &key, pVarP data);
             void insert(const pInt &key, pVarP data);
             void insertNext(pVarP data);
+            
+            size_type remove(const pUString &key);
+            //void remove(const pBString &key);
+            size_type remove(const pInt &key);
 
-            // size
+            // queries
             const size_type getSize() { return hashData.size(); }
+            const bool keyExists(const pUString &key);
+            //const bool keyExists(const pBString &key);
+            const bool keyExists(const pInt &key);
 
             // dump of contents
             void varDump();
 
             // lookup
-            pVarP operator[] ( const pUString &key ) {
-                stableHash::iterator k = hashData.find(key);
-                if (k == hashData.end())
-                    return pVarP();
-                else
-                    return (*k).pData;
-            }
-            pVarP operator[] ( const pInt &key ) {
-                stableHash::iterator k = hashData.find(key);
-                if (k == hashData.end())
-                    return pVarP();
-                else
-                    return (*k).pData;
-            }
+            pVarP operator[] (const pUString &key);
+            //pVarP operator[] (const pBString &key);
+            pVarP operator[] (const pInt &key);
 
 
     };

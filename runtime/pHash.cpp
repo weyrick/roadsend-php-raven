@@ -33,6 +33,13 @@ namespace rphp {
         hashData.insert(h_container(key, data));
     }
 
+    /*
+    void pHash::insert(const pBString &key, pVarP data) {
+        // TODO check numeric string, set maxIntKey accordingly
+        hashData.insert(h_container(key, data));
+    }
+    */
+
     void pHash::insert(const pInt &key, pVarP data) {
         if (key > maxIntKey)
             maxIntKey = key+1;
@@ -42,7 +49,65 @@ namespace rphp {
     void pHash::insertNext(pVarP data) {
         hashData.insert(h_container(maxIntKey++, data));
     }
+
+    pHash::size_type pHash::remove(const pUString &key) {
+        return hashData.erase(key);
+    }
     
+    pHash::size_type pHash::remove(const pInt &key) {
+        return hashData.erase(key);
+    }
+
+    
+    // query
+    const bool pHash::keyExists(const pUString &key) {
+        stableHash::iterator k = hashData.find(key);
+        return (k != hashData.end());
+    }
+    /*
+    const bool pHash::keyExists(const pBString &key) {
+        stableHash::iterator k = hashData.find(key);
+        return (k != hashData.end());
+    }
+    */
+    const bool pHash::keyExists(const pInt &key) {
+        stableHash::iterator k = hashData.find(key);
+        return (k != hashData.end());
+    }
+    
+    // lookup
+    pVarP pHash::operator[] ( const pUString &key ) {
+        stableHash::iterator k = hashData.find(key);
+        if (k == hashData.end())
+            return pVarP();
+        else
+            return (*k).pData;
+    }
+
+    /*
+    pVarP pHash::operator[] ( const pBString &key ) {
+        stableHash::iterator k = hashData.find(key);
+        if (k == hashData.end())
+            return pVarP();
+        else
+            return (*k).pData;
+    }
+    */
+    
+    pVarP pHash::operator[] ( const pInt &key ) {
+        stableHash::iterator k = hashData.find(key);
+        if (k == hashData.end())
+            return pVarP();
+        else
+            return (*k).pData;
+    }
+
+    // output
+    std::ostream& operator << (std::ostream& os, const rphp::pHash& h)
+    {
+        return os << "php_hash:" << std::endl;
+    }
+
     void pHash::varDump() {
 
 
@@ -64,10 +129,6 @@ namespace rphp {
 
     }
 
-    std::ostream& operator << (std::ostream& os, const rphp::pHash& h)
-    {
-        return os << "php_hash:" << std::endl;
-    }
-
+    
 } /* namespace rphp */
 
