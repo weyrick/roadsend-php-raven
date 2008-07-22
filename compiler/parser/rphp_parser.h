@@ -8,6 +8,7 @@
 #include <kdev-pg-memory-pool.h>
 #include <kdev-pg-allocator.h>
 #include <kdev-pg-token-stream.h>
+#include <unistr.h>
 
 namespace rphp
   {
@@ -232,7 +233,7 @@ namespace rphp
        * When this method returns, the parser's token stream has been filled
        * and any parse*() method can be called.
        */
-      void tokenize( const std::string& contents );
+      void tokenize( const UnicodeString& contents );
 
       enum ProblemType {
         Error,
@@ -251,7 +252,7 @@ namespace rphp
         OnlyVariable,
         OnlyNewObject
       };
-      std::string m_contents;
+      UnicodeString m_contents;
       bool m_debug;
 
       struct parser_state

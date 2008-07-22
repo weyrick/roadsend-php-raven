@@ -3,13 +3,13 @@
 
 #include "rphp_parser.h"
 
-
+#include <unistr.h>
 #include "phplexer.h"
 
 namespace rphp
   {
 
-  void parser::tokenize( const std::string& contents )
+  void parser::tokenize( const UnicodeString& contents )
   {
     m_contents =  contents;
     Lexer lexer( this,  contents );
@@ -43,10 +43,10 @@ namespace rphp
 
   std::string parser::tokenText(rint64 begin,  rint64 end)
   {
-#ifdef PENDING_THOMAS 
+#ifdef PENDING_THOMAS
     // TODO pending
     return  m_contents.mid(begin, end - begin + 1);
-#endif 
+#endif
     return  "";
   }
 
@@ -61,16 +61,17 @@ namespace rphp
       std::cout <<  "** Info:" <<  message;
   }
 
-#ifdef PEDNING_THOMAS 
-  // TODO pending
   // custom error recovery
-  void parser::expectedToken(int /*expected*/,  rint64 /*where*/,  const std::string& name)
+  void parser::yy_expected_token(int kind,  std::size_t token,  const char* name)
   {
-    reportProblem( parser::Error,  QString("Expected token \"%1\"").arg(name));
+    //    reportProblem( parser::Error, QString("Expected token \"%1\"").arg(name));
   }
 
-  void parser::expectedSymbol(int /*expectedSymbol*/,  const std::string& name)
+  void parser::yy_expected_symbol(int kind,  const char* name)
   {
+#ifdef PEDNING_THOMAS
+    // TODO pending
+
     rint64 line;
     rint64 col;
     rint64 index =  token_stream->index() - 1;
@@ -87,9 +88,8 @@ namespace rphp
                    .arg(token.kind)
                    .arg(line)
                    .arg(col));
-  }
-
 #endif
+  }
 
   void parser::setDebug( bool debug )
   {
