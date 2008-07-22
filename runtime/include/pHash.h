@@ -144,6 +144,13 @@ namespace rphp {
                 else
                     return (*k).pData;
             }
+            pVarP operator[] ( const pInt &key ) {
+                stableHash::iterator k = hashData.find(key);
+                if (k == hashData.end())
+                    return pVarP();
+                else
+                    return (*k).pData;
+            }
 
 
     };

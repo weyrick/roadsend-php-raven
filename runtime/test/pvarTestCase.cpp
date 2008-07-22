@@ -68,7 +68,7 @@ public:
 void changeRef(rphp::pVar r) {
 
 	rphp::pVarRef rval;
-	if (rval = rphp::pVar_getVal_ref(r)) {
+	if (rval = rphp::pVar_getVal_pRef(r)) {
 		*rval = rphp::pBString("changed the ref to a string!");
 	}
 	else {
@@ -128,7 +128,7 @@ void pvarTestCase::basic()
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
-    if (rphp::pVar_getVal_bool(u)) {
+    if (rphp::pVar_getVal_pBool(u)) {
     	std::cout << "the bool was true" << std::endl;
     }
     else {
@@ -140,7 +140,7 @@ void pvarTestCase::basic()
     std::cout << u << std::endl;
     result = boost::apply_visitor( my_visitor(), u );
 
-    if (rphp::pVar_getVal_bool(u)) {
+    if (rphp::pVar_getVal_pBool(u)) {
         std::cout << "the bool was true" << std::endl;
     }
     else {

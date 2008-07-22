@@ -15,19 +15,15 @@ class phashTestCase : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( basic );
   CPPUNIT_TEST_SUITE_END();
 
-/*
 protected:
-  double m_value1;
-  double m_value2;
-*/
+  rphp::pHash testHash;
 
-/*
-public:
-  void setUp();
-*/
+//public:
+//  void setUp();
 
 protected:
   void basic();
+
 };
 
 

@@ -46,7 +46,7 @@ namespace rphp {
             //std::cout << "pVar_add: l is " << l << std::endl;
             r = pVar_castToNumber(rhs);
             //std::cout << "pVar_add: r is " << r << std::endl;
-            result = pVar_getVal_int(l) + pVar_getVal_int(r);
+            result = pVar_getVal_pInt(l) + pVar_getVal_pInt(r);
             //std::cout << "pVar_add: result is " << result << std::endl;
         }
 

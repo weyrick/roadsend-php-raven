@@ -11,30 +11,40 @@ CPPUNIT_TEST_SUITE_REGISTRATION( phashTestCase );
 void phashTestCase::basic()
 {
 
+    rphp::pVarP lu;
+
+    // string key
     rphp::pVarP int1(new rphp::pVar(rphp::pInt(971)));
-
-    // php hash
-    rphp::pHash h;
-    h.insert("var-test", int1);
-
-    //std::cout << *(h["var-test"]) << std::endl;
-    rphp::pVarP int2 = h["var-test"];
-
-    CPPUNIT_ASSERT( pVar_getVal_int(*int1) == pVar_getVal_int(*int2) );
-
-    // not found
-    int2 = h["foo"];
-    CPPUNIT_ASSERT( int2.get() == 0 );
+    testHash.insert("var-test", int1);
+    CPPUNIT_ASSERT( testHash.getSize() == 1 );
 
     // int key
     rphp::pVarP str1(new rphp::pVar(rphp::pBString("int key 1")));
-    h.insert(55, str1);
-    
+    testHash.insert(55, str1);
+    CPPUNIT_ASSERT( testHash.getSize() == 2 );
+
     // next key
     rphp::pVarP str2(new rphp::pVar(rphp::pBString("next key")));
-    h.insertNext(str2);
-    
-    h.varDump();
+    testHash.insertNext(str2);
+    CPPUNIT_ASSERT( testHash.getSize() == 3 );
+
+    //testHash.varDump();
+
+    // string key
+    lu = testHash["var-test"];
+    CPPUNIT_ASSERT( pVar_getVal_pInt(*int1) == pVar_getVal_pInt(*lu) );
+
+    // int key
+    lu = testHash[55];
+    CPPUNIT_ASSERT( pVar_getVal_pBString(*str1) == pVar_getVal_pBString(*lu) );
+
+    // next key
+    lu = testHash[56];
+    CPPUNIT_ASSERT( pVar_getVal_pBString(*str2) == pVar_getVal_pBString(*lu) );
+
+    // not found
+    lu = testHash["foo"];
+    CPPUNIT_ASSERT( lu.get() == 0 );
 
 }
 
@@ -42,9 +52,8 @@ void phashTestCase::basic()
 void phashTestCase::setUp()
 {
 
-  m_value1 = 2.0;
-  m_value2 = 3.0;
 
 }
 */
+
 

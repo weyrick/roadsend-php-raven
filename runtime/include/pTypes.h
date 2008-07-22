@@ -135,15 +135,23 @@ namespace rphp {
 
     // get the boolean value of a pVar. does NOT convert so pVar
     // must already be a pTriState
-    inline pTriState pVar_getVal_bool(const pVar &p) {
+    inline pTriState pVar_getVal_pBool(const pVar &p) {
             return boost::get<rphp::pTriState>(p);
     }
 
-    inline long pVar_getVal_int(const pVar &p) {
+    inline long pVar_getVal_pInt(const pVar &p) {
             return boost::get<pInt>(p);
     }
+    
+    inline pBString pVar_getVal_pBString(const pVar &p) {
+            return boost::get<pBString>(p);
+    }
+    
+    inline pUStringP pVar_getVal_pUString(const pVar &p) {
+            return boost::get<pUStringP>(p);
+    }
 
-    inline pVarRef pVar_getVal_ref(const pVar &p) {
+    inline pVarRef pVar_getVal_pRef(const pVar &p) {
             return boost::get<pVarRef>(p);
     }
 
