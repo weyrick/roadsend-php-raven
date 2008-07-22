@@ -8,7 +8,6 @@
 #include <kdev-pg-memory-pool.h>
 #include <kdev-pg-allocator.h>
 #include <kdev-pg-token-stream.h>
-#include <unistr.h>
 
 namespace rphp
   {
@@ -241,7 +240,7 @@ namespace rphp
         Info
       };
       void reportProblem( parser::ProblemType type,  const std::string& message );
-      std::string tokenText(rint64 begin,  rint64 end);
+      UnicodeString tokenText(rint64 begin,  rint64 end);
       void setDebug(bool debug);
 
 

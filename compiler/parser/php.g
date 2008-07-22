@@ -22,6 +22,7 @@
 
 [:
 
+#include <unistr.h>
 #include <string>
 #include <iostream>
 
@@ -59,7 +60,7 @@ typedef long long rint64;
    * When this method returns, the parser's token stream has been filled
    * and any parse*() method can be called.
    */
-  void tokenize( const std::string& contents );
+  void tokenize( const UnicodeString& contents );
 
   enum ProblemType {
       Error,
@@ -67,7 +68,7 @@ typedef long long rint64;
       Info
   };
   void reportProblem( parser::ProblemType type, const std::string& message );
-  std::string tokenText(rint64 begin, rint64 end);
+  UnicodeString tokenText(rint64 begin, rint64 end);
   void setDebug(bool debug);
 
 :]
@@ -79,7 +80,7 @@ typedef long long rint64;
         OnlyVariable,
         OnlyNewObject
     };
-    std::string m_contents;
+    UnicodeString m_contents;
     bool m_debug;
 
     struct parser_state {
@@ -721,7 +722,7 @@ LBRACKET dimOffset=dimOffset RBRACKET | LBRACE expr=expr RBRACE
 namespace rphp
 {
 
-void parser::tokenize( const std::string& contents )
+void parser::tokenize( const UnicodeString& contents )
 {
     m_contents = contents;
     Lexer lexer( this, contents );
@@ -749,7 +750,7 @@ void parser::tokenize( const std::string& contents )
 }
 
 
-std::string parser::tokenText(rint64 begin, rint64 end)
+UnicodeString parser::tokenText(rint64 begin, rint64 end)
 {
 #ifdef PENDING_THOMAS
 // TODO pending
@@ -772,7 +773,9 @@ void parser::reportProblem( parser::ProblemType type, const std::string& message
 // custom error recovery
 void parser::yy_expected_token(int kind, std::size_t token, const char* name)
 {
-//    reportProblem( parser::Error, QString("Expected token \"%1\"").arg(name));
+    std::string msg = "Expected token ";
+    msg += name;
+    reportProblem( parser::Error, msg );
 }
 
 void parser::yy_expected_symbol(int kind, const char* name)
@@ -787,7 +790,7 @@ void parser::yy_expected_symbol(int kind, const char* name)
     kDebug() << "token starts at:" << token.begin;
     kDebug() << "index is:" << index;
     token_stream->startPosition(index, &line, &col);
-    std::string tokenValue = tokenText(token.begin, token.end);
+    UnicodeString tokenValue = tokenText(token.begin, token.end);
     reportProblem( parser::Error,
 // TODO port me
 //                   QString("Expected symbol \"%1\" (current token: \"%2\" [%3] at line: %4 col: %5)")

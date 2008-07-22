@@ -3,7 +3,7 @@
 
 #include "rphp_parser.h"
 
-#include <unistr.h>
+
 #include "phplexer.h"
 
 namespace rphp
@@ -41,12 +41,12 @@ namespace rphp
   }
 
 
-  std::string parser::tokenText(rint64 begin,  rint64 end)
+  UnicodeString parser::tokenText(rint64 begin,  rint64 end)
   {
-#ifdef PENDING_THOMAS
+#ifdef PENDING_THOMAS 
     // TODO pending
     return  m_contents.mid(begin, end - begin + 1);
-#endif
+#endif 
     return  "";
   }
 
@@ -64,12 +64,14 @@ namespace rphp
   // custom error recovery
   void parser::yy_expected_token(int kind,  std::size_t token,  const char* name)
   {
-    //    reportProblem( parser::Error, QString("Expected token \"%1\"").arg(name));
+    std::string msg =  "Expected token ";
+    msg +=  name;
+    reportProblem( parser::Error,  msg );
   }
 
   void parser::yy_expected_symbol(int kind,  const char* name)
   {
-#ifdef PEDNING_THOMAS
+#ifdef PEDNING_THOMAS 
     // TODO pending
 
     rint64 line;
@@ -79,7 +81,7 @@ namespace rphp
     kDebug() <<  "token starts at:" <<  token.begin;
     kDebug() <<  "index is:" <<  index;
     token_stream->startPosition(index,  &line,  &col);
-    std::string tokenValue =  tokenText(token.begin,  token.end);
+    UnicodeString tokenValue =  tokenText(token.begin,  token.end);
     reportProblem( parser::Error,
                    // TODO port me
                    //                   QString("Expected symbol \"%1\" (current token: \"%2\" [%3] at line: %4 col: %5)")

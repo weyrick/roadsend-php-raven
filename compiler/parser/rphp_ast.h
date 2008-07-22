@@ -8,6 +8,7 @@
 
 
 
+#include <unistr.h>
 #include <string>
 #include <iostream>
 
