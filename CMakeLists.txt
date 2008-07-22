@@ -14,6 +14,7 @@ set(SRC_FILES
   compiler/parser/rphp_parser.cpp
   compiler/parser/rphp_visitor.cpp
   compiler/parser/phplexer.cpp
+  compiler/parser/main.cpp
 )
 
 add_executable( rphp ${SRC_FILES} )
