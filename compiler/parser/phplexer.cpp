@@ -28,6 +28,7 @@
 #include <iostream>
 #include <string>
 #include "unicode/utypes.h"
+#include "unicode/uchar.h"
 
 // TODO check cursor position after returning from a method and if they change the former state, or not!
 // TODO pos and m_curpos the same?
