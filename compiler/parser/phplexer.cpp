@@ -47,10 +47,9 @@
 
 int Lexer::state(int deepness) const
 {
-    #ifdef PENDING_THOMAS
-    // TODO pending we need to look at other positions than top
+
+    // was: return m_state[ m_state.size() - deepness - 1 ]; size()
     return m_state[ m_state.size() - deepness - 1 ];
-    #endif
 }
 void Lexer::printState()
 {
@@ -81,12 +80,14 @@ void Lexer::printState()
 
 void Lexer::pushState( int state )
 {
-    m_state.push( state );
+    m_state.push_back( state );
+    //m_state.push( state ); which is a QVector::append()
 }
 
 void Lexer::popState()
 {
-    m_state.pop();
+    m_state.pop_back();
+//    m_state.pop(); which is a QVector::data[ size() - 1 ]
 }
 
 int Lexer::nextTokenKind()

@@ -22,8 +22,7 @@
 #define PHPLEXER_H
 
 #include "rphp_ast.h"
-#include <stack>
-//#include <string>
+#include <vector>
 #include <unistr.h>
 
 namespace rphp
@@ -67,7 +66,7 @@ private:
 
     UChar32 lookAt( int pos ){ return m_content.char32At( m_curpos ); }
 
-    std::stack<int> m_state;
+    std::vector<int> m_state; // was: QStack<int>
     enum State
     {
         ErrorState = -1,
