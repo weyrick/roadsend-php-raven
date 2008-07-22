@@ -769,16 +769,17 @@ void parser::reportProblem( parser::ProblemType type, const std::string& message
         std::cout << "** Info:" << message;
 }
 
-#ifdef PEDNING_THOMAS
-// TODO pending
 // custom error recovery
-void parser::expectedToken(int /*expected*/, rint64 /*where*/, const std::string& name)
+void parser::yy_expected_token(int kind, std::size_t token, const char* name)
 {
-    reportProblem( parser::Error, QString("Expected token \"%1\"").arg(name));
+//    reportProblem( parser::Error, QString("Expected token \"%1\"").arg(name));
 }
 
-void parser::expectedSymbol(int /*expectedSymbol*/, const std::string& name)
+void parser::yy_expected_symbol(int kind, const char* name)
 {
+#ifdef PEDNING_THOMAS
+// TODO pending
+
     rint64 line;
     rint64 col;
     rint64 index = token_stream->index()-1;
@@ -795,8 +796,8 @@ void parser::expectedSymbol(int /*expectedSymbol*/, const std::string& name)
                   .arg(token.kind)
                   .arg(line)
                   .arg(col));
-}
 #endif
+}
 
 void parser::setDebug( bool debug )
 {
