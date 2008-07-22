@@ -25,6 +25,10 @@
 #include <unistr.h>
 #include <string>
 #include <iostream>
+#include <sstream>
+
+// I hope this makes life easier
+#define str(stdstring) std::string(stdstring)
 
 namespace rphp
 {
@@ -780,20 +784,31 @@ void parser::yy_expected_token(int kind, std::size_t token, const char* name)
 
 void parser::yy_expected_symbol(int kind, const char* name)
 {
-#ifdef PEDNING_THOMAS
-// TODO pending
-
     rint64 line;
     rint64 col;
     rint64 index = token_stream->index()-1;
     token_type &token = token_stream->token(index);
-    kDebug() << "token starts at:" << token.begin;
-    kDebug() << "index is:" << index;
-    token_stream->startPosition(index, &line, &col);
+    std::cout << "token starts at:" << token.begin;
+    std::cout << "index is:" << index;
+//    token_stream->start_position(index, &line, &col);
     UnicodeString tokenValue = tokenText(token.begin, token.end);
+
+    std::stringstream msg;
+    msg << "Expected symbol " 
+        << name 
+        << " (current token: \"" 
+//        + ( token.kind != 0 ? tokenValue : \"EOF\" )
+        + token.kind 
+        << " at line: "
+        << line
+        << " col: "
+        << col;
+
+//        reportProblem( parser::Error, msg.str() );
+
+#ifdef PENDING_THOMAS // can be removed
     reportProblem( parser::Error,
-// TODO port me
-//                   QString("Expected symbol \"%1\" (current token: \"%2\" [%3] at line: %4 col: %5)")
+                   QString("Expected symbol \"%1\" (current token: \"%2\" [%3] at line: %4 col: %5)")
                   .arg(name)
                   .arg(token.kind != 0 ? tokenValue : "EOF")
                   .arg(token.kind)

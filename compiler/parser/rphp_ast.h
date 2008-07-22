@@ -11,6 +11,10 @@
 #include <unistr.h>
 #include <string>
 #include <iostream>
+#include <sstream>
+
+// I hope this makes life easier
+#define str(stdstring) std::string(stdstring)
 
 namespace rphp
   {
