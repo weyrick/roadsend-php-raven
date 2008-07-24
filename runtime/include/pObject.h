@@ -23,12 +23,46 @@
 
 #include "pHash.h"
 
+/*
+; PHP5 case sensitivity:
+;  - class names are NOT case sensitive
+;  - method names are NOT case sensitive
+;  - properties ARE case sensitive
+; 
+; regardless of whether it is case sensitive, each item must
+; know the case it was defined as, because it's shown that way
+; by various reporting functions
+*/
+
 namespace rphp {
 
-    // XXX placeholder
+    class pMethod {
+        // method name, case sensitive (as declared)
+        // canonical name, lowercased
+        // origin class: original defining class pClass*, used in inheritance
+        // final, abstract flags
+        // function pointer (common class with normal functions?)
+    };
+
+    class pClass {
+
+            // bitset of class flags: abstract, final, interface, abstract-implied
+            // class name, case sensitive (as declared)
+            // canonical name, lowercased
+            // list of parent classes (only 1, unless interface)
+            // list of interfaces the class implements
+            // constructor, destructor, method array
+            // declared properties (including visibility, static info)
+            // class constants
+
+    };
+
     class pObject {
         private:
-            pHash properties;
+            pHash properties; // copied from declared
+            const pClass* parentClass;
+            // object instance id
+            // hash for properties created on the fly
         public:
             pObject() : properties() { }
 
@@ -37,7 +71,6 @@ namespace rphp {
             }
 
     };
-
 
     std::ostream& operator << (std::ostream& os, const rphp::pObject& h);
 

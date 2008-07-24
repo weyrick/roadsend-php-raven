@@ -27,7 +27,35 @@ namespace rphp {
     class pRuntimeEngine {
 
         private:
+
+            // output buffering management
             pOutputManager outputManager;
+            
+            // function manager
+            // --> store list of available functions, including builtins (from extension manager) which stay on page reset,
+            //     and the currently defined via php code, which are reset each page
+            // --> interface for new function definition
+            
+            // class manager
+            // --> similar to funciton manager, but stores builtin and currently defined classes
+            // --> interface for new class definition
+            
+            // extension manager
+            // --> for loading and registering dynamic extensions (pcre, mysql, etc) and their associated functions, classes
+
+            // global data:
+            // --> $GLOBAL and other superglobal symbol table, argc, argv,
+            // --> constants (with define()). support builtins (PATH_SEPARATOR, etc) and interface for dynamic verisons
+
+            // include files: include paths, all files included
+
+            // runtime reset functionality (for page resets)
+            
+            // maintainance: startup, shutdown hooks. signal/slots?
+
+            // php.ini compatilbility
+
+            // error manager
 
         public:
             pRuntimeEngine() { }
