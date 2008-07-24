@@ -1,13 +1,8 @@
-project (rphp)
+# runtime
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../cmake/modules )
+MESSAGE( STATUS "runtime check" )
 
-FIND_PACKAGE(Boost REQUIRED)
-FIND_PACKAGE(ICU)
-
-cmake_minimum_required(VERSION 2.6)
-
-include_directories (${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR} ${Boost_INCLUDE_DIRS})
+include_directories (${Boost_INCLUDE_DIRS} ${RPHP_RUNTIME_INCLUDE_DIR})
 
 set(RUNTIME_SRC_FILES
   pHash.cpp

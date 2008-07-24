@@ -1,22 +1,19 @@
+# root
+
 project (rphp)
 
-cmake_minimum_required(VERSION 2.6)
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules )
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules )
+MESSAGE( STATUS "PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR} )
+MESSAGE( STATUS "CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH} )
 
-FIND_PACKAGE(ICU REQUIRED)
+set(RPHP_RUNTIME_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/runtime/include)
+set(RPHP_COMPILER_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/compiler)
+
+FIND_PACKAGE(Boost REQUIRED)
+FIND_PACKAGE(ICU)
 
 add_subdirectory(tools)
+add_subdirectory(runtime)
+add_subdirectory(compiler)
+add_subdirectory(frontend/cli)
 
-include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} tools/kdevelop-pg/include ${ICU_INCLUDE_DIRS}/unicode ${ICU_INCLUDE_DIRS})
-
-set(SRC_FILES
-  compiler/parser/rphp_default_visitor.cpp
-  compiler/parser/rphp_parser.cpp
-  compiler/parser/rphp_visitor.cpp
-  compiler/parser/phplexer.cpp
-  compiler/parser/main.cpp
-)
-
-add_executable( rphp ${SRC_FILES} )
-
-target_link_libraries( rphp  ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} )
