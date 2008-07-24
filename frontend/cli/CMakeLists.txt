@@ -8,5 +8,5 @@ set(CLI_SRC_FILES
 )
 
 add_executable( rphp ${CLI_SRC_FILES} )
-target_link_libraries( rphp rphp-eval rphp-runtime )
+target_link_libraries( rphp rphp-eval rphp-runtime boost_program_options )
 
