@@ -37,7 +37,7 @@ int main( int argc, char* argv[] )
 
     std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
     for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {
-        driver.compile(*it);
+        driver.dumpTokens(*it);
     }
 
     //std::cout << "Optimization level is " << opt << "\n";

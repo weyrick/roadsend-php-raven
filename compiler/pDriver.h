@@ -20,6 +20,7 @@
 #ifndef RPHP_PDRIVER_H_
 #define RPHP_PDRIVER_H_
 
+#include <string>
 
 namespace rphp {
 
@@ -27,7 +28,7 @@ namespace rphp {
     class pDriver {
 
         public:
-            void compile(std::string fileName);
+            void dumpTokens(std::string fileName);
 
     };
 

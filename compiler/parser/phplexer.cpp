@@ -100,10 +100,7 @@ int Lexer::nextTokenKind()
         return 0;
     }
     int pos = m_curpos;
-    #ifdef THOMAS_TEMP_DISABLED
-    // TODO temp. disabled code, tokenBegin was not in use
     m_tokenBegin = m_curpos;
-    #endif
     switch ( state() )
     {
         case HtmlState:
@@ -148,7 +145,7 @@ int Lexer::nextTokenKind()
                 token = parser::Token_WHITESPACE;
                 while (m_curpos < m_contentSize && lookAt( pos ) == ' ') {
                     if ( lookAt( pos ) == '\n') createNewline(m_curpos);
-                    pos; // weiterspringen!!!!
+                    pos++; // weiterspringen!!!!
                     m_curpos++;
                 }
                 m_curpos--;

@@ -64,7 +64,7 @@ private:
     bool isEscapedWithBackslash(const UChar32& it, int curPos, int startPos, int pos);
     bool isHeredocEnd(const UChar32& it, int pos);
 
-    UChar32 lookAt( int pos ){ return m_content.char32At( m_curpos ); }
+    UChar32 lookAt( int pos ){ return m_content.char32At( pos ); }
 
     std::vector<int> m_state; // was: QStack<int>
     enum State
