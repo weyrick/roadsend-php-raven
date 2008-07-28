@@ -9,18 +9,15 @@ namespace rphp
   void default_visitor::visit_additiveExpression(additiveExpression_ast *node)
   {
     visit_node(node->expression);
-
-    if  (node->additionalExpression_sequence)
+    if (node->additionalExpression_sequence)
       {
-        const list_node<additiveExpressionRest_ast*> *__it =  node->additionalExpression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<additiveExpressionRest_ast*> *__it = node->additionalExpression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -54,17 +51,15 @@ namespace rphp
 
   void default_visitor::visit_assignmentList(assignmentList_ast *node)
   {
-    if  (node->element_sequence)
+    if (node->element_sequence)
       {
-        const list_node<assignmentListElement_ast*> *__it =  node->element_sequence->to_front(),  *__end =  __it;
-
+        const list_node<assignmentListElement_ast*> *__it = node->element_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -77,20 +72,16 @@ namespace rphp
   void default_visitor::visit_baseVariable(baseVariable_ast *node)
   {
     visit_node(node->var);
-
-    if  (node->offsetItems_sequence)
+    if (node->offsetItems_sequence)
       {
-        const list_node<dimListItem_ast*> *__it =  node->offsetItems_sequence->to_front(),  *__end =  __it;
-
+        const list_node<dimListItem_ast*> *__it = node->offsetItems_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
     visit_node(node->staticMember);
   }
 
@@ -102,97 +93,85 @@ namespace rphp
 
   void default_visitor::visit_bitAndExpression(bitAndExpression_ast *node)
   {
-    if  (node->expression_sequence)
+    if (node->expression_sequence)
       {
-        const list_node<equalityExpression_ast*> *__it =  node->expression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<equalityExpression_ast*> *__it = node->expression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
   void default_visitor::visit_bitOrExpression(bitOrExpression_ast *node)
   {
-    if  (node->expression_sequence)
+    if (node->expression_sequence)
       {
-        const list_node<bitXorExpression_ast*> *__it =  node->expression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<bitXorExpression_ast*> *__it = node->expression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
   void default_visitor::visit_bitXorExpression(bitXorExpression_ast *node)
   {
-    if  (node->expression_sequence)
+    if (node->expression_sequence)
       {
-        const list_node<bitAndExpression_ast*> *__it =  node->expression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<bitAndExpression_ast*> *__it = node->expression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
   void default_visitor::visit_booleanAndExpression(booleanAndExpression_ast *node)
   {
-    if  (node->expression_sequence)
+    if (node->expression_sequence)
       {
-        const list_node<bitOrExpression_ast*> *__it =  node->expression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<bitOrExpression_ast*> *__it = node->expression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
   void default_visitor::visit_booleanOrExpression(booleanOrExpression_ast *node)
   {
-    if  (node->expression_sequence)
+    if (node->expression_sequence)
       {
-        const list_node<booleanAndExpression_ast*> *__it =  node->expression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<booleanAndExpression_ast*> *__it = node->expression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
   void default_visitor::visit_caseList(caseList_ast *node)
   {
-    if  (node->caseItems_sequence)
+    if (node->caseItems_sequence)
       {
-        const list_node<case_item_ast*> *__it =  node->caseItems_sequence->to_front(),  *__end =  __it;
-
+        const list_node<case_item_ast*> *__it = node->caseItems_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -214,17 +193,15 @@ namespace rphp
 
   void default_visitor::visit_classDeclarationStatement(classDeclarationStatement_ast *node)
   {
-    if  (node->statements_sequence)
+    if (node->statements_sequence)
       {
-        const list_node<classStatement_ast*> *__it =  node->statements_sequence->to_front(),  *__end =  __it;
-
+        const list_node<classStatement_ast*> *__it = node->statements_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -307,17 +284,15 @@ namespace rphp
 
   void default_visitor::visit_dynamicClassNameVariableProperties(dynamicClassNameVariableProperties_ast *node)
   {
-    if  (node->properties_sequence)
+    if (node->properties_sequence)
       {
-        const list_node<dynamicClassNameVariableProperty_ast*> *__it =  node->properties_sequence->to_front(),  *__end =  __it;
-
+        const list_node<dynamicClassNameVariableProperty_ast*> *__it = node->properties_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -333,17 +308,15 @@ namespace rphp
 
   void default_visitor::visit_elseifList(elseifList_ast *node)
   {
-    if  (node->elseifListItem_sequence)
+    if (node->elseifListItem_sequence)
       {
-        const list_node<elseifListItem_ast*> *__it =  node->elseifListItem_sequence->to_front(),  *__end =  __it;
-
+        const list_node<elseifListItem_ast*> *__it = node->elseifListItem_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -360,17 +333,15 @@ namespace rphp
 
   void default_visitor::visit_encapsList(encapsList_ast *node)
   {
-    if  (node->encaps_sequence)
+    if (node->encaps_sequence)
       {
-        const list_node<encaps_ast*> *__it =  node->encaps_sequence->to_front(),  *__end =  __it;
-
+        const list_node<encaps_ast*> *__it = node->encaps_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -386,18 +357,15 @@ namespace rphp
   void default_visitor::visit_equalityExpression(equalityExpression_ast *node)
   {
     visit_node(node->expression);
-
-    if  (node->additionalExpression_sequence)
+    if (node->additionalExpression_sequence)
       {
-        const list_node<equalityExpressionRest_ast*> *__it =  node->additionalExpression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<equalityExpressionRest_ast*> *__it = node->additionalExpression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -413,17 +381,15 @@ namespace rphp
 
   void default_visitor::visit_forExpr(forExpr_ast *node)
   {
-    if  (node->exprs_sequence)
+    if (node->exprs_sequence)
       {
-        const list_node<expr_ast*> *__it =  node->exprs_sequence->to_front(),  *__end =  __it;
-
+        const list_node<expr_ast*> *__it = node->exprs_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -458,17 +424,15 @@ namespace rphp
 
   void default_visitor::visit_functionCallParameterList(functionCallParameterList_ast *node)
   {
-    if  (node->parameters_sequence)
+    if (node->parameters_sequence)
       {
-        const list_node<functionCallParameterListElement_ast*> *__it =  node->parameters_sequence->to_front(),  *__end =  __it;
-
+        const list_node<functionCallParameterListElement_ast*> *__it = node->parameters_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -492,65 +456,57 @@ namespace rphp
 
   void default_visitor::visit_innerStatementList(innerStatementList_ast *node)
   {
-    if  (node->statements_sequence)
+    if (node->statements_sequence)
       {
-        const list_node<topStatement_ast*> *__it =  node->statements_sequence->to_front(),  *__end =  __it;
-
+        const list_node<topStatement_ast*> *__it = node->statements_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
   void default_visitor::visit_logicalAndExpression(logicalAndExpression_ast *node)
   {
-    if  (node->expression_sequence)
+    if (node->expression_sequence)
       {
-        const list_node<printExpression_ast*> *__it =  node->expression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<printExpression_ast*> *__it = node->expression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
   void default_visitor::visit_logicalOrExpression(logicalOrExpression_ast *node)
   {
-    if  (node->expression_sequence)
+    if (node->expression_sequence)
       {
-        const list_node<logicalXorExpression_ast*> *__it =  node->expression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<logicalXorExpression_ast*> *__it = node->expression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
   void default_visitor::visit_logicalXorExpression(logicalXorExpression_ast *node)
   {
-    if  (node->expression_sequence)
+    if (node->expression_sequence)
       {
-        const list_node<logicalAndExpression_ast*> *__it =  node->expression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<logicalAndExpression_ast*> *__it = node->expression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -565,18 +521,15 @@ namespace rphp
   void default_visitor::visit_multiplicativeExpression(multiplicativeExpression_ast *node)
   {
     visit_node(node->expression);
-
-    if  (node->additionalExpression_sequence)
+    if (node->additionalExpression_sequence)
       {
-        const list_node<multiplicativeExpression_rest_ast*> *__it =  node->additionalExpression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<multiplicativeExpression_rest_ast*> *__it = node->additionalExpression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -592,17 +545,15 @@ namespace rphp
 
   void default_visitor::visit_newElseifList(newElseifList_ast *node)
   {
-    if  (node->newElseifListItem_sequence)
+    if (node->newElseifListItem_sequence)
       {
-        const list_node<newelseifListItem_ast*> *__it =  node->newElseifListItem_sequence->to_front(),  *__end =  __it;
-
+        const list_node<newelseifListItem_ast*> *__it = node->newElseifListItem_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -615,18 +566,15 @@ namespace rphp
   void default_visitor::visit_objectDimList(objectDimList_ast *node)
   {
     visit_node(node->variableName);
-
-    if  (node->offsetItems_sequence)
+    if (node->offsetItems_sequence)
       {
-        const list_node<dimListItem_ast*> *__it =  node->offsetItems_sequence->to_front(),  *__end =  __it;
-
+        const list_node<dimListItem_ast*> *__it = node->offsetItems_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -643,17 +591,15 @@ namespace rphp
 
   void default_visitor::visit_parameterList(parameterList_ast *node)
   {
-    if  (node->params_sequence)
+    if (node->params_sequence)
       {
-        const list_node<parameter_ast*> *__it =  node->params_sequence->to_front(),  *__end =  __it;
-
+        const list_node<parameter_ast*> *__it = node->params_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -668,20 +614,16 @@ namespace rphp
   void default_visitor::visit_relationalExpression(relationalExpression_ast *node)
   {
     visit_node(node->expression);
-
-    if  (node->additionalExpression_sequence)
+    if (node->additionalExpression_sequence)
       {
-        const list_node<relationalExpressionRest_ast*> *__it =  node->additionalExpression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<relationalExpressionRest_ast*> *__it = node->additionalExpression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
     visit_node(node->instanceofType);
   }
 
@@ -702,18 +644,15 @@ namespace rphp
   void default_visitor::visit_shiftExpression(shiftExpression_ast *node)
   {
     visit_node(node->expression);
-
-    if  (node->additionalExpression_sequence)
+    if (node->additionalExpression_sequence)
       {
-        const list_node<shiftExpressionRest_ast*> *__it =  node->additionalExpression_sequence->to_front(),  *__end =  __it;
-
+        const list_node<shiftExpressionRest_ast*> *__it = node->additionalExpression_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -749,108 +688,86 @@ namespace rphp
     visit_node(node->foreachArg);
     visit_node(node->foreachStatement);
     visit_node(node->declareItem);
-
-    if  (node->catches_sequence)
+    if (node->catches_sequence)
       {
-        const list_node<catch_item_ast*> *__it =  node->catches_sequence->to_front(),  *__end =  __it;
-
+        const list_node<catch_item_ast*> *__it = node->catches_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
-    if  (node->unsetVariables_sequence)
+    if (node->unsetVariables_sequence)
       {
-        const list_node<variable_ast*> *__it =  node->unsetVariables_sequence->to_front(),  *__end =  __it;
-
+        const list_node<variable_ast*> *__it = node->unsetVariables_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
     visit_node(node->expr);
     visit_node(node->doStatement);
     visit_node(node->whilteExpr);
     visit_node(node->breakExpr);
     visit_node(node->continueExpr);
     visit_node(node->returnExpr);
-
-    if  (node->globalVars_sequence)
+    if (node->globalVars_sequence)
       {
-        const list_node<globalVar_ast*> *__it =  node->globalVars_sequence->to_front(),  *__end =  __it;
-
+        const list_node<globalVar_ast*> *__it = node->globalVars_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
-    if  (node->staticVars_sequence)
+    if (node->staticVars_sequence)
       {
-        const list_node<staticVar_ast*> *__it =  node->staticVars_sequence->to_front(),  *__end =  __it;
-
+        const list_node<staticVar_ast*> *__it = node->staticVars_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
-    if  (node->echoExprs_sequence)
+    if (node->echoExprs_sequence)
       {
-        const list_node<expr_ast*> *__it =  node->echoExprs_sequence->to_front(),  *__end =  __it;
-
+        const list_node<expr_ast*> *__it = node->echoExprs_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
     visit_node(node->throwExpr);
   }
 
   void default_visitor::visit_staticArrayPairValue(staticArrayPairValue_ast *node)
   {
-    if  (node->val1_sequence)
+    if (node->val1_sequence)
       {
-        const list_node<staticScalar_ast*> *__it =  node->val1_sequence->to_front(),  *__end =  __it;
-
+        const list_node<staticScalar_ast*> *__it = node->val1_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
-    if  (node->val2_sequence)
+    if (node->val2_sequence)
       {
-        const list_node<staticScalar_ast*> *__it =  node->val2_sequence->to_front(),  *__end =  __it;
-
+        const list_node<staticScalar_ast*> *__it = node->val2_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -864,18 +781,15 @@ namespace rphp
     visit_node(node->value);
     visit_node(node->plusValue);
     visit_node(node->minusValue);
-
-    if  (node->arrayValues_sequence)
+    if (node->arrayValues_sequence)
       {
-        const list_node<staticArrayPairValue_ast*> *__it =  node->arrayValues_sequence->to_front(),  *__end =  __it;
-
+        const list_node<staticArrayPairValue_ast*> *__it = node->arrayValues_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -906,32 +820,26 @@ namespace rphp
 
   void default_visitor::visit_unaryExpression_not_plusminus(unaryExpression_not_plusminus_ast *node)
   {
-    if  (node->prefixOperator_sequence)
+    if (node->prefixOperator_sequence)
       {
-        const list_node<postprefixOperator_ast*> *__it =  node->prefixOperator_sequence->to_front(),  *__end =  __it;
-
+        const list_node<postprefixOperator_ast*> *__it = node->prefixOperator_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
     visit_node(node->varExpression);
-
-    if  (node->postfixOperator_sequence)
+    if (node->postfixOperator_sequence)
       {
-        const list_node<postprefixOperator_ast*> *__it =  node->postfixOperator_sequence->to_front(),  *__end =  __it;
-
+        const list_node<postprefixOperator_ast*> *__it = node->postfixOperator_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -954,33 +862,26 @@ namespace rphp
     visit_node(node->encapsList);
     visit_node(node->variable);
     visit_node(node->scalar);
-
-    if  (node->arrayValues_sequence)
+    if (node->arrayValues_sequence)
       {
-        const list_node<arrayPairValue_ast*> *__it =  node->arrayValues_sequence->to_front(),  *__end =  __it;
-
+        const list_node<arrayPairValue_ast*> *__it = node->arrayValues_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
-    if  (node->issetVariable_sequence)
+    if (node->issetVariable_sequence)
       {
-        const list_node<variable_ast*> *__it =  node->issetVariable_sequence->to_front(),  *__end =  __it;
-
+        const list_node<variable_ast*> *__it = node->issetVariable_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
-
     visit_node(node->emptyVarialbe);
     visit_node(node->newObject);
     visit_node(node->cloneCar);
@@ -989,18 +890,15 @@ namespace rphp
   void default_visitor::visit_variable(variable_ast *node)
   {
     visit_node(node->var);
-
-    if  (node->variableProperties_sequence)
+    if (node->variableProperties_sequence)
       {
-        const list_node<variableProperty_ast*> *__it =  node->variableProperties_sequence->to_front(),  *__end =  __it;
-
+        const list_node<variableProperty_ast*> *__it = node->variableProperties_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 
@@ -1018,18 +916,15 @@ namespace rphp
   void default_visitor::visit_variableWithoutObjects(variableWithoutObjects_ast *node)
   {
     visit_node(node->variable);
-
-    if  (node->offsetItems_sequence)
+    if (node->offsetItems_sequence)
       {
-        const list_node<dimListItem_ast*> *__it =  node->offsetItems_sequence->to_front(),  *__end =  __it;
-
+        const list_node<dimListItem_ast*> *__it = node->offsetItems_sequence->to_front(), *__end = __it;
         do
           {
             visit_node(__it->element);
-            __it =  __it->next;
+            __it = __it->next;
           }
-
-        while  (__it !=  __end);
+        while (__it != __end);
       }
   }
 

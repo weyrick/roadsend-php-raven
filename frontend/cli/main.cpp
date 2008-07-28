@@ -33,7 +33,7 @@ int main( int argc, char* argv[] )
         return 1;
     }
     
-    std::cout << "Roadsend PHP" << std::endl;
+    //std::cout << "Roadsend PHP" << std::endl;
 
     std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
     for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {

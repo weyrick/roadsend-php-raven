@@ -27,16 +27,35 @@
 
 #include <iostream>
 #include <string>
+#include <algorithm>
+#include <cctype>
 #include "unicode/utypes.h"
 #include "unicode/uchar.h"
 
 // TODO check cursor position after returning from a method and if they change the former state, or not!
 // TODO pos and m_curpos the same?
 
-    namespace rphp
-    {
+namespace rphp
+{
 
-        Lexer::Lexer( parser* _parser, const UnicodeString& content ):
+// generic helpers
+bool C_isAlNum(char c) { return isalnum(c); }
+bool C_isDigit(char c) { return isdigit(c); }
+bool C_isHigh(char c) { return false; }
+char C_toLower(char c) { return tolower(c); }
+void S_toLower(std::string& s) {
+  std::transform(s.begin(), s.end(), s.begin(),
+                 (int(*)(int)) std::tolower);
+}
+
+bool C_isAlNum(UChar32 c) { return u_isalnum(c); }
+bool C_isDigit(UChar32 c) { return u_isdigit(c); }
+UChar32 C_toLower(UChar32 c) { return u_tolower(c); }
+void S_toLower(UnicodeString& s) { s.toLower(); }
+//
+
+template <typename StringClass, typename CharClass>
+Lexer<StringClass, CharClass>::Lexer( parser* _parser, const StringClass& content ):
         m_content( content ), m_parser( _parser ),
         m_curpos( 0 ), m_contentSize( m_content.length() ),
         m_tokenBegin( 0 ), m_tokenEnd( 0 ), m_haltCompiler( 0 )
@@ -45,13 +64,16 @@
     pushState( HtmlState );
 }
 
-int Lexer::state(int deepness) const
+template <typename StringClass, typename CharClass>
+int Lexer<StringClass, CharClass>::state(int deepness) const
 {
 
     // was: return m_state[ m_state.size() - deepness - 1 ]; size()
     return m_state[ m_state.size() - deepness - 1 ];
 }
-void Lexer::printState()
+
+template <typename StringClass, typename CharClass>
+void Lexer<StringClass, CharClass>::printState()
 {
     int s = state();
     if (s == ErrorState)
@@ -78,19 +100,22 @@ void Lexer::printState()
         std::cout << "StringBacktick";
 }
 
-void Lexer::pushState( int state )
+template <typename StringClass, typename CharClass>
+void Lexer<StringClass, CharClass>::pushState( int state )
 {
     m_state.push_back( state );
     //m_state.push( state ); which is a QVector::append()
 }
 
-void Lexer::popState()
+template <typename StringClass, typename CharClass>
+void Lexer<StringClass, CharClass>::popState()
 {
     m_state.pop_back();
 //    m_state.pop(); which is a QVector::data[ size() - 1 ]
 }
 
-int Lexer::nextTokenKind()
+template <typename StringClass, typename CharClass>
+int Lexer<StringClass, CharClass>::nextTokenKind()
 {
     int token = parser::Token_INVALID;
     if ( m_curpos >= m_contentSize )
@@ -150,10 +175,11 @@ int Lexer::nextTokenKind()
                 }
                 m_curpos--;
             }
-            else if (u_isdigit( lookAt( pos ) )
-                    || ( lookAt( pos )  == '.' && u_isdigit( lookAt( pos + 1 ) ) ))
+            else if (C_isDigit( lookAt( pos ) )
+                    || ( lookAt( pos )  == '.' && C_isDigit( lookAt( pos + 1 ) ) ))
             {
-		UnicodeString num;bool hasPoint = false;
+                StringClass num;
+                bool hasPoint = false;
                 bool hex = false;
                 if ( lookAt( pos ) == '0' && ( lookAt( pos + 1 )) == 'x') {
                     pos += 2;
@@ -161,20 +187,21 @@ int Lexer::nextTokenKind()
                     hex = true;
                 }
                 while (m_curpos < m_contentSize && (
-                            u_isdigit( lookAt( pos ) )
+                            C_isDigit( lookAt( pos ) )
                         || (!hex && !hasPoint && lookAt( pos ) == '.')
-                        || (hex && (u_tolower( lookAt( pos ) ) == 'a' || u_tolower( lookAt( pos ) ) == 'b' ||
-                                    u_tolower( lookAt( pos ) ) == 'c' || u_tolower( lookAt( pos ) ) == 'd' ||
-                                    u_tolower( lookAt( pos ) ) == 'e' || u_tolower( lookAt( pos ) ) == 'f'))))
+                        || (hex && (C_toLower( lookAt( pos ) ) == 'a' || C_toLower( lookAt( pos ) ) == 'b' ||
+                                    C_toLower( lookAt( pos ) ) == 'c' || C_toLower( lookAt( pos ) ) == 'd' ||
+                                    C_toLower( lookAt( pos ) ) == 'e' || C_toLower( lookAt( pos ) ) == 'f'))))
                 {
                     if (lookAt( pos ) == '.') hasPoint = true;
-                    num.append(lookAt( pos ));
+                    //num.append(lookAt( pos ));
+                    num += lookAt( pos );
                     pos++;
                     m_curpos++;
                 }
-                if (!hex && u_tolower( lookAt( pos ) ) == 'e' &&
-                        (u_isdigit( lookAt( pos ) ) ||
-                            ((lookAt( pos + 1 ) == '-' || lookAt( pos + 1 ) == '+') && u_isdigit( lookAt( pos + 2 ) ) )))
+                if (!hex && C_toLower( lookAt( pos ) ) == 'e' &&
+                        (C_isDigit( lookAt( pos ) ) ||
+                            ((lookAt( pos + 1 ) == '-' || lookAt( pos + 1 ) == '+') && C_isDigit( lookAt( pos + 2 ) ) )))
                 {
                     //exponential number
                     token = parser::Token_DNUMBER;
@@ -184,7 +211,7 @@ int Lexer::nextTokenKind()
                         pos++;
                         m_curpos++;
                     }
-                    while (m_curpos < m_contentSize && ( u_isdigit( lookAt( pos ) ) )) {
+                    while (m_curpos < m_contentSize && ( C_isDigit( lookAt( pos ) ) )) {
                         pos++;
                         m_curpos++;
                     }
@@ -246,10 +273,11 @@ int Lexer::nextTokenKind()
                     pos++;
                     _pos++;
                 }
-                UnicodeString name;
-                while (_pos < m_contentSize && u_isalnum( lookAt( pos ) ))
+                StringClass name;
+                while (_pos < m_contentSize && C_isAlNum( lookAt( pos ) ))
                 {
-                    name.append( lookAt( pos ) );
+                    //name.append( lookAt( pos ) );
+                    name += lookAt( pos );
                     pos++;
                     _pos++;
                 }
@@ -258,7 +286,8 @@ int Lexer::nextTokenKind()
                     pos++;
                     _pos++;
                 }
-                name = name.toLower();
+                //name = name.toLower();
+                S_toLower(name);
                 if (lookAt( pos ) == ')')
                 {
                     if (name == "int" || name == "integer")
@@ -355,17 +384,19 @@ int Lexer::nextTokenKind()
                         //HEREDOC string (<<< EOD\nfoo\nEOD;\n)
                         int _pos = 3;
                         while (m_curpos+_pos < m_contentSize &&
-                               ( u_isalnum( lookAt( pos + _pos ) ) == ' ' || u_isalnum( lookAt( pos + _pos ) ) == '\t'))
+                               ( C_isAlNum( lookAt( pos + _pos ) ) == ' ' || C_isAlNum( lookAt( pos + _pos ) ) == '\t'))
                         {
                             _pos++;
                         }
-                        if ( u_isalnum( lookAt( pos + _pos ) ) || lookAt( pos + _pos ) == '_') //identifier must start with a letter
+                        if ( C_isAlNum( lookAt( pos + _pos ) ) || lookAt( pos + _pos ) == '_') //identifier must start with a letter
                         {
-                            m_heredocIdentifier.remove();
+                            //m_heredocIdentifier.remove();
+                            m_heredocIdentifier = "";
                             while (m_curpos+_pos < m_contentSize &&
-                                ( u_isdigit( lookAt( pos + _pos ) ) || u_isalnum( lookAt( pos + _pos ) ) || lookAt( pos + _pos ) == '_'))
+                                ( C_isDigit( lookAt( pos + _pos ) ) || C_isAlNum( lookAt( pos + _pos ) ) || lookAt( pos + _pos ) == '_'))
                             {
-                                m_heredocIdentifier.append( lookAt( pos + _pos ) );
+                                //m_heredocIdentifier.append( lookAt( pos + _pos ) );
+                                m_heredocIdentifier += lookAt( pos + _pos );
                                 _pos++;
                             }
                             if ( lookAt( pos + _pos ) == '\n') {
@@ -629,7 +660,7 @@ int Lexer::nextTokenKind()
                 {
                     if (lookAt( pos ) == '$'  && !isEscapedWithBackslash(lookAt( pos ), m_curpos+i, m_curpos, pos)
                             && (lookAt( pos + 1 ) == '{'
-                                   || (isValidVariableIdentifier( lookAt( pos + 1 ) ) && ! u_isdigit( lookAt( pos + 1 ) )))) {
+                                   || (isValidVariableIdentifier( lookAt( pos + 1 ) ) && ! C_isDigit( lookAt( pos + 1 ) )))) {
                         foundVar = true;
                     }
                     pos++;
@@ -676,16 +707,18 @@ int Lexer::nextTokenKind()
                     token = parser::Token_ASSIGN;
                 }
             }
-            else if (isValidVariableIdentifier(lookAt( pos )) && !u_isdigit( lookAt( pos ) ))
+            else if (isValidVariableIdentifier(lookAt( pos )) && !C_isDigit( lookAt( pos ) ))
             {
-		UnicodeString name;
+		StringClass name;
                 while (m_curpos < m_contentSize && (isValidVariableIdentifier(lookAt( pos )))) {
-                    name.append(lookAt( pos ));
+                    //name.append(lookAt( pos ));
+                    name += lookAt( pos );
                     pos++;
                     m_curpos++;
                 }
                 m_curpos--;
-                name = name.toLower();
+                //name = name.toLower();
+                S_toLower(name);
                 if (name == "echo") {
                     token = parser::Token_ECHO;
                 } else if (name == "include") {
@@ -855,7 +888,7 @@ int Lexer::nextTokenKind()
                 m_curpos++;
                 pos += 2;
                 //check if a valid variable follows
-                if ((isValidVariableIdentifier(lookAt( pos )) && ! u_isdigit( lookAt( pos ) )))
+                if ((isValidVariableIdentifier(lookAt( pos )) && ! C_isDigit( lookAt( pos ) )))
                 {
                     pushState(StringVarname);
                 }
@@ -867,14 +900,14 @@ int Lexer::nextTokenKind()
                 pushState(StringVariableBracket);
             }
             else if (state() != StringVariable && lookAt( pos ) == '{' && lookAt( pos + 1 ) == '$'
-                    && (isValidVariableIdentifier( lookAt( pos + 2 ) ) && ! u_isdigit( lookAt( pos + 2 ) ) || lookAt( pos + 2 ) == '{'))
+                    && (isValidVariableIdentifier( lookAt( pos + 2 ) ) && ! C_isDigit( lookAt( pos + 2 ) ) || lookAt( pos + 2 ) == '{'))
             {
                 token = parser::Token_CURLY_OPEN;
                 pushState(StringVariableCurly);
             }
             else if (state() == StringVariable
                     && lookAt( pos ) == '-' && lookAt( pos + 1 ) == '>'
-                    && isValidVariableIdentifier( lookAt( pos + 2 ) ) && ! u_isdigit( lookAt( pos + 2 ) ))
+                    && isValidVariableIdentifier( lookAt( pos + 2 ) ) && ! C_isDigit( lookAt( pos + 2 ) ))
             {
                 token = parser::Token_OBJECT_OPERATOR;
                 m_curpos++;
@@ -891,7 +924,7 @@ int Lexer::nextTokenKind()
                     if (!isEscapedWithBackslash(lookAt( pos ), m_curpos, startPos, pos) &&
                          (lookAt( pos ) == '$' && lookAt( pos + 1 ) == '{' ||
                           lookAt( pos ) == '{' && lookAt( pos + 1 ) == '$' ||
-                          lookAt( pos ) == '$' && isValidVariableIdentifier( lookAt( pos + 1 ) ) && ! u_isdigit( lookAt( pos + 1 ) )))
+                          lookAt( pos ) == '$' && isValidVariableIdentifier( lookAt( pos + 1 ) ) && ! C_isDigit( lookAt( pos + 1 ) )))
                     {
                         //variable is next ${var} or {$var}
                         break;
@@ -931,10 +964,10 @@ int Lexer::nextTokenKind()
                 popState();
                 popState();
             }
-            else if ( u_isdigit( lookAt( pos ) ))
+            else if ( C_isDigit( lookAt( pos ) ))
             {
                 token = parser::Token_NUM_STRING;
-                while (m_curpos < m_contentSize && u_isdigit( lookAt( pos ) ))
+                while (m_curpos < m_contentSize && C_isDigit( lookAt( pos ) ))
                 {
                     pos++;
                     m_curpos++;
@@ -1010,23 +1043,27 @@ int Lexer::nextTokenKind()
     return token;
 }
 
-rint64 Lexer::tokenBegin() const
+template <typename StringClass, typename CharClass>
+rint64 Lexer<StringClass, CharClass>::tokenBegin() const
 {
     return m_tokenBegin;
 }
 
-rint64 Lexer::tokenEnd() const
+template <typename StringClass, typename CharClass>
+rint64 Lexer<StringClass, CharClass>::tokenEnd() const
 {
     return m_tokenEnd;
 }
 
-bool Lexer::isHeredocEnd(const UChar32& it, int pos)
+template <typename StringClass, typename CharClass>
+bool Lexer<StringClass, CharClass>::isHeredocEnd(const CharClass& it, int pos)
 {
     int identiferLen = m_heredocIdentifier.length();
-    UnicodeString lineStart;
+    StringClass lineStart;
     for (int i = 0; i < identiferLen; i++) {
         if (m_curpos+i >= m_contentSize) break;
-        lineStart.append( lookAt( pos + i ) );
+        //lineStart.append( lookAt( pos + i ) );
+        lineStart += lookAt( pos + i );
     }
     if (lineStart == m_heredocIdentifier &&
         (lookAt( pos + identiferLen ) == '\n'
@@ -1039,7 +1076,8 @@ bool Lexer::isHeredocEnd(const UChar32& it, int pos)
 }
 
 //used for strings, to check if " is escaped (\" is, \\" not)
-bool Lexer::isEscapedWithBackslash(const UChar32& it, int curPos, int startPos, int pos)
+template <typename StringClass, typename CharClass>
+bool Lexer<StringClass, CharClass>::isEscapedWithBackslash(const CharClass& it, int curPos, int startPos, int pos)
 {
     int cnt = 0;
     pos--;
@@ -1050,10 +1088,11 @@ bool Lexer::isEscapedWithBackslash(const UChar32& it, int curPos, int startPos, 
     return (cnt % 2) == 1;
 }
 
-bool Lexer::processVariable(int pos)
+template <typename StringClass, typename CharClass>
+bool Lexer<StringClass, CharClass>::processVariable(int pos)
 {
-    UChar32 c2 = lookAt( pos + 1 );
-    if ( lookAt( pos ) == '$' && (isValidVariableIdentifier(c2) && ! u_isdigit( c2 )))
+    CharClass c2 = lookAt( pos + 1 );
+    if ( lookAt( pos ) == '$' && (isValidVariableIdentifier(c2) && ! C_isDigit( c2 )))
     {
         pos++;
         m_curpos++;
@@ -1071,13 +1110,15 @@ bool Lexer::processVariable(int pos)
         return false;
     }
 }
-bool Lexer::isValidVariableIdentifier(const UChar32& it)
+template <typename StringClass, typename CharClass>
+bool Lexer<StringClass, CharClass>::isValidVariableIdentifier(const CharClass& it)
 {
     // TODO check: it > 0x7f
-    return u_isalnum( it ) || u_isdigit( it ) || it == '_' || it > 0x7f;
+    return C_isAlNum( it ) || C_isDigit( it ) || it == '_' || C_isHigh(it);
 }
 
-void Lexer::createNewline( int pos )
+template <typename StringClass, typename CharClass>
+void Lexer<StringClass, CharClass>::createNewline( int pos )
 {
     #ifdef PENDING_THOMAS
     // TODO pending add newline to the tokenStream
@@ -1085,6 +1126,10 @@ void Lexer::createNewline( int pos )
         m_parser->tokenStream->locationTable()->newline( pos );
     #endif
 }
+
+// implement supported types
+template class Lexer<UnicodeString, UChar32>;
+template class Lexer<std::string, char>;
 
 }
 

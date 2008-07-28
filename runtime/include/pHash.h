@@ -128,6 +128,8 @@ namespace rphp {
 
             // types
             typedef stableHash::size_type size_type;
+            
+            typedef stableHash::iterator iterator;
 
             // construct/destroy/copy
             pHash() : maxIntKey(0) { std::cout << "creating fresh pHash" << std::endl; }

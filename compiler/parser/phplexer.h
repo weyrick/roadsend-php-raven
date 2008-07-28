@@ -23,67 +23,75 @@
 
 #include "rphp_ast.h"
 #include <vector>
-#include <unistr.h>
+#include <string>
+#include <unicode/unistr.h>
 
 namespace rphp
 {
 
-class parser;
+	class parser;
 
-/**
- * Hand-written Lexer that generates the same tokens as php uses.
- * This includes also a whitespace and comment token.
- *
- * For debugging output can be compared to php-tokens using the
- * test/test-tokenize.php script
- **/
-class Lexer {
-public:
-    Lexer(parser* _parser, const UnicodeString& contents);
+	/**
+	 * Hand-written Lexer that generates the same tokens as php uses.
+	 * This includes also a whitespace and comment token.
+	 *
+	 * For debugging output can be compared to php-tokens using the
+	 * test/test-tokenize.php script
+	 **/
+	template <typename StringClass, typename CharClass>
+	class Lexer {
+	public:
+		Lexer(parser* _parser, const StringClass& contents);
 
-    int nextTokenKind();
-    rint64 tokenBegin() const;
-    rint64 tokenEnd() const;
+		int nextTokenKind();
+		rint64 tokenBegin() const;
+		rint64 tokenEnd() const;
 
-private:
-    UnicodeString m_content;
-    parser* m_parser;
-    int m_curpos;
-    int m_contentSize;
-    rint64 m_tokenBegin;
-    rint64 m_tokenEnd;
+	private:
+		StringClass m_content;
+		parser* m_parser;
+		int m_curpos;
+		int m_contentSize;
+		rint64 m_tokenBegin;
+		rint64 m_tokenEnd;
 
-    int state(int deepness = 0) const;
-    void pushState(int state);
-    void popState();
-    void printState();
+		int state(int deepness = 0) const;
+		void pushState(int state);
+		void popState();
+		void printState();
 
-    bool processVariable(int pos);
-    bool isValidVariableIdentifier(const UChar32& it);
-    void createNewline( int pos );
-    bool isEscapedWithBackslash(const UChar32& it, int curPos, int startPos, int pos);
-    bool isHeredocEnd(const UChar32& it, int pos);
+		bool processVariable(int pos);
+		bool isValidVariableIdentifier(const CharClass& it);
+		void createNewline( int pos );
+		bool isEscapedWithBackslash(const CharClass& it, int curPos, int startPos, int pos);
+		bool isHeredocEnd(const CharClass& it, int pos);
 
-    UChar32 lookAt( int pos ){ return m_content.char32At( pos ); }
+		CharClass inline lookAt( int pos ){
+            return m_content[pos];
+        }
 
-    std::vector<int> m_state; // was: QStack<int>
-    enum State
-    {
-        ErrorState = -1,
-        HtmlState = 0,
-        DefaultState = 1,
-        String = 2,
-        StringVariable = 3,
-        StringVariableBracket = 4,
-        StringVariableObjectOperator = 5,
-        StringVariableCurly = 6,
-        StringVarname = 7,
-        StringHeredoc = 8,
-        StringBacktick = 9
-    };
-    UnicodeString m_heredocIdentifier;
-    int m_haltCompiler;
-};
+		std::vector<int> m_state; // was: QStack<int>
+		enum State
+		{
+			ErrorState = -1,
+			HtmlState = 0,
+			DefaultState = 1,
+			String = 2,
+			StringVariable = 3,
+			StringVariableBracket = 4,
+			StringVariableObjectOperator = 5,
+			StringVariableCurly = 6,
+			StringVarname = 7,
+			StringHeredoc = 8,
+			StringBacktick = 9
+		};
+		StringClass m_heredocIdentifier;
+		int m_haltCompiler;
+	};
+
+	// define the two lexers we support: Unicode and std::string based
+	typedef Lexer<UnicodeString, UChar32> ULexer;
+	typedef Lexer<std::string, char> BLexer;
 
 }
 

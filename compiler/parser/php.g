@@ -22,7 +22,7 @@
 
 [:
 
-#include <unistr.h>
+#include <unicode/unistr.h>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -32,7 +32,7 @@
 
 namespace rphp
 {
-    class Lexer;
+    //template <typename StringClass, typename CharClass> class Lexer;
     enum NumericType  {
         LongNumber,
         DoubleNumber,
@@ -729,7 +729,7 @@ namespace rphp
 void parser::tokenize( const UnicodeString& contents )
 {
     m_contents = contents;
-    Lexer lexer( this, contents );
+    Lexer<UnicodeString, UChar32> lexer( this, contents );
     int kind = parser::Token_EOF;
 
     do

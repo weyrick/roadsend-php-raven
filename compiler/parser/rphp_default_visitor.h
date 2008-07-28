@@ -9,9 +9,8 @@
 namespace rphp
   {
 
-  class  default_visitor:  public visitor
+  class  default_visitor: public visitor
     {
-
     public:
       virtual void visit_additiveExpression(additiveExpression_ast *node);
       virtual void visit_additiveExpressionRest(additiveExpressionRest_ast *node);

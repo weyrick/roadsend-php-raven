@@ -8,7 +8,7 @@
 
 
 
-#include <unistr.h>
+#include <unicode/unistr.h>
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -18,8 +18,7 @@
 
 namespace rphp
   {
-
-  class Lexer;
+  //template <typename StringClass, typename CharClass> class Lexer;
   enum NumericType  {
     LongNumber,
     DoubleNumber,
@@ -38,197 +37,101 @@ namespace rphp
   {
 
   struct additiveExpression_ast;
-
   struct additiveExpressionRest_ast;
-
   struct arrayPairValue_ast;
-
   struct assignmentExpression_ast;
-
   struct assignmentExpressionCheckIfVariable_ast;
-
   struct assignmentExpressionEqual_ast;
-
   struct assignmentList_ast;
-
   struct assignmentListElement_ast;
-
   struct baseVariable_ast;
-
   struct baseVariableWithFunctionCalls_ast;
-
   struct bitAndExpression_ast;
-
   struct bitOrExpression_ast;
-
   struct bitXorExpression_ast;
-
   struct booleanAndExpression_ast;
-
   struct booleanOrExpression_ast;
-
   struct caseList_ast;
-
   struct case_item_ast;
-
   struct catch_item_ast;
-
   struct classConstantDeclaration_ast;
-
   struct classDeclarationStatement_ast;
-
   struct classNameReference_ast;
-
   struct classStatement_ast;
-
   struct classVariable_ast;
-
   struct classVariableDeclaration_ast;
-
   struct commonScalar_ast;
-
   struct compoundVariable_ast;
-
   struct compoundVariableWithSimpleIndirectReference_ast;
-
   struct conditionalExpression_ast;
-
   struct ctorArguments_ast;
-
   struct declareItem_ast;
-
   struct declareStatement_ast;
-
   struct dimListItem_ast;
-
   struct dimOffset_ast;
-
   struct dynamicClassNameReference_ast;
-
   struct dynamicClassNameVariableProperties_ast;
-
   struct dynamicClassNameVariableProperty_ast;
-
   struct elseSingle_ast;
-
   struct elseifList_ast;
-
   struct elseifListItem_ast;
-
   struct encaps_ast;
-
   struct encapsList_ast;
-
   struct encapsVar_ast;
-
   struct encapsVarOffset_ast;
-
   struct equalityExpression_ast;
-
   struct equalityExpressionRest_ast;
-
   struct expr_ast;
-
   struct forExpr_ast;
-
   struct forStatement_ast;
-
   struct foreachOptionalArg_ast;
-
   struct foreachStatement_ast;
-
   struct foreachVariable_ast;
-
   struct functionCall_ast;
-
   struct functionCallParameterList_ast;
-
   struct functionCallParameterListElement_ast;
-
   struct functionDeclarationStatement_ast;
-
   struct globalVar_ast;
-
   struct innerStatementList_ast;
-
   struct logicalAndExpression_ast;
-
   struct logicalOrExpression_ast;
-
   struct logicalXorExpression_ast;
-
   struct memberModifier_ast;
-
   struct methodBody_ast;
-
   struct multiplicativeExpression_ast;
-
   struct multiplicativeExpression_rest_ast;
-
   struct newElseSingle_ast;
-
   struct newElseifList_ast;
-
   struct newelseifListItem_ast;
-
   struct objectDimList_ast;
-
   struct objectProperty_ast;
-
   struct parameter_ast;
-
   struct parameterList_ast;
-
   struct postprefixOperator_ast;
-
   struct printExpression_ast;
-
   struct relationalExpression_ast;
-
   struct relationalExpressionRest_ast;
-
   struct scalar_ast;
-
   struct semicolonOrCloseTag_ast;
-
   struct shiftExpression_ast;
-
   struct shiftExpressionRest_ast;
-
   struct start_ast;
-
   struct statement_ast;
-
   struct staticArrayPairValue_ast;
-
   struct staticMember_ast;
-
   struct staticScalar_ast;
-
   struct staticVar_ast;
-
   struct switchCaseList_ast;
-
   struct topStatement_ast;
-
   struct unaryExpression_ast;
-
   struct unaryExpression_not_plusminus_ast;
-
   struct varExpression_ast;
-
   struct varExpressionNewObject_ast;
-
   struct varExpressionNormal_ast;
-
   struct variable_ast;
-
   struct variableName_ast;
-
   struct variableProperty_ast;
-
   struct variableWithoutObjects_ast;
-
   struct whileStatement_ast;
 
 

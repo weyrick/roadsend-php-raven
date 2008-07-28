@@ -5,12 +5,12 @@
 ;; modify it under the terms of the GNU General Public License
 ;; as published by the Free Software Foundation; either version 2
 ;; of the License, or (at your option) any later version.
-;; 
+;;
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;; 
+;;
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
@@ -36,7 +36,7 @@ namespace rphp {
     * print the token with the same text as php tokens - so they can be compared with
     * the result of get_token_all (see test-tokenize.php)
     **/
-    void printToken(int token, const Lexer& lexer, const UnicodeString& content)
+    void printToken(int token, const ULexer& lexer, const UnicodeString& content)
     {
         int begin = lexer.tokenBegin();
         int end = lexer.tokenEnd();
@@ -338,11 +338,11 @@ namespace rphp {
             cout << tokenText << " unknown token" << token;
         }
     }
-    
+
     void pDriver::dumpTokens(string fileName) {
 
         ifstream inFile;
-    
+
         inFile.open(fileName.c_str(), ifstream::in);
         if (!inFile) {
             cout << "Unable to open file: " << endl;
@@ -356,12 +356,12 @@ namespace rphp {
             //cout << "read: " << buf << endl;
             contents += buf;
         }
-        
+
         inFile.close();
-        
-        Lexer lexer(0, contents);
+
+        ULexer lexer(0, contents);
         int token;
-        while ((token = lexer.nextTokenKind())) {
+        while (token = lexer.nextTokenKind()) {
             printToken(token, lexer, contents);
         }
         printToken(token, lexer, contents);
