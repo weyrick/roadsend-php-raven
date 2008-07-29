@@ -20,28 +20,28 @@
 #define RPHP_PRUNTIME_H_
 
 #include "pTypes.h"
-#include "pOutputManager.h"
 
 namespace rphp {
+
+    class pOutputManager;
+    class pExtManager;
+    class pFunctionManager;
 
     class pRuntimeEngine {
 
         private:
 
             // output buffering management
-            pOutputManager outputManager;
+            pOutputManager* outputManager;
             
-            // function manager
-            // --> store list of available functions, including builtins (from extension manager) which stay on page reset,
-            //     and the currently defined via php code, which are reset each page
-            // --> interface for new function definition
+            // extension manager
+            // --> for loading and registering dynamic extensions (pcre, mysql, etc) and their associated functions, classes
+            pExtManager* extManager;
             
             // class manager
             // --> similar to funciton manager, but stores builtin and currently defined classes
             // --> interface for new class definition
             
-            // extension manager
-            // --> for loading and registering dynamic extensions (pcre, mysql, etc) and their associated functions, classes
 
             // global data:
             // --> $GLOBAL and other superglobal symbol table, argc, argv,
@@ -58,7 +58,15 @@ namespace rphp {
             // error manager
 
         public:
-            pRuntimeEngine() { }
+
+            pRuntimeEngine();
+            ~pRuntimeEngine();
+            
+            // function manager
+            // --> store list of available functions, including builtins (from extension manager) which stay on page reset,
+            //     and the currently defined via php code, which are reset each page
+            // --> interface for new function definition
+            pFunctionManager* functionManager;
 
     };
 

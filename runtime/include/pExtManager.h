@@ -16,29 +16,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include <iostream>
-#include "pRuntime.h"
-#include "pExtManager.h"
-#include "pFunctionManager.h"
+#ifndef RPHP_PEXTMANAGER
+#define RPHP_PEXTMANAGER
+
+#include <deque>
+#include <string>
 
 namespace rphp {
 
-pRuntimeEngine::pRuntimeEngine() : extManager(new pExtManager(this)),
-                                   functionManager(new pFunctionManager(this))
-{
-    // runtime initialization
+    class pRuntimeEngine;
+    class pExtBase;
 
-    // load standard extension
-    
+    class pExtManager {
+
+        typedef std::deque<pExtBase*> registryType;
+
+        private:
+            pRuntimeEngine* runtime;
+            registryType extRegistry;
+
+        public:
+            pExtManager(pRuntimeEngine *r);
+            ~pExtManager();
+
+    };
+
 }
 
-
-pRuntimeEngine::~pRuntimeEngine() {
-    // runtime shutdown 
-    delete functionManager;
-    delete extManager;
-}
-
-}
-
-
+#endif /* RPHP_PEXTMANAGER_ */

@@ -21,13 +21,13 @@
 
 
 namespace boost {
-    std::size_t hash_value(rphp::hKeyVar const& k) {
+	std::size_t hash_value(rphp::hKeyVar const& k) {
         return boost::apply_visitor(rphp::hKeyHasher(), k);
     }
 }
 
 namespace rphp {
-    
+
     void pHash::insert(const pUString &key, pVarP data) {
         // TODO check numeric string, set maxIntKey accordingly
         hashData.insert(h_container(key, data));
@@ -45,7 +45,7 @@ namespace rphp {
             maxIntKey = key+1;
         hashData.insert(h_container(key, data));
     }
-    
+
     void pHash::insertNext(pVarP data) {
         hashData.insert(h_container(maxIntKey++, data));
     }
@@ -53,12 +53,12 @@ namespace rphp {
     pHash::size_type pHash::remove(const pUString &key) {
         return hashData.erase(key);
     }
-    
+
     pHash::size_type pHash::remove(const pInt &key) {
         return hashData.erase(key);
     }
 
-    
+
     // query
     const bool pHash::keyExists(const pUString &key) {
         stableHash::iterator k = hashData.find(key);
@@ -74,7 +74,7 @@ namespace rphp {
         stableHash::iterator k = hashData.find(key);
         return (k != hashData.end());
     }
-    
+
     // lookup
     pVarP pHash::operator[] ( const pUString &key ) {
         stableHash::iterator k = hashData.find(key);
@@ -93,7 +93,7 @@ namespace rphp {
             return (*k).pData;
     }
     */
-    
+
     pVarP pHash::operator[] ( const pInt &key ) {
         stableHash::iterator k = hashData.find(key);
         if (k == hashData.end())
@@ -116,7 +116,7 @@ namespace rphp {
         seq_index& ot = get<1>(hashData);
 
         hKeyType kType;
-        
+
         for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
             kType = boost::apply_visitor(rphp::hKeyGetType(), (*it).key);
             if (kType == hKeyInt)
@@ -129,6 +129,6 @@ namespace rphp {
 
     }
 
-    
+
 } /* namespace rphp */
 

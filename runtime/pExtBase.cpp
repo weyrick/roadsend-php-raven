@@ -16,29 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include <iostream>
-#include "pRuntime.h"
-#include "pExtManager.h"
-#include "pFunctionManager.h"
+#include "pExtBase.h"
 
 namespace rphp {
 
-pRuntimeEngine::pRuntimeEngine() : extManager(new pExtManager(this)),
-                                   functionManager(new pFunctionManager(this))
-{
-    // runtime initialization
 
-    // load standard extension
-    
-}
-
-
-pRuntimeEngine::~pRuntimeEngine() {
-    // runtime shutdown 
-    delete functionManager;
-    delete extManager;
-}
 
 }
-
-

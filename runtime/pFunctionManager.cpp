@@ -17,27 +17,10 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pRuntime.h"
-#include "pExtManager.h"
 #include "pFunctionManager.h"
 
 namespace rphp {
 
-pRuntimeEngine::pRuntimeEngine() : extManager(new pExtManager(this)),
-                                   functionManager(new pFunctionManager(this))
-{
-    // runtime initialization
-
-    // load standard extension
-    
-}
-
-
-pRuntimeEngine::~pRuntimeEngine() {
-    // runtime shutdown 
-    delete functionManager;
-    delete extManager;
-}
 
 }
 

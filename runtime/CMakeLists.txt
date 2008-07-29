@@ -11,6 +11,10 @@ set(RUNTIME_SRC_FILES
   pRuntime.cpp
   pOutputBuffer.cpp
   pOutputManager.cpp
+  pFunctionManager.cpp
+  pExtBase.cpp
+  pExtManager.cpp
+  standard/pStandardExt.cpp
 )
 
 add_library( rphp-runtime SHARED ${RUNTIME_SRC_FILES} )
