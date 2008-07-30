@@ -19,7 +19,10 @@
 #ifndef PSTANDARDEXT_H_
 #define PSTANDARDEXT_H_
 
+#include "pTypes.h"
 #include "pExtBase.h"
+
+#define STD_EXT_NAME "standard"
 
 namespace rphp {
 
@@ -27,10 +30,12 @@ namespace rphp {
 
     public:
 
-        pStandardExt(pRuntimeEngine *r) : pExtBase(r) { }
+        pStandardExt(pRuntimeEngine *r) : pExtBase(r, STD_EXT_NAME) { }
 
         void extensionStartup();
         void extensionShutdown();
+
+        pVar strlen(pVar str);
 
     };
 

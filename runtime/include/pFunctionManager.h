@@ -19,17 +19,21 @@
 #ifndef RPHP_PFUNCTIONMANAGER
 #define RPHP_PFUNCTIONMANAGER
 
-namespace rphp {
+#include <string>
+#include "pFunctionSig.h"
 
-    class pRuntimeEngine;
+namespace rphp {
 
     class pFunctionManager {
 
+
         private:
-            pRuntimeEngine* runtime;
 
         public:
-            pFunctionManager(pRuntimeEngine *r) : runtime(r) { }
+
+            //pFunctionManager(pRuntimeEngine *r) : runtime(r) { }
+
+            void registerBuiltin(std::string name, pFunPointer1 f);
 
     };
 

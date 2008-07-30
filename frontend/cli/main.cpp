@@ -4,12 +4,14 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include "pDriver.h"
+#include "pRuntime.h"
 
 namespace po = boost::program_options;
 
 int main( int argc, char* argv[] )
 {
 
+    rphp::pRuntimeEngine runtime;
     rphp::pDriver driver;
 
     //int opt;
@@ -32,7 +34,7 @@ int main( int argc, char* argv[] )
         std::cout << desc << "\n";
         return 1;
     }
-    
+
     //std::cout << "Roadsend PHP" << std::endl;
 
     std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
@@ -41,5 +43,5 @@ int main( int argc, char* argv[] )
     }
 
     //std::cout << "Optimization level is " << opt << "\n";
- 
+
 }

@@ -17,9 +17,14 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "pExtBase.h"
+#include "pRuntime.h"
 
 namespace rphp {
 
+void pExtBase::registerBuiltin(std::string name, pFunPointer1 f) {
 
+    runtime->functionManager->registerBuiltin(name, f);
+
+}
 
 }

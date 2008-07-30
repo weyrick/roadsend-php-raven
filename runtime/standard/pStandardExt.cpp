@@ -25,6 +25,8 @@ void pStandardExt::extensionStartup() {
 
     std::cout << "initializing standard extension" << std::endl;
 
+    registerBuiltin("strlen", boost::bind(&pStandardExt::strlen, this, _1));
+
 }
 
 void pStandardExt::extensionShutdown() {
@@ -33,5 +35,11 @@ void pStandardExt::extensionShutdown() {
 
 }
 
+/* Library Implementation */
+
+pVar pStandardExt::strlen(pVar str) {
+    pVar_castToBString(str);
+    return (pInt)pVar_getVal_pBString(str).length();
+}
 
 }

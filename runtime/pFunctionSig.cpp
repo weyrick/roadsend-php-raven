@@ -16,32 +16,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef PEXTENSIONBASE_H_
-#define PEXTENSIONBASE_H_
-
-#include <string>
-#include "pFunctionManager.h"
+#include "pFunctionSig.h"
 
 namespace rphp {
 
-    class pRuntimeEngine;
 
-    class pExtBase {
-
-    protected:
-        std::string extName;
-        pRuntimeEngine* runtime;
-
-        void registerBuiltin(std::string name, pFunPointer1 f);
-
-    public:
-        pExtBase(pRuntimeEngine *r, std::string eName) : runtime(r), extName(eName) { }
-
-        virtual void extensionStartup() = 0;
-        virtual void extensionShutdown() = 0;
-
-    };
 
 }
 
-#endif /* PEXTENSIONBASE_H_ */
+

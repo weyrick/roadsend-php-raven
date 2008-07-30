@@ -21,6 +21,12 @@
 
 namespace rphp {
 
+void pFunctionManager::registerBuiltin(std::string name, pFunPointer1 f) {
+
+    std::cout << "registering " << name << std::endl;
+
+}
+
 
 }
 

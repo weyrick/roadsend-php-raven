@@ -105,7 +105,7 @@ namespace rphp {
         void operator()(pHashP &h) const {
             var = (pInt)h->getSize();
         }
-        
+
         void operator()(pObjectP &h) const {
             var = (pInt)h->getNumProperties();
         }
@@ -117,6 +117,52 @@ namespace rphp {
 
     };
 
+    // a visitor for converting to a string
+    class convertToBString : public boost::static_visitor<void> {
+    protected:
+        pVar &var;
+
+    public:
+        convertToBString(pVar &v) : var(v) { }
+
+        void operator()(pTriState &h) const {
+                (h) ? var = pBString("1") : var = pBString("0");
+        }
+
+        void operator()(pInt &a) const {
+            // TODO: real conversion
+            var = pBString("some pInt");
+        }
+
+        void operator()(pFloat &i) const {
+            // TODO: real conversion
+            var = pBString("some pFloat");
+        }
+
+        void operator()(pBString &a) const {
+            // nothing
+        }
+
+        void operator()(pUStringP &a) const {
+            // TODO
+        }
+
+        void operator()(pHashP &h) const {
+            var = pBString("array");
+        }
+
+        void operator()(pObjectP &h) const {
+            // TODO: toString
+            var = pBString("object");
+        }
+
+        void operator()(pVarRef &r) const {
+            // TODO
+            // unbox
+            //boost::apply_visitor(convertToNumber(*r), *r);
+        }
+
+    };
 
     /*
      * convenience accessors
@@ -142,11 +188,11 @@ namespace rphp {
     inline long pVar_getVal_pInt(const pVar &p) {
             return boost::get<pInt>(p);
     }
-    
+
     inline pBString pVar_getVal_pBString(const pVar &p) {
             return boost::get<pBString>(p);
     }
-    
+
     inline pUStringP pVar_getVal_pUString(const pVar &p) {
             return boost::get<pUStringP>(p);
     }
@@ -160,6 +206,8 @@ namespace rphp {
      *
      */
     pVar pVar_castToNumber(const pVar p);
+    pVar pVar_castToBString(const pVar p);
+
     pVar pVar_add(const pVar lhs, const pVar rhs);
 
 } /* namespace rphp */

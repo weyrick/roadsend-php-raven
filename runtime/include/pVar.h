@@ -46,6 +46,9 @@ namespace rphp {
     typedef long   pInt;
     typedef double pFloat;
 
+    // note, pUInt is not a base PHP type (all PHP numbers are signed)
+    typedef unsigned long pUInt;
+
     // string types: binary and unicode flavor
     // "binary" strings
     typedef std::string pBString;

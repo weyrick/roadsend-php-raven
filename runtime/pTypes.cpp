@@ -22,11 +22,16 @@ namespace rphp {
 
     // non destructive cast (explicit copy)
     pVar pVar_castToNumber(const pVar p) {
-
         pVar r = p;
         boost::apply_visitor(convertToNumber(r), r);
         return r;
+    }
 
+    // non destructive cast (explicit copy)
+    pVar pVar_castToBString(const pVar p) {
+        pVar r = p;
+        boost::apply_visitor(convertToBString(r), r);
+        return r;
     }
 
     // TODO: belongs in rphp_operators.cpp
