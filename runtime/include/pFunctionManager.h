@@ -20,20 +20,58 @@
 #define RPHP_PFUNCTIONMANAGER
 
 #include <string>
+#include <boost/multi_index_container.hpp>
+#include <boost/multi_index/hashed_index.hpp>
+#include <boost/multi_index/member.hpp>
+#include <ext/hash_map>
 #include "pFunctionSig.h"
+
+using boost::multi_index_container;
+using namespace boost::multi_index;
 
 namespace rphp {
 
+    struct functionEntry {
+        pUString canonicalName;
+        pFunctionSig* signature;
+        functionEntry(pUString name, pFunctionSig* sig) : canonicalName(name.toLower()), signature(sig) { }
+    };
+
+    typedef multi_index_container<
+      functionEntry,
+      indexed_by<
+       hashed_unique <
+        BOOST_MULTI_INDEX_MEMBER(functionEntry, const pUString, canonicalName)
+       >
+      >
+    > functionRegistryType;
+
+    class pRuntimeEngine;
+
     class pFunctionManager {
 
-
         private:
+            pRuntimeEngine* runtime;
+            functionRegistryType functionRegistry;
 
         public:
 
-            //pFunctionManager(pRuntimeEngine *r) : runtime(r) { }
+            pFunctionManager(pRuntimeEngine *r) : runtime(r) { }
+            ~pFunctionManager() {
+                // TODO delete function signatures
+            }
 
-            void registerBuiltin(std::string name, pFunPointer1 f);
+            void registerBuiltin(const pExtBase*, const pUString&, const pFunPointer1&);
+
+            pVar invoke(pUString funName, pVar arg1) {
+                functionRegistryType::iterator function = functionRegistry.find(funName.toLower());
+                if (function != functionRegistry.end()) {
+                    return (*function).signature->invoke(arg1);
+                }
+                else {
+                    return pNull;
+                }
+            }
 
     };
 

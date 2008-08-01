@@ -20,6 +20,7 @@
 #define PEXTENSIONBASE_H_
 
 #include <string>
+#include "pTypes.h"
 #include "pFunctionManager.h"
 
 namespace rphp {
@@ -32,7 +33,7 @@ namespace rphp {
         std::string extName;
         pRuntimeEngine* runtime;
 
-        void registerBuiltin(std::string name, pFunPointer1 f);
+        void registerBuiltin(pUString name, pFunPointer1 f);
 
     public:
         pExtBase(pRuntimeEngine *r, std::string eName) : runtime(r), extName(eName) { }

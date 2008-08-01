@@ -20,9 +20,8 @@
 #define RPHP_PFUNCTIONSIG
 
 #include <vector>
-#include <string>
 #include <boost/function.hpp>
-#include "pVar.h"
+#include "pTypes.h"
 
 namespace rphp {
 
@@ -44,25 +43,44 @@ namespace rphp {
 
     class pFunctionSig {
         private:
-            // declaration location
-            pUInt startLineNum;
-            pUInt endLineNum;
-            pUString fileName;
-            pExtBase* parentExtension;
+            // declaration location (user function)
+            const pSourceStartEndLocation sourceLocation;
+
+            // or parent extension (only builtins)
+            const pExtBase* parentExtension;
 
             // docComment?
 
             // signature
-            pUString functionName;
-            pUString canonicalName;
-            pFunType funType;
-            pUInt arity;
-            pUInt minRequiredArity;
-            bool isVarArity;
+            const pUString functionName;
+            const pFunType funType;
+            const pUInt requiredArity;
+            const pUInt maxArity;
+            const bool isVarArity;
 
             std::vector<pFunctionParam> paramList;
 
+            const pFunPointer1 funPointer1;
+
         public:
+
+            // standard builtin function: one argument
+            pFunctionSig(const pExtBase* e, const pUString& f, const pFunPointer1& fun) :
+                parentExtension(e),
+                functionName(f),
+                funType(pBuiltinFunType),
+                requiredArity(1),
+                maxArity(1),
+                isVarArity(false),
+                funPointer1(fun)
+            {
+
+            }
+
+            // invocation
+            pVar invoke(pVar arg1) {
+                return funPointer1(arg1);
+            }
 
     };
 

@@ -18,6 +18,12 @@
 
 #include "pTypes.h"
 
+U_NAMESPACE_BEGIN
+    std::size_t hash_value(rphp::pUString const& k) {
+        return (std::size_t)k.hashCode();
+    }
+U_NAMESPACE_END
+
 namespace rphp {
 
     // non destructive cast (explicit copy)

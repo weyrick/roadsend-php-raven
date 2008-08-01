@@ -24,11 +24,10 @@
 namespace rphp {
 
 pRuntimeEngine::pRuntimeEngine() : extManager(new pExtManager(this)),
-                                   functionManager(new pFunctionManager())
+                                   functionManager(new pFunctionManager(this))
 {
     // runtime initialization
-
-    // load standard extension
+    extManager->startUp();
 
 }
 

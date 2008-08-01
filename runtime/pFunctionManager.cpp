@@ -21,9 +21,10 @@
 
 namespace rphp {
 
-void pFunctionManager::registerBuiltin(std::string name, pFunPointer1 f) {
+void pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pUString& funName, const pFunPointer1& f) {
 
-    std::cout << "registering " << name << std::endl;
+    std::cout << "registering " << funName << std::endl;
+    functionRegistry.insert(functionEntry(funName, new pFunctionSig(sourceExt, funName, f)));
 
 }
 

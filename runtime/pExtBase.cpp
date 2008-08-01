@@ -21,9 +21,9 @@
 
 namespace rphp {
 
-void pExtBase::registerBuiltin(std::string name, pFunPointer1 f) {
+void pExtBase::registerBuiltin(pUString name, pFunPointer1 f) {
 
-    runtime->functionManager->registerBuiltin(name, f);
+    runtime->functionManager->registerBuiltin(this, name, f);
 
 }
 

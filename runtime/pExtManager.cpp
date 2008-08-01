@@ -23,10 +23,17 @@
 
 namespace rphp {
 
+/*
 pExtManager::pExtManager(pRuntimeEngine *r) : runtime(r) {
 
+
+}
+*/
+
+void pExtManager::startUp() {
+
     // initialize standard library
-    pStandardExt* sext = new pStandardExt(r);
+    pStandardExt* sext = new pStandardExt(runtime);
     sext->extensionStartup();
     extRegistry.push_back(sext);
 
@@ -35,7 +42,7 @@ pExtManager::pExtManager(pRuntimeEngine *r) : runtime(r) {
 pExtManager::~pExtManager() {
 
     // shutdown extensions
-    for (registryType::iterator i=extRegistry.begin(); i!=extRegistry.end(); ++i) {
+    for (extRegistryType::iterator i=extRegistry.begin(); i!=extRegistry.end(); ++i) {
         (*i)->extensionShutdown();
         delete *i;
     }

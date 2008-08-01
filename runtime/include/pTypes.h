@@ -20,12 +20,29 @@
 #define RPHP_PTYPES_H_
 
 #include <boost/lexical_cast.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "pVar.h"
 #include "pHash.h"
 #include "pObject.h"
 
+U_NAMESPACE_BEGIN
+    // boost hash function for pUString
+    std::size_t hash_value(rphp::pUString const& k);
+U_NAMESPACE_END
+
 namespace rphp {
+
+    // types used in the runtime which aren't related to pVar (i.e. that aren't builtin php types)
+
+    // note, pUInt is not a base PHP type (all PHP numbers are signed)
+    typedef unsigned long pUInt;
+
+    // source locations: filename/linenum
+    typedef boost::tuple<const pUString, const pUInt> pSourceLocation;
+
+    // source locations: filename/startlinenum/endlinenum
+    typedef boost::tuple<const pUString, const pUInt, const pUInt> pSourceStartEndLocation;
 
     // a visitor for determining type of pVar
     class pVarTypeChecker : public boost::static_visitor<pVarType> {
@@ -185,7 +202,7 @@ namespace rphp {
             return boost::get<rphp::pTriState>(p);
     }
 
-    inline long pVar_getVal_pInt(const pVar &p) {
+    inline pInt pVar_getVal_pInt(const pVar &p) {
             return boost::get<pInt>(p);
     }
 
