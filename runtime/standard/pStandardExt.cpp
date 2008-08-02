@@ -23,7 +23,7 @@ namespace rphp {
 
 void pStandardExt::extensionStartup() {
 
-    std::cout << "initializing standard extension" << std::endl;
+    //std::cout << "initializing standard extension" << std::endl;
 
     registerBuiltin("strlen", boost::bind(&pStandardExt::strlen, this, _1));
 
@@ -31,7 +31,7 @@ void pStandardExt::extensionStartup() {
 
 void pStandardExt::extensionShutdown() {
 
-    std::cout << "deinitializing standard extension" << std::endl;
+    //std::cout << "deinitializing standard extension" << std::endl;
 
 }
 

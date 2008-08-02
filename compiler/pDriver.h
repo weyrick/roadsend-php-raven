@@ -29,6 +29,7 @@ namespace rphp {
 
         public:
             void dumpTokens(std::string fileName);
+            void dumpAST(std::string fileName);
 
     };
 

@@ -18,6 +18,8 @@ int main( int argc, char* argv[] )
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
+        ("dump-toks", "dump tokens from lexer")
+        ("dump-ast", "dump AST")
 //        ("optimization", po::value<int>(&opt)->default_value(10), "optimization level")
         ("input-file", po::value< std::vector<std::string> >(), "input file")
         ;
@@ -31,17 +33,30 @@ int main( int argc, char* argv[] )
     po::notify(vm);
 
     if (vm.count("help") || !vm.count("input-file")) {
+        std::cout << "Roadsend PHP" << std::endl;
         std::cout << desc << "\n";
         return 1;
     }
 
-    //std::cout << "Roadsend PHP" << std::endl;
 
-    std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
-    for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {
-        driver.dumpTokens(*it);
+    if (vm.count("dump-toks")) {
+        std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
+        for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {
+            driver.dumpTokens(*it);
+        }
+    }
+    else if (vm.count("dump-ast")) {
+        std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
+        for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {
+            driver.dumpAST(*it);
+        }
+    }
+    else {
+        std::cout << "Roadsend PHP" << std::endl;
+        std::cout << desc << "\n";
+        return 1;
     }
 
-    //std::cout << "Optimization level is " << opt << "\n";
+    return 0;
 
 }

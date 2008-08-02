@@ -24,6 +24,7 @@
 #include <unicode/unistr.h>
 #include <unicode/ustream.h>
 
+#include "parser/rphp_debug_visitor.h"
 #include "parser/phplexer.h"
 #include "parser/rphp_parser.h"
 #include "pDriver.h"
@@ -367,6 +368,49 @@ namespace rphp {
         printToken(token, lexer, contents);
 
     }
+
+    void pDriver::dumpAST(string fileName) {
+
+        ifstream inFile;
+
+        inFile.open(fileName.c_str(), ifstream::in);
+        if (!inFile) {
+            cout << "Unable to open file: " << endl;
+            exit(1); // terminate with error
+        }
+
+        UnicodeString contents;
+        char buf[512];
+        while (inFile) {
+            inFile.getline(buf, 512);
+            //cout << "read: " << buf << endl;
+            contents += buf;
+        }
+
+        inFile.close();
+
+        parser p;
+        p.set_token_stream( new parser::token_stream_type() );
+        p.set_memory_pool( new parser::memory_pool_type() );
+        p.setDebug( true );
+
+        p.tokenize(contents);
+        start_ast* phpAst;
+        bool matched = p.parse_start(&phpAst);
+        if( matched )
+        {
+            std::cout << "Successfully parsed" << std::endl;
+            debug_visitor dv;
+            dv.visit_start(phpAst);
+        }else
+        {
+            //*ast = 0;
+            //std::cout << p.expected_symbol(ast_node::Kind_start, "start");
+            std::cout << "Couldn't parse content" << std::endl;
+        }
+
+    }
+
 
 }
 
