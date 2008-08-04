@@ -65,6 +65,7 @@ namespace rphp {
 
             pVar invoke(pUString funName, pVar arg1) {
                 functionRegistryType::iterator function = functionRegistry.find(funName.toLower());
+                // TODO this needs to throw a runtime error if the function wasn't found
                 if (function != functionRegistry.end()) {
                     return (*function).signature->invoke(arg1);
                 }

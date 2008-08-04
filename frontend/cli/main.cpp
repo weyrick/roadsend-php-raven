@@ -20,6 +20,7 @@ int main( int argc, char* argv[] )
         ("help", "produce help message")
         ("dump-toks", "dump tokens from lexer")
         ("dump-ast", "dump AST")
+        ("dump-ir", "dump LLVM IR (assembly)")
 //        ("optimization", po::value<int>(&opt)->default_value(10), "optimization level")
         ("input-file", po::value< std::vector<std::string> >(), "input file")
         ;
@@ -49,6 +50,12 @@ int main( int argc, char* argv[] )
         std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
         for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {
             driver.dumpAST(*it);
+        }
+    }
+    else if (vm.count("dump-ir")) {
+        std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
+        for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {
+            driver.dumpIR(*it);
         }
     }
     else {

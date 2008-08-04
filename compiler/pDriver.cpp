@@ -24,6 +24,14 @@
 #include <unicode/unistr.h>
 #include <unicode/ustream.h>
 
+#include "llvm/ModuleProvider.h"
+#include "llvm/Analysis/Verifier.h"
+#include "llvm/Support/IRBuilder.h"
+#include "llvm/Module.h"
+#include "llvm/DerivedTypes.h"
+#include "llvm/Constants.h"
+#include "llvm/Instructions.h"
+
 #include "parser/rphp_debug_visitor.h"
 #include "parser/phplexer.h"
 #include "parser/rphp_parser.h"
@@ -33,16 +41,58 @@ using namespace std;
 
 namespace rphp {
 
+    // dump LLVM IR
+    void pDriver::dumpIR(string fileName) {
+
+        // Create the "module" or "program" or "translation unit" to hold the
+        // function
+        llvm::Module *M = new llvm::Module("test");
+
+        // Create the main function: first create the type 'int ()'
+        llvm::FunctionType *FT = llvm::FunctionType::get(llvm::Type::Int32Ty, std::vector<const llvm::Type*>(),
+                                            /*not vararg*/false);
+
+        // By passing a module as the last parameter to the Function constructor,
+        // it automatically gets appended to the Module.
+        llvm::Function *F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "main", M);
+
+        // Add a basic block to the function... again, it automatically inserts
+        // because of the last argument.
+        llvm::BasicBlock *BB = llvm::BasicBlock::Create("EntryBlock", F);
+
+        // Get pointers to the constant integers...
+        llvm::Value *Two = llvm::ConstantInt::get(llvm::Type::Int32Ty, 2);
+        llvm::Value *Three = llvm::ConstantInt::get(llvm::Type::Int32Ty, 3);
+
+        // Create the add instruction... does not insert...
+        llvm::Instruction *Add = llvm::BinaryOperator::create(llvm::Instruction::Add, Two, Three,
+                                                    "addresult");
+
+        // explicitly insert it into the basic block...
+        BB->getInstList().push_back(Add);
+
+        // Create the return instruction and add it to the basic block
+        BB->getInstList().push_back(llvm::ReturnInst::Create(Add));
+
+        
+        M->dump();
+
+        delete M;
+
+    }
+
+
     /**
     * print the token with the same text as php tokens - so they can be compared with
     * the result of get_token_all (see test-tokenize.php)
     **/
-    void printToken(int token, const ULexer& lexer, const UnicodeString& content)
+    template <class LexerType, class StringType>
+    void printToken(int token, const LexerType& lexer, const StringType& content)
     {
         int begin = lexer.tokenBegin();
         int end = lexer.tokenEnd();
         //UnicodeString tokenText = content.replace(begin, end-begin+1,"\n", "\\n");
-        UnicodeString tokenText(content, begin, end-begin+1);
+        StringType tokenText(content, begin, end-begin+1);
         if (token == parser::Token_INLINE_HTML) {
             cout << tokenText << " T_INLINE_HTML" << endl;
         } else if (token == parser::Token_OPEN_TAG) {
@@ -350,7 +400,7 @@ namespace rphp {
             exit(1); // terminate with error
         }
 
-        UnicodeString contents;
+        string contents;
         char buf[512];
         while (inFile) {
             inFile.getline(buf, 512);
@@ -360,7 +410,9 @@ namespace rphp {
 
         inFile.close();
 
-        ULexer lexer(0, contents);
+        cout << "contents: " << contents << endl;
+
+        BLexer lexer(0, contents);
         int token;
         while (token = lexer.nextTokenKind()) {
             printToken(token, lexer, contents);
@@ -410,7 +462,6 @@ namespace rphp {
         }
 
     }
-
 
 }
 
