@@ -34,6 +34,11 @@
 #include "llvm/DerivedTypes.h"
 #include "llvm/Constants.h"
 #include "llvm/Instructions.h"
+#include "llvm/Support/MemoryBuffer.h"
+#include "llvm/ModuleProvider.h"
+#include "llvm/ExecutionEngine/JIT.h"
+#include "llvm/ExecutionEngine/Interpreter.h"
+#include "llvm/ExecutionEngine/GenericValue.h"
 
 #include "parser/rphp_debug_visitor.h"
 #include "parser/phplexer.h"
@@ -51,14 +56,55 @@ namespace rphp {
 void pDriver::execute(string fileName) {
     cout << "executing file: " << fileName << endl;
     // TODO: determine file type, then run executeBC or executePHP
-
+    executeBC(fileName);
 }
 
 /**
  * execute precompiled bytecode
  */
 void pDriver::executeBC(string fileName) {
+
     cout << "executing compiled bytecode: " << fileName << endl;
+
+    // Now we create the JIT.
+    string* errMsg = new string();
+    llvm::MemoryBuffer* mb = llvm::MemoryBuffer::getFile(fileName.c_str(), errMsg);
+    if (errMsg->length()) {
+        cerr << "error loading file: " << fileName << endl;
+        delete errMsg;
+        return;
+    }
+    llvm::ModuleProvider* MP = llvm::getBitcodeModuleProvider(mb, errMsg);
+    if (errMsg->length()) {
+        cerr << "error parsing bitcode file: " << fileName << endl;
+        delete errMsg;
+        return;
+    }
+
+    // MP now owns mb and will delete
+    // errMsg isn't needed.
+    delete errMsg;
+
+    llvm::ExecutionEngine* EE = llvm::ExecutionEngine::create(MP, false);
+
+    // EE now owns MP
+
+    llvm::Function* rphpMain = MP->getModule()->getFunction("rphp_main");
+    if (!rphpMain) {
+        cerr << "error: rphp_main symbol not found" << endl;
+        MP->getModule()->dump();
+        delete EE;
+        return;
+    }
+
+    // Call the rphp_main function with no arguments:
+    std::vector<llvm::GenericValue> noargs;
+    llvm::GenericValue gv = EE->runFunction(rphpMain, noargs);
+
+    cout << "module ran, return value is: " << gv.IntVal.toStringSigned(10) << endl;
+
+    delete EE;
+
 }
 
 /**
@@ -122,7 +168,7 @@ llvm::Module* pDriver::compileToIR(string fileName) {
 
     // By passing a module as the last parameter to the Function constructor,
     // it automatically gets appended to the Module.
-    llvm::Function *F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "main", M);
+    llvm::Function *F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "rphp_main", M);
 
     // Add a basic block to the function... again, it automatically inserts
     // because of the last argument.
