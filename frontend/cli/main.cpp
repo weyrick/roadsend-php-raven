@@ -8,16 +8,22 @@
 
 namespace po = boost::program_options;
 
+void showHelp(const po::options_description &desc) {
+    std::cout << "Roadsend PHP" << std::endl;
+    std::cout << desc << std::endl;
+}
+
 int main( int argc, char* argv[] )
 {
 
     rphp::pRuntimeEngine runtime;
     rphp::pDriver driver;
 
-    //int opt;
     po::options_description desc("Allowed options");
     desc.add_options()
         ("help", "produce help message")
+        ("i", "execute the given file (php source or precompiled bytecode)")
+        ("compile-target", po::value<std::string>(), "one of [native, bc, asm]")
         ("dump-toks", "dump tokens from lexer")
         ("dump-ast", "dump AST")
         ("dump-ir", "dump LLVM IR (assembly)")
@@ -34,12 +40,12 @@ int main( int argc, char* argv[] )
     po::notify(vm);
 
     if (vm.count("help") || !vm.count("input-file")) {
-        std::cout << "Roadsend PHP" << std::endl;
-        std::cout << desc << "\n";
+        showHelp(desc);
         return 1;
     }
 
 
+    // TODO: make this a map of function pointers, or something nicer.
     if (vm.count("dump-toks")) {
         std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
         for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {
@@ -58,9 +64,33 @@ int main( int argc, char* argv[] )
             driver.dumpIR(*it);
         }
     }
+    else if (vm.count("i")) {
+        std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
+        for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {
+            driver.execute(*it);
+        }
+    }
+    else if (vm.count("compile-target")) {
+        std::vector<std::string> infiles = vm["input-file"].as< std::vector<std::string> >();
+        for (std::vector<std::string>::iterator it = infiles.begin(); it!=infiles.end(); ++it) {
+            if (vm["compile-target"].as<std::string>() == "bc") {
+                driver.compileToBC(*it);
+            }
+            else if (vm["compile-target"].as<std::string>() == "asm") {
+                driver.compileToAsm(*it);
+            }
+            else if (vm["compile-target"].as<std::string>() == "native") {
+                driver.compileToNative(*it);
+            }
+            else {
+                std::cerr << "unknown target: " << vm["compile-target"].as<std::string>() << std::endl;
+                showHelp(desc);
+                return 1;
+            }
+        }
+    }
     else {
-        std::cout << "Roadsend PHP" << std::endl;
-        std::cout << desc << "\n";
+        showHelp(desc);
         return 1;
     }
 
