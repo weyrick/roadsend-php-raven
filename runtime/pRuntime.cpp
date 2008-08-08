@@ -26,6 +26,8 @@ namespace rphp {
 pRuntimeEngine::pRuntimeEngine() : extManager(new pExtManager(this)),
                                    functionManager(new pFunctionManager(this))
 {
+    std::cout << "runtime is starting" << std::endl;
+
     // runtime initialization
     extManager->startUp();
 
@@ -33,11 +35,32 @@ pRuntimeEngine::pRuntimeEngine() : extManager(new pExtManager(this)),
 
 
 pRuntimeEngine::~pRuntimeEngine() {
+
+    std::cout << "runtime is shutting down" << std::endl;
+
     // runtime shutdown
     delete functionManager;
     delete extManager;
 }
 
-}
+} /* end namespace rphp */
 
+
+/* start C interface */
+extern "C" {
+
+    // create a new runtime engine
+    rphp::pRuntimeEngine* rphp_newRuntimeEngine() {
+        std::cout << "in C API runtime now" << std::endl;
+        rphp::pRuntimeEngine* rt = new rphp::pRuntimeEngine();
+        return rt;
+    }
+
+    // destroy runtime engine
+    void rphp_deleteRuntimeEngine(rphp::pRuntimeEngine* e) {
+        std::cout << "closing in C API runtime now" << std::endl;
+        delete e;
+    }
+
+}
 

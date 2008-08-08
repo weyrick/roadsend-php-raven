@@ -33,15 +33,15 @@ namespace rphp {
 
             // output buffering management
             pOutputManager* outputManager;
-            
+
             // extension manager
             // --> for loading and registering dynamic extensions (pcre, mysql, etc) and their associated functions, classes
             pExtManager* extManager;
-            
+
             // class manager
             // --> similar to funciton manager, but stores builtin and currently defined classes
             // --> interface for new class definition
-            
+
 
             // global data:
             // --> $GLOBAL and other superglobal symbol table, argc, argv,
@@ -50,7 +50,7 @@ namespace rphp {
             // include files: include paths, all files included
 
             // runtime reset functionality (for page resets)
-            
+
             // maintainance: startup, shutdown hooks. signal/slots?
 
             // php.ini compatilbility
@@ -61,7 +61,7 @@ namespace rphp {
 
             pRuntimeEngine();
             ~pRuntimeEngine();
-            
+
             // function manager
             // --> store list of available functions, including builtins (from extension manager) which stay on page reset,
             //     and the currently defined via php code, which are reset each page
@@ -69,6 +69,17 @@ namespace rphp {
             pFunctionManager* functionManager;
 
     };
+
+} /* end namespace rphp */
+
+/* start C interface */
+extern "C" {
+
+    // create a new runtime engine
+    rphp::pRuntimeEngine* rphp_newRuntimeEngine();
+
+    // destroy runtime engine
+    void rphp_deleteRuntimeEngine(rphp::pRuntimeEngine*);
 
 }
 
