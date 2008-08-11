@@ -175,7 +175,7 @@ llvm::Module* pDriver::compileToIR(string fileName) {
     llvm::BasicBlock *BB = llvm::BasicBlock::Create("EntryBlock", F);
 
     // RUNTIME startup/shutdown test
-    const llvm::Type* rEnginePointer = llvm::PointerType::get(llvm::OpaqueType::get(),0);
+    const llvm::Type* rEnginePointer = llvm::PointerType::get(llvm::Type::Int8Ty,0);
     llvm::FunctionType *runtimeStartupFuncType = llvm::FunctionType::get(rEnginePointer, std::vector<const llvm::Type*>(), false);
     llvm::Function *runtimeStartupFunc = llvm::Function::Create(runtimeStartupFuncType, llvm::Function::ExternalLinkage, "rphp_newRuntimeEngine", M);
 
@@ -206,6 +206,14 @@ llvm::Module* pDriver::compileToIR(string fileName) {
 
     // Create the return instruction and add it to the basic block
     BB->getInstList().push_back(llvm::ReturnInst::Create(Add));
+
+    if (llvm::verifyModule(*M, llvm::PrintMessageAction)) {
+        cerr << "module corrupt" << endl;
+        exit(-1);
+    }
+    else {
+        cerr << "module verified" << endl;
+    }
 
     return M;
 
