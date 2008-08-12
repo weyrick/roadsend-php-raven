@@ -62,5 +62,9 @@ extern "C" {
         delete e;
     }
 
+    void sayHello() {
+        std::cout << "saying hello" << std::endl;
+    }
+    
 }
 
