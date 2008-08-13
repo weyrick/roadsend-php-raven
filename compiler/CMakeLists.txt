@@ -29,6 +29,8 @@ set(EVAL_SRC_FILES
 
 add_library( rphp-eval SHARED ${EVAL_SRC_FILES} )
 set_target_properties( rphp-eval
-                       PROPERTIES LINK_FLAGS ${LLVM_LD_FLAGS} )
+                       PROPERTIES LINK_FLAGS ${LLVM_LD_FLAGS}
+                       # this tells cmake not to link the llvm libs into targets that link to rphp-eval
+                       LINK_INTERFACE_LIBRARIES "" )
 target_link_libraries( rphp-eval rphp-runtime ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${LLVM_LIBRARIES})
 
