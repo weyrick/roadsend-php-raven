@@ -26,6 +26,7 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include "llvm/System/DynamicLibrary.h"
 #include "llvm/Bitcode/ReaderWriter.h"
 #include "llvm/ModuleProvider.h"
 #include "llvm/Analysis/Verifier.h"
@@ -70,28 +71,38 @@ void pDriver::executeBC(string fileName) {
     string* errMsg = new string();
     llvm::MemoryBuffer* mb = llvm::MemoryBuffer::getFile(fileName.c_str(), errMsg);
     if (errMsg->length()) {
-        cerr << "error loading file: " << fileName << endl;
+        cerr << "error loading file [" << fileName << "]: " << *errMsg << endl;
         delete errMsg;
         return;
     }
     llvm::ModuleProvider* MP = llvm::getBitcodeModuleProvider(mb, errMsg);
     if (errMsg->length()) {
-        cerr << "error parsing bitcode file: " << fileName << endl;
+        cerr << "error parsing bitcode file [" << fileName << "]: " << *errMsg << endl;
         delete errMsg;
         return;
     }
 
     // MP now owns mb and will delete
-    // errMsg isn't needed.
-    //delete errMsg;
 
-    //llvm::ExecutionEngine* EE = llvm::ExecutionEngine::create(MP, false);
-    llvm::ExecutionEngine* EE = llvm::ExecutionEngine::createJIT(MP, errMsg);
-    if (errMsg->length()) {
-        cerr << "no JIT available for this platform?: " << errMsg << endl;
+    if (llvm::sys::DynamicLibrary::LoadLibraryPermanently("librphp-runtime.so", errMsg)) {
+        cerr << "error loading runtime library: " << *errMsg << endl;
         delete errMsg;
         return;
     }
+
+    //MP->getModule()->setDataLayout("e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128");
+    //MP->getModule()->setTargetTriple("x86_64-pc-linux-gnu");
+
+    //llvm::ExecutionEngine* EE = llvm::ExecutionEngine::create(MP, false);
+    llvm::ExecutionEngine* EE = llvm::ExecutionEngine::createJIT(MP, errMsg);
+    if (!EE) {
+        cerr << *errMsg << endl;
+        delete errMsg;
+        return;
+    }
+
+    // errMsg isn't needed.
+    delete errMsg;
 
     // EE now owns MP
 
@@ -103,9 +114,13 @@ void pDriver::executeBC(string fileName) {
         return;
     }
 
+    EE->runStaticConstructorsDestructors(false);
+
     // Call the rphp_main function with no arguments:
     std::vector<llvm::GenericValue> noargs;
     llvm::GenericValue gv = EE->runFunction(rphpMain, noargs);
+
+    EE->runStaticConstructorsDestructors(true);
 
     cout << "module ran, return value is: " << gv.IntVal.toStringSigned(10) << endl;
 
