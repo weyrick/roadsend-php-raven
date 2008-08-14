@@ -30,8 +30,7 @@
 namespace rphp {
 
     /*
-     * Definition of the various types used in the rphp runtime, including the
-     * main pVar variant
+     * Definition of the main pVar variant
      */
 
     // a boost::tribool represents php true, false and null values

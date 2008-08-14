@@ -196,25 +196,20 @@ llvm::Module* pDriver::compileToIR(string fileName) {
     llvm::BasicBlock *BB = llvm::BasicBlock::Create("EntryBlock", F);
 
     // RUNTIME startup/shutdown test
-//     const llvm::Type* rEnginePointer = llvm::PointerType::get(llvm::Type::Int8Ty,0);
-//     llvm::FunctionType *runtimeStartupFuncType = llvm::FunctionType::get(rEnginePointer, std::vector<const llvm::Type*>(), false);
-//     llvm::Function *runtimeStartupFunc = llvm::Function::Create(runtimeStartupFuncType, llvm::Function::ExternalLinkage, "rphp_newRuntimeEngine", M);
-//
-//     llvm::Instruction *runtimeStartInstr = llvm::CallInst::Create(runtimeStartupFunc, "runtime");
-//
-//     std::vector<const llvm::Type*> engineSig(1, rEnginePointer);
-//     llvm::FunctionType *runtimeDeleteFuncType = llvm::FunctionType::get(llvm::Type::VoidTy, engineSig, false);
-//     llvm::Function *runtimeDeleteFunc = llvm::Function::Create(runtimeDeleteFuncType, llvm::Function::ExternalLinkage, "rphp_deleteRuntimeEngine", M);
-//
-//     std::vector<llvm::Value*> ArgsV;
-//     ArgsV.push_back(runtimeStartInstr);
-//
-//     llvm::Instruction *runtimeDeleteInstr = llvm::CallInst::Create(runtimeDeleteFunc, ArgsV.begin(), ArgsV.end());
+    const llvm::Type* rEnginePointer = llvm::PointerType::get(llvm::Type::Int8Ty,0);
+    llvm::FunctionType *runtimeStartupFuncType = llvm::FunctionType::get(rEnginePointer, std::vector<const llvm::Type*>(), false);
+    llvm::Function *runtimeStartupFunc = llvm::Function::Create(runtimeStartupFuncType, llvm::Function::ExternalLinkage, "rphp_newRuntimeEngine", M);
 
-    llvm::FunctionType *helloFuncType = llvm::FunctionType::get(llvm::Type::VoidTy, std::vector<const llvm::Type*>(), false);
-    llvm::Function *helloFunc = llvm::Function::Create(helloFuncType, llvm::Function::ExternalLinkage, "sayHello", M);
+    llvm::Instruction *runtimeStartInstr = llvm::CallInst::Create(runtimeStartupFunc, "runtime");
 
-    llvm::Instruction *helloInstr = llvm::CallInst::Create(helloFunc);
+    std::vector<const llvm::Type*> engineSig(1, rEnginePointer);
+    llvm::FunctionType *runtimeDeleteFuncType = llvm::FunctionType::get(llvm::Type::VoidTy, engineSig, false);
+    llvm::Function *runtimeDeleteFunc = llvm::Function::Create(runtimeDeleteFuncType, llvm::Function::ExternalLinkage, "rphp_deleteRuntimeEngine", M);
+
+    std::vector<llvm::Value*> ArgsV;
+    ArgsV.push_back(runtimeStartInstr);
+
+    llvm::Instruction *runtimeDeleteInstr = llvm::CallInst::Create(runtimeDeleteFunc, ArgsV.begin(), ArgsV.end());
 
     // Get pointers to the constant integers...
     llvm::Value *Two = llvm::ConstantInt::get(llvm::Type::Int32Ty, 2);
@@ -227,9 +222,8 @@ llvm::Module* pDriver::compileToIR(string fileName) {
     // explicitly insert it into the basic block...
     BB->getInstList().push_back(Add);
 
-    //BB->getInstList().push_back(runtimeStartInstr);
-    //BB->getInstList().push_back(runtimeDeleteInstr);
-    BB->getInstList().push_back(helloInstr);
+    BB->getInstList().push_back(runtimeStartInstr);
+    BB->getInstList().push_back(runtimeDeleteInstr);
 
     // Create the return instruction and add it to the basic block
     BB->getInstList().push_back(llvm::ReturnInst::Create(Add));

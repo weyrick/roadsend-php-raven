@@ -75,8 +75,6 @@ namespace rphp {
 /* start C interface */
 extern "C" {
 
-    void sayHello(void);
-
     // create a new runtime engine
     rphp::pRuntimeEngine* rphp_newRuntimeEngine();
 
