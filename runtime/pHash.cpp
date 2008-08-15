@@ -17,6 +17,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
+#include <unicode/ustream.h>
 #include "pHash.h"
 
 

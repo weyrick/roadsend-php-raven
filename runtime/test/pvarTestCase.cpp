@@ -59,6 +59,11 @@ public:
         return 0;
     }
 
+    int operator()(const rphp::pResourceP &h) const {
+        std::cout << "i see a resource" << std::endl;
+        return 0;
+    }
+
     int operator()(const rphp::pVarRef &h) const {
         std::cout << "i see a php reference" << std::endl;
         return 0;
@@ -94,6 +99,8 @@ void pvarTestCase::basic()
     std::cout << "pHashP: " << sizeof(rphp::pHashP) << std::endl;
     std::cout << "pObject: " << sizeof(rphp::pObject) << std::endl;
     std::cout << "pObjectP: " << sizeof(rphp::pObjectP) << std::endl;
+    std::cout << "pResource: " << sizeof(rphp::pResource) << std::endl;
+    std::cout << "pResourceP: " << sizeof(rphp::pResourceP) << std::endl;
     std::cout << "pVarBase: " << sizeof(rphp::pVarBase) << std::endl;
     std::cout << "pVarRef: " << sizeof(rphp::pVarRef) << std::endl;
     std::cout << "pVar: " << sizeof(rphp::pVar) << std::endl;
@@ -134,7 +141,7 @@ void pvarTestCase::basic()
     else {
         std::cout << "the bool was false" << std::endl;
     }
-    
+
     u = rphp::pFalse;
 
     std::cout << u << std::endl;

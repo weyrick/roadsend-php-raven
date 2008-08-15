@@ -24,7 +24,6 @@
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <unicode/unistr.h>
-#include <unicode/ustream.h>
 #include <iostream>
 
 namespace rphp {
@@ -61,15 +60,18 @@ namespace rphp {
     class pObject;
     typedef boost::shared_ptr<pObject> pObjectP;
 
+    // php resources
+    class pResource;
+    typedef boost::shared_ptr<pResource> pResourceP;
+
     // base variant that represents a php variable
-    typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP > pVarBase;
+    typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pResourceP > pVarBase;
 
     // reference to a pvarBase, i.e. a container for pvar variables
-    // shared_ptr maintains a reference count and guarantees proper destruction
     typedef boost::shared_ptr<pVarBase> pVarRef;
 
     // full pvar definition: a variant that can hold a base type or a reference
-    typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pVarRef > pVar;
+    typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pResourceP, pVarRef > pVar;
     typedef boost::shared_ptr<pVar> pVarP;
 
     // associated enum for checking type
@@ -82,6 +84,7 @@ namespace rphp {
         pVarUStringType,
         pVarHashType,
         pVarObjectType,
+        pVarResourceType,
         pVarRefType
     } pVarType;
 

@@ -25,6 +25,7 @@
 #include "pVar.h"
 #include "pHash.h"
 #include "pObject.h"
+#include "pResource.h"
 
 U_NAMESPACE_BEGIN
     // boost hash function for pUString
@@ -77,6 +78,10 @@ namespace rphp {
             return pVarObjectType;
         }
 
+        pVarType operator()(const pResourceP &h) const {
+            return pVarResourceType;
+        }
+
         pVarType operator()(const pVarRef &p) const {
             return pVarRefType;
         }
@@ -127,6 +132,11 @@ namespace rphp {
             var = (pInt)h->getNumProperties();
         }
 
+        void operator()(pResourceP &h) const {
+            // TODO: return static resource count
+            var = 0l;
+        }
+
         void operator()(pVarRef &r) const {
             // unbox
             //boost::apply_visitor(convertToNumber(*r), *r);
@@ -171,6 +181,10 @@ namespace rphp {
         void operator()(pObjectP &h) const {
             // TODO: toString
             var = pBString("object");
+        }
+
+        void operator()(pResourceP &h) const {
+            var = pBString("resource");
         }
 
         void operator()(pVarRef &r) const {
