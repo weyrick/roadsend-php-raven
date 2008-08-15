@@ -19,15 +19,15 @@
 #include <iostream>
 #include "pRuntime.h"
 #include "pExtManager.h"
+#include "pOutputManager.h"
 #include "pFunctionManager.h"
 
 namespace rphp {
 
 pRuntimeEngine::pRuntimeEngine() : extManager(new pExtManager(this)),
-                                   functionManager(new pFunctionManager(this))
+                                   functionManager(new pFunctionManager(this)),
+                                   outputManager(new pOutputManager(this))
 {
-    std::cout << "runtime is starting" << std::endl;
-
     // runtime initialization
     extManager->startUp();
 
@@ -36,9 +36,8 @@ pRuntimeEngine::pRuntimeEngine() : extManager(new pExtManager(this)),
 
 pRuntimeEngine::~pRuntimeEngine() {
 
-    std::cout << "runtime is shutting down" << std::endl;
-
     // runtime shutdown
+    delete outputManager; // will flush
     delete functionManager;
     delete extManager;
 }
@@ -51,16 +50,20 @@ extern "C" {
 
     // create a new runtime engine
     rphp::pRuntimeEngine* rphp_newRuntimeEngine() {
-        std::cout << "in C API runtime now" << std::endl;
         rphp::pRuntimeEngine* rt = new rphp::pRuntimeEngine();
         return rt;
     }
 
     // destroy runtime engine
     void rphp_deleteRuntimeEngine(rphp::pRuntimeEngine* e) {
-        std::cout << "closing in C API runtime now" << std::endl;
         delete e;
     }
+
+    // print a c string to the current output buffer in the given runtime
+    void rphp_print_cstr(rphp::pRuntimeEngine* e, char* str) {
+        e->outputManager->print(rphp::pBString(str));
+    }
+
 
 }
 

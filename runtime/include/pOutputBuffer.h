@@ -25,45 +25,20 @@ namespace rphp {
 
     class pOutputBuffer {
 
-        // default size of a new output buffer
-        // note that for unicode strings, memory space is 2*defBufSize
-        static const std::size_t defBufSize = 512;
+    public:
 
         typedef enum { bufTypeBinary, bufTypeUnicode } bufTypeT;
 
-        private:
-            
-            pUString *uBuffer;
-            pBString *bBuffer;
-            bufTypeT bType;
-
-        public:
-
             // constructors
 
-            // default builds a unicode buffer, default size
-            pOutputBuffer() : uBuffer(new pUString(defBufSize,' ',0)), bType(bufTypeUnicode) { }
-
-            // specify type, default size
-            pOutputBuffer(bufTypeT t) : bType(t) {
+            // specify type
+            pOutputBuffer(bufTypeT t) : bBuffer(0), uBuffer(0), bType(t) {
                 switch (t) {
                     case bufTypeBinary:
-                        bBuffer = new pBString(defBufSize,' ');
+                        bBuffer = new pBString();
                         break;
                     case bufTypeUnicode:
-                        uBuffer = new pUString(defBufSize,' ',0);
-                        break;
-                }
-            }
-
-            // specify type, size
-            pOutputBuffer(bufTypeT t, std::size_t s) : bType(t) {
-                switch (t) {
-                    case bufTypeBinary:
-                        bBuffer = new pBString(s,' ');
-                        break;
-                    case bufTypeUnicode:
-                        uBuffer = new pUString(s,' ',0);
+                        uBuffer = new pUString();
                         break;
                 }
             }
@@ -75,6 +50,42 @@ namespace rphp {
                 if (bBuffer)
                     delete bBuffer;
             }
+
+            const char* getRawBuffer() {
+                switch (bType) {
+                    case bufTypeBinary:
+                        return bBuffer->c_str();
+                    case bufTypeUnicode:
+                        return (const char*)uBuffer->getTerminatedBuffer();
+                }
+            }
+
+            void operator<< (const pBString& str) {
+                switch (bType) {
+                    case bufTypeBinary:
+                        bBuffer->append(str);
+                        break;
+                    case bufTypeUnicode:
+                        // TODO: this doesn't seem so efficient. but how often will it be used?
+                        uBuffer->append(pUString(str.c_str(),str.length(), US_INV));
+                        break;
+                }
+            }
+
+            void operator<< (const pUString& str) {
+                if (bType == bufTypeBinary) {
+                    // convert to unicode buffer
+                    uBuffer = new pUString(bBuffer->c_str(), bBuffer->length(), US_INV);
+                    delete bBuffer;
+                }
+                uBuffer->append(str);
+            }
+
+    private:
+
+            pUString *uBuffer;
+            pBString *bBuffer;
+            bufTypeT bType;
 
     };
 

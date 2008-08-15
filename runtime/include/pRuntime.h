@@ -30,10 +30,6 @@ namespace rphp {
     class pRuntimeEngine {
 
         private:
-
-            // output buffering management
-            pOutputManager* outputManager;
-
             // extension manager
             // --> for loading and registering dynamic extensions (pcre, mysql, etc) and their associated functions, classes
             pExtManager* extManager;
@@ -68,6 +64,9 @@ namespace rphp {
             // --> interface for new function definition
             pFunctionManager* functionManager;
 
+            // output buffering management
+            pOutputManager* outputManager;
+
     };
 
 } /* end namespace rphp */
@@ -80,6 +79,9 @@ extern "C" {
 
     // destroy runtime engine
     void rphp_deleteRuntimeEngine(rphp::pRuntimeEngine*);
+
+    // print to runtime output buffer
+    void rphp_print_cstr(rphp::pRuntimeEngine*, char* str);
 
 }
 

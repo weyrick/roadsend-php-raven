@@ -16,9 +16,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
+#include <iostream>
 #include "pOutputManager.h"
 
 namespace rphp {
+
+void pOutputManager::flushAndFreeAll() {
+    while( !bufferStack.empty() ) {
+        std::cout << bufferStack.top()->getRawBuffer();
+        delete bufferStack.top();
+        bufferStack.pop();
+    }
+}
 
 
 }

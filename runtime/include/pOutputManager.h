@@ -21,20 +21,45 @@
 
 #include <stack>
 #include "pOutputBuffer.h"
+#include "pTypes.h"
 
 namespace rphp {
+
+    class pRuntimeEngine;
 
     class pOutputManager {
 
         private:
-            std::stack<pOutputBuffer> bufferStack;
+            pRuntimeEngine* runtime;
+            std::stack<pOutputBuffer*> bufferStack;
 
         public:
 
             // constructors
-            pOutputManager() {
+            pOutputManager(pRuntimeEngine *r) : runtime(r) {
                 // default output buffer
-                bufferStack.push(pOutputBuffer());
+                // TODO: check the runtime config for which type of default buffer to use
+                bufferStack.push(new pOutputBuffer(pOutputBuffer::bufTypeBinary));
+            }
+
+            ~pOutputManager() {
+                flushAndFreeAll();
+            }
+
+            // flush one or more buffers
+            void flushAndFreeAll();
+
+            // printing to the current buffer
+            void print(pBString str) {
+                if (bufferStack.empty())
+                    return;
+                *bufferStack.top() << str;
+            }
+
+            void print(pUString str) {
+                if (bufferStack.empty())
+                    return;
+                *bufferStack.top() << str;
             }
 
     };
