@@ -11,10 +11,10 @@ MESSAGE( STATUS "CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH} )
 set(RPHP_RUNTIME_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/runtime/include)
 set(RPHP_COMPILER_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/compiler)
 
-Find_Package(Boost COMPONENTS program_options REQUIRED)
+Find_Package(Boost)
 FIND_PACKAGE(ICU)
 
-add_subdirectory(tools)
+#add_subdirectory(tools)
 add_subdirectory(runtime)
 add_subdirectory(compiler)
 add_subdirectory(frontend/cli)

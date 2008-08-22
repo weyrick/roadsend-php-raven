@@ -17,38 +17,16 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PDRIVER_H_
-#define RPHP_PDRIVER_H_
-
-#include <string>
-
-namespace llvm {
-    class Module;
-}
+#ifndef RPHP_PTOKENS_H_
+#define RPHP_PTOKENS_H_
 
 namespace rphp {
 
-    class pDriver {
-    private:
-        llvm::Module* compileToIR(std::string fileName);
-        std::string readFile(std::string fileName);
-
-    public:
-
-        void compileToBC(std::string fileName);
-        void compileToAsm(std::string fileName);
-        void compileToNative(std::string fileName);
-
-        void execute(std::string fileName);
-        void executeBC(std::string fileName);
-        void executePHP(std::string fileName);
-
-        void dumpTokens(std::string fileName);
-        void dumpAST(std::string fileName);
-        void dumpIR(std::string fileName);
-
-    };
+enum languageTokenList {
+    T_VARIABLE = 1000,
+    T_IF
+};
 
 }
 
-#endif /* RPHP_PDRIVER_H_ */
+#endif /* RPHP_PTOKENS_H_ */

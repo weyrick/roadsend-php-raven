@@ -2,6 +2,7 @@
 MESSAGE( STATUS "compiler check" )
 
 # TODO: move this to a FindLLVM in cmake/modules
+# see frontend/cli/CMakeLists.txt as well
 EXECUTE_PROCESS(COMMAND llvm-config --libs core jit bitreader bitwriter linker interpreter OUTPUT_VARIABLE LLVM_LIBRARIES OUTPUT_STRIP_TRAILING_WHITESPACE)
 EXECUTE_PROCESS(COMMAND llvm-config --includedir OUTPUT_VARIABLE LLVM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
 EXECUTE_PROCESS(COMMAND llvm-config --cppflags OUTPUT_VARIABLE LLVM_CPP_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -12,18 +13,15 @@ SEPARATE_ARGUMENTS(LLVM_CPP_FLAGS)
 
 add_definitions(${LLVM_CPP_FLAGS} -fPIC)
 
-include_directories (${PROJECT_SOURCE_DIR}/tools/kdevelop-pg/include
+include_directories (
                      ${ICU_INCLUDE_DIRS}/unicode
                      ${ICU_INCLUDE_DIRS}
                      ${RPHP_RUNTIME_INCLUDE_DIR}
                      ${LLVM_INCLUDE_DIRS}
-                     )
+                     ${Boost_INCLUDE_DIRS}
+                    )
 
 set(EVAL_SRC_FILES
-  parser/rphp_default_visitor.cpp
-  parser/rphp_parser.cpp
-  parser/rphp_visitor.cpp
-  parser/phplexer.cpp
   pDriver.cpp
 )
 
