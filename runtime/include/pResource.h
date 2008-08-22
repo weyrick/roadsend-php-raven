@@ -21,8 +21,6 @@
 
 #include <iostream>
 
-#include "pHash.h"
-
 namespace rphp {
 
     class pResource {

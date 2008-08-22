@@ -611,7 +611,7 @@ void pDriver::dumpTokens(string fileName) {
 
     inFile.open(fileName.c_str(), ifstream::in);
     if (!inFile) {
-        cout << "Unable to open file: " << endl;
+        cout << "Unable to open file: " << fileName << endl;
         exit(1); // terminate with error
     }
 
