@@ -22,6 +22,9 @@ int main( int argc, char* argv[] )
     // command line options
     cl::opt<std::string> inputFile(cl::Positional, cl::desc("<input file>"), cl::Required);
     cl::opt<bool> dumpToks ("dump-toks", cl::desc("Dump tokens from lexer"));
+    cl::opt<bool> dumpIR ("dump-ir", cl::desc("Dump IR "));
+    cl::opt<bool> dumpAST ("dump-ast", cl::desc("Dump AST"));
+    cl::opt<bool> iBC ("i", cl::desc("Interpret bytecode"));
 
     cl::SetVersionPrinter(&rphpVersion);
     cl::ParseCommandLineOptions(argc, argv, "Roadsend PHP");
@@ -29,6 +32,19 @@ int main( int argc, char* argv[] )
     if (dumpToks) {
         driver.dumpTokens(inputFile);
     }
+    else if (dumpIR) {
+        driver.dumpIR(inputFile);
+    }
+    else if (dumpAST) {
+        driver.dumpAST(inputFile);
+    }
+    else if (iBC) {
+        driver.executeBC(inputFile);
+    }
+    else {
+        driver.compileToBC(inputFile);
+    }
+
 
     /*
     po::options_description desc("Allowed options");

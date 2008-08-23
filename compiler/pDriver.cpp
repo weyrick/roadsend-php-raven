@@ -307,7 +307,7 @@ void pDriver::dumpTokens(string fileName) {
     std::string::iterator source_it = contents.begin();
     for (tokIteratorType iter = lexer.begin(source_it, contents.end()); iter != lexer.end(); ++iter)
     {
-        std::cout << "tok: " << (*iter).id() << ">" << (*iter).value() << "<" << std::endl;
+        std::cout << "tok: " << (*iter).id() << " >" << (*iter).value() << "<" << std::endl;
         if ((*iter).id() == 0)
             break;
     }
