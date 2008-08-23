@@ -43,6 +43,7 @@
 #include "llvm/ExecutionEngine/GenericValue.h"
 
 #include "pLexers.h"
+#include "pParser.h"
 #include "pDriver.h"
 
 using namespace std;
@@ -328,7 +329,37 @@ std::string pDriver::readFile(std::string fileName)
 }
 
 void pDriver::dumpAST(string fileName) {
-/*
+
+    ifstream inFile;
+
+    std::string contents = readFile(fileName);
+
+    pLangTokens tokens;
+    pLangLexer lexer(tokens);
+    pLangGrammar parser(tokens);
+
+    std::string::iterator it = contents.begin();
+    tokIteratorType iter = lexer.begin(it, contents.end());
+    tokIteratorType end = lexer.end();
+
+    std::string ws = "WS";
+
+    bool r = phrase_parse(iter, end, parser, in_state(ws)[tokens.skip_toks]);
+
+    if (r && iter == end)
+    {
+        std::cout << "-------------------------\n";
+        std::cout << "Parsing succeeded\n";
+        std::cout << "-------------------------\n";
+    }
+    else
+    {
+        std::cout << "-------------------------\n";
+        std::cout << "Parsing failed\n";
+        std::cout << "-------------------------\n";
+    }
+
+    /*
     ifstream inFile;
 
     inFile.open(fileName.c_str(), ifstream::in);
