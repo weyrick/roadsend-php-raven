@@ -43,22 +43,30 @@ struct rphpLangTokens : lexer_def<Lexer>
     void def (Self& self)
     {
 
-        identifier = "[a-zA-Z_][a-zA-Z0-9_]*";
-        variable = ("\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE);
-        constant = "[0-9]+";
+        if_ = token_def<omitted>("if", T_IF);
+        while_ = token_def<omitted>("while", T_WHILE);
+        else_ = token_def<omitted>("else", T_ELSE);
+        echo = token_def<omitted>("echo", T_ECHO);
 
-        if_ = ("if", T_IF);
-        while_ = "while";
-        else_ = "else";
+        identifier = token_def<std::string>("[a-zA-Z_][a-zA-Z0-9_]*", T_IDENTIFIER);
+
+        //dqstring = token_def<omitted>("\"([^\"\\\\]|\\\\.)*\"", T_CONSTANT_ENCAPSED_STRING);
+        dqstring = token_def<omitted>("[\"][^\"]*[\"]", T_CONSTANT_ENCAPSED_STRING);
+        variable = token_def<std::string>("\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE);
+        lnumber = token_def<unsigned int>("[0-9]+", T_LNUMBER);
+
+        opentag = token_def<omitted>("<\\?", T_OPEN_TAG);
+        closetag = token_def<omitted>("\\?>", T_CLOSE_TAG);
 
         skip_toks
-           = token_def<std::string>("[ \\t\\n]+")
-           | token_def<std::string>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/")
-           | token_def<std::string>("\\/\\/.*$");
+           = token_def<std::string>("[ \\t\\n]+", T_WHITESPACE)
+           | token_def<std::string>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_ML_COMMENT)
+           | token_def<std::string>("\\/\\/.*$", T_SL_COMMENT);
 
         // associate the tokens and the token set with the lexer
-        self += token_def<>('(') | ')' | '{' | '}' | '=' | ';' | constant;
-        self += if_ | while_ | else_ | identifier | variable;
+        self += token_def<>('(') | ')' | '{' | '}' | '=' | ';';
+        self += if_ | while_ | else_ | echo | opentag | closetag;
+        self += identifier | variable | lnumber | dqstring;
 
         // whitespace tokens in WS lexer state
         self("WS") = skip_toks;
@@ -70,13 +78,14 @@ struct rphpLangTokens : lexer_def<Lexer>
     // that defines our langTokenType (see below)
 
     // these tokens have no value
-    token_def<omitted> if_, while_, else_;
+    token_def<omitted> if_, while_, else_, echo, opentag, closetag, dqstring;
 
     // tokens with string value
     token_def<std::string> identifier, variable;
 
     // tokens with int value
-    token_def<unsigned int> constant;
+    // TODO: change this to pInt
+    token_def<unsigned int> lnumber;
 
     // token set to be used as the skip parser (whitespace and comments)
     token_set skip_toks;
@@ -104,6 +113,41 @@ typedef lexer<pLangTokens> pLangLexer;
 // a token
 typedef lexer<pLangTokens>::iterator_type tokIteratorType;
 
+const char* getTokenDescription(const std::size_t t) {
+
+    switch (t) {
+        case T_VARIABLE:
+            return "T_VARIABLE";
+        case T_WHITESPACE:
+            return "T_WHITESPACE";
+        case T_ML_COMMENT:
+            return "T_ML_COMMENT";
+        case T_SL_COMMENT:
+            return "T_SL_COMMENT";
+        case T_ECHO:
+            return "T_ECHO";
+        case T_OPEN_TAG:
+            return "T_OPEN_TAG";
+        case T_CLOSE_TAG:
+            return "T_CLOSE_TAG";
+        case T_LNUMBER:
+            return "T_LNUMBER";
+        case T_INLINE_HTML:
+            return "T_INLINE_HTML";
+        case T_IF:
+            return "T_IF";
+        case T_ELSE:
+            return "T_ELSE";
+        case T_WHILE:
+            return "T_WHILE";
+        case T_IDENTIFIER:
+            return "T_IDENTIFIER";
+        case T_CONSTANT_ENCAPSED_STRING:
+            return "T_CONSTANT_ENCAPSED_STRING";
+    }
+    return "";
+
+}
 
 } // namespace
 

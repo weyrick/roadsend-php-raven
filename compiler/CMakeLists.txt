@@ -22,6 +22,7 @@ include_directories (
                     )
 
 set(EVAL_SRC_FILES
+  pASTVisitors.cpp
   pDriver.cpp
 )
 

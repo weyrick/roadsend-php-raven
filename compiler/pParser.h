@@ -20,6 +20,9 @@
 #ifndef RPHP_PPARSER_H_
 #define RPHP_PPARSER_H_
 
+//#define BOOST_SPIRIT_LEXERTL_DEBUG
+//#define BOOST_SPIRIT_DEBUG
+
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_container.hpp>
@@ -29,6 +32,7 @@
 #include <string>
 
 #include "pLexers.h"
+#include "pAST.h"
 
 using namespace boost::spirit;
 using namespace boost::spirit::qi;
@@ -71,32 +75,39 @@ struct rphpLangGrammarDef
 {
     template <typename TokenDef>
     rphpLangGrammarDef(TokenDef const& tok)
-      : rphpLangGrammarDef::base_type(program, "program")
+      : rphpLangGrammarDef::base_type(module, "module")
     {
-        program
-            =  +block
+        using boost::spirit::arg_names::_1;
+        using boost::spirit::arg_names::_2;
+        using boost::spirit::arg_names::_3;
+        using boost::spirit::arg_names::_4;
+
+        module
+            =  *statement
             ;
 
-        block
+        statement_block
             =   '{' >> *statement >> '}'
             ;
 
         statement
-            =   assignment
+            =   statement_block
+            |   assignment
             |   if_stmt
             |   while_stmt
+            |   echo_stmt
             ;
 
         assignment
             =   (tok.identifier >> '=' >> expression >> ';')
                 [
-                    std::cout << val("assignment statement to: ") << _1 << "\n"
+                    std::cout << val("assignment statement to: ") << _1 << " from "<< _2 <<  "\n"
                 ]
             ;
 
         if_stmt
-            =   (   tok.if_ >> '(' >> expression >> ')' >> block
-                    >> -(tok.else_ >> block)
+            =   (   tok.if_ >> '(' >> expression > ')' >> statement_block
+                    >> -(tok.else_ >> statement_block)
                 )
                 [
                     std::cout << val("if expression: ") << _1 << "\n"
@@ -104,9 +115,16 @@ struct rphpLangGrammarDef
             ;
 
         while_stmt
-            =   (tok.while_ >> '(' >> expression >> ')' >> block)
+            =   (tok.while_ >> '(' >> expression >> ')' >> statement_block)
                 [
                     std::cout << val("while expression: ") << _1 << "\n"
+                ]
+            ;
+
+        echo_stmt
+            =   (tok.echo >> expression >> ';')
+                [
+                    std::cout << val("echo: ") << _1 << "\n"
                 ]
             ;
 
@@ -116,36 +134,27 @@ struct rphpLangGrammarDef
         expression
             =   tok.identifier [ _val = _1 ]
             |   tok.variable   [ _val = _1 ]
-            |   tok.constant   [ _val = _1 ]
+            |   tok.lnumber   [ _val = _1 ]
             ;
 
-        //BOOST_SPIRIT_DEBUG_NODE(program);
-
-        program.name("program");
-        block.name("block");
+        module.name("module");
+        statement_block.name("statement block");
         statement.name("statement");
         assignment.name("assignment");
         if_stmt.name("if_stmt");
         while_stmt.name("while_stmt");
+        echo_stmt.name("echo_stmt");
 
-        on_error<fail>(program, parse_error_handler(_4, _3, _2));
-        /*
-        on_error<fail>(block, error_handler(_4, _3, _2));
-        on_error<fail>(statement, error_handler(_4, _3, _2));
-        on_error<fail>(assignment, error_handler(_4, _3, _2));
-        on_error<fail>(if_stmt, error_handler(_4, _3, _2));
-        on_error<fail>(while_stmt, error_handler(_4, _3, _2));
-        on_error<fail>(expression, error_handler(_4, _3, _2));
-        */
+        on_error<fail>(module, parse_error_handler(_4, _3, _2));
 
     }
 
     typedef grammar<Iterator, in_state_skipper<typename Lexer::token_set> > base_type;
     typedef typename base_type::skipper_type skipper_type;
 
-    rule<Iterator, skipper_type> program, block, statement;
+    rule<Iterator, skipper_type> module, statement, statement_block;
     rule<Iterator, skipper_type> assignment, if_stmt;
-    rule<Iterator, skipper_type> while_stmt;
+    rule<Iterator, skipper_type> while_stmt, echo_stmt;
 
     //  the expression is the only rule having a return value
     typedef boost::variant<unsigned int, std::string> expression_type;

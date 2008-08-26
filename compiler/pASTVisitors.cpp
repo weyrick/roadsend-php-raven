@@ -17,29 +17,32 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PTOKENS_H_
-#define RPHP_PTOKENS_H_
+#include <iostream>
+#include <vector>
+#include "pASTVisitors.h"
 
-namespace rphp {
+namespace rphp { namespace AST {
 
-typedef enum {
-
-    T_VARIABLE = 1000,
-    T_WHITESPACE,
-    T_ML_COMMENT,
-    T_SL_COMMENT,
-    T_ECHO,
-    T_OPEN_TAG,
-    T_CLOSE_TAG,
-    T_LNUMBER,
-    T_INLINE_HTML,
-    T_IF,
-    T_ELSE,
-    T_WHILE,
-    T_IDENTIFIER,
-    T_CONSTANT_ENCAPSED_STRING
-} languageTokenIDType;
-
+void defaultVisitor::visit(moduleNodeP n) {
+    for(statementListType::iterator s = n->statementList.begin(); s != n->statementList.end(); ++s) {
+        visit(*s);
+    }
 }
 
-#endif /* RPHP_PTOKENS_H_ */
+void defaultVisitor::visit(statementNodeP n) {
+    // fixme
+}
+
+void dumpVisitor::visit(moduleNodeP n) {
+    std::cout << "moduleNode" << std::endl;
+    defaultVisitor::visit(n);
+}
+
+void dumpVisitor::visit(statementNodeP n) {
+    std::cout << "statementNode" << std::endl;
+    defaultVisitor::visit(n);
+}
+
+
+} } // namespace
+

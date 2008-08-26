@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <unicode/unistr.h>
 #include <unicode/ustream.h>
 
@@ -305,12 +306,38 @@ void pDriver::dumpTokens(string fileName) {
     pLangTokens tokens;
     pLangLexer lexer(tokens);
 
+    string tokID;
+    stringstream val;
+    
     std::string::iterator source_it = contents.begin();
     for (tokIteratorType iter = lexer.begin(source_it, contents.end()); iter != lexer.end(); ++iter)
     {
-        std::cout << "tok: " << (*iter).id() << " >" << (*iter).value() << "<" << std::endl;
-        if ((*iter).id() == 0)
-            break;
+        if ((*iter).id() == 0) {
+            // if we didn't match, we switch to state 1 which is our skip_toks (i.e. whitespace, comments)
+            iter.set_state(1);
+            // if we still haven't matched, then we have a lexer error or end of input
+            if ((*iter).id() == 0)
+                break;
+            val.str("");
+            if ((*iter).id() != T_WHITESPACE)
+                val << (*iter).value();
+            tokID = getTokenDescription((*iter).id());
+            if (tokID.size() == 0)
+                tokID = val.str();
+            std::cout << val.str() << " " << tokID << std::endl;
+            // always switch back
+            iter.set_state(0);
+        }
+        else {
+            // matched
+            val.str("");
+            if ((*iter).id() != T_WHITESPACE)
+                val << (*iter).value();
+            tokID = getTokenDescription((*iter).id());
+            if (tokID.size() == 0)
+                tokID = val.str();
+            std::cout << val.str() << " " << tokID << std::endl;
+        }
     }
 
 
@@ -329,7 +356,7 @@ std::string pDriver::readFile(std::string fileName)
 }
 
 void pDriver::dumpAST(string fileName) {
-
+/*
     ifstream inFile;
 
     std::string contents = readFile(fileName);
@@ -346,56 +373,8 @@ void pDriver::dumpAST(string fileName) {
 
     bool r = phrase_parse(iter, end, parser, in_state(ws)[tokens.skip_toks]);
 
-    if (r && iter == end)
-    {
-        std::cout << "-------------------------\n";
-        std::cout << "Parsing succeeded\n";
-        std::cout << "-------------------------\n";
-    }
-    else
-    {
-        std::cout << "-------------------------\n";
+    if (!r || iter != end) {
         std::cout << "Parsing failed\n";
-        std::cout << "-------------------------\n";
-    }
-
-    /*
-    ifstream inFile;
-
-    inFile.open(fileName.c_str(), ifstream::in);
-    if (!inFile) {
-        cout << "Unable to open file: " << endl;
-        exit(1); // terminate with error
-    }
-
-    UnicodeString contents;
-    char buf[512];
-    while (inFile) {
-        inFile.getline(buf, 512);
-        //cout << "read: " << buf << endl;
-        contents += buf;
-    }
-
-    inFile.close();
-
-    parser p;
-    p.set_token_stream( new parser::token_stream_type() );
-    p.set_memory_pool( new parser::memory_pool_type() );
-    p.setDebug( true );
-
-    p.tokenize(contents);
-    start_ast* phpAst;
-    bool matched = p.parse_start(&phpAst);
-    if( matched )
-    {
-        std::cout << "Successfully parsed" << std::endl;
-        debug_visitor dv;
-        dv.visit_start(phpAst);
-    }else
-    {
-        //*ast = 0;
-        //std::cout << p.expected_symbol(ast_node::Kind_start, "start");
-        std::cout << "Couldn't parse content" << std::endl;
     }
 */
 }
