@@ -16,29 +16,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_PTYPES_H_
-#define RPHP_PTYPES_H_
-
-#include <boost/tuple/tuple.hpp>
-
-// including this file includes all rphp base types
-#include "pVar.h"
-#include "pHash.h"
-#include "pObject.h"
-#include "pResource.h"
+#include "pTypeOperations.h"
+#include "pVarOperators.h"
 
 namespace rphp {
 
-    // note, pUInt is not a base PHP type (all PHP numbers are signed)
-    typedef unsigned long pUInt;
+pVar pVar_add(const pVar &lhs, const pVar &rhs)
+{
+    pVar l,r,result;
 
-    // source locations: filename/linenum
-    typedef boost::tuple<const pUString, const pUInt> pSourceLocation;
+    pVarType lhs_type = pVar_getType(lhs);
+    pVarType rhs_type = pVar_getType(rhs);
+    if ( (lhs_type == pVarHashType) && (rhs_type == pVarHashType) ) {
+        //std::cout << "fixme: concat hashes" << std::endl;
+        result = 0l;
+    }
+    else {
+        // convert to number, then add
+        l = pVar_castToNumber(lhs);
+        //std::cout << "pVar_add: l is " << l << std::endl;
+        r = pVar_castToNumber(rhs);
+        //std::cout << "pVar_add: r is " << r << std::endl;
+        result = pVar_getVal_pInt(l) + pVar_getVal_pInt(r);
+        //std::cout << "pVar_add: result is " << result << std::endl;
+    }
 
-    // source locations: filename/startlinenum/endlinenum
-    typedef boost::tuple<const pUString, const pUInt, const pUInt> pSourceStartEndLocation;
+    return result;
+}
+
 
 } /* namespace rphp */
 
-
-#endif /* RPHP_PTYPES_H_ */

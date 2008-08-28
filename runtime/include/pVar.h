@@ -24,69 +24,69 @@
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <unicode/unistr.h>
-#include <iostream>
 
 namespace rphp {
 
-    /*
-     * Definition of the main pVar variant
-     */
+/*
+ * Definition of the main pVar variant, which represents
+ * a PHP value in the runtime
+ */
 
-    // a boost::tribool represents php true, false and null values
-    // pTrue, pFalse and pNull are defined
-    typedef boost::logic::tribool pTriState;
-    // convenience accesors
-    BOOST_TRIBOOL_THIRD_STATE(pNull)
-    #define pTrue  pTriState(true)
-    #define pFalse pTriState(false)
+// a boost::tribool represents php true, false and null values
+// pTrue, pFalse and pNull are defined
+typedef boost::logic::tribool pTriState;
+// convenience accesors
+BOOST_TRIBOOL_THIRD_STATE(pNull)
+#define pTrue  pTriState(true)
+#define pFalse pTriState(false)
 
-    // numeric types
-    typedef long   pInt;
-    typedef double pFloat;
+// numeric types
+typedef signed long pInt;
+typedef double pFloat;
 
-    // string types: binary and unicode flavor
-    // "binary" strings
-    typedef std::string pBString;
+// string types: binary and unicode flavor
+// "binary" strings
+typedef std::string pBString;
 
-    // unicode strings, using the ICU library
-    typedef UnicodeString pUString;
-    typedef boost::shared_ptr<pUString> pUStringP;
+// unicode strings, using the ICU library
+typedef UnicodeString pUString;
+typedef boost::shared_ptr<pUString> pUStringP;
 
-    // php hash tables
-    class pHash;
-    typedef boost::shared_ptr<pHash> pHashP;
+// php hash tables
+class pHash;
+typedef boost::shared_ptr<pHash> pHashP;
 
-    // php objects
-    class pObject;
-    typedef boost::shared_ptr<pObject> pObjectP;
+// php objects
+class pObject;
+typedef boost::shared_ptr<pObject> pObjectP;
 
-    // php resources
-    class pResource;
-    typedef boost::shared_ptr<pResource> pResourceP;
+// php resources
+class pResource;
+typedef boost::shared_ptr<pResource> pResourceP;
 
-    // base variant that represents a php variable
-    typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pResourceP > pVarBase;
+// base variant that represents a php variable
+typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pResourceP > pVarBase;
 
-    // reference to a pvarBase, i.e. a container for pvar variables
-    typedef boost::shared_ptr<pVarBase> pVarRef;
+// reference to a pvarBase, i.e. a container for pvar variables
+typedef boost::shared_ptr<pVarBase> pVarRef;
 
-    // full pvar definition: a variant that can hold a base type or a reference
-    typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pResourceP, pVarRef > pVar;
-    typedef boost::shared_ptr<pVar> pVarP;
+// full pvar definition: a variant that can hold a base type or a reference
+typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pResourceP, pVarRef > pVar;
+typedef boost::shared_ptr<pVar> pVarP;
 
-    // associated enum for checking type
-    typedef enum {
-        pVarNullType,
-        pVarBoolType,
-        pVarIntType,
-        pVarFloatType,
-        pVarBStringType,
-        pVarUStringType,
-        pVarHashType,
-        pVarObjectType,
-        pVarResourceType,
-        pVarRefType
-    } pVarType;
+// associated enum for checking type
+typedef enum {
+    pVarNullType,
+    pVarBoolType,
+    pVarIntType,
+    pVarFloatType,
+    pVarBStringType,
+    pVarUStringType,
+    pVarHashType,
+    pVarObjectType,
+    pVarResourceType,
+    pVarRefType
+} pVarType;
 
 } /* namespace rphp */
 

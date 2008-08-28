@@ -16,29 +16,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_PTYPES_H_
-#define RPHP_PTYPES_H_
+#ifndef RPHP_PVAROPERATORS_H_
+#define RPHP_PVAROPERATORS_H_
 
-#include <boost/tuple/tuple.hpp>
-
-// including this file includes all rphp base types
-#include "pVar.h"
-#include "pHash.h"
-#include "pObject.h"
-#include "pResource.h"
+#include "pTypes.h"
 
 namespace rphp {
 
-    // note, pUInt is not a base PHP type (all PHP numbers are signed)
-    typedef unsigned long pUInt;
-
-    // source locations: filename/linenum
-    typedef boost::tuple<const pUString, const pUInt> pSourceLocation;
-
-    // source locations: filename/startlinenum/endlinenum
-    typedef boost::tuple<const pUString, const pUInt, const pUInt> pSourceStartEndLocation;
+pVar pVar_add(const pVar &lhs, const pVar &rhs);
 
 } /* namespace rphp */
 
 
-#endif /* RPHP_PTYPES_H_ */
+#endif /* RPHP_PVAROPERATORS_H_ */

@@ -8,7 +8,8 @@ set(RUNTIME_SRC_FILES
   pResource.cpp
   pHash.cpp
   pObject.cpp
-  pTypes.cpp
+  pVarOperators.cpp
+  pTypeOperators.cpp
   pRuntime.cpp
   pOutputBuffer.cpp
   pOutputManager.cpp

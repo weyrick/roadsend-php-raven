@@ -20,6 +20,8 @@
 #define RPHP_PRUNTIME_H_
 
 #include "pTypes.h"
+#include "pTypeOperators.h"
+#include "pVarOperators.h"
 
 namespace rphp {
 
