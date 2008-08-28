@@ -44,132 +44,132 @@ namespace boost {
 
 namespace rphp {
 
-    // a visitor for hashing phash keys
-    class hKeyHasher : public boost::static_visitor<std::size_t> {
+// a visitor for hashing phash keys
+class hKeyHasher : public boost::static_visitor<std::size_t> {
+
+public:
+
+    std::size_t operator()(const pInt &k) const {
+        return static_cast<std::size_t>(k);
+    }
+
+    /*
+    std::size_t operator()(const pBString &k) const {
+        return boost::hash_value(k);
+    }
+    */
+
+    std::size_t operator()(const pUString &k) const {
+        return static_cast<std::size_t>(k.hashCode());
+    }
+
+};
+
+// a visitor for determining phash key type
+class hKeyGetType : public boost::static_visitor<hKeyType> {
+
+public:
+
+    hKeyType operator()(const pInt &k) const {
+        return hKeyInt;
+    }
+
+    /*
+    hKeyType operator()(const pBString &k) const {
+        return hKeyBStr;
+    }
+    */
+
+    hKeyType operator()(const pUString &k) const {
+        return hKeyUStr;
+    }
+
+};
+
+// define the container stored in stableHash
+struct h_container {
+
+    pVarP pData;
+    hKeyVar key;
+
+    h_container(const pUString k, pVarP d) : pData(d), key(k) { }
+
+    //   h_container(const pBString k, pVarP d) : pData(d), key(k) { }
+
+    h_container(const pInt k, pVarP d) : pData(d), key(k) { }
+
+};
+
+// the stableHash container
+// a boost.multiindex that stores data with two indexes: hashed and sequenced
+typedef multi_index_container<
+    // the container structure we store for each item in the hash
+    h_container,
+    // index definitions: hash and sequence
+    indexed_by<
+        hashed_unique< member<h_container, hKeyVar, &h_container::key> >,
+        sequenced<>
+    >
+> stableHash;
+
+// sequenced index accessor
+typedef nth_index<stableHash,1>::type seq_index;
+
+/**
+* pHash definition
+*/
+class pHash {
+
+    private:
+        stableHash hashData;
+        pInt maxIntKey;
 
     public:
 
-        std::size_t operator()(const pInt &k) const {
-            return static_cast<std::size_t>(k);
+        // types
+        typedef stableHash::size_type size_type;
+
+        typedef stableHash::iterator iterator;
+
+        // construct/destroy/copy
+        pHash() : maxIntKey(0) { std::cout << "creating fresh pHash" << std::endl; }
+
+        pHash(pHash const& p) : maxIntKey(p.maxIntKey) {
+            std::cout << "pHash copy construct" << std::endl;
+            hashData = p.hashData;
         }
 
-        /*
-        std::size_t operator()(const pBString &k) const {
-            return boost::hash_value(k);
-        }
-        */
+        ~pHash() { std::cout << "destroying pHash" << std::endl; }
 
-        std::size_t operator()(const pUString &k) const {
-            return static_cast<std::size_t>(k.hashCode());
-        }
+        // modifiers
+        void insert(const pUString &key, pVarP data);
+        //void insert(const pBString &key, pVarP data);
+        void insert(const pInt &key, pVarP data);
+        void insertNext(pVarP data);
 
-    };
-    
-    // a visitor for determining phash key type
-    class hKeyGetType : public boost::static_visitor<hKeyType> {
+        size_type remove(const pUString &key);
+        //void remove(const pBString &key);
+        size_type remove(const pInt &key);
 
-    public:
+        // queries
+        const size_type getSize() { return hashData.size(); }
+        const bool keyExists(const pUString &key);
+        //const bool keyExists(const pBString &key);
+        const bool keyExists(const pInt &key);
 
-        hKeyType operator()(const pInt &k) const {
-            return hKeyInt;
-        }
+        // dump of contents
+        void varDump();
 
-        /*
-        hKeyType operator()(const pBString &k) const {
-            return hKeyBStr;
-        }
-        */
-
-        hKeyType operator()(const pUString &k) const {
-            return hKeyUStr;
-        }
-
-    };
-
-    // define the container stored in stableHash
-    struct h_container {
-
-        pVarP pData;
-        hKeyVar key;
-
-        h_container(const pUString k, pVarP d) : pData(d), key(k) { }
-        
-//        h_container(const pBString k, pVarP d) : pData(d), key(k) { }
-
-        h_container(const pInt k, pVarP d) : pData(d), key(k) { }
-
-    };
-
-    // the stableHash container
-    // a boost.multiindex that stores data with two indexes: hashed and sequenced
-    typedef multi_index_container<
-        // the container structure we store for each item in the hash
-        h_container,
-        // index definitions: hash and sequence
-        indexed_by<
-            hashed_unique< member<h_container, hKeyVar, &h_container::key> >,
-            sequenced<>
-        >
-    > stableHash;
-
-    // sequenced index accessor
-    typedef nth_index<stableHash,1>::type seq_index;
-
-    /**
-     * pHash definition
-     */
-    class pHash {
-
-        private:
-            stableHash hashData;
-            pInt maxIntKey;
-
-        public:
-
-            // types
-            typedef stableHash::size_type size_type;
-            
-            typedef stableHash::iterator iterator;
-
-            // construct/destroy/copy
-            pHash() : maxIntKey(0) { std::cout << "creating fresh pHash" << std::endl; }
-
-            pHash(pHash const& p) : maxIntKey(p.maxIntKey) {
-                std::cout << "pHash copy construct" << std::endl;
-                hashData = p.hashData;
-            }
-
-            ~pHash() { std::cout << "destroying pHash" << std::endl; }
-
-            // modifiers
-            void insert(const pUString &key, pVarP data);
-            //void insert(const pBString &key, pVarP data);
-            void insert(const pInt &key, pVarP data);
-            void insertNext(pVarP data);
-            
-            size_type remove(const pUString &key);
-            //void remove(const pBString &key);
-            size_type remove(const pInt &key);
-
-            // queries
-            const size_type getSize() { return hashData.size(); }
-            const bool keyExists(const pUString &key);
-            //const bool keyExists(const pBString &key);
-            const bool keyExists(const pInt &key);
-
-            // dump of contents
-            void varDump();
-
-            // lookup
-            pVarP operator[] (const pUString &key);
-            //pVarP operator[] (const pBString &key);
-            pVarP operator[] (const pInt &key);
+        // lookup
+        pVarP operator[] (const pUString &key);
+        //pVarP operator[] (const pBString &key);
+        pVarP operator[] (const pInt &key);
 
 
-    };
+};
 
-    // stream interface
-    std::ostream& operator << (std::ostream& os, const rphp::pHash& h);
+// stream interface
+std::ostream& operator << (std::ostream& os, const rphp::pHash& h);
 
 } /* namespace rphp */
 

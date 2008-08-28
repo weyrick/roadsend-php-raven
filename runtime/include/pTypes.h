@@ -19,6 +19,7 @@
 #ifndef RPHP_PTYPES_H_
 #define RPHP_PTYPES_H_
 
+#include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
 
 // including this file includes all rphp base types
@@ -38,6 +39,9 @@ namespace rphp {
     // source locations: filename/startlinenum/endlinenum
     typedef boost::tuple<const pUString, const pUInt, const pUInt> pSourceStartEndLocation;
 
+    // php function signatures
+    typedef boost::function<pVar (pVar)> pFunPointer1;
+    
 } /* namespace rphp */
 
 

@@ -21,7 +21,6 @@
 
 #include <string>
 #include "pTypes.h"
-#include "pFunctionManager.h"
 
 namespace rphp {
 

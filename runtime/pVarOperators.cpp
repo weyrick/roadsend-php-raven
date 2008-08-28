@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include "pTypeOperations.h"
+#include "pTypeOperators.h"
 #include "pVarOperators.h"
 
 namespace rphp {

@@ -17,6 +17,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
+#include "pTypeOperators.h"
 #include "pStandardExt.h"
 
 namespace rphp {

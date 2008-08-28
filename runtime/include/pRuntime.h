@@ -23,11 +23,12 @@
 #include "pTypeOperators.h"
 #include "pVarOperators.h"
 
+#include "pFunctionManager.h"
+#include "pOutputManager.h"
+
 namespace rphp {
 
-    class pOutputManager;
     class pExtManager;
-    class pFunctionManager;
 
     class pRuntimeEngine {
 

@@ -20,15 +20,12 @@
 #define RPHP_PFUNCTIONSIG
 
 #include <vector>
-#include <boost/function.hpp>
 #include "pTypes.h"
 
 namespace rphp {
 
     class pClass;
     class pExtBase;
-
-    typedef boost::function<pVar (pVar)> pFunPointer1;
 
     typedef enum { pBuiltinFunType, pUserFunType } pFunType;
 
