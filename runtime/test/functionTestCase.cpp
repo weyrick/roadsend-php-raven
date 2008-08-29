@@ -22,6 +22,6 @@ void functionTestCase::basic()
 
     rphp::pVar testStringSize = runtime.functionManager->invoke("strlen", testString);
 
-    CPPUNIT_ASSERT( pVar_getVal_pInt(testStringSize) == 20 );
+    CPPUNIT_ASSERT( testStringSize.getInt() == 20 );
 
 }

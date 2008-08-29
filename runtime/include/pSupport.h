@@ -16,27 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include "pTypeOperators.h"
-#include "pVarOperators.h"
+#ifndef RPHP_PSUPPORT_H_
+#define RPHP_PSUPPORT_H_
 
-namespace rphp {
+#include "pTypes.h"
+#include "pSupport.h"
 
-pVar pVar_add(const pVar &lhs, const pVar &rhs)
-{
-    pVar result;
-    
-    if ( (lhs.getType() == pVarHashType) && (rhs.getType() == pVarHashType) ) {
-        // TODO: array concat
-        result = 0l;
-    }
-    else {
-        // TODO: handle floats, automatic overflow, etc
-        result = lhs.copyAsInt() + rhs.copyAsInt();
-    }
+U_NAMESPACE_BEGIN
+// boost compatible hash function for UnicodeString
+std::size_t hash_value(const rphp::pUString &v);
+U_NAMESPACE_END
 
-    return result;
-}
-
-
-} /* namespace rphp */
-
+#endif /* RPHP_PSUPPORT_H_ */

@@ -34,15 +34,15 @@ void phashTestCase::basic()
     
     // string key
     lu = testHash["var-test"];
-    CPPUNIT_ASSERT( pVar_getVal_pInt(*int1) == pVar_getVal_pInt(*lu) );
+    CPPUNIT_ASSERT( (*int1).getInt() == (*lu).getInt() );
 
     // int key
     lu = testHash[55];
-    CPPUNIT_ASSERT( pVar_getVal_pBString(*str1) == pVar_getVal_pBString(*lu) );
+    CPPUNIT_ASSERT( (*str1).getBString() == (*lu).getBString() );
 
     // next key
     lu = testHash[56];
-    CPPUNIT_ASSERT( pVar_getVal_pBString(*str2) == pVar_getVal_pBString(*lu) );
+    CPPUNIT_ASSERT( (*str2).getBString() == (*lu).getBString() );
 
     // not found
     lu = testHash["foo"];

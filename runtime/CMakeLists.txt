@@ -5,11 +5,13 @@ MESSAGE( STATUS "runtime check" )
 include_directories (${Boost_INCLUDE_DIRS} ${RPHP_RUNTIME_INCLUDE_DIR})
 
 set(RUNTIME_SRC_FILES
+  pSupport.cpp
+  pVar.cpp
+  pVarOperators.cpp
+  pTypeOperators.cpp
   pResource.cpp
   pHash.cpp
   pObject.cpp
-  pVarOperators.cpp
-  pTypeOperators.cpp
   pRuntime.cpp
   pOutputBuffer.cpp
   pOutputManager.cpp

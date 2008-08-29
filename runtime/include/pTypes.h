@@ -19,28 +19,105 @@
 #ifndef RPHP_PTYPES_H_
 #define RPHP_PTYPES_H_
 
+#include <boost/logic/tribool.hpp>
+#include <boost/variant.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
 
-// including this file includes all rphp base types
-#include "pVar.h"
-#include "pHash.h"
-#include "pObject.h"
-#include "pResource.h"
+#include <unicode/unistr.h>
 
 namespace rphp {
 
-    // note, pUInt is not a base PHP type (all PHP numbers are signed)
-    typedef unsigned long pUInt;
+// a boost::tribool represents php true, false and null values
+// pTrue, pFalse and pNull are defined
+typedef boost::logic::tribool pTriState;
+// convenience accesors
+BOOST_TRIBOOL_THIRD_STATE(pNull)
+#define pTrue  pTriState(true)
+#define pFalse pTriState(false)
 
-    // source locations: filename/linenum
-    typedef boost::tuple<const pUString, const pUInt> pSourceLocation;
+// numeric types
+typedef signed long pInt;
+typedef double pFloat;
 
-    // source locations: filename/startlinenum/endlinenum
-    typedef boost::tuple<const pUString, const pUInt, const pUInt> pSourceStartEndLocation;
+// string types: binary and unicode flavor
+// "binary" strings
+typedef std::string pBString;
 
-    // php function signatures
-    typedef boost::function<pVar (pVar)> pFunPointer1;
+// unicode strings, using the ICU library
+typedef UnicodeString pUString;
+typedef boost::shared_ptr<pUString> pUStringP;
+
+// php hash tables
+class pHash;
+typedef boost::shared_ptr<pHash> pHashP;
+
+// php objects
+class pObject;
+typedef boost::shared_ptr<pObject> pObjectP;
+
+// php resources
+class pResource;
+typedef boost::shared_ptr<pResource> pResourceP;
+
+// a shared container for pvar variables: php reference variables
+class pVar;
+typedef boost::shared_ptr<pVar> pVarP;
+
+// main pVar variant type
+typedef boost::variant< pTriState,
+                        pInt,
+                        pFloat,
+                        pBString,
+                        pUStringP,
+                        pHashP,
+                        pObjectP,
+                        pResourceP,
+                        pVarP
+                        > pVarDataType;
+
+// these should match the order of the actual types listed in the variant type
+// it is only used by the pVar type checker, which returns pVarType
+// this is only because pVarNullType and pVarBoolType are both handled
+// by pTriState
+typedef enum {
+    pVarTriStateType_ = 0,
+    pVarIntType_      = 1,
+    pVarFloatType_    = 2,
+    pVarBStringType_  = 3,
+    pVarUStringType_  = 4,
+    pVarHashType_     = 5,
+    pVarObjectType_   = 6,
+    pVarResourceType_ = 7,
+    pVarRefType_      = 8
+} pVarWhichType_;
+
+// this should be used by user code
+typedef enum {
+    pVarNullType,
+    pVarBoolType,
+    pVarIntType,
+    pVarFloatType,
+    pVarBStringType,
+    pVarUStringType,
+    pVarHashType,
+    pVarObjectType,
+    pVarResourceType,
+    pVarRefType
+} pVarType;
+    
+// note, pUInt is not a base PHP type (all PHP numbers are signed)
+typedef unsigned long pUInt;
+
+// source locations: filename/linenum
+typedef boost::tuple<const pUString, const pUInt> pSourceLocation;
+
+// source locations: filename/startlinenum/endlinenum
+typedef boost::tuple<const pUString, const pUInt, const pUInt> pSourceStartEndLocation;
+
+// php function signatures
+typedef boost::function<pVar (pVar)> pFunPointer1;
     
 } /* namespace rphp */
 

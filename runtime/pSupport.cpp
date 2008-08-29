@@ -16,27 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include "pTypeOperators.h"
-#include "pVarOperators.h"
+#include "pSupport.h"
 
-namespace rphp {
-
-pVar pVar_add(const pVar &lhs, const pVar &rhs)
-{
-    pVar result;
-    
-    if ( (lhs.getType() == pVarHashType) && (rhs.getType() == pVarHashType) ) {
-        // TODO: array concat
-        result = 0l;
-    }
-    else {
-        // TODO: handle floats, automatic overflow, etc
-        result = lhs.copyAsInt() + rhs.copyAsInt();
-    }
-
-    return result;
+/*
+   This defines a boost compatible hash function for UnicodeString
+*/
+U_NAMESPACE_BEGIN
+std::size_t hash_value(const rphp::pUString &v) {
+    return (std::size_t)v.hashCode();
 }
+U_NAMESPACE_END
 
-
-} /* namespace rphp */
 

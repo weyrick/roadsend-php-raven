@@ -20,18 +20,9 @@
 
 #include "pTypeOperators.h"
 
-/*
-   This defines a boost compatible hash function for UnicodeString
-*/
-U_NAMESPACE_BEGIN
-std::size_t hash_value(const rphp::pUString &v) {
-    return (std::size_t)v.hashCode();
-}
-U_NAMESPACE_END
-
 namespace rphp {
 
-void pVar_convertToNumberVisitor::operator()(pBString &v) {
+void pVar_convertToIntVisitor::operator()(pBString &v) {
     // TODO: handle floats
     try {
         var = boost::lexical_cast<pInt>(v);
@@ -40,24 +31,10 @@ void pVar_convertToNumberVisitor::operator()(pBString &v) {
     }
 }
 
-void pVar_convertToNumberVisitor:: operator()(pUStringP &v) {
+void pVar_convertToIntVisitor:: operator()(pUStringP &v) {
     // TODO: do a real conversion here
     // should handle both integers and floats
     var = 0l;
-}
-
-pVar pVar_castToNumber(const pVar &v) {
-    pVar r(v);
-    pVar_convertToNumberVisitor cv(r);
-    boost::apply_visitor(cv, r);
-    return r;
-}
-
-pVar pVar_castToBString(const pVar &v) {
-    pVar r(v);
-    pVar_convertToBStringVisitor cv(r);
-    boost::apply_visitor(cv, r);
-    return r;
 }
 
 } /* namespace rphp */

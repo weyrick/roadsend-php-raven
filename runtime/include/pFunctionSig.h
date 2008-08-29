@@ -20,7 +20,7 @@
 #define RPHP_PFUNCTIONSIG
 
 #include <vector>
-#include "pTypes.h"
+#include "pVar.h"
 
 namespace rphp {
 

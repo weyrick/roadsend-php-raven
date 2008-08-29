@@ -19,8 +19,9 @@
 #ifndef PEXTENSIONBASE_H_
 #define PEXTENSIONBASE_H_
 
+#include <boost/bind.hpp>
 #include <string>
-#include "pTypes.h"
+#include "pVar.h"
 
 namespace rphp {
 

@@ -20,7 +20,10 @@
 #define RPHP_PRUNTIME_H_
 
 #include "pTypes.h"
-#include "pTypeOperators.h"
+#include "pVar.h"
+#include "pHash.h"
+#include "pObject.h"
+#include "pResource.h"
 #include "pVarOperators.h"
 
 #include "pFunctionManager.h"

@@ -16,77 +16,167 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-
 #ifndef RPHP_PVAR_H_
 #define RPHP_PVAR_H_
 
-#include <boost/logic/tribool.hpp>
-#include <boost/variant.hpp>
-#include <boost/shared_ptr.hpp>
-#include <unicode/unistr.h>
+#include <iostream>
+#include "pTypes.h"
 
 namespace rphp {
 
-/*
- * Definition of the main pVar variant, which represents
- * a PHP value in the runtime
- */
+class pVar {
 
-// a boost::tribool represents php true, false and null values
-// pTrue, pFalse and pNull are defined
-typedef boost::logic::tribool pTriState;
-// convenience accesors
-BOOST_TRIBOOL_THIRD_STATE(pNull)
-#define pTrue  pTriState(true)
-#define pFalse pTriState(false)
+private:
+    pVarDataType pVarData_;
 
-// numeric types
-typedef signed long pInt;
-typedef double pFloat;
+public:
 
-// string types: binary and unicode flavor
-// "binary" strings
-typedef std::string pBString;
+    /* constructors */
+    pVar(void): pVarData_(pNull) { }
+    template <typename T>
+    pVar(const T &v): pVarData_(v) { }
+    
+    /* default copy constructor */
 
-// unicode strings, using the ICU library
-typedef UnicodeString pUString;
-typedef boost::shared_ptr<pUString> pUStringP;
+    /* assignment */
+    template <typename T>
+    void operator=(T val) { pVarData_ = val; }
 
-// php hash tables
-class pHash;
-typedef boost::shared_ptr<pHash> pHashP;
+    /* custom visitors */
+    template <typename T>
+    typename T::result_type applyVisitor() {
+        return boost::apply_visitor( T(), pVarData_ );
+    }
 
-// php objects
-class pObject;
-typedef boost::shared_ptr<pObject> pObjectP;
+    /* type checks */
+    const pVarType getType() const;
+    const bool isNull() const {
+        return ((pVarData_.which() == pVarTriStateType_) && pNull(boost::get<pTriState>(pVarData_)));
+    }
+    const bool isBool() const {
+        return ((pVarData_.which() == pVarTriStateType_) && !pNull(boost::get<pTriState>(pVarData_)));
+    }
+    const bool isInt() const {
+        return (pVarData_.which() == pVarIntType_);
+    }
+    const bool isFloat() const {
+        return (pVarData_.which() == pVarFloatType_);
+    }
+    const bool isBString() const {
+        return (pVarData_.which() == pVarBStringType_);
+    }
+    const bool isUString() const {
+        return (pVarData_.which() == pVarUStringType_);
+    }
+    const bool isHash() const {
+        return (pVarData_.which() == pVarHashType_);
+    }
+    const bool isObject() const {
+        return (pVarData_.which() == pVarObjectType_);
+    }
+    const bool isResource() const {
+        return (pVarData_.which() == pVarResourceType_);
+    }
 
-// php resources
-class pResource;
-typedef boost::shared_ptr<pResource> pResourceP;
+    // stream interface
+    friend std::ostream& operator << (std::ostream& os, const rphp::pVar& v);
 
-// base variant that represents a php variable
-typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pResourceP > pVarBase;
+    /* in place type conversion */
+    // null
+    // bool
+    pInt& convertToInt();
+    // float
+    pBString& convertToBString();
+    // ustring
+    // hash
+    // object
+    // resource
 
-// reference to a pvarBase, i.e. a container for pvar variables
-typedef boost::shared_ptr<pVarBase> pVarRef;
+    /* return type casted copy */
+    // null
+    // bool
+    pInt copyAsInt() const;
+    // float
+    pBString copyAsBString() const;
+    // ustring
+    // hash
+    // object
+    // resource
 
-// full pvar definition: a variant that can hold a base type or a reference
-typedef boost::variant< pTriState, pInt, pFloat, pBString, pUStringP, pHashP, pObjectP, pResourceP, pVarRef > pVar;
-typedef boost::shared_ptr<pVar> pVarP;
+    /* these do no conversions, and throw exception if the wrong type is accessed */
+    pTriState& getBool() {
+        return boost::get<pTriState&>(pVarData_);
+    }
 
-// associated enum for checking type
-typedef enum {
-    pVarNullType,
-    pVarBoolType,
-    pVarIntType,
-    pVarFloatType,
-    pVarBStringType,
-    pVarUStringType,
-    pVarHashType,
-    pVarObjectType,
-    pVarResourceType,
-    pVarRefType
-} pVarType;
+    const pTriState& getBool() const {
+        return boost::get<const pTriState&>(pVarData_);
+    }
+    
+    pInt& getInt() {
+        return boost::get<pInt&>(pVarData_);
+    }
+    
+    const pInt& getInt() const {
+        return boost::get<const pInt&>(pVarData_);
+    }
+
+    pFloat& getFloat() {
+        return boost::get<pFloat&>(pVarData_);
+    }
+    
+    const pFloat& getFloat() const {
+        return boost::get<const pFloat&>(pVarData_);
+    }
+
+    pBString& getBString() {
+        return boost::get<pBString&>(pVarData_);
+    }
+    
+    const pBString& getBString() const {
+        return boost::get<const pBString&>(pVarData_);
+    }
+
+    pUStringP& getUString() {
+        return boost::get<pUStringP&>(pVarData_);
+    }
+    
+    const pUStringP& getUString() const {
+        return boost::get<const pUStringP&>(pVarData_);
+    }
+
+    pHashP& getHash() {
+        return boost::get<pHashP&>(pVarData_);
+    }
+    
+    const pHashP& getHash() const {
+        return boost::get<const pHashP&>(pVarData_);
+    }
+
+    pObjectP& getObject() {
+        return boost::get<pObjectP&>(pVarData_);
+    }
+    
+    const pObjectP& getObject() const {
+        return boost::get<const pObjectP&>(pVarData_);
+    }
+
+    pResourceP& getResource() {
+        return boost::get<pResourceP&>(pVarData_);
+    }
+    
+    const pResourceP& getResource() const {
+        return boost::get<const pResourceP&>(pVarData_);
+    }
+    
+    pVarP& getRef() {
+        return boost::get<pVarP&>(pVarData_);
+    }
+    
+    const pVarP& getRef() const {
+        return boost::get<const pVarP&>(pVarData_);
+    }
+
+};
 
 } /* namespace rphp */
 

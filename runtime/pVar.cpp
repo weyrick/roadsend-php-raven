@@ -16,27 +16,47 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
+
+#include "pVar.h"
 #include "pTypeOperators.h"
-#include "pVarOperators.h"
 
 namespace rphp {
 
-pVar pVar_add(const pVar &lhs, const pVar &rhs)
-{
-    pVar result;
-    
-    if ( (lhs.getType() == pVarHashType) && (rhs.getType() == pVarHashType) ) {
-        // TODO: array concat
-        result = 0l;
+const pVarType pVar::getType() const {
+    int w = pVarData_.which();
+    if (w == pVarTriStateType_) {
+        return (pNull(boost::get<pTriState>(pVarData_))) ? pVarNullType : pVarBoolType;
     }
     else {
-        // TODO: handle floats, automatic overflow, etc
-        result = lhs.copyAsInt() + rhs.copyAsInt();
+        return (pVarType)w;
     }
-
-    return result;
 }
 
+pInt& pVar::convertToInt() {
+    pVar_convertToIntVisitor cv(pVarData_);
+    boost::apply_visitor(cv, pVarData_);
+    return getInt();
+}
+
+pBString& pVar::convertToBString() {
+    pVar_convertToBStringVisitor cv(pVarData_);
+    boost::apply_visitor(cv, pVarData_);
+    return getBString();
+}
+
+pInt pVar::copyAsInt() const {
+    pVar v(*this);
+    return v.convertToInt();
+}
+
+pBString pVar::copyAsBString() const {
+    pVar v(*this);
+    return v.convertToBString();
+}
+
+std::ostream& operator << (std::ostream& os, const pVar& v)
+{
+    return os << v.pVarData_ << std::endl;
+}
 
 } /* namespace rphp */
-

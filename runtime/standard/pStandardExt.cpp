@@ -17,7 +17,6 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pTypeOperators.h"
 #include "pStandardExt.h"
 
 namespace rphp {
@@ -38,9 +37,8 @@ void pStandardExt::extensionShutdown() {
 
 /* Library Implementation */
 
-pVar pStandardExt::strlen(pVar str) {
-    pVar_castToBString(str);
-    return (pInt)pVar_getVal_pBString(str).length();
+pVar pStandardExt::strlen(pVar v) {
+    return (pInt)v.convertToBString().length();
 }
 
 }

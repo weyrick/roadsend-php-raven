@@ -64,7 +64,7 @@ public:
         return 0;
     }
 
-    int operator()(const rphp::pVarRef &h) const {
+    int operator()(const rphp::pVarP &h) const {
         std::cout << "i see a php reference" << std::endl;
         return 0;
     }
@@ -72,8 +72,8 @@ public:
 
 void changeRef(rphp::pVar r) {
 
-	rphp::pVarRef rval;
-	if (rval = rphp::pVar_getVal_pRef(r)) {
+	rphp::pVarP rval;
+	if (rval = r.getRef()) {
 		*rval = rphp::pBString("changed the ref to a string!");
 	}
 	else {
@@ -101,41 +101,40 @@ void pvarTestCase::basic()
     std::cout << "pObjectP: " << sizeof(rphp::pObjectP) << std::endl;
     std::cout << "pResource: " << sizeof(rphp::pResource) << std::endl;
     std::cout << "pResourceP: " << sizeof(rphp::pResourceP) << std::endl;
-    std::cout << "pVarBase: " << sizeof(rphp::pVarBase) << std::endl;
-    std::cout << "pVarRef: " << sizeof(rphp::pVarRef) << std::endl;
+    std::cout << "pVarRef: " << sizeof(rphp::pVarP) << std::endl;
     std::cout << "pVar: " << sizeof(rphp::pVar) << std::endl;
 
     // binary string
     u = rphp::pBString("hello world there");
 
-    std::cout << u << std::endl;
-    int result = boost::apply_visitor( my_visitor(), u );
+    std::cout << "bstring: " << u << std::endl;
+    int result = u.applyVisitor<my_visitor>();
 
     // unicode string
     u = new rphp::pUString("hello world there -- unicode style");
 
-    std::cout << u << std::endl;
-    result = boost::apply_visitor( my_visitor(), u );
+    std::cout << "ustring: " << u << std::endl;
+    result = u.applyVisitor<my_visitor>();
 
     // long
     u = rphp::pInt(15);
 
-    std::cout << u << std::endl;
-    result = boost::apply_visitor( my_visitor(), u );
-
+    std::cout << "pint: " << u << std::endl;
+    result = u.applyVisitor<my_visitor>();
+    
     // float
     u = rphp::pFloat(2.3123);
 
     std::cout << u << std::endl;
-    result = boost::apply_visitor( my_visitor(), u );
+    result = u.applyVisitor<my_visitor>();
 
     // bool
     u = rphp::pTrue;
 
     std::cout << u << std::endl;
-    result = boost::apply_visitor( my_visitor(), u );
+    result = u.applyVisitor<my_visitor>();
 
-    if (rphp::pVar_getVal_pBool(u)) {
+    if (u.getBool()) {
     	std::cout << "the bool was true" << std::endl;
     }
     else {
@@ -145,9 +144,9 @@ void pvarTestCase::basic()
     u = rphp::pFalse;
 
     std::cout << u << std::endl;
-    result = boost::apply_visitor( my_visitor(), u );
+    result = u.applyVisitor<my_visitor>();
 
-    if (rphp::pVar_getVal_pBool(u)) {
+    if (u.getBool()) {
         std::cout << "the bool was true" << std::endl;
     }
     else {
@@ -158,7 +157,7 @@ void pvarTestCase::basic()
     u = rphp::pNull;
 
     std::cout << u << std::endl;
-    result = boost::apply_visitor( my_visitor(), u );
+    result = u.applyVisitor<my_visitor>();
 
     // php hash
     /*
@@ -176,7 +175,7 @@ void pvarTestCase::basic()
     ////
 
     // type checking?
-    int pt = rphp::pVar_getType(u);
+    rphp::pVarType pt = u.getType();
     switch (pt) {
     case rphp::pVarHashType:
     	std::cout << "found a hash" << std::endl;
@@ -196,9 +195,9 @@ void pvarTestCase::basic()
     // type conversion
     std::cout << "type conversion:" << std::endl;
     u = std::string("55");
-    boost::apply_visitor( my_visitor(), u );
-    rphp::pVar_convertToNumber(u);
-    boost::apply_visitor( my_visitor(), u );
+    u.applyVisitor<my_visitor>();
+    u.convertToInt();
+    u.applyVisitor<my_visitor>();
     std::cout << "final: " << u << std::endl;
 
     // operators
@@ -215,24 +214,24 @@ void pvarTestCase::basic()
 
     // create a new reference. can only be comprised of pVarBase items (i.e., can't be a ref to a ref)
     std::cout << "references----" << std::endl;
-    rphp::pVarRef r1(new rphp::pVarBase);
+    rphp::pVarP r1(new rphp::pVar());
 
     // assign a value to the pVar
     *r1 = rphp::pInt(5);
-    boost::apply_visitor( my_visitor(), *r1 );
+    (*r1).applyVisitor<my_visitor>();
 
     // call a function which takes a pVar (not strictly a pVarRef)
     changeRef(r1);
-    boost::apply_visitor( my_visitor(), *r1 );
+    (*r1).applyVisitor<my_visitor>();
 
     // assign two variables to the same reference
-    rphp::pVarRef r2 = r1;
-    boost::apply_visitor( my_visitor(), *r1 );
-    boost::apply_visitor( my_visitor(), *r2 );
+    rphp::pVarP r2 = r1;
+    (*r1).applyVisitor<my_visitor>();
+    (*r2).applyVisitor<my_visitor>();
 
 	// change one
     *r2 = rphp::pInt(20);
-    boost::apply_visitor( my_visitor(), *r1 );
-    boost::apply_visitor( my_visitor(), *r2 );
+    (*r1).applyVisitor<my_visitor>();
+    (*r2).applyVisitor<my_visitor>();
 
 }
