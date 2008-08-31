@@ -32,15 +32,42 @@ private:
 public:
 
     /* constructors */
+
+    // default null
     pVar(void): pVarData_(pNull) { }
+
+    // generic
     template <typename T>
     pVar(const T &v): pVarData_(v) { }
-    
+
+    // some specializations to avoid ambiguity
+
+    // default to binary strings
+    pVar(const char* str): pVarData_(pBString(str)) { }
+    // specify type of string to make from literal
+    pVar(const char* str, pVarType t) {
+        if (t == pVarUStringType) {
+            pVarData_ = pUStringP(new UnicodeString(str));
+        }
+        else {
+            pVarData_ = pBString(str);
+        }
+    }
+    pVar(int i): pVarData_(pInt(i)) { }
+
+    // convenience function for creating a new empty hash
+    void newEmptyHash(void);
+
     /* default copy constructor */
 
     /* assignment */
     template <typename T>
     void operator=(T val) { pVarData_ = val; }
+
+    // some specializations to avoid ambiguity
+    // default to binary strings
+    void operator=(const char* str) { pVarData_ = pBString(str); }
+    void operator=(int i) { pVarData_ = pInt(i); }
 
     /* custom visitors */
     template <typename T>
@@ -50,31 +77,31 @@ public:
 
     /* type checks */
     const pVarType getType() const;
-    const bool isNull() const {
+    bool isNull() const {
         return ((pVarData_.which() == pVarTriStateType_) && pNull(boost::get<pTriState>(pVarData_)));
     }
-    const bool isBool() const {
+    bool isBool() const {
         return ((pVarData_.which() == pVarTriStateType_) && !pNull(boost::get<pTriState>(pVarData_)));
     }
-    const bool isInt() const {
+    bool isInt() const {
         return (pVarData_.which() == pVarIntType_);
     }
-    const bool isFloat() const {
+    bool isFloat() const {
         return (pVarData_.which() == pVarFloatType_);
     }
-    const bool isBString() const {
+    bool isBString() const {
         return (pVarData_.which() == pVarBStringType_);
     }
-    const bool isUString() const {
+    bool isUString() const {
         return (pVarData_.which() == pVarUStringType_);
     }
-    const bool isHash() const {
+    bool isHash() const {
         return (pVarData_.which() == pVarHashType_);
     }
-    const bool isObject() const {
+    bool isObject() const {
         return (pVarData_.which() == pVarObjectType_);
     }
-    const bool isResource() const {
+    bool isResource() const {
         return (pVarData_.which() == pVarResourceType_);
     }
 

@@ -8,54 +8,58 @@
 
 CPPUNIT_TEST_SUITE_REGISTRATION( phashTestCase );
 
+using namespace rphp;
+
 void phashTestCase::basic()
 {
-
-    rphp::pVarP lu;
 
     // ** INSERT **
 
     // string key
-    rphp::pVarP int1(new rphp::pVar(rphp::pInt(971)));
+    pVar int1(971);
     testHash.insert("var-test", int1);
     CPPUNIT_ASSERT( testHash.getSize() == 1 );
 
     // int key
-    rphp::pVarP str1(new rphp::pVar(rphp::pBString("int key 1")));
+    pVar str1("int key 1");
     testHash.insert(55, str1);
     CPPUNIT_ASSERT( testHash.getSize() == 2 );
 
     // next key
-    rphp::pVarP str2(new rphp::pVar(rphp::pBString("next key")));
+    pVar str2("next key");
     testHash.insertNext(str2);
     CPPUNIT_ASSERT( testHash.getSize() == 3 );
 
+    testHash.insert("var-test2", -215);
+    CPPUNIT_ASSERT( testHash.getSize() == 4 );
+
     // ** LOOKUP **
+    pVar lu;
     
     // string key
     lu = testHash["var-test"];
-    CPPUNIT_ASSERT( (*int1).getInt() == (*lu).getInt() );
+    CPPUNIT_ASSERT( int1.getInt() == lu.getInt() );
 
     // int key
     lu = testHash[55];
-    CPPUNIT_ASSERT( (*str1).getBString() == (*lu).getBString() );
+    CPPUNIT_ASSERT( str1.getBString() == lu.getBString() );
 
     // next key
     lu = testHash[56];
-    CPPUNIT_ASSERT( (*str2).getBString() == (*lu).getBString() );
+    CPPUNIT_ASSERT( str2.getBString() == lu.getBString() );
 
     // not found
     lu = testHash["foo"];
-    CPPUNIT_ASSERT( lu.get() == 0 );
+    CPPUNIT_ASSERT( lu.isNull() );
 
     // ** REMOVE **
-    rphp::pHash::size_type rc = testHash.remove("var-test");
+    pHash::size_type rc = testHash.remove("var-test");
     CPPUNIT_ASSERT( rc == 1 );
-    CPPUNIT_ASSERT( testHash.getSize() == 2 );
+    CPPUNIT_ASSERT( testHash.getSize() == 3 );
     
     rc = testHash.remove("doesn't exist");
     CPPUNIT_ASSERT( rc == 0 );
-    CPPUNIT_ASSERT( testHash.getSize() == 2 );
+    CPPUNIT_ASSERT( testHash.getSize() == 3 );
     
     testHash.varDump();
     

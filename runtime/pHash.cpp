@@ -29,7 +29,7 @@ namespace boost {
 
 namespace rphp {
 
-    void pHash::insert(const pUString &key, pVarP data) {
+    void pHash::insert(const pUString &key, const pVar& data) {
         // TODO check numeric string, set maxIntKey accordingly
         hashData.insert(h_container(key, data));
     }
@@ -41,13 +41,13 @@ namespace rphp {
     }
     */
 
-    void pHash::insert(const pInt &key, pVarP data) {
+    void pHash::insert(const pInt &key, const pVar& data) {
         if (key > maxIntKey)
             maxIntKey = key+1;
         hashData.insert(h_container(key, data));
     }
 
-    void pHash::insertNext(pVarP data) {
+    void pHash::insertNext(const pVar& data) {
         hashData.insert(h_container(maxIntKey++, data));
     }
 
@@ -77,10 +77,10 @@ namespace rphp {
     }
 
     // lookup
-    pVarP pHash::operator[] ( const pUString &key ) {
+    pVar pHash::operator[] ( const pUString &key ) {
         stableHash::iterator k = hashData.find(key);
         if (k == hashData.end())
-            return pVarP();
+            return pVar(); // pNull
         else
             return (*k).pData;
     }
@@ -95,10 +95,10 @@ namespace rphp {
     }
     */
 
-    pVarP pHash::operator[] ( const pInt &key ) {
+    pVar pHash::operator[] ( const pInt &key ) {
         stableHash::iterator k = hashData.find(key);
         if (k == hashData.end())
-            return pVarP();
+            return pVar(); // pNull
         else
             return (*k).pData;
     }
@@ -121,9 +121,9 @@ namespace rphp {
         for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
             kType = boost::apply_visitor(rphp::hKeyGetType(), (*it).key);
             if (kType == hKeyInt)
-                std::cout << "   [" << (*it).key << "] => " << *(*it).pData << std::endl;
+                std::cout << "   [" << (*it).key << "] => " << (*it).pData << std::endl;
             else
-                std::cout << "   ['" << (*it).key << "'] => " << *(*it).pData << std::endl;
+                std::cout << "   ['" << (*it).key << "'] => " << (*it).pData << std::endl;
         }
 
         std::cout << "}" << std::endl;

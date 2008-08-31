@@ -54,6 +54,10 @@ pBString pVar::copyAsBString() const {
     return v.convertToBString();
 }
 
+void pVar::newEmptyHash() {
+    pVarData_ = pHashP(new pHash());
+}
+
 std::ostream& operator << (std::ostream& os, const pVar& v)
 {
     return os << v.pVarData_ << std::endl;

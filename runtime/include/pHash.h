@@ -89,14 +89,14 @@ public:
 // define the container stored in stableHash
 struct h_container {
 
-    pVarP pData;
+    pVar pData;
     hKeyVar key;
 
-    h_container(const pUString k, pVarP d) : pData(d), key(k) { }
+    h_container(const pUString k, pVar d) : pData(d), key(k) { }
 
     //   h_container(const pBString k, pVarP d) : pData(d), key(k) { }
 
-    h_container(const pInt k, pVarP d) : pData(d), key(k) { }
+    h_container(const pInt k, pVar d) : pData(d), key(k) { }
 
 };
 
@@ -142,10 +142,10 @@ class pHash {
         ~pHash() { std::cout << "destroying pHash" << std::endl; }
 
         // modifiers
-        void insert(const pUString &key, pVarP data);
+        void insert(const pUString &key, const pVar& data);
         //void insert(const pBString &key, pVarP data);
-        void insert(const pInt &key, pVarP data);
-        void insertNext(pVarP data);
+        void insert(const pInt &key, const pVar& data);
+        void insertNext(const pVar& data);
 
         size_type remove(const pUString &key);
         //void remove(const pBString &key);
@@ -161,9 +161,9 @@ class pHash {
         void varDump();
 
         // lookup
-        pVarP operator[] (const pUString &key);
+        pVar operator[] (const pUString &key);
         //pVarP operator[] (const pBString &key);
-        pVarP operator[] (const pInt &key);
+        pVar operator[] (const pInt &key);
 
 
 };
