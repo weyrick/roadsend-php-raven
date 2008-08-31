@@ -104,13 +104,19 @@ public:
     bool isResource() const {
         return (pVarData_.which() == pVarResourceType_);
     }
+    bool isRef() const {
+        return (pVarData_.which() == pVarRefType_);
+    }
 
     // stream interface
     friend std::ostream& operator << (std::ostream& os, const rphp::pVar& v);
 
+    // evaluation
+    bool evalAsBool() const;
+    
     /* in place type conversion */
-    // null
-    // bool
+    void convertToNull();
+    pTriState& convertToBool();
     pInt& convertToInt();
     // float
     pBString& convertToBString();

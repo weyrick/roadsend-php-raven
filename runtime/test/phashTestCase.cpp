@@ -61,7 +61,7 @@ void phashTestCase::basic()
     CPPUNIT_ASSERT( rc == 0 );
     CPPUNIT_ASSERT( testHash.getSize() == 3 );
     
-    testHash.varDump();
+    //testHash.varDump();
     
 }
 

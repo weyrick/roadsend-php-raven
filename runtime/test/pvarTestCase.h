@@ -12,20 +12,13 @@
 class pvarTestCase : public CPPUNIT_NS::TestFixture
 {
   CPPUNIT_TEST_SUITE( pvarTestCase );
-  CPPUNIT_TEST( basic );
+  CPPUNIT_TEST( test_pNull );
+  CPPUNIT_TEST( test_pBool );
   CPPUNIT_TEST_SUITE_END();
 
-/*
 protected:
-  pvar m_value1;
-  pvar m_value2;
-
-public:
-  void setUp();
-*/
-
-protected:
-  void basic();
+  void test_pNull();
+  void test_pBool();
 
 };
 

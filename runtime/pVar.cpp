@@ -32,6 +32,16 @@ const pVarType pVar::getType() const {
     }
 }
 
+void pVar::convertToNull() {
+    pVarData_ = pNull;
+}
+
+pTriState& pVar::convertToBool() {
+    pVar_convertToBoolVisitor cv(pVarData_);
+    boost::apply_visitor(cv, pVarData_);
+    return getBool();
+}
+
 pInt& pVar::convertToInt() {
     pVar_convertToIntVisitor cv(pVarData_);
     boost::apply_visitor(cv, pVarData_);
@@ -56,6 +66,11 @@ pBString pVar::copyAsBString() const {
 
 void pVar::newEmptyHash() {
     pVarData_ = pHashP(new pHash());
+}
+
+bool pVar::evalAsBool() const {
+    pVar v(*this);
+    return v.convertToBool();
 }
 
 std::ostream& operator << (std::ostream& os, const pVar& v)
