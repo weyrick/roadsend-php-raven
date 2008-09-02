@@ -173,6 +173,45 @@ void pvarTestCase::test_pBool() {
 
 }
 
+pVar hashObserver(pVar H) {
+    // use const pHash, which will not copy data
+    CPPUNIT_ASSERT( H.getConstHash()->getSize() == 1 );
+    return H;
+}
+
+pVar hashMutator(pVar H) {
+    // use non const pHash which copies data
+    CPPUNIT_ASSERT( H.getHash()->getSize() == 1 );
+    return H;
+}
+
+void pvarTestCase::test_pHash() {
+
+    // ** HASH **
+
+    // NOTE: this mostly tests pHash functionality as it relates to pVar
+    // see phashTestCase for the full pHash testsuite
+    pVar h1;
+    h1.newEmptyHash();
+    CPPUNIT_ASSERT( h1.isHash() );
+
+    h1.getHash()->insert("foo", 5);
+    CPPUNIT_ASSERT( h1.getHash()->getSize() == 1 );
+
+    // test copy on write
+    pVar h2(h1);
+    CPPUNIT_ASSERT( h2.getConstHash()->getSize() == 1 );
+    // this calls CowPtr::operator==, which calls boost::shared_ptr::operator== to
+    // see if they point to the same object
+    CPPUNIT_ASSERT( h1.getHash() == h2.getHash() );
+
+    h2 = hashObserver(h1);
+    CPPUNIT_ASSERT( h1.getHash() == h2.getHash() );
+    h2 = hashMutator(h1);
+    CPPUNIT_ASSERT( !(h1.getHash() == h2.getHash()) );
+
+}
+
     /*
     // sizes
     std::cout << std::endl;

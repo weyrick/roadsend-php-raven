@@ -23,7 +23,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+#ifdef RPHP_PVAR_DEBUG
 #include <iostream>
+#endif
 
 namespace rphp {
 
@@ -32,55 +34,66 @@ class CowPtr
 {
     public:
         typedef boost::shared_ptr<T> RefPtr;
- 
+
     private:
         RefPtr m_sp;
- 
-        void detach()
-        {
-            std::cout << "detatching" << std::endl;
+
+        void detach() {
             T* tmp = m_sp.get();
             if( !( tmp == 0 || m_sp.unique() ) ) {
+#ifdef RPHP_PVAR_DEBUG
+                std::cerr << "COW: detach, full copy" << std::endl;
+#endif
                 m_sp = RefPtr( new T( *tmp ) );
             }
         }
  
     public:
         CowPtr(T* t)
-            :   m_sp(t)
-        {
-            
+            :   m_sp(t) {
+#ifdef RPHP_PVAR_DEBUG
+            std::cerr << "COW: create from T*" << std::endl;
+#endif
         }
         CowPtr(const RefPtr& refptr)
-            :   m_sp(refptr)
-        {
-            
+            :   m_sp(refptr) {
+#ifdef RPHP_PVAR_DEBUG
+            std::cerr << "COW: create from shared_ptr<T>" << std::endl;
+#endif
         }
         CowPtr(const CowPtr& cowptr)
-            :   m_sp(cowptr.m_sp)
-        {
-            
+            :   m_sp(cowptr.m_sp)  {
+#ifdef RPHP_PVAR_DEBUG
+            std::cerr << "COW: copy construct" << std::endl;
+#endif
         }
-        CowPtr& operator=(const CowPtr& rhs)
-        {
+
+        CowPtr& operator=(const CowPtr& rhs) {
+#ifdef RPHP_PVAR_DEBUG
+            std::cerr << "COW: shallow assign" << std::endl;
+#endif
             m_sp = rhs.m_sp; // no need to check for self-assignment with boost::shared_ptr
             return *this;
         }
-        const T& operator*() const
-        {
+
+        bool operator==(const CowPtr& rhs) {
+            return (m_sp == rhs.m_sp);
+        }
+
+        const T& operator*() const {
             return *m_sp;
         }
-        T& operator*()
-        {
+
+        T& operator*() {
             detach();
             return *m_sp;
         }
-        const T* operator->() const
-        {
+
+        const T* operator->() const {
             return m_sp.operator->();
         }
-        T* operator->()
-        {
+        
+        T* operator->() {
             detach();
             return m_sp.operator->();
         }

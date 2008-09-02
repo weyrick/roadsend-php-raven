@@ -185,6 +185,10 @@ public:
         return boost::get<const pHashP&>(pVarData_);
     }
 
+    const pHashP& getConstHash() const {
+        return boost::get<const pHashP&>(pVarData_);
+    }
+
     pObjectP& getObject() {
         return boost::get<pObjectP&>(pVarData_);
     }

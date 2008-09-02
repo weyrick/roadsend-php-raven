@@ -132,14 +132,23 @@ class pHash {
         typedef stableHash::iterator iterator;
 
         // construct/destroy/copy
-        pHash() : maxIntKey(0) { std::cout << "creating fresh pHash" << std::endl; }
-
-        pHash(pHash const& p) : maxIntKey(p.maxIntKey) {
-            std::cout << "pHash copy construct" << std::endl;
-            hashData = p.hashData;
+        pHash() : maxIntKey(0) {
+#ifdef RPHP_PVAR_DEBUG
+        std::cerr << "pHash(): create" << std::endl;
+#endif
         }
 
-        ~pHash() { std::cout << "destroying pHash" << std::endl; }
+        // default copy construtor, destructor
+
+#ifdef RPHP_PVAR_DEBUG
+        pHash(pHash const& p) : maxIntKey(p.maxIntKey), hashData(p.hashData) {
+            std::cerr << "pHash(): copy construct (full data copy)" << std::endl;
+        }
+
+        ~pHash() {
+            std::cerr << "pHash(): destruct" << std::endl;
+        }
+#endif
 
         // modifiers
         void insert(const pUString &key, const pVar& data);
@@ -152,18 +161,18 @@ class pHash {
         size_type remove(const pInt &key);
 
         // queries
-        const size_type getSize() { return hashData.size(); }
-        const bool keyExists(const pUString &key);
-        //const bool keyExists(const pBString &key);
-        const bool keyExists(const pInt &key);
+        size_type getSize() const { return hashData.size(); }
+        bool keyExists(const pUString &key) const;
+        //bool keyExists(const pBString &key) const;
+        bool keyExists(const pInt &key) const;
 
         // dump of contents
-        void varDump();
+        void varDump() const;
 
         // lookup
-        pVar operator[] (const pUString &key);
-        //pVarP operator[] (const pBString &key);
-        pVar operator[] (const pInt &key);
+        pVar operator[] (const pUString &key) const;
+        //pVarP operator[] (const pBString &key) const;
+        pVar operator[] (const pInt &key) const;
 
 
 };

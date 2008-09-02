@@ -61,23 +61,23 @@ namespace rphp {
 
 
     // query
-    const bool pHash::keyExists(const pUString &key) {
+    bool pHash::keyExists(const pUString &key) const {
         stableHash::iterator k = hashData.find(key);
         return (k != hashData.end());
     }
     /*
-    const bool pHash::keyExists(const pBString &key) {
+    bool pHash::keyExists(const pBString &key) const {
         stableHash::iterator k = hashData.find(key);
         return (k != hashData.end());
     }
     */
-    const bool pHash::keyExists(const pInt &key) {
+    bool pHash::keyExists(const pInt &key) const {
         stableHash::iterator k = hashData.find(key);
         return (k != hashData.end());
     }
 
     // lookup
-    pVar pHash::operator[] ( const pUString &key ) {
+    pVar pHash::operator[] ( const pUString &key ) const {
         stableHash::iterator k = hashData.find(key);
         if (k == hashData.end())
             return pVar(); // pNull
@@ -86,7 +86,7 @@ namespace rphp {
     }
 
     /*
-    pVarP pHash::operator[] ( const pBString &key ) {
+    pVarP pHash::operator[] ( const pBString &key ) const {
         stableHash::iterator k = hashData.find(key);
         if (k == hashData.end())
             return pVarP();
@@ -95,7 +95,7 @@ namespace rphp {
     }
     */
 
-    pVar pHash::operator[] ( const pInt &key ) {
+    pVar pHash::operator[] ( const pInt &key ) const {
         stableHash::iterator k = hashData.find(key);
         if (k == hashData.end())
             return pVar(); // pNull
@@ -109,12 +109,12 @@ namespace rphp {
         return os << "php_hash:" << std::endl;
     }
 
-    void pHash::varDump() {
+    void pHash::varDump() const {
 
 
         std::cout << "array(" << hashData.size() << ") {" << std::endl;
 
-        seq_index& ot = get<1>(hashData);
+        const seq_index& ot = get<1>(hashData);
 
         hKeyType kType;
 
