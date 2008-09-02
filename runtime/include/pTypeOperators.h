@@ -27,48 +27,48 @@ namespace rphp {
 
 /* a visitor for converting to bool (triState), in place */
 class pVar_convertToBoolVisitor : public boost::static_visitor<void> {
-    protected:
-        pVarDataType &var;
 
-    public:
-        pVar_convertToBoolVisitor(pVarDataType &v) : var(v) { }
+protected:
+    pVarDataType &var;
 
-        void operator()(pTriState &v)  {
-            (pNull(v)) ? var = pFalse : var = v;
-        }
+public:
+    pVar_convertToBoolVisitor(pVarDataType &v) : var(v) { }
 
-        void operator()(pInt &v) {
-            (v) ? var = pTrue : var = pFalse;
-        }
+    void operator()(pTriState &v)  {
+        (pNull(v)) ? var = pFalse : var = v;
+    }
 
-        void operator()(pFloat &v) {
-            (v) ? var = pTrue : var = pFalse;
-        }
+    void operator()(pInt &v) {
+        (v) ? var = pTrue : var = pFalse;
+    }
 
-        void operator()(pBString &v) {
-            (v.empty()) ? var = pFalse : var = pTrue;
-        }
+    void operator()(pFloat &v) {
+        (v) ? var = pTrue : var = pFalse;
+    }
 
-        void operator()(pUStringP &v) {
-            (v->isEmpty()) ? var = pFalse : var = pTrue;
-        }
+    void operator()(pBString &v) {
+        (v.empty()) ? var = pFalse : var = pTrue;
+    }
 
-        void operator()(pHashP &v) {
-            (v->getSize()) ? var = pTrue : var = pFalse;
-        }
+    void operator()(pUStringP &v) {
+        (v->isEmpty()) ? var = pFalse : var = pTrue;
+    }
 
-        void operator()(pObjectP &v) {
-            (v->getNumProperties()) ? var = pTrue : var = pFalse;
-        }
+    void operator()(pHashP &v) {
+        (v->getSize()) ? var = pTrue : var = pFalse;
+    }
 
-        void operator()(pResourceP &v) {
-            var = pTrue;
-        }
+    void operator()(pObjectP &v) {
+        (v->getNumProperties()) ? var = pTrue : var = pFalse;
+    }
 
-        void operator()(pVarP &v) {
-    // TODO:unbox
-    //boost::apply_visitor(pVar_convertToNumberVisitor(*r), *r);
-        }
+    void operator()(pResourceP &v) {
+        var = pTrue;
+    }
+
+    void operator()(pVarP &v) {
+        v->convertToBool();
+    }
 
 };
 
@@ -109,8 +109,7 @@ public:
     }
 
     void operator()(pVarP &v) {
-        // unbox
-        //boost::apply_visitor(pVar_convertToNumberVisitor(*r), *r);
+        v->convertToInt();
     }
 
 };
@@ -156,9 +155,7 @@ public:
     }
 
     void operator()(pVarP &v) const {
-        // TODO
-        // unbox
-        //boost::apply_visitor(convertToNumber(*r), *r);
+        v->convertToBString();
     }
 
 };
