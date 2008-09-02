@@ -27,6 +27,8 @@
 
 #include <unicode/unistr.h>
 
+#include "CowPtr.h"
+
 namespace rphp {
 
 // a boost::tribool represents php true, false and null values
@@ -47,11 +49,11 @@ typedef std::string pBString;
 
 // unicode strings, using the ICU library
 typedef UnicodeString pUString;
-typedef boost::shared_ptr<pUString> pUStringP;
+typedef CowPtr<pUString> pUStringP;
 
 // php hash tables
 class pHash;
-typedef boost::shared_ptr<pHash> pHashP;
+typedef CowPtr<pHash> pHashP;
 
 // php objects
 class pObject;

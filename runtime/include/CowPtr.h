@@ -49,21 +49,20 @@ class CowPtr
         CowPtr(T* t)
             :   m_sp(t)
         {
-            std::cout << "construct from hashData pointer" << std::endl;
+            
         }
         CowPtr(const RefPtr& refptr)
             :   m_sp(refptr)
         {
-            std::cout << "construct from hashData ref" << std::endl;
+            
         }
         CowPtr(const CowPtr& cowptr)
             :   m_sp(cowptr.m_sp)
         {
-            std::cout << "construct from CowPtr" << std::endl;
+            
         }
         CowPtr& operator=(const CowPtr& rhs)
         {
-            std::cout << "shallow assign" << std::endl;
             m_sp = rhs.m_sp; // no need to check for self-assignment with boost::shared_ptr
             return *this;
         }
