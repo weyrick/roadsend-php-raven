@@ -41,7 +41,7 @@
 #include "llvm/ExecutionEngine/Interpreter.h"
 #include "llvm/ExecutionEngine/GenericValue.h"
 
-#include "pLexers.h"
+#include "pLexer.h"
 #include "pParser.h"
 #include "pDriver.h"
 

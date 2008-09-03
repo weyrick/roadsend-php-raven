@@ -23,7 +23,7 @@
 #include <string>
 #include <sstream>
 
-#include "pLexers.h"
+#include "pLexer.h"
 
 namespace rphp {
 

@@ -19,7 +19,7 @@
 
 #include <iostream>
 
-#include "pLexers.h"
+#include "pLexer.h"
 #include "pLangParserDef.h"
 #include "pParser.h"
 
