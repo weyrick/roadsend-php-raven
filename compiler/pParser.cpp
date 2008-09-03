@@ -17,21 +17,33 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PPARSER_H_
-#define RPHP_PPARSER_H_
+#include <iostream>
 
-#include <string>
+#include "pLexers.h"
+#include "pLangParserDef.h"
+#include "pParser.h"
 
 namespace rphp {
 
-class pParser {
 
-public:
+void pParser::dumpAST(std::string fileName) {
 
-    void dumpAST(std::string fileName);
+    pLexer lexer(fileName);
+    pLangGrammar parser(lexer.getTokens());
 
-};
+    tokIteratorType iter = lexer.begin();
+    tokIteratorType end = lexer.end();
+
+    std::string ws = "WS";
+
+    bool r = phrase_parse(iter, end, parser, in_state(ws)[lexer.getTokens().skip_toks]);
+
+    if (!r || iter != end) {
+        std::cout << "Parsing failed\n";
+    }
+
+
+}
+
 
 } // namespace
-
-#endif /* RPHP_PPARSER_H_ */

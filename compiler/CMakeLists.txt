@@ -24,6 +24,8 @@ include_directories (
 set(EVAL_SRC_FILES
   pASTVisitors.cpp
   pDriver.cpp
+  pParser.cpp
+  pLexer.cpp
 )
 
 add_library( rphp-eval SHARED ${EVAL_SRC_FILES} )

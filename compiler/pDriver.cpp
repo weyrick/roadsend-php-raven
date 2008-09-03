@@ -17,11 +17,9 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <iostream>
-#include <iomanip>
 #include <fstream>
+#include <iostream>
 #include <string>
-#include <sstream>
 #include <unicode/unistr.h>
 #include <unicode/ustream.h>
 
@@ -299,84 +297,16 @@ void pDriver::dumpIR(string fileName) {
 
 void pDriver::dumpTokens(string fileName) {
 
-    ifstream inFile;
+    pLexer l(fileName);
+    l.dumpTokens();
 
-    std::string contents = readFile(fileName);
-
-    pLangTokens tokens;
-    pLangLexer lexer(tokens);
-
-    string tokID;
-    stringstream val;
-    
-    std::string::iterator source_it = contents.begin();
-    for (tokIteratorType iter = lexer.begin(source_it, contents.end()); iter != lexer.end(); ++iter)
-    {
-        if ((*iter).id() == 0) {
-            // if we didn't match, we switch to state 1 which is our skip_toks (i.e. whitespace, comments)
-            iter.set_state(1);
-            // if we still haven't matched, then we have a lexer error or end of input
-            if ((*iter).id() == 0)
-                break;
-            val.str("");
-            if ((*iter).id() != T_WHITESPACE)
-                val << (*iter).value();
-            tokID = getTokenDescription((*iter).id());
-            if (tokID.size() == 0)
-                tokID = val.str();
-            std::cout << val.str() << " " << tokID << std::endl;
-            // always switch back
-            iter.set_state(0);
-        }
-        else {
-            // matched
-            val.str("");
-            if ((*iter).id() != T_WHITESPACE)
-                val << (*iter).value();
-            tokID = getTokenDescription((*iter).id());
-            if (tokID.size() == 0)
-                tokID = val.str();
-            std::cout << val.str() << " " << tokID << std::endl;
-        }
-    }
-
-
-}
-
-std::string pDriver::readFile(std::string fileName)
-{
-    std::ifstream instream(fileName.c_str());
-    if (!instream.is_open()) {
-        std::cerr << "Couldn't open file: " << fileName << std::endl;
-        exit(-1);
-    }
-    instream.unsetf(std::ios::skipws);
-    return std::string(std::istreambuf_iterator<char>(instream.rdbuf()),
-                       std::istreambuf_iterator<char>());
 }
 
 void pDriver::dumpAST(string fileName) {
-/*
-    ifstream inFile;
 
-    std::string contents = readFile(fileName);
+    pParser p;
+    p.dumpAST(fileName);
 
-    pLangTokens tokens;
-    pLangLexer lexer(tokens);
-    pLangGrammar parser(tokens);
-
-    std::string::iterator it = contents.begin();
-    tokIteratorType iter = lexer.begin(it, contents.end());
-    tokIteratorType end = lexer.end();
-
-    std::string ws = "WS";
-
-    bool r = phrase_parse(iter, end, parser, in_state(ws)[tokens.skip_toks]);
-
-    if (!r || iter != end) {
-        std::cout << "Parsing failed\n";
-    }
-*/
 }
 
 

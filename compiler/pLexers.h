@@ -17,138 +17,44 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PLEXERS_H_
-#define RPHP_PLEXERS_H_
+#ifndef RPHP_PLEXER_H_
+#define RPHP_PLEXER_H_
 
-//#define BOOST_SPIRIT_LEXERTL_DEBUG
-//#define BOOST_SPIRIT_DEBUG
-
-#include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/lex_lexer_lexertl.hpp>
 #include <string>
-
-#include "pTokens.h"
+#include "pLangLexerDef.h"
 
 namespace rphp {
 
-using namespace boost::spirit;
-using namespace boost::spirit::lex;
+class pLexer {
 
-template <typename Lexer>
-struct rphpLangTokens : lexer_def<Lexer>
-{
-    typedef typename Lexer::token_set token_set;
+private:
+    pLangTokens tokens;
+    pLangLexer lexer;
 
-    template <typename Self>
-    void def (Self& self)
-    {
+    std::string fileName;
+    std::string contents;
 
-        if_ = token_def<omitted>("if", T_IF);
-        while_ = token_def<omitted>("while", T_WHILE);
-        else_ = token_def<omitted>("else", T_ELSE);
-        echo = token_def<omitted>("echo", T_ECHO);
+    std::string::iterator sourceBegin;
+    std::string::iterator sourceEnd;
 
-        identifier = token_def<std::string>("[a-zA-Z_][a-zA-Z0-9_]*", T_IDENTIFIER);
+public:
 
-        //dqstring = token_def<omitted>("\"([^\"\\\\]|\\\\.)*\"", T_CONSTANT_ENCAPSED_STRING);
-        dqstring = token_def<omitted>("[\"][^\"]*[\"]", T_CONSTANT_ENCAPSED_STRING);
-        variable = token_def<std::string>("\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE);
-        lnumber = token_def<unsigned int>("[0-9]+", T_LNUMBER);
+    typedef tokIteratorType iterator_type;
 
-        opentag = token_def<omitted>("<\\?", T_OPEN_TAG);
-        closetag = token_def<omitted>("\\?>", T_CLOSE_TAG);
+    pLexer(std::string);
 
-        skip_toks
-           = token_def<std::string>("[ \\t\\n]+", T_WHITESPACE)
-           | token_def<std::string>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_ML_COMMENT)
-           | token_def<std::string>("\\/\\/.*$", T_SL_COMMENT);
+    tokIteratorType begin(void);
+    tokIteratorType end(void);
 
-        // associate the tokens and the token set with the lexer
-        self += token_def<>('(') | ')' | '{' | '}' | '=' | ';';
-        self += if_ | while_ | else_ | echo | opentag | closetag;
-        self += identifier | variable | lnumber | dqstring;
+    void dumpTokens(void);
+    const char* getTokenDescription(const std::size_t t);
 
-        // whitespace tokens in WS lexer state
-        self("WS") = skip_toks;
-
+    pLangTokens& getTokens(void) {
+        return tokens;
     }
 
-    // TOKEN defs
-    // NOTE: any type used as a return value here must also be defined in the vector
-    // that defines our langTokenType (see below)
-
-    // these tokens have no value
-    token_def<omitted> if_, while_, else_, echo, opentag, closetag, dqstring;
-
-    // tokens with string value
-    token_def<std::string> identifier, variable;
-
-    // tokens with int value
-    // TODO: change this to pInt
-    token_def<unsigned int> lnumber;
-
-    // token set to be used as the skip parser (whitespace and comments)
-    token_set skip_toks;
 };
-
-// iterator type used to expose the underlying input stream
-typedef std::string::iterator sourceIteratorType;
-
-// token type. this should list all types used as return values in the
-// token lexer definition
-typedef lexertl_token<
-    sourceIteratorType, boost::mpl::vector<unsigned int, std::string>
-> languageTokenType;
-
-// Here we use the lexertl based lexer engine.
-typedef lexertl_lexer<languageTokenType> lexerEngineType;
-
-// specialize the tokens with this engine
-typedef rphpLangTokens<lexerEngineType> pLangTokens;
-
-// actual lexer type
-typedef lexer<pLangTokens> pLangLexer;
-
-// this is the iterator type exposed by the lexer, which dereferences to
-// a token
-typedef lexer<pLangTokens>::iterator_type tokIteratorType;
-
-const char* getTokenDescription(const std::size_t t) {
-
-    switch (t) {
-        case T_VARIABLE:
-            return "T_VARIABLE";
-        case T_WHITESPACE:
-            return "T_WHITESPACE";
-        case T_ML_COMMENT:
-            return "T_ML_COMMENT";
-        case T_SL_COMMENT:
-            return "T_SL_COMMENT";
-        case T_ECHO:
-            return "T_ECHO";
-        case T_OPEN_TAG:
-            return "T_OPEN_TAG";
-        case T_CLOSE_TAG:
-            return "T_CLOSE_TAG";
-        case T_LNUMBER:
-            return "T_LNUMBER";
-        case T_INLINE_HTML:
-            return "T_INLINE_HTML";
-        case T_IF:
-            return "T_IF";
-        case T_ELSE:
-            return "T_ELSE";
-        case T_WHILE:
-            return "T_WHILE";
-        case T_IDENTIFIER:
-            return "T_IDENTIFIER";
-        case T_CONSTANT_ENCAPSED_STRING:
-            return "T_CONSTANT_ENCAPSED_STRING";
-    }
-    return "";
-
-}
 
 } // namespace
 
-#endif /* RPHP_PLEXERS_H_ */
+#endif /* RPHP_PLEXER_H_ */
