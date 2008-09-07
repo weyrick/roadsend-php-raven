@@ -297,14 +297,14 @@ void pDriver::dumpIR(string fileName) {
 
 void pDriver::dumpTokens(string fileName) {
 
-    pLexer l(fileName);
+    lexer::pLexer l(fileName);
     l.dumpTokens();
 
 }
 
 void pDriver::dumpAST(string fileName) {
 
-    pParser p;
+    parser::pParser p;
     p.dumpAST(fileName);
 
 }

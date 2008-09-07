@@ -23,6 +23,8 @@
 //#define BOOST_SPIRIT_LEXERTL_DEBUG
 //#define BOOST_SPIRIT_DEBUG
 
+#include <boost/bind.hpp>
+
 #include <boost/spirit/include/qi.hpp>
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_container.hpp>
@@ -30,6 +32,8 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 
 #include <string>
+
+#include "pAST.h"
 
 using namespace boost::spirit;
 using namespace boost::spirit::qi;
@@ -41,7 +45,7 @@ using namespace boost::spirit::ascii;
 using boost::phoenix::val;
 using boost::phoenix::function;
 
-namespace rphp {
+namespace rphp { namespace parser {
 
 struct parse_error_handler_
 {
@@ -150,7 +154,8 @@ struct rphpLangGrammarDef
     typedef grammar<Iterator, in_state_skipper<typename Lexer::token_set> > base_type;
     typedef typename base_type::skipper_type skipper_type;
 
-    rule<Iterator, skipper_type> module, statement, statement_block;
+    rule<Iterator, skipper_type> module;
+    rule<Iterator, skipper_type> statement, statement_block;
     rule<Iterator, skipper_type> assignment, if_stmt;
     rule<Iterator, skipper_type> while_stmt, echo_stmt;
 
@@ -160,8 +165,8 @@ struct rphpLangGrammarDef
 };
 
 // rphp language grammer type
-typedef rphpLangGrammarDef<tokIteratorType, lexerEngineType> pLangGrammar;
+typedef rphpLangGrammarDef<lexer::tokIteratorType, lexer::lexerEngineType> pLangGrammar;
 
-} // namespace
+} } // namespace
 
 #endif /* RPHP_PPARSER_H_ */

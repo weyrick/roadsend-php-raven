@@ -20,50 +20,44 @@
 #ifndef RPHP_PAST_H_
 #define RPHP_PAST_H_
 
-#include <boost/shared_ptr.hpp>
-
 #include <vector>
+#include <boost/spirit/include/support_unused.hpp>
+
 #include "pTypes.h"
 
 namespace rphp { namespace AST {
 
-/* node forwards */
-class moduleNode;
-typedef boost::shared_ptr<moduleNode> moduleNodeP;
+using namespace boost::spirit;
 
+// node forwards
 class statementNode;
-typedef boost::shared_ptr<statementNode> statementNodeP;
 
-class literalIntNode;
-typedef boost::shared_ptr<literalIntNode> literalIntNodeP;
+// node list types
+typedef std::vector<statementNode*> statementListType;
 
-/* node list types */
-typedef std::vector<statementNodeP> statementListType;
-
-/* encapsulates a single php "module" (one script) */
-class rphpModule {
-
-private:
-    std::string originalFileName;
-    moduleNodeP moduleAST;
-};
-
-/* base node */
+// base node
 struct Node {
-    pSourceLocation location;
+    pUInt lineNum;
 };
 
-/* NODE: module */
-struct moduleNode: public Node {
+// NODE: treeTop
+struct treeTop: public Node {
     statementListType statementList;
 };
 
-/* NODE: statement */
+// NODE: statement
 struct statementNode: public Node {
 
 };
 
-/* NODE: literal int */
+// NODE: literal bstring
+struct literalBStringNode: public Node {
+
+    pBString val;
+
+};
+
+// NODE: literal int
 struct literalIntNode: public Node {
 
     pInt val;

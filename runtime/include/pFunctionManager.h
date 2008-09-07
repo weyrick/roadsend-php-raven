@@ -23,7 +23,6 @@
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/member.hpp>
-#include <ext/hash_map>
 
 #include "pFunctionSig.h"
 #include "pSupport.h"

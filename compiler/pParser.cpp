@@ -23,16 +23,19 @@
 #include "pLangParserDef.h"
 #include "pParser.h"
 
-namespace rphp {
+namespace rphp { namespace parser {
 
+pModuleP pParser::compileToAST(std::string fileName) {
 
-void pParser::dumpAST(std::string fileName) {
+    pModuleP pMod(new pModule(fileName));
 
-    pLexer lexer(fileName);
+    AST::treeTop moduleTop();
+
+    lexer::pLexer lexer(fileName);
     pLangGrammar parser(lexer.getTokens());
 
-    tokIteratorType iter = lexer.begin();
-    tokIteratorType end = lexer.end();
+    lexer::tokIteratorType iter = lexer.begin();
+    lexer::tokIteratorType end = lexer.end();
 
     std::string ws = "WS";
 
@@ -41,9 +44,17 @@ void pParser::dumpAST(std::string fileName) {
     if (!r || iter != end) {
         std::cout << "Parsing failed\n";
     }
+    
 
+}
+
+void pParser::dumpAST(std::string fileName) {
+
+    pModuleP m = compileToAST(fileName);
+    // apply dump visitor
+    std::cout << "i should dump here" << std::endl;
 
 }
 
 
-} // namespace
+} } // namespace

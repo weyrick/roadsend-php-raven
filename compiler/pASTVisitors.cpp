@@ -23,22 +23,18 @@
 
 namespace rphp { namespace AST {
 
-void defaultVisitor::visit(moduleNodeP n) {
+
+void defaultVisitor::visit(treeTop* n) {
     for(statementListType::iterator s = n->statementList.begin(); s != n->statementList.end(); ++s) {
         visit(*s);
     }
 }
 
-void defaultVisitor::visit(statementNodeP n) {
+void defaultVisitor::visit(statementNode* n) {
     // fixme
 }
 
-void dumpVisitor::visit(moduleNodeP n) {
-    std::cout << "moduleNode" << std::endl;
-    defaultVisitor::visit(n);
-}
-
-void dumpVisitor::visit(statementNodeP n) {
+void dumpVisitor::visit(statementNode* n) {
     std::cout << "statementNode" << std::endl;
     defaultVisitor::visit(n);
 }

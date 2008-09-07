@@ -25,7 +25,7 @@
 
 #include "pLexer.h"
 
-namespace rphp {
+namespace rphp { namespace lexer {
 
 
 pLexer::pLexer(std::string fName): tokens(), lexer(tokens), fileName(fName) {
@@ -132,5 +132,5 @@ const char* pLexer::getTokenDescription(const std::size_t t) {
 }
 
 
-} // namespace
+} } // namespace
 

@@ -26,22 +26,21 @@ namespace rphp { namespace AST {
 
 class baseVisitor {
 public:
-    virtual void visit(moduleNodeP) = 0;
-    virtual void visit(statementNodeP) = 0;
+    virtual void visit(treeTop*) = 0;
+    virtual void visit(statementNode*) = 0;
 
 };
 
 class defaultVisitor: public baseVisitor {
 public:
-    virtual void visit(moduleNodeP);
-    virtual void visit(statementNodeP);
+    virtual void visit(treeTop*);
+    virtual void visit(statementNode*);
 
 };
 
 class dumpVisitor: public defaultVisitor {
 public:
-    virtual void visit(moduleNodeP);
-    virtual void visit(statementNodeP);
+    virtual void visit(statementNode*);
 
 };
 

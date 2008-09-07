@@ -29,7 +29,7 @@
 
 #include "pTokens.h"
 
-namespace rphp {
+namespace rphp { namespace lexer {
 
 using namespace boost::spirit;
 using namespace boost::spirit::lex;
@@ -107,12 +107,12 @@ typedef lexertl_lexer<languageTokenType> lexerEngineType;
 typedef rphpLangTokens<lexerEngineType> pLangTokens;
 
 // actual lexer type
-typedef lexer<pLangTokens> pLangLexer;
+typedef boost::spirit::lex::lexer<pLangTokens> pLangLexer;
 
 // this is the iterator type exposed by the lexer, which dereferences to
 // a token
-typedef lexer<pLangTokens>::iterator_type tokIteratorType;
+typedef boost::spirit::lex::lexer<pLangTokens>::iterator_type tokIteratorType;
 
-} // namespace
+} } // namespace
 
 #endif /* RPHP_PLANGLEXERDEF_H_ */

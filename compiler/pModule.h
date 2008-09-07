@@ -17,44 +17,41 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PLEXER_H_
-#define RPHP_PLEXER_H_
+#ifndef RPHP_PMODULE_H_
+#define RPHP_PMODULE_H_
 
-#include <string>
-#include "pLangLexerDef.h"
+#include <boost/shared_ptr.hpp>
 
-namespace rphp { namespace lexer {
+#include "pMemPool.h"
+#include "pAST.h"
 
-class pLexer {
+namespace rphp {
+
+// encapsulates a single php "module" (one script)
+class pModule {
 
 private:
-    pLangTokens tokens;
-    pLangLexer lexer;
-
-    std::string fileName;
-    std::string contents;
-
-    std::string::iterator sourceBegin;
-    std::string::iterator sourceEnd;
+    std::string originalFileName;
+    pMemPool nodeMemPool;
+    AST::treeTop* astTop;
 
 public:
+    pModule(std::string fileName): originalFileName(fileName)
+    {
+    }
 
-    typedef tokIteratorType iterator_type;
+    void setTop(AST::treeTop* t) { astTop = t; }
 
-    pLexer(std::string);
-
-    tokIteratorType begin(void);
-    tokIteratorType end(void);
-
-    void dumpTokens(void);
-    const char* getTokenDescription(const std::size_t t);
-
-    pLangTokens& getTokens(void) {
-        return tokens;
+    template <class T>
+    inline T* createNode() {
+        T* node = new (nodeMemPool.allocate(sizeof(T))) T();
+        return node;
     }
 
 };
 
-} } // namespace
+typedef boost::shared_ptr<pModule> pModuleP;
 
-#endif /* RPHP_PLEXER_H_ */
+} // namespace
+
+#endif /* RPHP_PMODULE_H_ */
