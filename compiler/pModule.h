@@ -39,14 +39,10 @@ public:
     pModule(std::string fileName): originalFileName(fileName)
     {
     }
+    
+    pMemPool& getMemPool() { return nodeMemPool; }
 
     void setTop(AST::treeTop* t) { astTop = t; }
-
-    template <class T>
-    inline T* createNode() {
-        T* node = new (nodeMemPool.allocate(sizeof(T))) T();
-        return node;
-    }
 
 };
 

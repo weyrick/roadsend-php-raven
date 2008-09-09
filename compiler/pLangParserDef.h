@@ -34,6 +34,8 @@
 #include <string>
 
 #include "pAST.h"
+#include "pModule.h"
+#include "pCreateNode.h"
 
 using namespace boost::spirit;
 using namespace boost::spirit::qi;
@@ -70,12 +72,25 @@ struct parse_error_handler_
 
 function<parse_error_handler_> const parse_error_handler = parse_error_handler_();
 
+//AST::treeTop doTop(const boost::fusion::vector<AST::statementListType>& s) {
+AST::treeTop doTop(void) {
+    std::cout << "i am making a tree top" << std::endl;
+    return AST::treeTop(); 
+}
+
+/*
+AST::echoNode doEcho(const boost::fusion::vector<std::string>& v) {
+    std::cout << "i am making an echo node" << std::endl;
+    return AST::echoNode(boost::fusion::at_c<0>(v));
+}
+*/
+
 template <typename Iterator, typename Lexer>
 struct rphpLangGrammarDef
-  : grammar<Iterator, in_state_skipper<typename Lexer::token_set> >
+  : grammar<Iterator, AST::treeTop(), in_state_skipper<typename Lexer::token_set> >
 {
     template <typename TokenDef>
-    rphpLangGrammarDef(TokenDef const& tok)
+    rphpLangGrammarDef(TokenDef const& tok, pModuleP pMod)
       : rphpLangGrammarDef::base_type(module, "module")
     {
         using boost::spirit::arg_names::_1;
@@ -84,7 +99,7 @@ struct rphpLangGrammarDef
         using boost::spirit::arg_names::_4;
 
         module
-            =  *statement
+            =  *statement [&doTop]
             ;
 
         statement_block
@@ -123,10 +138,10 @@ struct rphpLangGrammarDef
             ;
 
         echo_stmt
-            =   (tok.echo >> expression >> ';')
-                [
-                    std::cout << val("echo: ") << _1 << "\n"
-                ]
+            =   (tok.echo >> tok.dqstring >> ';')
+            [
+                pCreateNode<AST::echoNode>(pMod)
+            ]
             ;
 
         //  since expression has a variant return type accommodating for
@@ -151,17 +166,20 @@ struct rphpLangGrammarDef
 
     }
 
-    typedef grammar<Iterator, in_state_skipper<typename Lexer::token_set> > base_type;
+    typedef grammar<Iterator, AST::treeTop(), in_state_skipper<typename Lexer::token_set> > base_type;
     typedef typename base_type::skipper_type skipper_type;
 
-    rule<Iterator, skipper_type> module;
-    rule<Iterator, skipper_type> statement, statement_block;
-    rule<Iterator, skipper_type> assignment, if_stmt;
-    rule<Iterator, skipper_type> while_stmt, echo_stmt;
+    rule<Iterator, AST::treeTop(), skipper_type> module;
+    rule<Iterator, skipper_type> statement;
+    rule<Iterator, skipper_type> statement_block;
+    rule<Iterator, skipper_type> assignment;
+    rule<Iterator, skipper_type> if_stmt;
+    rule<Iterator, skipper_type> while_stmt;
+    rule<Iterator, AST::echoNode*, skipper_type> echo_stmt;
 
-    //  the expression is the only rule having a return value
     typedef boost::variant<unsigned int, std::string> expression_type;
     rule<Iterator, expression_type(), skipper_type>  expression;
+
 };
 
 // rphp language grammer type

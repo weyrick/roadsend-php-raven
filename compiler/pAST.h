@@ -21,13 +21,12 @@
 #define RPHP_PAST_H_
 
 #include <vector>
-#include <boost/spirit/include/support_unused.hpp>
+#include <boost/fusion/container.hpp>
+#include <boost/fusion/sequence.hpp>
 
 #include "pTypes.h"
 
 namespace rphp { namespace AST {
-
-using namespace boost::spirit;
 
 // node forwards
 class statementNode;
@@ -64,6 +63,31 @@ struct literalIntNode: public Node {
 
 };
 
+// NODE: literal int
+struct echoNode: public Node {
+
+/*
+    typedef boost::fusion::vector<std::string> fVectorSig;
+
+    echoNode(const fVectorSig& r): rVal(boost::fusion::at_c<0>(r)) {
+        std::cout << "creating echo node" << std::endl;
+    }
+*/
+    typedef pBString parseSig;
+
+    pBString rVal;
+
+    echoNode(const parseSig& r): rVal(r) {
+        std::cout << "creating echo node, string is: " << rVal << std::endl;
+    }
+
+    // XXX FIXME TODO this never runs, and will leak pBString data
+    // because memPool does not run destructors. but, it's fast, right?
+    ~echoNode() {
+        std::cout << "echo node destructing, string is: " << rVal << std::endl;
+    }
+
+};
 
 } } // namespace
 

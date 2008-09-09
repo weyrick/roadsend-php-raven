@@ -17,44 +17,36 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <iostream>
+#ifndef RPHP_PCREATENODE_H_
+#define RPHP_PCREATENODE_H_
 
-#include "pLexer.h"
-#include "pLangParserDef.h"
-#include "pParser.h"
+#include <boost/spirit/include/support_unused.hpp>
 
-namespace rphp { namespace parser {
+#include "pModule.h"
+#include "pAST.h"
 
-pModuleP pParser::compileToAST(std::string fileName) {
+namespace rphp {
 
-    pModuleP pMod(new pModule(fileName));
+// This is a generic functor for creating AST nodes
+// using a given module's memory pool
 
-    lexer::pLexer lexer(fileName);
-    pLangGrammar parser(lexer.getTokens(), pMod);
+template <class T>
+struct pCreateNode {
 
-    lexer::tokIteratorType iter = lexer.begin();
-    lexer::tokIteratorType end = lexer.end();
+private:
+    pModuleP& pMod;
 
-    std::string ws = "WS";
+public:
+    typedef T* result_type;
 
-    AST::treeTop moduleTop;
+    pCreateNode(pModuleP& p): pMod(p) { }
 
-    bool r = phrase_parse(iter, end, parser, moduleTop, in_state(ws)[lexer.getTokens().skip_toks]);
-
-    if (!r || iter != end) {
-        std::cout << "Parsing failed\n";
+    T* operator()(typename T::parseSig v, boost::spirit::unused_type, boost::spirit::unused_type) const {
+        return new (pMod->getMemPool().allocate(sizeof(T))) T(v);
     }
-    
 
-}
+};
 
-void pParser::dumpAST(std::string fileName) {
+} // namespace
 
-    pModuleP m = compileToAST(fileName);
-    // apply dump visitor
-    std::cout << "i should dump here" << std::endl;
-
-}
-
-
-} } // namespace
+#endif /* RPHP_PCREATENODE_H_ */

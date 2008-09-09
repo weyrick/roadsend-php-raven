@@ -36,7 +36,7 @@ struct block_t
   char *ptr;
   char *end;
 
-  inline void init(int block_size = 256)
+  inline void init(int block_size = 512)
   {
     _M_block_size = block_size;
     chain = 0;
@@ -45,7 +45,7 @@ struct block_t
     end = data + block_size;
   }
 
-  inline void init0(int block_size = 256)
+  inline void init0(int block_size = 512)
   {
     init(block_size);
     memset(data, '\0', block_size);
