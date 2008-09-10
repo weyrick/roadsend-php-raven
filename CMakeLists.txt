@@ -2,6 +2,11 @@
 
 cmake_minimum_required(VERSION 2.4)
 
+# this policy warning is due to lib command lines arg output from llvm-config
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
+
 project (rphp)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules )

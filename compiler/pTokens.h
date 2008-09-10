@@ -37,7 +37,9 @@ typedef enum {
     T_ELSE,
     T_WHILE,
     T_IDENTIFIER,
-    T_CONSTANT_ENCAPSED_STRING
+    T_CONSTANT_ENCAPSED_STRING,
+    T_SEMI
+
 } languageTokenIDType;
 
 }

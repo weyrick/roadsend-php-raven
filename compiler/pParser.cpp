@@ -20,8 +20,12 @@
 #include <iostream>
 
 #include "pLexer.h"
-#include "pLangParserDef.h"
 #include "pParser.h"
+
+/* generated rphp_grammar parser interface */
+void *ParseAlloc(void *(*)(size_t));
+void ParseFree(void *p, void (*)(void*));
+void Parse(void *, int, std::string*, rphp::pModule*);
 
 namespace rphp { namespace parser {
 
@@ -30,21 +34,30 @@ pModuleP pParser::compileToAST(std::string fileName) {
     pModuleP pMod(new pModule(fileName));
 
     lexer::pLexer lexer(fileName);
-    pLangGrammar parser(lexer.getTokens(), pMod);
-
-    lexer::tokIteratorType iter = lexer.begin();
-    lexer::tokIteratorType end = lexer.end();
-
-    std::string ws = "WS";
 
     AST::treeTop moduleTop;
+    void* pParser = ParseAlloc(malloc);
 
-    bool r = phrase_parse(iter, end, parser, moduleTop, in_state(ws)[lexer.getTokens().skip_toks]);
-
-    if (!r || iter != end) {
-        std::cout << "Parsing failed\n";
+    for (lexer::tokIteratorType iter = lexer.begin(); iter != lexer.end(); ++iter)
+    {
+        if ((*iter).id() == 0) {
+            // if we didn't match, we switch to state 1 which is our skip_toks (i.e. whitespace, comments)
+            iter.set_state(1);
+            // if we still haven't matched, then we have a lexer error or end of input
+            if ((*iter).id() == 0) {
+                std::cerr << "lexical scan error" << std::endl;
+                exit(-1);
+            }
+            // always switch back
+            iter.set_state(0);
+        }
+        else {
+            // matched valid token
+            Parse(pParser, (*iter).id(), new std::string((*iter).value().begin(),(*iter).value().end()), pMod.get());
+        }
     }
-    
+
+  ParseFree(pParser, free);
 
 }
 
