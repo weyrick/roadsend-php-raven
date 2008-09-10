@@ -8,6 +8,7 @@ include_directories (
                      ${RPHP_COMPILER_INCLUDE_DIR}
                      ${LLVM_INCLUDE_DIRS}
                      ${Boost_INCLUDE_DIRS}
+                     ${CMAKE_CURRENT_BINARY_DIR}
                     )
 
 ######

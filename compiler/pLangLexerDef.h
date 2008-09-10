@@ -27,7 +27,7 @@
 #include <boost/spirit/include/lex_lexer_lexertl.hpp>
 #include <string>
 
-#include "pTokens.h"
+#include "rphp_grammar.h"
 
 namespace rphp { namespace lexer {
 
@@ -42,31 +42,33 @@ struct rphpLangTokens : lexer_def<Lexer>
     void def (Self& self)
     {
 
-        if_ = token_def<>("if", T_IF);
-        while_ = token_def<>("while", T_WHILE);
-        else_ = token_def<>("else", T_ELSE);
-        echo = token_def<>("echo", T_ECHO);
+        if_ = token_def<>("if"/*, T_IF*/);
+        while_ = token_def<>("while"/*, T_WHILE*/);
+        else_ = token_def<>("else"/*, T_ELSE*/);
+        
         semi = token_def<>(";", T_SEMI);
+        echo = token_def<>("echo", T_ECHO);
 
-        identifier = token_def<>("[a-zA-Z_][a-zA-Z0-9_]*", T_IDENTIFIER);
+        identifier = token_def<>("[a-zA-Z_][a-zA-Z0-9_]*"/*, T_IDENTIFIER*/);
 
         //dqstring = token_def<>("\"([^\"\\\\]|\\\\.)*\"", T_CONSTANT_ENCAPSED_STRING);
         dqstring = token_def<>("[\"][^\"]*[\"]", T_CONSTANT_ENCAPSED_STRING);
-        variable = token_def<>("\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE);
-        lnumber = token_def<>("[0-9]+", T_LNUMBER);
-
-        opentag = token_def<>("<\\?", T_OPEN_TAG);
-        closetag = token_def<>("\\?>", T_CLOSE_TAG);
+        
+        variable = token_def<>("\\$[a-zA-Z_][a-zA-Z0-9_]*"/*, T_VARIABLE*/);
+        lnumber = token_def<>("[0-9]+"/*, T_LNUMBER*/);
+        
+        opentag = token_def<>("<\\?"/*, T_OPEN_TAG*/);
+        closetag = token_def<>("\\?>"/*, T_CLOSE_TAG*/);
 
         skip_toks
            = token_def<>("[ \\t\\n]+", T_WHITESPACE)
-           | token_def<>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_ML_COMMENT)
-           | token_def<>("\\/\\/.*$", T_SL_COMMENT);
+           | token_def<>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"/*, T_ML_COMMENT*/)
+           | token_def<>("\\/\\/.*$"/*, T_SL_COMMENT*/);
 
         // associate the tokens and the token set with the lexer
-        self += token_def<>('(') | ')' | '{' | '}' | '=' | ';';
+        self += token_def<>('(') | ')' | '{' | '}' | '=';
         self += if_ | while_ | else_ | echo | opentag | closetag;
-        self += identifier | variable | lnumber | dqstring;
+        self += identifier | variable | lnumber | dqstring | semi;
 
         // whitespace tokens in WS lexer state
         self("WS") = skip_toks | opentag | closetag;

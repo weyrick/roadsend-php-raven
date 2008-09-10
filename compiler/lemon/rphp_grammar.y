@@ -21,6 +21,8 @@ using namespace rphp;
 %token_destructor { delete $$; }
 %extra_argument {pModule* pMod}
 
+%type T_WHITESPACE {int}
+
 //%type expr {Token}
 //%type NUM {Token}
 
@@ -34,12 +36,17 @@ using namespace rphp;
 
    
 %syntax_error {  
-  std::cout << "Syntax error!" << std::endl;  
+  std::cout << "Syntax error, unexpected: '" << *TOKEN << "'" << std::endl;
 }   
    
-start ::= statement.
+module ::= statement_list.
+
+statement_list ::= .
+statement_list ::= statement_list statement T_SEMI.
+
 statement ::= echo.
-echo ::= T_ECHO T_CONSTANT_ENCAPSED_STRING(A) T_SEMI. { std::cout << "found echo: " << A << std::endl; }
+
+echo ::= T_ECHO T_CONSTANT_ENCAPSED_STRING(B). { std::cout << "found echo: " << *B << std::endl; }
 
    
 /*  This is to terminate with a new line */

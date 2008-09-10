@@ -24,8 +24,9 @@
 
 /* generated rphp_grammar parser interface */
 void *ParseAlloc(void *(*)(size_t));
-void ParseFree(void *p, void (*)(void*));
 void Parse(void *, int, std::string*, rphp::pModule*);
+void ParseFree(void *, void (*)(void*));
+void ParseTrace(FILE *, char *);
 
 namespace rphp { namespace parser {
 
@@ -38,6 +39,8 @@ pModuleP pParser::compileToAST(std::string fileName) {
     AST::treeTop moduleTop;
     void* pParser = ParseAlloc(malloc);
 
+    ParseTrace(stderr, "trace: ");
+    
     for (lexer::tokIteratorType iter = lexer.begin(); iter != lexer.end(); ++iter)
     {
         if ((*iter).id() == 0) {
