@@ -21,26 +21,27 @@
 
 #include "pLexer.h"
 #include "pParser.h"
+#include "pASTVisitors.h"
 
 /* generated rphp_grammar parser interface */
-void *ParseAlloc(void *(*)(size_t));
-void Parse(void *, int, std::string*, rphp::pModule*);
-void ParseFree(void *, void (*)(void*));
-void ParseTrace(FILE *, char *);
+void* rphpParseAlloc(void *(*)(size_t));
+void  rphpParse(void *, int, std::string*, rphp::AST::treeTop*);
+void  rphpParseFree(void *, void (*)(void*));
+void  rphpParseTrace(FILE *, char *);
 
 namespace rphp { namespace parser {
 
 pModuleP pParser::compileToAST(std::string fileName) {
 
     pModuleP pMod(new pModule(fileName));
-
     lexer::pLexer lexer(fileName);
 
-    AST::treeTop moduleTop;
-    void* pParser = ParseAlloc(malloc);
+    void* pParser = rphpParseAlloc(malloc);
+    AST::treeTop* ast = pMod->getTreeTop();
 
-    ParseTrace(stderr, "trace: ");
-    
+    // DEBUG
+    //rphpParseTrace(stderr, "trace: ");
+
     for (lexer::tokIteratorType iter = lexer.begin(); iter != lexer.end(); ++iter)
     {
         if ((*iter).id() == 0) {
@@ -56,20 +57,28 @@ pModuleP pParser::compileToAST(std::string fileName) {
         }
         else {
             // matched valid token
-            Parse(pParser, (*iter).id(), new std::string((*iter).value().begin(),(*iter).value().end()), pMod.get());
+            rphpParse(pParser, (*iter).id(), new std::string((*iter).value().begin(),(*iter).value().end()), ast);
         }
     }
 
-  ParseFree(pParser, free);
+    // finish parse
+    std::string* end = new std::string();
+    rphpParse(pParser, 0, end, ast);
+    delete end;
+
+    rphpParseFree(pParser, free);
+
+    return pMod;
 
 }
 
 void pParser::dumpAST(std::string fileName) {
 
     pModuleP m = compileToAST(fileName);
-    // apply dump visitor
-    std::cout << "i should dump here" << std::endl;
 
+    AST::dumpVisitor visitor;
+    visitor.visit(m->getTreeTop());
+    
 }
 
 

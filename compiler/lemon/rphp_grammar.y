@@ -8,84 +8,38 @@ rphp language grammar
 
 #include <iostream>
 #include <string>
-#include "pModule.h"
+
+#include "pAST.h"
 #include "pLangLexerDef.h"
 
 using namespace rphp;
 
 }  
 
-
+%name rphpParse
 %token_type {std::string*}
 %default_type {std::string*}
 %token_destructor { delete $$; }
-%extra_argument {pModule* pMod}
+%extra_argument {AST::treeTop* ast}
 
 %type T_WHITESPACE {int}
-
-//%type expr {Token}
-//%type NUM {Token}
-
-   
-//%left PLUS MINUS.   
-//%left DIVIDE TIMES.  
-   
-%parse_accept {
-  printf("parsing complete!\n\n\n");
-}
-
    
 %syntax_error {  
-  std::cout << "Syntax error, unexpected: '" << *TOKEN << "'" << std::endl;
+  std::cerr << "Syntax error, unexpected: '" << *TOKEN << "'" << std::endl;
 }   
-   
+%stack_overflow {  
+  std::cerr << "Parser stack overflow" << std::endl;
+}   
+
+%type module {int}
 module ::= statement_list.
 
+%type statement_list {int}
 statement_list ::= .
-statement_list ::= statement_list statement T_SEMI.
+statement_list ::= statement_list statement(A). { ast->statementList.push_back(A); }
 
-statement ::= echo.
+%type statement {AST::statementNode*}
+statement(A) ::= echo(B). { A = new AST::statementNode(B); }
 
-echo ::= T_ECHO T_CONSTANT_ENCAPSED_STRING(B). { std::cout << "found echo: " << *B << std::endl; }
-
-   
-/*  This is to terminate with a new line */
-/*
-main ::= in.
-in ::= .
-in ::= in state NEWLINE.
-
-
-state ::= expr(A).   { 
-                        std::cout << "Result.value=" << A.value << std::endl; 
-                        std::cout << "Result.n=" << A.n << std::endl; 
-
-                         }  
-
-
-
-expr(A) ::= expr(B) MINUS  expr(C).   { A.value = B.value - C.value; 
-                                       A.n = B.n+1  + C.n+1;
-                                      }  
-
-expr(A) ::= expr(B) PLUS  expr(C).   { A.value = B.value + C.value; 
-                                       A.n = B.n+1  + C.n+1;
-                                      }  
-
-expr(A) ::= expr(B) TIMES  expr(C).   { A.value = B.value * C.value;
-                                        A.n = B.n+1  + C.n+1;
-
-                                         }  
-expr(A) ::= expr(B) DIVIDE expr(C).  { 
-
-         if(C.value != 0){
-           A.value = B.value / C.value;
-           A.n = B.n+1 + C.n+1;
-          }else{
-           std::cout << "divide by zero" << std::endl;
-           }
-}  // end of DIVIDE
-expr(A) ::= NUM(B). { A.value = B.value; A.n = B.n+1; }
-*/
-
-
+%type echo {AST::echoNode*}
+echo(A) ::= T_ECHO T_CONSTANT_ENCAPSED_STRING(B) T_SEMI. { A = new AST::echoNode(*B); delete B; }

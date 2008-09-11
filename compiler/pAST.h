@@ -28,25 +28,9 @@
 
 namespace rphp { namespace AST {
 
-// node forwards
-class statementNode;
-
-// node list types
-typedef std::vector<statementNode*> statementListType;
-
 // base node
 struct Node {
     pUInt lineNum;
-};
-
-// NODE: treeTop
-struct treeTop: public Node {
-    statementListType statementList;
-};
-
-// NODE: statement
-struct statementNode: public Node {
-
 };
 
 // NODE: literal bstring
@@ -63,30 +47,49 @@ struct literalIntNode: public Node {
 
 };
 
-// NODE: literal int
+// NODE: echo
 struct echoNode: public Node {
-
-/*
-    typedef boost::fusion::vector<std::string> fVectorSig;
-
-    echoNode(const fVectorSig& r): rVal(boost::fusion::at_c<0>(r)) {
-        std::cout << "creating echo node" << std::endl;
-    }
-*/
-    typedef pBString parseSig;
 
     pBString rVal;
 
-    echoNode(const parseSig& r): rVal(r) {
-        std::cout << "creating echo node, string is: " << rVal << std::endl;
+    echoNode(pBString v): rVal(v) {
+        std::cout << "creating echoNode(" << v << ")" << std::endl;
     }
-
-    // XXX FIXME TODO this never runs, and will leak pBString data
-    // because memPool does not run destructors. but, it's fast, right?
+    
     ~echoNode() {
-        std::cout << "echo node destructing, string is: " << rVal << std::endl;
+        std::cout << "destruct echoNode" << std::endl;
     }
 
+};
+
+// NODE: statement
+struct statementNode: public Node {
+
+    echoNode* echoNodeVar;
+
+    statementNode(echoNode* v): echoNodeVar(v) {
+        std::cout << "creating statementNode(echoNode*)" << std::endl;
+    }
+
+    ~statementNode() {
+        std::cout << "destruct statementNode" << std::endl;
+        if (echoNodeVar)
+            delete echoNodeVar;
+    }
+
+};
+
+// node list types
+typedef std::vector<statementNode*> statementListType;
+
+// NODE: treeTop
+struct treeTop: public Node {
+    statementListType statementList;
+    ~treeTop(void) {
+        for(statementListType::iterator s = statementList.begin(); s != statementList.end(); ++s) {
+            delete *s;
+        }
+    }
 };
 
 } } // namespace

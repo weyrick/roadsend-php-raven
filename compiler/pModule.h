@@ -22,7 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "pMemPool.h"
+//#include "pMemPool.h"
 #include "pAST.h"
 
 namespace rphp {
@@ -32,17 +32,18 @@ class pModule {
 
 private:
     std::string originalFileName;
-    pMemPool nodeMemPool;
-    AST::treeTop* astTop;
+    //pMemPool nodeMemPool;
+    AST::treeTop* ast;
 
 public:
-    pModule(std::string fileName): originalFileName(fileName)
+    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
     {
-    }
-    
-    pMemPool& getMemPool() { return nodeMemPool; }
 
-    void setTop(AST::treeTop* t) { astTop = t; }
+    }
+
+    AST::treeTop* getTreeTop() { return ast; }
+
+    ~pModule() { delete ast; }
 
 };
 

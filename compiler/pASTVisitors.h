@@ -28,6 +28,7 @@ class baseVisitor {
 public:
     virtual void visit(treeTop*) = 0;
     virtual void visit(statementNode*) = 0;
+    virtual void visit(echoNode*) = 0;
 
 };
 
@@ -35,12 +36,15 @@ class defaultVisitor: public baseVisitor {
 public:
     virtual void visit(treeTop*);
     virtual void visit(statementNode*);
+    virtual void visit(echoNode*) = 0;
 
 };
 
 class dumpVisitor: public defaultVisitor {
 public:
-    virtual void visit(statementNode*);
+    void visit(treeTop*);
+    void visit(statementNode*);
+    void visit(echoNode*);
 
 };
 

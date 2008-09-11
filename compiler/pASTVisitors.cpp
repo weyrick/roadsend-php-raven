@@ -18,7 +18,6 @@
 */
 
 #include <iostream>
-#include <vector>
 #include "pASTVisitors.h"
 
 namespace rphp { namespace AST {
@@ -31,7 +30,13 @@ void defaultVisitor::visit(treeTop* n) {
 }
 
 void defaultVisitor::visit(statementNode* n) {
-    // fixme
+    if (n->echoNodeVar)
+        visit(n->echoNodeVar);
+}
+
+void dumpVisitor::visit(treeTop* n) {
+    std::cout << "treeTop: " << n->statementList.size() << " top level statements in module" << std::endl;
+    defaultVisitor::visit(n);
 }
 
 void dumpVisitor::visit(statementNode* n) {
@@ -39,6 +44,9 @@ void dumpVisitor::visit(statementNode* n) {
     defaultVisitor::visit(n);
 }
 
+void dumpVisitor::visit(echoNode* n) {
+    std::cout << "echoNode, string: " << n->rVal << std::endl;
+}
 
 } } // namespace
 
