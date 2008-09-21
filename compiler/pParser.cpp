@@ -25,7 +25,7 @@
 
 /* generated rphp_grammar parser interface */
 void* rphpParseAlloc(void *(*)(size_t));
-void  rphpParse(void *, int, std::string*, rphp::AST::treeTop*);
+void  rphpParse(void *, int, rphp::lexer::tokenPairType*, rphp::AST::treeTop*);
 void  rphpParseFree(void *, void (*)(void*));
 void  rphpParseTrace(FILE *, char *);
 
@@ -57,14 +57,12 @@ pModuleP pParser::compileToAST(std::string fileName) {
         }
         else {
             // matched valid token
-            rphpParse(pParser, (*iter).id(), new std::string((*iter).value().begin(),(*iter).value().end()), ast);
+            rphpParse(pParser, (*iter).id(), &(*iter).value(), ast);
         }
     }
 
     // finish parse
-    std::string* end = new std::string();
-    rphpParse(pParser, 0, end, ast);
-    delete end;
+    rphpParse(pParser, 0, 0, ast);
 
     rphpParseFree(pParser, free);
 

@@ -17,9 +17,8 @@ using namespace rphp;
 }  
 
 %name rphpParse
-%token_type {std::string*}
-%default_type {std::string*}
-%token_destructor { delete $$; }
+%token_type {lexer::tokenPairType*}
+%default_type {lexer::tokenPairType*}
 %extra_argument {AST::treeTop* ast}
 
 %type T_WHITESPACE {int}
@@ -42,4 +41,4 @@ statement_list ::= statement_list statement(A). { ast->statementList.push_back(A
 statement(A) ::= echo(B). { A = new AST::statementNode(B); }
 
 %type echo {AST::echoNode*}
-echo(A) ::= T_ECHO T_CONSTANT_ENCAPSED_STRING(B) T_SEMI. { A = new AST::echoNode(*B); delete B; }
+echo(A) ::= T_ECHO T_CONSTANT_ENCAPSED_STRING(B) T_SEMI. { A = new AST::echoNode(std::string((*B).begin(), (*B).end())); }

@@ -52,7 +52,7 @@ struct echoNode: public Node {
 
     pBString rVal;
 
-    echoNode(pBString v): rVal(v) {
+    echoNode(const pBString& v): rVal(v) {
         std::cout << "creating echoNode(" << v << ")" << std::endl;
     }
     
