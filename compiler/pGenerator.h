@@ -20,12 +20,35 @@
 #ifndef RPHP_PGENERATOR_H_
 #define RPHP_PGENERATOR_H_
 
+#include <string>
+#include <llvm/Support/IRBuilder.h>
 #include "pASTVisitors.h"
+
+namespace llvm {
+    class Module;
+}
 
 namespace rphp {
 
+class pCompileTarget;
+
 class pGenerator: public AST::defaultVisitor {
+
+    llvm::Module* llvmModule;
+    pCompileTarget* target;
+    std::string entryFunctionName;
+
+    llvm::IRBuilder currentBlock;
+
+    void createEntryFunctionName(const std::string&);
+    void createEntryPoint(void);
+
 public:
+
+    pGenerator(llvm::Module* m, pCompileTarget* t): llvmModule(m), target(t) {
+        createEntryPoint();
+    }
+
     void visit(AST::treeTop*);
     void visit(AST::statementNode*);
     void visit(AST::echoNode*);

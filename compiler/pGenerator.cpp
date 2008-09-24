@@ -18,9 +18,46 @@
 */
 
 #include <iostream>
+
+#include <llvm/Module.h>
+#include <llvm/GlobalVariable.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/DerivedTypes.h>
+#include <llvm/Constants.h>
+#include <llvm/Instructions.h>
+
+#include "pCompileTarget.h"
 #include "pGenerator.h"
 
+using namespace llvm;
+
 namespace rphp {
+
+void pGenerator::createEntryFunctionName(const std::string& inName) {
+
+    // TODO: this needs to set an appropriate name based on file name
+    // and project root (from target)
+    entryFunctionName = inName;
+
+}
+    
+void pGenerator::createEntryPoint(void) {
+
+    // script top level initialization function
+    createEntryFunctionName(llvmModule->getModuleIdentifier());
+
+    // function type: void (*)(void)
+    FunctionType *initFunType = FunctionType::get(llvm::Type::VoidTy, /* return type */
+                                                  std::vector<const llvm::Type*>() /* arguments */,
+                                                  false /*not vararg*/);
+
+    // function
+    Function *initFun = Function::Create(initFunType, Function::ExternalLinkage, entryFunctionName, llvmModule);
+     
+    // entry block
+    currentBlock.SetInsertPoint(BasicBlock::Create("EntryBlock", initFun));
+
+}
 
 void pGenerator::visit(AST::treeTop* n) {
     std::cout << "generator: treeTop: " << n->statementList.size() << " top level statements in module" << std::endl;

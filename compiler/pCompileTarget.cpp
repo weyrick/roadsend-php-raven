@@ -32,7 +32,7 @@ void pCompileTarget::execute(void) {
     outputFile = inputFile+".bc";
     
     pModule* m = driver.createModule(inputFile);
-    m->lowerToIR();
+    m->lowerToIR(this);
     m->writeBitcode(outputFile);
     delete m;
 

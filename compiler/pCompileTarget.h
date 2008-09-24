@@ -40,6 +40,9 @@ public:
 
     virtual void execute(void);
 
+    const std::string& getInputFileName(void) { return inputFile; }
+    const std::string& getProjectRoot(void) { return projectRoot; }
+
 };
 
 } // namespace

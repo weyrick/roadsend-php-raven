@@ -17,13 +17,21 @@
    ***** END LICENSE BLOCK *****
 */
 
+#include <fstream>
+#include <llvm/Module.h>
+#include <llvm/Bitcode/ReaderWriter.h>
+
 #include "pModule.h"
 #include "pASTVisitors.h"
 #include "pGenerator.h"
 
-#include <iostream>
-
 namespace rphp {
+
+pModule::~pModule() {
+    delete ast;
+    // only if codegen was performed
+    delete llvmModule;
+}
 
 void pModule::dumpAST() {
 
@@ -32,18 +40,23 @@ void pModule::dumpAST() {
 
 }
 
-void pModule::lowerToIR() {
+void pModule::lowerToIR(pCompileTarget* target) {
 
-    std::cout << "lowering to IR" << std::endl;
+    assert(llvmModule == NULL);
 
-    pGenerator codeGen;
+    llvmModule = new llvm::Module(fileName);
+    pGenerator codeGen(llvmModule, target);
     codeGen.visit(ast);
 
 }
 
 void pModule::writeBitcode(std::string fileName) {
-    
-    std::cout << "saving bitcode file to: " << fileName << std::endl;
+
+    assert(llvmModule != NULL);
+
+    std::ofstream OS(fileName.c_str(), std::ios_base::out|std::ios::trunc|std::ios::binary);
+    if (!OS.fail())
+        llvm::WriteBitcodeToFile(llvmModule, OS);
 
 }
 

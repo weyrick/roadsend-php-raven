@@ -22,26 +22,32 @@
 
 #include "pAST.h"
 
+namespace llvm {
+    class Module;
+}
+
 namespace rphp {
 
-// encapsulates a single php "module" (one script)
+class pCompileTarget;
+
 class pModule {
 
 private:
-    std::string originalFileName;
+    std::string fileName;
     AST::treeTop* ast;
+    llvm::Module* llvmModule;
 
 public:
-    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
+    pModule(std::string name): fileName(name), ast(new AST::treeTop()), llvmModule(NULL)
     {
 
     }
-    
-    ~pModule() { delete ast; }
+
+    ~pModule();
 
     AST::treeTop* getTreeTop() { return ast; }
 
-    void lowerToIR();
+    void lowerToIR(pCompileTarget* target);
     void writeBitcode(std::string fileName);
     void dumpAST();
 
