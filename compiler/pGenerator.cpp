@@ -17,37 +17,24 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
-
-#include "pAST.h"
+#include <iostream>
+#include "pGenerator.h"
 
 namespace rphp {
 
-// encapsulates a single php "module" (one script)
-class pModule {
+void pGenerator::visit(AST::treeTop* n) {
+    std::cout << "generator: treeTop: " << n->statementList.size() << " top level statements in module" << std::endl;
+    AST::defaultVisitor::visit(n);
+}
 
-private:
-    std::string originalFileName;
-    AST::treeTop* ast;
+void pGenerator::visit(AST::statementNode* n) {
+    std::cout << "generator: statementNode" << std::endl;
+    AST::defaultVisitor::visit(n);
+}
 
-public:
-    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
-    {
-
-    }
-    
-    ~pModule() { delete ast; }
-
-    AST::treeTop* getTreeTop() { return ast; }
-
-    void lowerToIR();
-    void writeBitcode(std::string fileName);
-    void dumpAST();
-
-
-};
+void pGenerator::visit(AST::echoNode* n) {
+    std::cout << "generator: echoNode, string: " << n->rVal << std::endl;
+}
 
 } // namespace
 
-#endif /* RPHP_PMODULE_H_ */

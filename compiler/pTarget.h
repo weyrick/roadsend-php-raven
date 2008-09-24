@@ -17,37 +17,37 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
+#ifndef RPHP_PTARGET_H_
+#define RPHP_PTARGET_H_
 
-#include "pAST.h"
+#include <boost/unordered_map.hpp>
+#include <string>
 
 namespace rphp {
 
-// encapsulates a single php "module" (one script)
-class pModule {
+// A target is a configurable purpose created in the frontend
+// it conveys the users wishes to the driver
+class pTarget {
 
-private:
-    std::string originalFileName;
-    AST::treeTop* ast;
+protected:
+    // hash table for generic options
+    boost::unordered_map<std::string, std::string> stringOptions;
+    boost::unordered_map<std::string, int> intOptions;
 
 public:
-    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
-    {
 
+    virtual void execute(void) = 0;
+
+    void setOption(std::string k, std::string v) {
+        stringOptions[k] = v;
     }
-    
-    ~pModule() { delete ast; }
 
-    AST::treeTop* getTreeTop() { return ast; }
-
-    void lowerToIR();
-    void writeBitcode(std::string fileName);
-    void dumpAST();
-
+    void setOption(std::string k, int v) {
+        intOptions[k] = v;
+    }
 
 };
 
 } // namespace
 
-#endif /* RPHP_PMODULE_H_ */
+#endif /* RPHP_TARGET_H_ */

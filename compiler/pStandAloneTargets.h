@@ -17,37 +17,27 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
+#ifndef RPHP_PSTANDALONETARGETS_H_
+#define RPHP_PSTANDALONETARGETS_H_
 
-#include "pAST.h"
+#include "pLinkTarget.h"
 
 namespace rphp {
 
-// encapsulates a single php "module" (one script)
-class pModule {
+// create a stand alone binary from the given source files
+// a main "entry" php script must be given, which will be the entry point of the binary
+class pStandAloneTarget : public pLinkTarget {
 
-private:
-    std::string originalFileName;
-    AST::treeTop* ast;
+    // main entry file
 
-public:
-    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
-    {
+};
 
-    }
-    
-    ~pModule() { delete ast; }
-
-    AST::treeTop* getTreeTop() { return ast; }
-
-    void lowerToIR();
-    void writeBitcode(std::string fileName);
-    void dumpAST();
+// custom GUI stuff, like winres
+class pGUITarget : public pStandAloneTarget {
 
 
 };
 
 } // namespace
 
-#endif /* RPHP_PMODULE_H_ */
+#endif /* RPHP_PSTANDALONETARGETS_H_ */

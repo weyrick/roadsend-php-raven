@@ -28,26 +28,29 @@ namespace llvm {
 
 namespace rphp {
 
-    class pDriver {
-    private:
-        llvm::Module* compileToIR(std::string fileName);
-        std::string readFile(std::string fileName);
+class pModule;
 
-    public:
+class pDriver {
+private:
+    std::string readFile(std::string fileName);
 
-        void compileToBC(std::string fileName);
-        void compileToAsm(std::string fileName);
-        void compileToNative(std::string fileName);
+public:
+/*
+    void compileToBC(std::string fileName);
+    void compileToAsm(std::string fileName);
+    void compileToNative(std::string fileName);
+*/
+    pModule* createModule(std::string fileName);
 
-        void execute(std::string fileName);
-        void executeBC(std::string fileName);
-        void executePHP(std::string fileName);
+    void execute(std::string fileName);
+    void executeBC(std::string fileName);
+    void executePHP(std::string fileName);
 
-        void dumpTokens(std::string fileName);
-        void dumpAST(std::string fileName);
-        void dumpIR(std::string fileName);
+    void dumpTokens(std::string fileName);
+    void dumpAST(std::string fileName);
+//        void dumpIR(std::string fileName);
 
-    };
+};
 
 }
 

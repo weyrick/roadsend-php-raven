@@ -17,37 +17,10 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
-
-#include "pAST.h"
+#include "pLibTargets.h"
 
 namespace rphp {
 
-// encapsulates a single php "module" (one script)
-class pModule {
-
-private:
-    std::string originalFileName;
-    AST::treeTop* ast;
-
-public:
-    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
-    {
-
-    }
-    
-    ~pModule() { delete ast; }
-
-    AST::treeTop* getTreeTop() { return ast; }
-
-    void lowerToIR();
-    void writeBitcode(std::string fileName);
-    void dumpAST();
-
-
-};
 
 } // namespace
 
-#endif /* RPHP_PMODULE_H_ */

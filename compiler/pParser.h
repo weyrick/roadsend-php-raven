@@ -21,18 +21,14 @@
 #define RPHP_PPARSER_H_
 
 #include <string>
-#include "pModule.h"
 
-namespace rphp { namespace parser {
+namespace rphp {
 
-class pParser {
+class pModule;
 
-public:
+namespace parser {
 
-    pModuleP compileToAST(std::string fileName);
-    void dumpAST(std::string fileName);
-
-};
+pModule* parseSourceFile(std::string fileName);
 
 } } // namespace
 

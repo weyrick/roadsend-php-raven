@@ -3,10 +3,10 @@
 #include <vector>
 #include <string>
 #include <llvm/Support/CommandLine.h>
-#include "pDriver.h"
-#include "pRuntime.h"
+#include "pCompileTarget.h"
 
 using namespace llvm;
+using namespace rphp;
 
 void rphpVersion(void) {
     // TODO get version info from runtime
@@ -16,9 +16,6 @@ void rphpVersion(void) {
 int main( int argc, char* argv[] )
 {
 
-    rphp::pRuntimeEngine runtime;
-    rphp::pDriver driver;
-
     // command line options
     cl::opt<std::string> inputFile(cl::Positional, cl::desc("<input file>"), cl::Required);
     cl::opt<bool> dumpToks ("dump-toks", cl::desc("Dump tokens from lexer"));
@@ -26,9 +23,31 @@ int main( int argc, char* argv[] )
     cl::opt<bool> dumpAST ("dump-ast", cl::desc("Dump AST"));
     cl::opt<bool> iBC ("i", cl::desc("Interpret bytecode"));
 
+    cl::opt<bool> compileModule ("c", cl::desc("Compile a single source file to bitcode object file"));
+
     cl::SetVersionPrinter(&rphpVersion);
     cl::ParseCommandLineOptions(argc, argv, "Roadsend PHP");
 
+    pTarget* target;
+    if (compileModule) {
+        target = new pCompileTarget(inputFile, "/");
+    }
+
+    if (!target) {
+        std::cout << "nothing to do" << std::endl;
+        return 1;
+    }
+
+    try {
+        target->execute();
+    }
+    catch (...) {
+        std::cerr << "problem executing target" << std::endl;
+    }
+
+    delete target;
+
+/*
     if (dumpToks) {
         driver.dumpTokens(inputFile);
     }
@@ -44,7 +63,7 @@ int main( int argc, char* argv[] )
     else {
         driver.compileToBC(inputFile);
     }
-
+*/
 
     /*
     po::options_description desc("Allowed options");

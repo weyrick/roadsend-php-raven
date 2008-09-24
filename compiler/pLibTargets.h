@@ -17,37 +17,30 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
+#ifndef RPHP_PLIBTARGETS_H_
+#define RPHP_PLIBTARGETS_H_
 
-#include "pAST.h"
+#include "pLinkTarget.h"
 
 namespace rphp {
 
-// encapsulates a single php "module" (one script)
-class pModule {
+// generate a library (static or dynamic)
+// this means a standard .so, .a, .dll, etc
+class pLibTarget : public pLinkTarget {
 
-private:
-    std::string originalFileName;
-    AST::treeTop* ast;
+};
 
-public:
-    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
-    {
 
-    }
-    
-    ~pModule() { delete ast; }
+// generate a fastcgi binary
+class pFastCGITarget : public pLibTarget {
 
-    AST::treeTop* getTreeTop() { return ast; }
+};
 
-    void lowerToIR();
-    void writeBitcode(std::string fileName);
-    void dumpAST();
-
+// generate a microserver binary
+class pMicroServerTarget : public pLibTarget {
 
 };
 
 } // namespace
 
-#endif /* RPHP_PMODULE_H_ */
+#endif /* RPHP_PLIBTARGETS_H_ */

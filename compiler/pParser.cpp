@@ -21,7 +21,7 @@
 
 #include "pLexer.h"
 #include "pParser.h"
-#include "pASTVisitors.h"
+#include "pModule.h"
 
 /* generated rphp_grammar parser interface */
 void* rphpParseAlloc(void *(*)(size_t));
@@ -31,9 +31,9 @@ void  rphpParseTrace(FILE *, char *);
 
 namespace rphp { namespace parser {
 
-pModuleP pParser::compileToAST(std::string fileName) {
+pModule* parseSourceFile(std::string fileName) {
 
-    pModuleP pMod(new pModule(fileName));
+    pModule* pMod = new pModule(fileName);
     lexer::pLexer lexer(fileName);
 
     void* pParser = rphpParseAlloc(malloc);
@@ -68,15 +68,6 @@ pModuleP pParser::compileToAST(std::string fileName) {
 
     return pMod;
 
-}
-
-void pParser::dumpAST(std::string fileName) {
-
-    pModuleP m = compileToAST(fileName);
-
-    AST::dumpVisitor visitor;
-    visitor.visit(m->getTreeTop());
-    
 }
 
 

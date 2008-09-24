@@ -20,9 +20,8 @@
 #ifndef RPHP_PAST_H_
 #define RPHP_PAST_H_
 
+#include <iostream>
 #include <vector>
-#include <boost/fusion/container.hpp>
-#include <boost/fusion/sequence.hpp>
 
 #include "pTypes.h"
 

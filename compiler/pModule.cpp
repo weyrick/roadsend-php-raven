@@ -17,37 +17,35 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
+#include "pModule.h"
+#include "pASTVisitors.h"
+#include "pGenerator.h"
 
-#include "pAST.h"
+#include <iostream>
 
 namespace rphp {
 
-// encapsulates a single php "module" (one script)
-class pModule {
+void pModule::dumpAST() {
 
-private:
-    std::string originalFileName;
-    AST::treeTop* ast;
+    AST::dumpVisitor visitor;
+    visitor.visit(ast);
 
-public:
-    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
-    {
+}
 
-    }
+void pModule::lowerToIR() {
+
+    std::cout << "lowering to IR" << std::endl;
+
+    pGenerator codeGen;
+    codeGen.visit(ast);
+
+}
+
+void pModule::writeBitcode(std::string fileName) {
     
-    ~pModule() { delete ast; }
+    std::cout << "saving bitcode file to: " << fileName << std::endl;
 
-    AST::treeTop* getTreeTop() { return ast; }
+}
 
-    void lowerToIR();
-    void writeBitcode(std::string fileName);
-    void dumpAST();
-
-
-};
 
 } // namespace
-
-#endif /* RPHP_PMODULE_H_ */

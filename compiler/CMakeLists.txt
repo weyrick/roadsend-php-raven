@@ -82,6 +82,12 @@ set(EVAL_SRC_FILES
   pASTVisitors.cpp
   pDriver.cpp
   pParser.cpp
+  pModule.cpp
+  pGenerator.cpp
+  pCompileTarget.cpp
+  pStandAloneTargets.cpp
+  pLinkTarget.cpp
+  pLibTargets.cpp
 )
 
 add_library( rphp-eval SHARED ${EVAL_SRC_FILES} )

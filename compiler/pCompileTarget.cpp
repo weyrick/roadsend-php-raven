@@ -17,37 +17,26 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
-
-#include "pAST.h"
+#include "pCompileTarget.h"
+#include "pModule.h"
+#include "pDriver.h"
 
 namespace rphp {
 
-// encapsulates a single php "module" (one script)
-class pModule {
+void pCompileTarget::execute(void) {
 
-private:
-    std::string originalFileName;
-    AST::treeTop* ast;
+    std::string outputFile;
+    pDriver driver;
 
-public:
-    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
-    {
-
-    }
+    // TODO: check stringOptions for outputFile
+    outputFile = inputFile+".bc";
     
-    ~pModule() { delete ast; }
+    pModule* m = driver.createModule(inputFile);
+    m->lowerToIR();
+    m->writeBitcode(outputFile);
+    delete m;
 
-    AST::treeTop* getTreeTop() { return ast; }
-
-    void lowerToIR();
-    void writeBitcode(std::string fileName);
-    void dumpAST();
-
-
-};
+}
 
 } // namespace
 
-#endif /* RPHP_PMODULE_H_ */

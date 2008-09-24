@@ -17,37 +17,21 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
+#ifndef RPHP_PLINKTARGET_H_
+#define RPHP_PLINKTARGET_H_
 
-#include "pAST.h"
+#include "pTarget.h"
 
 namespace rphp {
 
-// encapsulates a single php "module" (one script)
-class pModule {
+// link targets will create various native binaries from one or more compile bitcode files
+class pLinkTarget : public pTarget {
 
-private:
-    std::string originalFileName;
-    AST::treeTop* ast;
-
-public:
-    pModule(std::string fileName): originalFileName(fileName), ast(new AST::treeTop())
-    {
-
-    }
-    
-    ~pModule() { delete ast; }
-
-    AST::treeTop* getTreeTop() { return ast; }
-
-    void lowerToIR();
-    void writeBitcode(std::string fileName);
-    void dumpAST();
-
+    // link options (static, dynamic)
+    // bc file(s)
 
 };
 
 } // namespace
 
-#endif /* RPHP_PMODULE_H_ */
+#endif /* RPHP_PLINKTARGET_H_ */

@@ -16,7 +16,7 @@
 ;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
    ***** END LICENSE BLOCK *****
 */
-
+// 
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -25,16 +25,19 @@
 
 #include <boost/algorithm/string.hpp>
 
+/*
 #include "llvm/GlobalVariable.h"
+#include "llvm/Analysis/Verifier.h"
+#include "llvm/DerivedTypes.h"
+#include "llvm/Constants.h"
+#include "llvm/Instructions.h"*/
+
+// JIT, bitcode
+#include "llvm/Module.h"
 #include "llvm/System/DynamicLibrary.h"
 #include "llvm/Bitcode/ReaderWriter.h"
 #include "llvm/ModuleProvider.h"
-#include "llvm/Analysis/Verifier.h"
 #include "llvm/Support/IRBuilder.h"
-#include "llvm/Module.h"
-#include "llvm/DerivedTypes.h"
-#include "llvm/Constants.h"
-#include "llvm/Instructions.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/ModuleProvider.h"
 #include "llvm/ExecutionEngine/JIT.h"
@@ -44,6 +47,7 @@
 #include "pLexer.h"
 #include "pParser.h"
 #include "pDriver.h"
+#include "pModule.h"
 
 using namespace std;
 
@@ -133,166 +137,169 @@ void pDriver::executePHP(string fileName) {
 /**
  * compile to llvm bytecode
  */
-void pDriver::compileToBC(string fileName) {
-    cout << "compiling " << fileName << " to bytecode " << endl;
-
-    llvm::Module* phpModule = compileToIR(fileName);
-
-    boost::replace_last(fileName, ".php", ".rbc");
-
-    std::ofstream OS(fileName.c_str(), std::ios_base::out|std::ios::trunc|std::ios::binary);
-    if (!OS.fail())
-        llvm::WriteBitcodeToFile(phpModule, OS);
-
-    //if (OS.fail())
-    //    return -1;
-
-    delete phpModule;
-
-}
+// void pDriver::compileToBC(string fileName) {
+//     cout << "compiling " << fileName << " to bytecode " << endl;
+// 
+//     llvm::Module* phpModule = compileToIR(fileName);
+// 
+//     boost::replace_last(fileName, ".php", ".rbc");
+// 
+//     std::ofstream OS(fileName.c_str(), std::ios_base::out|std::ios::trunc|std::ios::binary);
+//     if (!OS.fail())
+//         llvm::WriteBitcodeToFile(phpModule, OS);
+// 
+//     //if (OS.fail())
+//     //    return -1;
+// 
+//     delete phpModule;
+// 
+// }
 
 /**
  * compile to llvm assembly
  */
-void pDriver::compileToAsm(string fileName) {
-    cout << "compiling " << fileName << " to llvm assembly " << endl;
-}
+// void pDriver::compileToAsm(string fileName) {
+//     cout << "compiling " << fileName << " to llvm assembly " << endl;
+// }
 
 /**
  * compile to native binary
  */
-void pDriver::compileToNative(string fileName) {
-    cout << "compiling " << fileName << " to native binary " << endl;
-}
+// void pDriver::compileToNative(string fileName) {
+//     cout << "compiling " << fileName << " to native binary " << endl;
+// }
 
 /**
- *  compile the given file to an llvm::Module, which is returned
- *  the caller is responsible for deleting the module
+ *  compile the given file to an pModule, which the caller then owns and must delete
  */
-llvm::Module* pDriver::compileToIR(string fileName) {
+pModule* pDriver::createModule(string fileName) {
 
-    // TODO: llvm example module. this whole project will work better if this
-    // thing actually compiles the file in fileName
-
-    // Create the "module" or "program" or "translation unit" to hold the
-    // function
-    llvm::Module *M = new llvm::Module(fileName);
-
-    // Create the main function: first create the type 'int ()'
-    llvm::FunctionType *FT = llvm::FunctionType::get(llvm::Type::VoidTy, std::vector<const llvm::Type*>(),
-                                        /*not vararg*/false);
-
-    // By passing a module as the last parameter to the Function constructor,
-    // it automatically gets appended to the Module.
-    llvm::Function *F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "rphp_main", M);
-
-    // Add a basic block to the function... again, it automatically inserts
-    // because of the last argument.
-    llvm::BasicBlock *BB = llvm::BasicBlock::Create("EntryBlock", F);
-
-    // ** STARTUP **
-    // runtime engine pointer type
-    const llvm::Type* rEnginePointer = llvm::PointerType::get(llvm::Type::Int8Ty,0);
-
-    // startup function type
-    llvm::FunctionType *runtimeStartupFuncType = llvm::FunctionType::get(rEnginePointer, std::vector<const llvm::Type*>(), false);
-    // startup function
-    llvm::Function *runtimeStartupFunc = llvm::Function::Create(runtimeStartupFuncType, llvm::Function::ExternalLinkage, "rphp_newRuntimeEngine", M);
-    // startup instruction call
-    llvm::Instruction *runtimeStartInstr = llvm::CallInst::Create(runtimeStartupFunc, "runtime");
-
-    // ** hello world **
-    llvm::ArrayType* ArrayTy_0 = llvm::ArrayType::get(llvm::IntegerType::get(8), 12);
-    llvm::PointerType* PointerTy_4 = llvm::PointerType::get(llvm::IntegerType::get(8), 0);
-    llvm::GlobalVariable* gvar_array__str = new llvm::GlobalVariable(
-    /*Type=*/ArrayTy_0,
-    /*isConstant=*/true,
-    /*Linkage=*/llvm::GlobalValue::InternalLinkage,
-    /*Initializer=*/0, // has initializer, specified below
-    /*Name=*/".str",
-    M);
-
-    // Constant Definitions
-    llvm::Constant* const_array_7 = llvm::ConstantArray::get("hello world", true);
-    std::vector<llvm::Constant*> const_ptr_8_indices;
-    llvm::Constant* const_int32_9 = llvm::Constant::getNullValue(llvm::IntegerType::get(32));
-    const_ptr_8_indices.push_back(const_int32_9);
-    const_ptr_8_indices.push_back(const_int32_9);
-    llvm::Constant* const_ptr_8 = llvm::ConstantExpr::getGetElementPtr(gvar_array__str, &const_ptr_8_indices[0], const_ptr_8_indices.size() );
-    llvm::UndefValue* const_int32_10 = llvm::UndefValue::get(llvm::IntegerType::get(32));
-
-    // Global Variable Definitions
-    gvar_array__str->setInitializer(const_array_7);
-
-    // argument sig for print function
-    std::vector<const llvm::Type*> printSig;
-    printSig.push_back(rEnginePointer);
-    printSig.push_back(PointerTy_4);
-    // print function type
-    llvm::FunctionType *printFuncType = llvm::FunctionType::get(llvm::Type::VoidTy, printSig, false);
-    // print function
-    llvm::Function *printFunc = llvm::Function::Create(printFuncType, llvm::Function::ExternalLinkage, "rphp_print_cstr", M);
-    // push args
-    std::vector<llvm::Value*> printArgsV;
-    printArgsV.push_back(runtimeStartInstr);
-    printArgsV.push_back(const_ptr_8);
-    // print instruction call
-    llvm::Instruction *printInstr = llvm::CallInst::Create(printFunc, printArgsV.begin(), printArgsV.end());
-
-
-    //  ** SHUTDOWN **
-    // argument sig for shutdown function
-    std::vector<const llvm::Type*> engineSig(1, rEnginePointer);
-    // shutdown function type
-    llvm::FunctionType *runtimeDeleteFuncType = llvm::FunctionType::get(llvm::Type::VoidTy, engineSig, false);
-    // shutdown function
-    llvm::Function *runtimeDeleteFunc = llvm::Function::Create(runtimeDeleteFuncType, llvm::Function::ExternalLinkage, "rphp_deleteRuntimeEngine", M);
-
-    // push args
-    std::vector<llvm::Value*> shutdownArgsV;
-    shutdownArgsV.push_back(runtimeStartInstr);
-
-    // shutdown instruction call
-    llvm::Instruction *runtimeDeleteInstr = llvm::CallInst::Create(runtimeDeleteFunc, shutdownArgsV.begin(), shutdownArgsV.end());
-
-    // Get pointers to the constant integers...
-    //llvm::Value *Two = llvm::ConstantInt::get(llvm::Type::Int32Ty, 2);
-    //llvm::Value *Three = llvm::ConstantInt::get(llvm::Type::Int32Ty, 3);
-
-    // Create the add instruction... does not insert...
-    //llvm::Instruction *Add = llvm::BinaryOperator::create(llvm::Instruction::Add, Two, Three, "addresult");
-
-    // explicitly insert it into the basic block...
-    //BB->getInstList().push_back(Add);
-
-    BB->getInstList().push_back(runtimeStartInstr);
-    BB->getInstList().push_back(printInstr);
-    BB->getInstList().push_back(runtimeDeleteInstr);
-
-    // Create the return instruction and add it to the basic block
-    BB->getInstList().push_back(llvm::ReturnInst::Create());
-    //BB->getInstList().push_back(llvm::ReturnInst::Create(Add));
-
-    if (llvm::verifyModule(*M, llvm::PrintMessageAction)) {
-        cerr << "module corrupt" << endl;
-        exit(-1);
-    }
-    else {
-        cerr << "module verified" << endl;
-    }
-
-    return M;
+    return parser::parseSourceFile(fileName);
 
 }
+
+//     // TODO: llvm example module. this whole project will work better if this
+//     // thing actually compiles the file in fileName
+// 
+//     // Create the "module" or "program" or "translation unit" to hold the
+//     // function
+//     llvm::Module *M = new llvm::Module(fileName);
+// 
+//     // Create the main function: first create the type 'int ()'
+//     llvm::FunctionType *FT = llvm::FunctionType::get(llvm::Type::VoidTy, std::vector<const llvm::Type*>(),
+//                                         /*not vararg*/false);
+// 
+//     // By passing a module as the last parameter to the Function constructor,
+//     // it automatically gets appended to the Module.
+//     llvm::Function *F = llvm::Function::Create(FT, llvm::Function::ExternalLinkage, "rphp_main", M);
+// 
+//     // Add a basic block to the function... again, it automatically inserts
+//     // because of the last argument.
+//     llvm::BasicBlock *BB = llvm::BasicBlock::Create("EntryBlock", F);
+// 
+//     // ** STARTUP **
+//     // runtime engine pointer type
+//     const llvm::Type* rEnginePointer = llvm::PointerType::get(llvm::Type::Int8Ty,0);
+// 
+//     // startup function type
+//     llvm::FunctionType *runtimeStartupFuncType = llvm::FunctionType::get(rEnginePointer, std::vector<const llvm::Type*>(), false);
+//     // startup function
+//     llvm::Function *runtimeStartupFunc = llvm::Function::Create(runtimeStartupFuncType, llvm::Function::ExternalLinkage, "rphp_newRuntimeEngine", M);
+//     // startup instruction call
+//     llvm::Instruction *runtimeStartInstr = llvm::CallInst::Create(runtimeStartupFunc, "runtime");
+// 
+//     // ** hello world **
+//     llvm::ArrayType* ArrayTy_0 = llvm::ArrayType::get(llvm::IntegerType::get(8), 12);
+//     llvm::PointerType* PointerTy_4 = llvm::PointerType::get(llvm::IntegerType::get(8), 0);
+//     llvm::GlobalVariable* gvar_array__str = new llvm::GlobalVariable(
+//     /*Type=*/ArrayTy_0,
+//     /*isConstant=*/true,
+//     /*Linkage=*/llvm::GlobalValue::InternalLinkage,
+//     /*Initializer=*/0, // has initializer, specified below
+//     /*Name=*/".str",
+//     M);
+// 
+//     // Constant Definitions
+//     llvm::Constant* const_array_7 = llvm::ConstantArray::get("hello world", true);
+//     std::vector<llvm::Constant*> const_ptr_8_indices;
+//     llvm::Constant* const_int32_9 = llvm::Constant::getNullValue(llvm::IntegerType::get(32));
+//     const_ptr_8_indices.push_back(const_int32_9);
+//     const_ptr_8_indices.push_back(const_int32_9);
+//     llvm::Constant* const_ptr_8 = llvm::ConstantExpr::getGetElementPtr(gvar_array__str, &const_ptr_8_indices[0], const_ptr_8_indices.size() );
+//     llvm::UndefValue* const_int32_10 = llvm::UndefValue::get(llvm::IntegerType::get(32));
+// 
+//     // Global Variable Definitions
+//     gvar_array__str->setInitializer(const_array_7);
+// 
+//     // argument sig for print function
+//     std::vector<const llvm::Type*> printSig;
+//     printSig.push_back(rEnginePointer);
+//     printSig.push_back(PointerTy_4);
+//     // print function type
+//     llvm::FunctionType *printFuncType = llvm::FunctionType::get(llvm::Type::VoidTy, printSig, false);
+//     // print function
+//     llvm::Function *printFunc = llvm::Function::Create(printFuncType, llvm::Function::ExternalLinkage, "rphp_print_cstr", M);
+//     // push args
+//     std::vector<llvm::Value*> printArgsV;
+//     printArgsV.push_back(runtimeStartInstr);
+//     printArgsV.push_back(const_ptr_8);
+//     // print instruction call
+//     llvm::Instruction *printInstr = llvm::CallInst::Create(printFunc, printArgsV.begin(), printArgsV.end());
+// 
+// 
+//     //  ** SHUTDOWN **
+//     // argument sig for shutdown function
+//     std::vector<const llvm::Type*> engineSig(1, rEnginePointer);
+//     // shutdown function type
+//     llvm::FunctionType *runtimeDeleteFuncType = llvm::FunctionType::get(llvm::Type::VoidTy, engineSig, false);
+//     // shutdown function
+//     llvm::Function *runtimeDeleteFunc = llvm::Function::Create(runtimeDeleteFuncType, llvm::Function::ExternalLinkage, "rphp_deleteRuntimeEngine", M);
+// 
+//     // push args
+//     std::vector<llvm::Value*> shutdownArgsV;
+//     shutdownArgsV.push_back(runtimeStartInstr);
+// 
+//     // shutdown instruction call
+//     llvm::Instruction *runtimeDeleteInstr = llvm::CallInst::Create(runtimeDeleteFunc, shutdownArgsV.begin(), shutdownArgsV.end());
+// 
+//     // Get pointers to the constant integers...
+//     //llvm::Value *Two = llvm::ConstantInt::get(llvm::Type::Int32Ty, 2);
+//     //llvm::Value *Three = llvm::ConstantInt::get(llvm::Type::Int32Ty, 3);
+// 
+//     // Create the add instruction... does not insert...
+//     //llvm::Instruction *Add = llvm::BinaryOperator::create(llvm::Instruction::Add, Two, Three, "addresult");
+// 
+//     // explicitly insert it into the basic block...
+//     //BB->getInstList().push_back(Add);
+// 
+//     BB->getInstList().push_back(runtimeStartInstr);
+//     BB->getInstList().push_back(printInstr);
+//     BB->getInstList().push_back(runtimeDeleteInstr);
+// 
+//     // Create the return instruction and add it to the basic block
+//     BB->getInstList().push_back(llvm::ReturnInst::Create());
+//     //BB->getInstList().push_back(llvm::ReturnInst::Create(Add));
+// 
+//     if (llvm::verifyModule(*M, llvm::PrintMessageAction)) {
+//         cerr << "module corrupt" << endl;
+//         exit(-1);
+//     }
+//     else {
+//         cerr << "module verified" << endl;
+//     }
+// 
+//     return M;
+
+//}
 
 // dump LLVM IR
-void pDriver::dumpIR(string fileName) {
-
-    llvm::Module* phpModule = compileToIR(fileName);
-    phpModule->dump();
-    delete phpModule;
-
-}
+// void pDriver::dumpIR(string fileName) {
+// 
+//     llvm::Module* phpModule = compileToIR(fileName);
+//     phpModule->dump();
+//     delete phpModule;
+// 
+// }
 
 
 void pDriver::dumpTokens(string fileName) {
@@ -304,8 +311,9 @@ void pDriver::dumpTokens(string fileName) {
 
 void pDriver::dumpAST(string fileName) {
 
-    parser::pParser p;
-    p.dumpAST(fileName);
+    pModule* m = parser::parseSourceFile(fileName);
+    m->dumpAST();
+    delete m;
 
 }
 
