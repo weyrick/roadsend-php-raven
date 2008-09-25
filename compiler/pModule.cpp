@@ -47,6 +47,7 @@ void pModule::lowerToIR(pCompileTarget* target) {
     llvmModule = new llvm::Module(fileName);
     pGenerator codeGen(llvmModule, target);
     codeGen.visit(ast);
+    codeGen.finalize();
 
 }
 

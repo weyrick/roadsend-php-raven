@@ -40,14 +40,21 @@ class pGenerator: public AST::defaultVisitor {
 
     llvm::IRBuilder currentBlock;
 
+    llvm::Type* rEngineType;
+    llvm::Value* runtimeEngine;
+
+    void getTypes(void);
     void createEntryFunctionName(const std::string&);
     void createEntryPoint(void);
 
 public:
 
     pGenerator(llvm::Module* m, pCompileTarget* t): llvmModule(m), target(t) {
+        getTypes();
         createEntryPoint();
     }
+
+    void finalize(void);
 
     void visit(AST::treeTop*);
     void visit(AST::statementNode*);

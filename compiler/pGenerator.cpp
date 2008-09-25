@@ -40,37 +40,91 @@ void pGenerator::createEntryFunctionName(const std::string& inName) {
     entryFunctionName = inName;
 
 }
-    
+
+void pGenerator::getTypes(void) {
+
+    // runtime engine pointer
+    rEngineType = PointerType::get(Type::Int8Ty,0);
+
+}
+
 void pGenerator::createEntryPoint(void) {
 
     // script top level initialization function
     createEntryFunctionName(llvmModule->getModuleIdentifier());
 
-    // function type: void (*)(void)
-    FunctionType *initFunType = FunctionType::get(llvm::Type::VoidTy, /* return type */
-                                                  std::vector<const llvm::Type*>() /* arguments */,
+    // entry function takes pointer to runtime instance
+    std::vector<const Type*> efArgs;
+    efArgs.push_back(rEngineType);
+
+    // entry function type: void (*)(void)
+    FunctionType *initFunType = FunctionType::get(Type::VoidTy, /* return type */
+                                                  efArgs, /* arguments */
                                                   false /*not vararg*/);
 
-    // function
+    // entry function
     Function *initFun = Function::Create(initFunType, Function::ExternalLinkage, entryFunctionName, llvmModule);
-     
+
+    runtimeEngine = initFun->arg_begin();
+    runtimeEngine->setName("rEngine");
+
     // entry block
-    currentBlock.SetInsertPoint(BasicBlock::Create("EntryBlock", initFun));
+    currentBlock.SetInsertPoint(BasicBlock::Create("entry", initFun));
 
 }
 
+void pGenerator::finalize(void) {
+    // terminate entry function
+    Function *initFun = llvmModule->getFunction(entryFunctionName);
+    initFun->getEntryBlock().getInstList().push_back(ReturnInst::Create());
+}
+
 void pGenerator::visit(AST::treeTop* n) {
-    std::cout << "generator: treeTop: " << n->statementList.size() << " top level statements in module" << std::endl;
     AST::defaultVisitor::visit(n);
 }
 
 void pGenerator::visit(AST::statementNode* n) {
-    std::cout << "generator: statementNode" << std::endl;
     AST::defaultVisitor::visit(n);
 }
 
 void pGenerator::visit(AST::echoNode* n) {
-    std::cout << "generator: echoNode, string: " << n->rVal << std::endl;
+
+    ArrayType* ArrayTy_0 = ArrayType::get(IntegerType::get(8), 12);
+    PointerType* PointerTy_4 = PointerType::get(IntegerType::get(8), 0);
+    GlobalVariable* gvar_array__str = new GlobalVariable(
+    /*Type=*/ArrayTy_0,
+    /*isConstant=*/true,
+    /*Linkage=*/GlobalValue::InternalLinkage,
+    /*Initializer=*/0, // has initializer, specified below
+    /*Name=*/".str",
+    llvmModule);
+
+    // Constant Definitions
+    Constant* const_array_7 = ConstantArray::get("hello world", true);
+    std::vector<Constant*> const_ptr_8_indices;
+    Constant* const_int32_9 = Constant::getNullValue(IntegerType::get(32));
+    const_ptr_8_indices.push_back(const_int32_9);
+    const_ptr_8_indices.push_back(const_int32_9);
+    Constant* const_ptr_8 = ConstantExpr::getGetElementPtr(gvar_array__str, &const_ptr_8_indices[0], const_ptr_8_indices.size() );
+    UndefValue* const_int32_10 = UndefValue::get(IntegerType::get(32));
+
+    // Global Variable Definitions
+    gvar_array__str->setInitializer(const_array_7);
+
+    // argument sig for print function
+    std::vector<const Type*> printSig;
+    printSig.push_back(rEngineType);
+    printSig.push_back(PointerTy_4);
+
+    // print function type
+    FunctionType *printFuncType = FunctionType::get(Type::VoidTy, printSig, false);
+
+    // print function
+    Constant *printFunc = llvmModule->getOrInsertFunction("rphp_print_cstr", printFuncType);
+
+    currentBlock.CreateCall2(printFunc, runtimeEngine, const_ptr_8);
+
+
 }
 
 } // namespace
