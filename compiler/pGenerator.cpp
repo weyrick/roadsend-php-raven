@@ -89,10 +89,11 @@ void pGenerator::visit(AST::statementNode* n) {
 
 void pGenerator::visit(AST::echoNode* n) {
 
-    ArrayType* ArrayTy_0 = ArrayType::get(IntegerType::get(8), 12);
-    PointerType* PointerTy_4 = PointerType::get(IntegerType::get(8), 0);
+    // FIXME: this will go in the literal string node
+    ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->rVal.size()+1);
+    
     GlobalVariable* gvar_array__str = new GlobalVariable(
-    /*Type=*/ArrayTy_0,
+    /*Type=*/stringLiteralType,
     /*isConstant=*/true,
     /*Linkage=*/GlobalValue::InternalLinkage,
     /*Initializer=*/0, // has initializer, specified below
@@ -100,13 +101,12 @@ void pGenerator::visit(AST::echoNode* n) {
     llvmModule);
 
     // Constant Definitions
-    Constant* const_array_7 = ConstantArray::get("hello world", true);
+    Constant* const_array_7 = ConstantArray::get(n->rVal.c_str(), true);
     std::vector<Constant*> const_ptr_8_indices;
     Constant* const_int32_9 = Constant::getNullValue(IntegerType::get(32));
     const_ptr_8_indices.push_back(const_int32_9);
     const_ptr_8_indices.push_back(const_int32_9);
     Constant* const_ptr_8 = ConstantExpr::getGetElementPtr(gvar_array__str, &const_ptr_8_indices[0], const_ptr_8_indices.size() );
-    UndefValue* const_int32_10 = UndefValue::get(IntegerType::get(32));
 
     // Global Variable Definitions
     gvar_array__str->setInitializer(const_array_7);
@@ -114,7 +114,7 @@ void pGenerator::visit(AST::echoNode* n) {
     // argument sig for print function
     std::vector<const Type*> printSig;
     printSig.push_back(rEngineType);
-    printSig.push_back(PointerTy_4);
+    printSig.push_back(PointerType::get(IntegerType::get(8), 0)/* char* */);
 
     // print function type
     FunctionType *printFuncType = FunctionType::get(Type::VoidTy, printSig, false);
