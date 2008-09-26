@@ -23,7 +23,7 @@ namespace rphp {
 
 void pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pUString& funName, const pFunPointer1& f) {
 
-    functionRegistry.insert(functionEntry(funName, new pFunctionSig(sourceExt, funName, f)));
+    functionRegistry[funName] = new pFunctionSig(sourceExt, funName, f);
 
 }
 

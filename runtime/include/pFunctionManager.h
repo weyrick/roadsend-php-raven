@@ -20,32 +20,14 @@
 #define RPHP_PFUNCTIONMANAGER
 
 #include <string>
-#include <boost/multi_index_container.hpp>
-#include <boost/multi_index/hashed_index.hpp>
-#include <boost/multi_index/member.hpp>
+#include <boost/unordered_map.hpp>
 
 #include "pFunctionSig.h"
 #include "pSupport.h"
 
-using boost::multi_index_container;
-using namespace boost::multi_index;
-
 namespace rphp {
 
-    struct functionEntry {
-        pUString canonicalName;
-        pFunctionSig* signature;
-        functionEntry(pUString name, pFunctionSig* sig) : canonicalName(name.toLower()), signature(sig) { }
-    };
-
-    typedef multi_index_container<
-      functionEntry,
-      indexed_by<
-       hashed_unique <
-        BOOST_MULTI_INDEX_MEMBER(functionEntry, const pUString, canonicalName)
-       >
-      >
-    > functionRegistryType;
+    typedef boost::unordered_map<pUString, pFunctionSig*> functionRegistryType;
 
     class pRuntimeEngine;
 
@@ -68,7 +50,7 @@ namespace rphp {
                 functionRegistryType::iterator function = functionRegistry.find(funName.toLower());
                 // TODO this needs to throw a runtime error if the function wasn't found
                 if (function != functionRegistry.end()) {
-                    return (*function).signature->invoke(arg1);
+                    return (*function).second->invoke(arg1);
                 }
                 else {
                     return pNull;
