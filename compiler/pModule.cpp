@@ -17,13 +17,12 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <fstream>
 #include <llvm/Module.h>
-#include <llvm/Bitcode/ReaderWriter.h>
 
 #include "pModule.h"
 #include "pASTVisitors.h"
 #include "pGenerator.h"
+#include "pGenSupport.h"
 
 namespace rphp {
 
@@ -53,11 +52,7 @@ void pModule::lowerToIR(pCompileTarget* target) {
 
 void pModule::writeBitcode(std::string fileName) {
 
-    assert(llvmModule != NULL);
-
-    std::ofstream OS(fileName.c_str(), std::ios_base::out|std::ios::trunc|std::ios::binary);
-    if (!OS.fail())
-        llvm::WriteBitcodeToFile(llvmModule, OS);
+    pGenSupport::writeBitcode(llvmModule, fileName);
 
 }
 

@@ -23,6 +23,7 @@
 #include <string>
 #include <llvm/Support/IRBuilder.h>
 #include "pASTVisitors.h"
+#include "pIRTypes.h"
 
 namespace llvm {
     class Module;
@@ -36,23 +37,22 @@ class pGenerator: public AST::defaultVisitor {
 
     llvm::Module* llvmModule;
     pCompileTarget* target;
+    pIRTypes IRTypes;
+
     std::string entryFunctionName;
 
     llvm::IRBuilder currentBlock;
-
-    llvm::Type* rEngineType;
     llvm::Value* runtimeEngine;
 
-    void getTypes(void);
-    void createEntryFunctionName(const std::string&);
     void createEntryPoint(void);
 
 public:
 
     pGenerator(llvm::Module* m, pCompileTarget* t): llvmModule(m), target(t) {
-        getTypes();
         createEntryPoint();
     }
+
+    // destructor: we don't own any of our member objects
 
     void finalize(void);
 

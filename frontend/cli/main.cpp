@@ -3,7 +3,9 @@
 #include <vector>
 #include <string>
 #include <llvm/Support/CommandLine.h>
+
 #include "pCompileTarget.h"
+#include "pStandAloneTargets.h"
 
 using namespace llvm;
 using namespace rphp;
@@ -23,7 +25,11 @@ int main( int argc, char* argv[] )
     cl::opt<bool> dumpAST ("dump-ast", cl::desc("Dump AST"));
     cl::opt<bool> iBC ("i", cl::desc("Interpret bytecode"));
 
+    cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
+    cl::opt<std::string> mainFile ("main-file",cl::desc("Main entry script for stand alone programs"));
+    
     cl::opt<bool> compileModule ("c", cl::desc("Compile a single source file to bitcode object file"));
+    cl::opt<bool> linkSA ("link-sa", cl::desc("Link objects to stand alone executable"));
 
     cl::SetVersionPrinter(&rphpVersion);
     cl::ParseCommandLineOptions(argc, argv, "Roadsend PHP");
@@ -31,6 +37,11 @@ int main( int argc, char* argv[] )
     pTarget* target;
     if (compileModule) {
         target = new pCompileTarget(inputFile, "/");
+    }
+    else if (linkSA) {
+        pStandAloneTarget* saTarget = new pStandAloneTarget(outputFile, mainFile);
+        saTarget->addInputFile(inputFile);
+        target = saTarget;
     }
 
     if (!target) {

@@ -17,40 +17,32 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PSTANDALONETARGETS_H_
-#define RPHP_PSTANDALONETARGETS_H_
+#include <llvm/Module.h>
+#include <llvm/Bitcode/ReaderWriter.h>
+#include <fstream>
 
-#include "pIRTypes.h"
-#include "pLinkTarget.h"
+#include "pGenSupport.h"
 
 namespace rphp {
 
-// create a stand alone binary from the given source files
-// a main "entry" php script must be given, which will be the entry point of the binary
-class pStandAloneTarget : public pLinkTarget {
+std::string pGenSupport::mangleModuleName(std::string inName) {
 
-protected:
-    std::string mainFile;
-    pIRTypes IRTypes;
+    // TODO: mangle
+    return inName;
 
-    llvm::Module* createStubModule(void);
+}
 
-public:
-    pStandAloneTarget(const std::string& outName, const std::string& mainName): mainFile(mainName), pLinkTarget(outName) { }
+void pGenSupport::writeBitcode(llvm::Module* m, std::string outFile) {
 
-    virtual void execute(void);
+    assert(m != NULL);
 
-    const std::string& getMainFileName(void) { return mainFile; }
+    // TODO: real error handling
+    std::ofstream OS(outFile.c_str(), std::ios_base::out|std::ios::trunc|std::ios::binary);
+    if (!OS.fail())
+        llvm::WriteBitcodeToFile(m, OS);
 
+}
 
-};
-
-// custom GUI stuff, like winres
-class pGUITarget : public pStandAloneTarget {
-
-
-};
 
 } // namespace
 
-#endif /* RPHP_PSTANDALONETARGETS_H_ */

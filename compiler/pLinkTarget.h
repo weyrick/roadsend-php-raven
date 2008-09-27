@@ -20,15 +20,33 @@
 #ifndef RPHP_PLINKTARGET_H_
 #define RPHP_PLINKTARGET_H_
 
+#include <string>
+#include <vector>
 #include "pTarget.h"
+
+namespace llvm {
+    class Module;
+}
 
 namespace rphp {
 
 // link targets will create various native binaries from one or more compile bitcode files
 class pLinkTarget : public pTarget {
 
+protected:
+    std::string outputFile;
+    std::vector<std::string> inputFiles;
+
     // link options (static, dynamic)
-    // bc file(s)
+
+public:
+    pLinkTarget(std::string outFile): outputFile(outFile) { }
+
+    void addInputFile(std::string f) {
+        inputFiles.push_back(f);
+    }
+
+    const std::string& getOutputFileName(void) { return outputFile; }
 
 };
 

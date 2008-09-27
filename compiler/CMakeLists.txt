@@ -88,6 +88,8 @@ set(EVAL_SRC_FILES
   pStandAloneTargets.cpp
   pLinkTarget.cpp
   pLibTargets.cpp
+  pGenSupport.cpp
+  pIRTypes.cpp
 )
 
 add_library( rphp-eval SHARED ${EVAL_SRC_FILES} )

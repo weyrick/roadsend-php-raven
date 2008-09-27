@@ -28,42 +28,23 @@
 
 #include "pCompileTarget.h"
 #include "pGenerator.h"
+#include "pIRTypes.h"
+#include "pGenSupport.h"
 
 using namespace llvm;
 
 namespace rphp {
 
-void pGenerator::createEntryFunctionName(const std::string& inName) {
-
-    // TODO: this needs to set an appropriate name based on file name
-    // and project root (from target)
-    entryFunctionName = inName;
-
-}
-
-void pGenerator::getTypes(void) {
-
-    // runtime engine pointer
-    rEngineType = PointerType::get(Type::Int8Ty,0);
-
-}
-
 void pGenerator::createEntryPoint(void) {
 
     // script top level initialization function
-    createEntryFunctionName(llvmModule->getModuleIdentifier());
-
-    // entry function takes pointer to runtime instance
-    std::vector<const Type*> efArgs;
-    efArgs.push_back(rEngineType);
-
-    // entry function type: void (*)(void)
-    FunctionType *initFunType = FunctionType::get(Type::VoidTy, /* return type */
-                                                  efArgs, /* arguments */
-                                                  false /*not vararg*/);
+    entryFunctionName = pGenSupport::mangleModuleName(llvmModule->getModuleIdentifier());
 
     // entry function
-    Function *initFun = Function::Create(initFunType, Function::ExternalLinkage, entryFunctionName, llvmModule);
+    Function *initFun = Function::Create(IRTypes.moduleEntryFunType(),
+                                         Function::ExternalLinkage,
+                                         entryFunctionName,
+                                         llvmModule);
 
     runtimeEngine = initFun->arg_begin();
     runtimeEngine->setName("rEngine");
@@ -91,7 +72,7 @@ void pGenerator::visit(AST::echoNode* n) {
 
     // FIXME: this will go in the literal string node
     ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->rVal.size()+1);
-    
+
     GlobalVariable* gvar_array__str = new GlobalVariable(
     /*Type=*/stringLiteralType,
     /*isConstant=*/true,
@@ -113,7 +94,7 @@ void pGenerator::visit(AST::echoNode* n) {
 
     // argument sig for print function
     std::vector<const Type*> printSig;
-    printSig.push_back(rEngineType);
+    printSig.push_back(IRTypes.runtimeEngineType());
     printSig.push_back(PointerType::get(IntegerType::get(8), 0)/* char* */);
 
     // print function type

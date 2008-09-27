@@ -20,7 +20,6 @@
 #ifndef RPHP_PAST_H_
 #define RPHP_PAST_H_
 
-#include <iostream>
 #include <vector>
 
 #include "pTypes.h"
@@ -52,11 +51,11 @@ struct echoNode: public Node {
     pBString rVal;
 
     echoNode(const pBString& v): rVal(v) {
-        std::cout << "creating echoNode(" << v << ")" << std::endl;
+        //std::cout << "creating echoNode(" << v << ")" << std::endl;
     }
     
     ~echoNode() {
-        std::cout << "destruct echoNode" << std::endl;
+        //std::cout << "destruct echoNode" << std::endl;
     }
 
 };
@@ -67,11 +66,11 @@ struct statementNode: public Node {
     echoNode* echoNodeVar;
 
     statementNode(echoNode* v): echoNodeVar(v) {
-        std::cout << "creating statementNode(echoNode*)" << std::endl;
+        //std::cout << "creating statementNode(echoNode*)" << std::endl;
     }
 
     ~statementNode() {
-        std::cout << "destruct statementNode" << std::endl;
+        //std::cout << "destruct statementNode" << std::endl;
         if (echoNodeVar)
             delete echoNodeVar;
     }

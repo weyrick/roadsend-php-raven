@@ -17,40 +17,25 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PSTANDALONETARGETS_H_
-#define RPHP_PSTANDALONETARGETS_H_
+#ifndef RPHP_PGENSUPPORT_H_
+#define RPHP_PGENSUPPORT_H_
 
-#include "pIRTypes.h"
-#include "pLinkTarget.h"
+#include <string>
+
+namespace llvm {
+    class Module;
+}
 
 namespace rphp {
 
-// create a stand alone binary from the given source files
-// a main "entry" php script must be given, which will be the entry point of the binary
-class pStandAloneTarget : public pLinkTarget {
-
-protected:
-    std::string mainFile;
-    pIRTypes IRTypes;
-
-    llvm::Module* createStubModule(void);
+class pGenSupport {
 
 public:
-    pStandAloneTarget(const std::string& outName, const std::string& mainName): mainFile(mainName), pLinkTarget(outName) { }
-
-    virtual void execute(void);
-
-    const std::string& getMainFileName(void) { return mainFile; }
-
-
-};
-
-// custom GUI stuff, like winres
-class pGUITarget : public pStandAloneTarget {
-
+    static std::string mangleModuleName(std::string moduleName);
+    static void writeBitcode(llvm::Module* m, std::string outFile);
 
 };
 
 } // namespace
 
-#endif /* RPHP_PSTANDALONETARGETS_H_ */
+#endif /* RPHP_PGENSUPPORT_H_ */
