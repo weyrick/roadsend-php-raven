@@ -41,4 +41,12 @@ statement_list ::= statement_list statement(A). { ast->statementList.push_back(A
 statement(A) ::= echo(B). { A = new AST::statementNode(B); }
 
 %type echo {AST::echoNode*}
-echo(A) ::= T_ECHO T_CONSTANT_ENCAPSED_STRING(B) T_SEMI. { A = new AST::echoNode(std::string((*B).begin(), (*B).end())); }
+echo(A) ::= T_ECHO T_CONSTANT_ENCAPSED_STRING(B) T_SEMI.
+{
+  // substring out the quotes, special case for empty string
+  std::string::iterator start = (*B).begin();
+  if (++start == (*B).end())
+    A = new AST::echoNode(std::string());
+  else
+    A = new AST::echoNode(std::string(start, --(*B).end()));
+}
