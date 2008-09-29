@@ -22,30 +22,31 @@
 
 namespace rphp { namespace AST {
 
-
-void defaultVisitor::visit(treeTop* n) {
-    for(statementListType::iterator s = n->statementList.begin(); s != n->statementList.end(); ++s) {
-        visit(*s);
+void baseVisitor::visit(stmt* s) {
+    // TODO: implement the dispatch better
+    assert(s != NULL && "statement to visit is NULL");
+    switch (s->getKind()) {
+    case AST::echoStmtKind:
+        visit_echoStmt(static_cast<AST::echoStmt*>(s));
+        break;
+    case AST::literalBStringKind:
+        visit_literalBString(static_cast<AST::literalBString*>(s));
+        break;
     }
 }
 
-void defaultVisitor::visit(statementNode* n) {
-    if (n->echoNodeVar)
-        visit(n->echoNodeVar);
+
+void defaultVisitor::visit_echoStmt(echoStmt* n) {
+    visit(n->getRVal());
 }
 
-void dumpVisitor::visit(treeTop* n) {
-    std::cout << "treeTop: " << n->statementList.size() << " top level statements in module" << std::endl;
-    defaultVisitor::visit(n);
+void dumpVisitor::visit_echoStmt(echoStmt* n) {
+    std::cout << "echoStmt: ";
+    defaultVisitor::visit_echoStmt(n);
 }
 
-void dumpVisitor::visit(statementNode* n) {
-    std::cout << "statementNode" << std::endl;
-    defaultVisitor::visit(n);
-}
-
-void dumpVisitor::visit(echoNode* n) {
-    std::cout << "echoNode, string: " << n->rVal << std::endl;
+void dumpVisitor::visit_literalBString(literalBString* n)  {
+    std::cout << "literal bstring: " << n->getVal() << std::endl;
 }
 
 } } // namespace

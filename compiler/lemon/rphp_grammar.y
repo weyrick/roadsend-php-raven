@@ -10,6 +10,7 @@ rphp language grammar
 #include <string>
 
 #include "pAST.h"
+#include "pModule.h"
 #include "pLangLexerDef.h"
 
 using namespace rphp;
@@ -19,7 +20,7 @@ using namespace rphp;
 %name rphpParse
 %token_type {lexer::tokenPairType*}
 %default_type {lexer::tokenPairType*}
-%extra_argument {AST::treeTop* ast}
+%extra_argument {pModule* pMod}
 
 %type T_WHITESPACE {int}
    
@@ -35,18 +36,30 @@ module ::= statement_list.
 
 %type statement_list {int}
 statement_list ::= .
-statement_list ::= statement_list statement(A). { ast->statementList.push_back(A); }
+statement_list ::= statement_list statement(A). { pMod->getAST().push_back(A); }
 
-%type statement {AST::statementNode*}
-statement(A) ::= echo(B). { A = new AST::statementNode(B); }
+/******** STATEMENTS ********/
+%type statement {AST::stmt*}
+statement(A) ::= echo(B). { A = B; }
 
-%type echo {AST::echoNode*}
-echo(A) ::= T_ECHO T_CONSTANT_ENCAPSED_STRING(B) T_SEMI.
+%type echo {AST::echoStmt*}
+echo(A) ::= T_ECHO expr(B) T_SEMI. { A = new AST::echoStmt(B); }
+
+/****** EXPRESSIONS *********/
+%type expr {AST::expr*}
+expr(A) ::= literal(B). { A = B; }
+
+/** LITERALS **/
+%type literal {AST::literalExpr*}
+
+// literal bstring, double quotes
+literal(A) ::= T_CONSTANT_ENCAPSED_STRING(B).
 {
   // substring out the quotes, special case for empty string
   std::string::iterator start = (*B).begin();
   if (++start == (*B).end())
-    A = new AST::echoNode(std::string());
+    A = new AST::literalBString(std::string());
   else
-    A = new AST::echoNode(std::string(start, --(*B).end()));
+    A = new AST::literalBString(std::string(start, --(*B).end()));
 }
+

@@ -20,6 +20,7 @@
 #ifndef RPHP_PGENERATOR_H_
 #define RPHP_PGENERATOR_H_
 
+#include <queue>
 #include <string>
 #include <llvm/Support/IRBuilder.h>
 #include "pASTVisitors.h"
@@ -27,6 +28,7 @@
 
 namespace llvm {
     class Module;
+    class Value;
 }
 
 namespace rphp {
@@ -43,6 +45,7 @@ class pGenerator: public AST::defaultVisitor {
 
     llvm::IRBuilder currentBlock;
     llvm::Value* runtimeEngine;
+    std::queue<llvm::Value*> valueStack;
 
     void createEntryPoint(void);
 
@@ -56,9 +59,9 @@ public:
 
     void finalize(void);
 
-    void visit(AST::treeTop*);
-    void visit(AST::statementNode*);
-    void visit(AST::echoNode*);
+    // nodes
+    void visit_echoStmt(AST::echoStmt*);
+    void visit_literalBString(AST::literalBString*);
 
 };
 

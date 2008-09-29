@@ -26,68 +26,74 @@
 
 namespace rphp { namespace AST {
 
-// base node
-struct Node {
-    pUInt lineNum;
+enum nodeKind {
+    echoStmtKind,
+    literalBStringKind
+};
+
+// statement base class
+struct stmt {
+
+    nodeKind stmtKind;
+
+    pUInt startLineNum;
+    pUInt endLineNum;
+
+public:
+    stmt(nodeKind k): stmtKind(k) { }
+    virtual ~stmt(void) { }
+
+    const nodeKind getKind(void) { return stmtKind; }
+
+};
+
+// declaration base class
+struct decl: public stmt {
+
+public:
+
+
+};
+
+// expression base class
+struct expr: public stmt {
+
+public:
+    expr(nodeKind k): stmt(k) { }
+
+};
+
+// literal expression base class
+struct literalExpr: public expr {
+
+public:
+    literalExpr(nodeKind k): expr(k) { }
+
 };
 
 // NODE: literal bstring
-struct literalBStringNode: public Node {
+struct literalBString: public literalExpr {
 
     pBString val;
 
-};
+public:
+    literalBString(const pBString& v): literalExpr(literalBStringKind), val(v) { }
 
-// NODE: literal int
-struct literalIntNode: public Node {
-
-    pInt val;
+    const pBString& getVal(void) { return val; }
 
 };
 
-// NODE: echo
-struct echoNode: public Node {
+// NODE: echo statement
+struct echoStmt: public stmt {
 
-    pBString rVal;
+    expr* rVal;
 
-    echoNode(const pBString& v): rVal(v) {
-        //std::cout << "creating echoNode(" << v << ")" << std::endl;
-    }
-    
-    ~echoNode() {
-        //std::cout << "destruct echoNode" << std::endl;
-    }
+public:
+    echoStmt(expr* v): stmt(echoStmtKind), rVal(v) { }
+    ~echoStmt(void) { delete rVal; }
 
-};
+    expr* getRVal(void) { return rVal; }
 
-// NODE: statement
-struct statementNode: public Node {
-
-    echoNode* echoNodeVar;
-
-    statementNode(echoNode* v): echoNodeVar(v) {
-        //std::cout << "creating statementNode(echoNode*)" << std::endl;
-    }
-
-    ~statementNode() {
-        //std::cout << "destruct statementNode" << std::endl;
-        if (echoNodeVar)
-            delete echoNodeVar;
-    }
-
-};
-
-// node list types
-typedef std::vector<statementNode*> statementListType;
-
-// NODE: treeTop
-struct treeTop: public Node {
-    statementListType statementList;
-    ~treeTop(void) {
-        for(statementListType::iterator s = statementList.begin(); s != statementList.end(); ++s) {
-            delete *s;
-        }
-    }
 };
 
 } } // namespace

@@ -25,7 +25,7 @@
 
 /* generated rphp_grammar parser interface */
 void* rphpParseAlloc(void *(*)(size_t));
-void  rphpParse(void *, int, rphp::lexer::tokenPairType*, rphp::AST::treeTop*);
+void  rphpParse(void *, int, rphp::lexer::tokenPairType*, rphp::pModule*);
 void  rphpParseFree(void *, void (*)(void*));
 void  rphpParseTrace(FILE *, char *);
 
@@ -37,7 +37,6 @@ pModule* parseSourceFile(std::string fileName) {
     lexer::pLexer lexer(fileName);
 
     void* pParser = rphpParseAlloc(malloc);
-    AST::treeTop* ast = pMod->getTreeTop();
 
     // DEBUG
     //rphpParseTrace(stderr, "trace: ");
@@ -57,12 +56,12 @@ pModule* parseSourceFile(std::string fileName) {
         }
         else {
             // matched valid token
-            rphpParse(pParser, (*iter).id(), &(*iter).value(), ast);
+            rphpParse(pParser, (*iter).id(), &(*iter).value(), pMod);
         }
     }
 
     // finish parse
-    rphpParse(pParser, 0, 0, ast);
+    rphpParse(pParser, 0, 0, pMod);
 
     rphpParseFree(pParser, free);
 

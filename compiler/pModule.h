@@ -20,7 +20,7 @@
 #ifndef RPHP_PMODULE_H_
 #define RPHP_PMODULE_H_
 
-#include "pAST.h"
+#include <vector>
 
 namespace llvm {
     class Module;
@@ -28,25 +28,33 @@ namespace llvm {
 
 namespace rphp {
 
+namespace AST {
+    class stmt;
+    class baseVisitor;
+}
+
 class pCompileTarget;
 
 class pModule {
+public:
+    typedef std::vector<AST::stmt*> astType;
 
 private:
     std::string fileName;
-    AST::treeTop* ast;
+    astType ast;
     llvm::Module* llvmModule;
 
 public:
-    pModule(std::string name): fileName(name), ast(new AST::treeTop()), llvmModule(NULL)
+    pModule(std::string name): fileName(name), llvmModule(NULL)
     {
 
     }
 
     ~pModule();
 
-    AST::treeTop* getTreeTop() { return ast; }
+    astType& getAST() { return ast; }
 
+    void applyVisitor(AST::baseVisitor* v);
     void lowerToIR(pCompileTarget* target);
     void writeBitcode(std::string fileName);
     void dumpAST();

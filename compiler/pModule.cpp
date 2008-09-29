@@ -19,6 +19,7 @@
 
 #include <llvm/Module.h>
 
+#include "pASTVisitors.h"
 #include "pModule.h"
 #include "pASTVisitors.h"
 #include "pGenerator.h"
@@ -27,15 +28,24 @@
 namespace rphp {
 
 pModule::~pModule() {
-    delete ast;
+    // free up statements
+    for(astType::iterator s = ast.begin(); s != ast.end(); ++s) {
+        delete *s;
+    }
     // only if codegen was performed
     delete llvmModule;
 }
 
+void pModule::applyVisitor(AST::baseVisitor* v) {
+    for(astType::iterator s = ast.begin(); s != ast.end(); ++s) {
+        v->visit(*s);
+    }
+}
+
 void pModule::dumpAST() {
 
-    AST::dumpVisitor visitor;
-    visitor.visit(ast);
+    AST::dumpVisitor v;
+    applyVisitor(&v);
 
 }
 
@@ -45,7 +55,7 @@ void pModule::lowerToIR(pCompileTarget* target) {
 
     llvmModule = new llvm::Module(fileName);
     pGenerator codeGen(llvmModule, target);
-    codeGen.visit(ast);
+    applyVisitor(&codeGen);
     codeGen.finalize();
 
 }

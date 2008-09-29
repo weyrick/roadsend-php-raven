@@ -60,18 +60,9 @@ void pGenerator::finalize(void) {
     initFun->getEntryBlock().getInstList().push_back(ReturnInst::Create());
 }
 
-void pGenerator::visit(AST::treeTop* n) {
-    AST::defaultVisitor::visit(n);
-}
+void pGenerator::visit_literalBString(AST::literalBString* n) {
 
-void pGenerator::visit(AST::statementNode* n) {
-    AST::defaultVisitor::visit(n);
-}
-
-void pGenerator::visit(AST::echoNode* n) {
-
-    // FIXME: this will go in the literal string node
-    ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->rVal.size()+1);
+    ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->getVal().size()+1);
 
     GlobalVariable* gvar_array__str = new GlobalVariable(
     /*Type=*/stringLiteralType,
@@ -81,21 +72,31 @@ void pGenerator::visit(AST::echoNode* n) {
     /*Name=*/".str",
     llvmModule);
 
-    // Constant Definitions
-    Constant* const_array_7 = ConstantArray::get(n->rVal.c_str(), true);
+    Constant* const_array_7 = ConstantArray::get(n->getVal().c_str(), true);
     std::vector<Constant*> const_ptr_8_indices;
     Constant* const_int32_9 = Constant::getNullValue(IntegerType::get(32));
     const_ptr_8_indices.push_back(const_int32_9);
     const_ptr_8_indices.push_back(const_int32_9);
-    Constant* const_ptr_8 = ConstantExpr::getGetElementPtr(gvar_array__str, &const_ptr_8_indices[0], const_ptr_8_indices.size() );
+    Constant* litStringVal = ConstantExpr::getGetElementPtr(gvar_array__str, &const_ptr_8_indices[0], const_ptr_8_indices.size() );
 
     // Global Variable Definitions
     gvar_array__str->setInitializer(const_array_7);
 
+    valueStack.push(litStringVal);
+
+}
+
+void pGenerator::visit_echoStmt(AST::echoStmt* n) {
+
+    // codegen our rVal expression
+    visit(n->getRVal());
+    Value* rVal = valueStack.back();
+    valueStack.pop();
+
     // argument sig for print function
     std::vector<const Type*> printSig;
     printSig.push_back(IRTypes.runtimeEngineType());
-    printSig.push_back(PointerType::get(IntegerType::get(8), 0)/* char* */);
+    printSig.push_back(PointerType::get(IntegerType::get(8), 0)/* (char*) */);
 
     // print function type
     FunctionType *printFuncType = FunctionType::get(Type::VoidTy, printSig, false);
@@ -103,8 +104,7 @@ void pGenerator::visit(AST::echoNode* n) {
     // print function
     Constant *printFunc = llvmModule->getOrInsertFunction("rphp_print_cstr", printFuncType);
 
-    currentBlock.CreateCall2(printFunc, runtimeEngine, const_ptr_8);
-
+    currentBlock.CreateCall2(printFunc, runtimeEngine, rVal);
 
 }
 

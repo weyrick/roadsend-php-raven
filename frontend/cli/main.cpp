@@ -4,6 +4,7 @@
 #include <string>
 #include <llvm/Support/CommandLine.h>
 
+#include "pDriver.h"
 #include "pCompileTarget.h"
 #include "pStandAloneTargets.h"
 
@@ -27,14 +28,14 @@ int main( int argc, char* argv[] )
 
     cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
     cl::opt<std::string> mainFile ("main-file",cl::desc("Main entry script for stand alone programs"));
-    
+
     cl::opt<bool> compileModule ("c", cl::desc("Compile a single source file to bitcode object file"));
     cl::opt<bool> linkSA ("link-sa", cl::desc("Link objects to stand alone executable"));
 
     cl::SetVersionPrinter(&rphpVersion);
     cl::ParseCommandLineOptions(argc, argv, "Roadsend PHP");
 
-    pTarget* target;
+    pTarget* target = NULL;
     if (compileModule) {
         target = new pCompileTarget(inputFile, "/");
     }
@@ -42,6 +43,16 @@ int main( int argc, char* argv[] )
         pStandAloneTarget* saTarget = new pStandAloneTarget(outputFile, mainFile);
         saTarget->addInputFile(inputFile);
         target = saTarget;
+    }
+    else if (dumpToks) {
+        pDriver driver;
+        driver.dumpTokens(inputFile);
+        return 0;
+    }
+    else if (dumpAST) {
+        pDriver driver;
+        driver.dumpAST(inputFile);
+        return 0;
     }
 
     if (!target) {

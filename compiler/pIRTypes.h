@@ -35,6 +35,8 @@ class pIRTypes {
 
 public:
 
+    pIRTypes(void): moduleEntryFunTypeC(0) { }
+
     // pointer to the runtime engine
     llvm::Type* runtimeEngineType(void);
 
