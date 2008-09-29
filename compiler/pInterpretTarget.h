@@ -17,54 +17,23 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
+#ifndef RPHP_PINTERPRETTARGET_H_
+#define RPHP_PINTERPRETTARGET_H_
 
-#include <vector>
-
-namespace llvm {
-    class Module;
-}
+#include "pCompileTarget.h"
+#include "pStandAloneTargets.h"
 
 namespace rphp {
 
-namespace AST {
-    class stmt;
-    class baseVisitor;
-}
-
-class pCompileTarget;
-
-class pModule {
-public:
-    typedef std::vector<AST::stmt*> astType;
-
-private:
-    std::string fileName;
-    astType ast;
-    llvm::Module* llvmModule;
+class pInterpretTarget: public pCompileTarget {
 
 public:
-    pModule(std::string name): fileName(name), llvmModule(NULL)
-    {
+    pInterpretTarget(const std::string& fileName, const std::string& root): pCompileTarget(fileName,root) { }
 
-    }
-
-    ~pModule();
-
-    astType& getAST() { return ast; }
-    llvm::Module* getLLVMModule() { return llvmModule; }
-
-    std::string getEntryFunctionName();
-
-    void applyVisitor(AST::baseVisitor* v);
-    void lowerToIR(pCompileTarget* target);
-    void writeBitcode(std::string fileName);
-    void dumpAST();
-
+    virtual void execute(void);
 
 };
 
 } // namespace
 
-#endif /* RPHP_PMODULE_H_ */
+#endif /* RPHP_PINTERPRETTARGET_H_ */

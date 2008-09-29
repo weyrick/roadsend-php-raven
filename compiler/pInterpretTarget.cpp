@@ -17,54 +17,23 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PMODULE_H_
-#define RPHP_PMODULE_H_
-
-#include <vector>
-
-namespace llvm {
-    class Module;
-}
+#include "pInterpretTarget.h"
+#include "pModule.h"
+#include "pDriver.h"
 
 namespace rphp {
 
-namespace AST {
-    class stmt;
-    class baseVisitor;
+void pInterpretTarget::execute(void) {
+
+    pDriver driver;
+
+    pModule* m = driver.createModule(inputFile);
+    m->lowerToIR(this);
+    driver.executeModule(m);
+    // TODO segfaults?
+    //delete m;
+
 }
-
-class pCompileTarget;
-
-class pModule {
-public:
-    typedef std::vector<AST::stmt*> astType;
-
-private:
-    std::string fileName;
-    astType ast;
-    llvm::Module* llvmModule;
-
-public:
-    pModule(std::string name): fileName(name), llvmModule(NULL)
-    {
-
-    }
-
-    ~pModule();
-
-    astType& getAST() { return ast; }
-    llvm::Module* getLLVMModule() { return llvmModule; }
-
-    std::string getEntryFunctionName();
-
-    void applyVisitor(AST::baseVisitor* v);
-    void lowerToIR(pCompileTarget* target);
-    void writeBitcode(std::string fileName);
-    void dumpAST();
-
-
-};
 
 } // namespace
 
-#endif /* RPHP_PMODULE_H_ */

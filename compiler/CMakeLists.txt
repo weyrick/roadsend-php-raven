@@ -85,6 +85,7 @@ set(EVAL_SRC_FILES
   pModule.cpp
   pGenerator.cpp
   pCompileTarget.cpp
+  pInterpretTarget.cpp
   pStandAloneTargets.cpp
   pLinkTarget.cpp
   pLibTargets.cpp

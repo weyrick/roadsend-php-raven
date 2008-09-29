@@ -66,5 +66,8 @@ void pModule::writeBitcode(std::string fileName) {
 
 }
 
+std::string pModule::getEntryFunctionName() {
+    return pGenSupport::mangleModuleName(fileName);
+}
 
 } // namespace

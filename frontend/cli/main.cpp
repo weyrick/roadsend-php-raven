@@ -5,6 +5,7 @@
 #include <llvm/Support/CommandLine.h>
 
 #include "pDriver.h"
+#include "pInterpretTarget.h"
 #include "pCompileTarget.h"
 #include "pStandAloneTargets.h"
 
@@ -25,6 +26,7 @@ int main( int argc, char* argv[] )
     cl::opt<bool> dumpIR ("dump-ir", cl::desc("Dump IR "));
     cl::opt<bool> dumpAST ("dump-ast", cl::desc("Dump AST"));
     cl::opt<bool> iBC ("i", cl::desc("Interpret bytecode"));
+    cl::opt<bool> iSF ("f", cl::desc("Execute source file immediately"));
 
     cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
     cl::opt<std::string> mainFile ("main-file",cl::desc("Main entry script for stand alone programs"));
@@ -38,6 +40,9 @@ int main( int argc, char* argv[] )
     pTarget* target = NULL;
     if (compileModule) {
         target = new pCompileTarget(inputFile, "/");
+    }
+    else if (iSF) {
+        target = new pInterpretTarget(inputFile, "/");
     }
     else if (linkSA) {
         pStandAloneTarget* saTarget = new pStandAloneTarget(outputFile, mainFile);

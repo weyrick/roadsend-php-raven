@@ -42,6 +42,8 @@
 #include "pDriver.h"
 #include "pModule.h"
 
+#include "pRuntime.h"
+
 using namespace std;
 
 namespace rphp {
@@ -56,31 +58,73 @@ void pDriver::execute(string fileName) {
     executeBC(fileName);
 }
 
+void pDriver::executeModule(pModule* mod) {
+
+    llvm::Module* M = mod->getLLVMModule();
+    assert(M != NULL);
+
+    // create entry stub which creates a runtime instance
+
+    llvm::ExistingModuleProvider* MP = new llvm::ExistingModuleProvider(M);
+    //JITmodule(MP, mod->getEntryFunctionName());
+
+    string errMsg;
+    llvm::ExecutionEngine* EE = llvm::ExecutionEngine::createJIT(MP, &errMsg);
+    if (!EE) {
+        cerr << errMsg << endl;
+        return;
+    }
+
+    // EE now owns MP
+
+    llvm::Function* main = MP->getModule()->getFunction(mod->getEntryFunctionName());
+    if (!main) {
+        cerr << "error: entry symbol not found: " << mod->getEntryFunctionName() << endl;
+        MP->getModule()->dump();
+        delete EE;
+        return;
+    }
+
+    // JIT magic
+    pRuntimeEngine* r = new pRuntimeEngine();
+    void *mainPtr = EE->getPointerToFunction(main);
+    // cast to entry function type (returns void, takes one parameter of runtime engine instance)
+    void (*mainFunc)(pRuntimeEngine*) = (void (*)(pRuntimeEngine*))mainPtr;
+    mainFunc(r);
+    delete r;
+
+    delete EE;
+
+}
+
 /**
  * execute precompiled bytecode
  */
 void pDriver::executeBC(string fileName) {
 
     // Now we create the JIT.
-    string* errMsg = new string();
-    llvm::MemoryBuffer* mb = llvm::MemoryBuffer::getFile(fileName.c_str(), errMsg);
-    if (errMsg->length()) {
-        cerr << "error loading file [" << fileName << "]: " << *errMsg << endl;
-        delete errMsg;
+    string errMsg;
+    llvm::MemoryBuffer* mb = llvm::MemoryBuffer::getFile(fileName.c_str(), &errMsg);
+    if (errMsg.length()) {
+        cerr << "error loading file [" << fileName << "]: " << errMsg << endl;
         return;
     }
-    llvm::ModuleProvider* MP = llvm::getBitcodeModuleProvider(mb, errMsg);
-    if (errMsg->length()) {
-        cerr << "error parsing bitcode file [" << fileName << "]: " << *errMsg << endl;
-        delete errMsg;
+    llvm::ModuleProvider* MP = llvm::getBitcodeModuleProvider(mb, &errMsg);
+    if (errMsg.length()) {
+        cerr << "error parsing bitcode file [" << fileName << "]: " << errMsg << endl;
         return;
     }
 
     // MP now owns mb and will delete
+    JITmodule(MP, "main");
 
-    if (llvm::sys::DynamicLibrary::LoadLibraryPermanently("librphp-runtime.so", errMsg)) {
-        cerr << "error loading runtime library: " << *errMsg << endl;
-        delete errMsg;
+}
+
+void pDriver::JITmodule(llvm::ModuleProvider* MP, std::string entryFunction) {
+
+    string errMsg;
+    if (llvm::sys::DynamicLibrary::LoadLibraryPermanently("librphp-runtime.so", &errMsg)) {
+        cerr << "error loading runtime library: " << errMsg << endl;
         return;
     }
 
@@ -88,21 +132,17 @@ void pDriver::executeBC(string fileName) {
     //MP->getModule()->setTargetTriple("x86_64-pc-linux-gnu");
 
     //llvm::ExecutionEngine* EE = llvm::ExecutionEngine::create(MP, false);
-    llvm::ExecutionEngine* EE = llvm::ExecutionEngine::createJIT(MP, errMsg);
+    llvm::ExecutionEngine* EE = llvm::ExecutionEngine::createJIT(MP, &errMsg);
     if (!EE) {
-        cerr << *errMsg << endl;
-        delete errMsg;
+        cerr << errMsg << endl;
         return;
     }
 
-    // errMsg isn't needed.
-    delete errMsg;
-
     // EE now owns MP
 
-    llvm::Function* rphpMain = MP->getModule()->getFunction("rphp_main");
+    llvm::Function* rphpMain = MP->getModule()->getFunction(entryFunction);
     if (!rphpMain) {
-        cerr << "error: rphp_main symbol not found" << endl;
+        cerr << "error: entry symbol not found: " << entryFunction << endl;
         MP->getModule()->dump();
         delete EE;
         return;

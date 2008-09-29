@@ -24,6 +24,7 @@
 
 namespace llvm {
     class Module;
+    class ModuleProvider;
 }
 
 namespace rphp {
@@ -34,17 +35,16 @@ class pDriver {
 private:
     std::string readFile(std::string fileName);
 
+    void JITmodule(llvm::ModuleProvider* MP, std::string entryFunction);
+
 public:
-/*
-    void compileToBC(std::string fileName);
-    void compileToAsm(std::string fileName);
-    void compileToNative(std::string fileName);
-*/
+
     pModule* createModule(std::string fileName);
 
     void execute(std::string fileName);
     void executeBC(std::string fileName);
     void executePHP(std::string fileName);
+    void executeModule(pModule* mod);
 
     void dumpTokens(std::string fileName);
     void dumpAST(std::string fileName);
