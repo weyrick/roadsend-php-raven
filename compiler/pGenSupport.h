@@ -32,7 +32,7 @@ class pGenSupport {
 
 public:
     static std::string mangleModuleName(std::string moduleName);
-    static void writeBitcode(llvm::Module* m, std::string outFile);
+    static bool writeBitcode(llvm::Module* m, std::string outFile);
 
 };
 

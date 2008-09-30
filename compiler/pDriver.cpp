@@ -41,8 +41,9 @@ using namespace std;
 
 namespace rphp {
 
-
-void pDriver::executeModule(pModule* pMod) {
+// execute the llvm Module contained in the given pModule
+// ir should already have been generated
+bool pDriver::executeModule(pModule* pMod) {
 
     llvm::Module* M = pMod->getLLVMModule();
     assert(M != NULL);
@@ -54,7 +55,7 @@ void pDriver::executeModule(pModule* pMod) {
     llvm::ExecutionEngine* EE = llvm::ExecutionEngine::createJIT(MP, &errMsg);
     if (!EE) {
         cerr << errMsg << endl;
-        return;
+        return false;
     }
 
     // EE now owns MP and M, so tell pModule not to delete
@@ -63,9 +64,8 @@ void pDriver::executeModule(pModule* pMod) {
     llvm::Function* main = MP->getModule()->getFunction(pMod->getEntryFunctionName());
     if (!main) {
         cerr << "error: entry symbol not found: " << pMod->getEntryFunctionName() << endl;
-        MP->getModule()->dump();
         delete EE;
-        return;
+        return false;
     }
 
     // JIT magic
@@ -74,75 +74,77 @@ void pDriver::executeModule(pModule* pMod) {
     // cast to entry function type (returns void, takes one parameter of runtime engine instance)
     void (*mainFunc)(pRuntimeEngine*) = (void (*)(pRuntimeEngine*))mainPtr;
     mainFunc(r);
-    delete r;
 
+    delete r;
     delete EE;
+
+    return true;
 
 }
 
-/**
- * execute precompiled bytecode
- */
-void pDriver::executeBC(string fileName) {
+// execute the given precompiled bitcode file, by calling the main
+// function and passing it a runtime instance
+bool pDriver::executeBC(string fileName) {
 
     // Now we create the JIT.
     string errMsg;
     llvm::MemoryBuffer* mb = llvm::MemoryBuffer::getFile(fileName.c_str(), &errMsg);
     if (errMsg.length()) {
         cerr << "error loading file [" << fileName << "]: " << errMsg << endl;
-        return;
+        return false;
     }
     llvm::ModuleProvider* MP = llvm::getBitcodeModuleProvider(mb, &errMsg);
     if (errMsg.length()) {
         cerr << "error parsing bitcode file [" << fileName << "]: " << errMsg << endl;
-        return;
+        return false;
     }
 
     // MP now owns mb and will delete
-    JITmodule(MP, "main");
+    return JITmodule(MP, "main");
 
 }
 
-void pDriver::JITmodule(llvm::ModuleProvider* MP, std::string entryFunction) {
+// run an llvm Module in the JIT
+// takes ownership of ModuleProvider
+// will call the given entryFunction with no arguments
+bool pDriver::JITmodule(llvm::ModuleProvider* MP, std::string entryFunction) {
 
     string errMsg;
     if (llvm::sys::DynamicLibrary::LoadLibraryPermanently("librphp-runtime.so", &errMsg)) {
         cerr << "error loading runtime library: " << errMsg << endl;
-        return;
+        delete MP;
+        return false;
     }
 
-    //MP->getModule()->setDataLayout("e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128");
-    //MP->getModule()->setTargetTriple("x86_64-pc-linux-gnu");
-
-    //llvm::ExecutionEngine* EE = llvm::ExecutionEngine::create(MP, false);
     llvm::ExecutionEngine* EE = llvm::ExecutionEngine::createJIT(MP, &errMsg);
     if (!EE) {
         cerr << errMsg << endl;
-        return;
+        return false;
     }
 
     // EE now owns MP
-
     llvm::Function* rphpMain = MP->getModule()->getFunction(entryFunction);
     if (!rphpMain) {
         cerr << "error: entry symbol not found: " << entryFunction << endl;
         MP->getModule()->dump();
         delete EE;
-        return;
+        return false;
     }
 
     EE->runStaticConstructorsDestructors(false);
 
-    // Call the rphp_main function with no arguments:
+    // Call entry function with no arguments:
     std::vector<llvm::GenericValue> noargs;
     llvm::GenericValue gv = EE->runFunction(rphpMain, noargs);
 
     EE->runStaticConstructorsDestructors(true);
 
     delete EE;
+    return true;
 
 }
 
+// lex and then dump tokens from the given source file
 void pDriver::dumpTokens(string fileName) {
 
     lexer::pLexer l(fileName);
@@ -150,6 +152,7 @@ void pDriver::dumpTokens(string fileName) {
 
 }
 
+// dump the parse tree from the given source file
 void pDriver::dumpAST(string fileName) {
 
     pModule m(fileName);
@@ -157,6 +160,7 @@ void pDriver::dumpAST(string fileName) {
 
 }
 
+// dump the generated IR code from the given source file
 void pDriver::dumpIR(string fileName) {
 
     pModule m(fileName);
@@ -165,5 +169,4 @@ void pDriver::dumpIR(string fileName) {
 }
 
 }
-
 

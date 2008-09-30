@@ -31,15 +31,13 @@ namespace rphp {
 class pModule;
 
 class pDriver {
-private:
-    std::string readFile(std::string fileName);
 
-    void JITmodule(llvm::ModuleProvider* MP, std::string entryFunction);
+    bool JITmodule(llvm::ModuleProvider* MP, std::string entryFunction);
 
 public:
 
-    void executeBC(std::string fileName);
-    void executeModule(pModule* pMod);
+    bool executeBC(std::string fileName);
+    bool executeModule(pModule* pMod);
 
     void dumpTokens(std::string fileName);
     void dumpAST(std::string fileName);

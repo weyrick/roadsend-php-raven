@@ -32,14 +32,20 @@ std::string pGenSupport::mangleModuleName(std::string inName) {
 
 }
 
-void pGenSupport::writeBitcode(llvm::Module* m, std::string outFile) {
+bool pGenSupport::writeBitcode(llvm::Module* m, std::string outFile) {
 
     assert(m != NULL);
+    assert(outFile.length() > 0);
 
     // TODO: real error handling
     std::ofstream OS(outFile.c_str(), std::ios_base::out|std::ios::trunc|std::ios::binary);
-    if (!OS.fail())
+    if (!OS.fail()) {
         llvm::WriteBitcodeToFile(m, OS);
+        return true;
+    }
+    else {
+        return false;
+    }
 
 }
 

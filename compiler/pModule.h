@@ -55,8 +55,8 @@ public:
     std::string getEntryFunctionName();
 
     void applyVisitor(AST::baseVisitor* v);
-    void lowerToIR(pCompileTarget* target);
-    void writeBitcode(std::string fileName);
+    bool lowerToIR(pCompileTarget* target);
+    bool writeBitcode(std::string fileName);
     void setLLVMModuleOwnership(bool v) { llvmModuleOwner = v; }
 
     void dumpAST();

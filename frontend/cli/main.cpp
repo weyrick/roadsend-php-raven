@@ -1,4 +1,5 @@
 
+#include <exception>
 #include <iostream>
 #include <vector>
 #include <string>
@@ -65,11 +66,9 @@ int main( int argc, char* argv[] )
     }
     else if (dumpToks) {
         driver.dumpTokens(inputFile);
-        return 0;
     }
     else if (dumpAST) {
         driver.dumpAST(inputFile);
-        return 0;
     }
     else if (dumpIR) {
         driver.dumpIR(inputFile);
@@ -92,18 +91,21 @@ int main( int argc, char* argv[] )
     }
 
     if (!target) {
+        // success
         return 0;
     }
 
     try {
         target->execute();
     }
-    catch (...) {
-        std::cerr << "problem executing target" << std::endl;
+    catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        delete target;
+        return 1;
     }
 
+    // success
     delete target;
-
     return 0;
 
 }

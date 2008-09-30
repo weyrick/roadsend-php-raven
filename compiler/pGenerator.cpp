@@ -62,6 +62,8 @@ void pGenerator::finalize(void) {
 
 void pGenerator::visit_literalBString(AST::literalBString* n) {
 
+    assert(n->getVal().size() > 0);
+    
     ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->getVal().size()+1);
 
     GlobalVariable* gvar_array__str = new GlobalVariable(

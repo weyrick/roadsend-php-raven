@@ -62,15 +62,16 @@ void pModule::dumpAST() {
 void pModule::dumpIR() {
 
     pCompileTarget* target = new pCompileTarget(fileName, "/");
-    lowerToIR(target);
-    llvmModule->dump();
+    if (lowerToIR(target))
+        llvmModule->dump();
     delete target;
 
 }
 
 
-void pModule::lowerToIR(pCompileTarget* target) {
+bool pModule::lowerToIR(pCompileTarget* target) {
 
+    assert(target != NULL);
     assert(llvmModule == NULL);
 
     llvmModule = new llvm::Module(fileName);
@@ -78,11 +79,14 @@ void pModule::lowerToIR(pCompileTarget* target) {
     applyVisitor(&codeGen);
     codeGen.finalize();
 
+    //bool broken = verifyModule(llvmModule, ReturnStatusAction);
+    return true;
+
 }
 
-void pModule::writeBitcode(std::string fileName) {
+bool pModule::writeBitcode(std::string fileName) {
 
-    pGenSupport::writeBitcode(llvmModule, fileName);
+    return pGenSupport::writeBitcode(llvmModule, fileName);
 
 }
 
