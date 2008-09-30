@@ -20,8 +20,6 @@
 #ifndef RPHP_PIRTYPES_H_
 #define RPHP_PIRTYPES_H_
 
-#include <vector>
-
 namespace llvm {
     class FunctionType;
     class Type;

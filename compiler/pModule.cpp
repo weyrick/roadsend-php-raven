@@ -19,21 +19,31 @@
 
 #include <llvm/Module.h>
 
-#include "pASTVisitors.h"
 #include "pModule.h"
 #include "pASTVisitors.h"
 #include "pGenerator.h"
 #include "pGenSupport.h"
+#include "pParser.h"
+#include "pCompileTarget.h"
 
 namespace rphp {
+
+pModule::pModule(std::string name): fileName(name), llvmModule(NULL), llvmModuleOwner(true) {
+
+    // TODO error handling
+    parser::parseSourceFile(fileName, this);
+
+}
 
 pModule::~pModule() {
     // free up statements
     for(astType::iterator s = ast.begin(); s != ast.end(); ++s) {
         delete *s;
     }
-    // only if codegen was performed
-    delete llvmModule;
+    // only if codegen was performed, and we are still the owner
+    // we aren't the owner if the llvmModule was executed in the JIT, for example
+    if (llvmModuleOwner)
+        delete llvmModule;
 }
 
 void pModule::applyVisitor(AST::baseVisitor* v) {
@@ -48,6 +58,16 @@ void pModule::dumpAST() {
     applyVisitor(&v);
 
 }
+
+void pModule::dumpIR() {
+
+    pCompileTarget* target = new pCompileTarget(fileName, "/");
+    lowerToIR(target);
+    llvmModule->dump();
+    delete target;
+
+}
+
 
 void pModule::lowerToIR(pCompileTarget* target) {
 

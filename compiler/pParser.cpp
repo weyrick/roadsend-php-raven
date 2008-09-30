@@ -31,9 +31,8 @@ void  rphpParseTrace(FILE *, char *);
 
 namespace rphp { namespace parser {
 
-pModule* parseSourceFile(std::string fileName) {
+void parseSourceFile(std::string fileName, pModule* pMod) {
 
-    pModule* pMod = new pModule(fileName);
     lexer::pLexer lexer(fileName);
 
     void* pParser = rphpParseAlloc(malloc);
@@ -64,8 +63,6 @@ pModule* parseSourceFile(std::string fileName) {
     rphpParse(pParser, 0, 0, pMod);
 
     rphpParseFree(pParser, free);
-
-    return pMod;
 
 }
 

@@ -23,7 +23,6 @@
 #include <string>
 
 namespace llvm {
-    class Module;
     class ModuleProvider;
 }
 
@@ -39,16 +38,12 @@ private:
 
 public:
 
-    pModule* createModule(std::string fileName);
-
-    void execute(std::string fileName);
     void executeBC(std::string fileName);
-    void executePHP(std::string fileName);
-    void executeModule(pModule* mod);
+    void executeModule(pModule* pMod);
 
     void dumpTokens(std::string fileName);
     void dumpAST(std::string fileName);
-//        void dumpIR(std::string fileName);
+    void dumpIR(std::string fileName);
 
 };
 

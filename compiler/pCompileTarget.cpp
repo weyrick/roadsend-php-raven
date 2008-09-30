@@ -26,15 +26,13 @@ namespace rphp {
 void pCompileTarget::execute(void) {
 
     std::string outputFile;
-    pDriver driver;
 
     // TODO: check stringOptions for outputFile
     outputFile = inputFile+".bc";
-    
-    pModule* m = driver.createModule(inputFile);
-    m->lowerToIR(this);
-    m->writeBitcode(outputFile);
-    delete m;
+
+    pModule  m(inputFile);
+    m.lowerToIR(this);
+    m.writeBitcode(outputFile);
 
 }
 

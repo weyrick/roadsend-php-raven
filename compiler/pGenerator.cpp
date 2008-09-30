@@ -26,8 +26,8 @@
 #include <llvm/Constants.h>
 #include <llvm/Instructions.h>
 
-#include "pCompileTarget.h"
 #include "pGenerator.h"
+#include "pCompileTarget.h"
 #include "pIRTypes.h"
 #include "pGenSupport.h"
 

@@ -16,30 +16,23 @@
 ;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
    ***** END LICENSE BLOCK *****
 */
-//
-#include <fstream>
+
 #include <iostream>
 #include <string>
-#include <unicode/unistr.h>
-#include <unicode/ustream.h>
 
-#include <boost/algorithm/string.hpp>
+#include <llvm/Module.h>
+#include <llvm/System/DynamicLibrary.h>
+#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/ModuleProvider.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/ModuleProvider.h>
+#include <llvm/ExecutionEngine/JIT.h>
+#include <llvm/ExecutionEngine/Interpreter.h>
+#include <llvm/ExecutionEngine/GenericValue.h>
 
-// JIT, bitcode
-#include "llvm/Module.h"
-#include "llvm/System/DynamicLibrary.h"
-#include "llvm/Bitcode/ReaderWriter.h"
-#include "llvm/ModuleProvider.h"
-#include "llvm/Support/IRBuilder.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/ModuleProvider.h"
-#include "llvm/ExecutionEngine/JIT.h"
-#include "llvm/ExecutionEngine/Interpreter.h"
-#include "llvm/ExecutionEngine/GenericValue.h"
-
+#include "pDriver.h"
 #include "pLexer.h"
 #include "pParser.h"
-#include "pDriver.h"
 #include "pModule.h"
 
 #include "pRuntime.h"
@@ -49,24 +42,13 @@ using namespace std;
 namespace rphp {
 
 
-/**
- * execute given file -- php source or bytecode
- */
-void pDriver::execute(string fileName) {
-    //cout << "executing file: " << fileName << endl;
-    // TODO: determine file type, then run executeBC or executePHP
-    executeBC(fileName);
-}
+void pDriver::executeModule(pModule* pMod) {
 
-void pDriver::executeModule(pModule* mod) {
-
-    llvm::Module* M = mod->getLLVMModule();
+    llvm::Module* M = pMod->getLLVMModule();
     assert(M != NULL);
 
     // create entry stub which creates a runtime instance
-
     llvm::ExistingModuleProvider* MP = new llvm::ExistingModuleProvider(M);
-    //JITmodule(MP, mod->getEntryFunctionName());
 
     string errMsg;
     llvm::ExecutionEngine* EE = llvm::ExecutionEngine::createJIT(MP, &errMsg);
@@ -75,11 +57,12 @@ void pDriver::executeModule(pModule* mod) {
         return;
     }
 
-    // EE now owns MP
+    // EE now owns MP and M, so tell pModule not to delete
+    pMod->setLLVMModuleOwnership(false);
 
-    llvm::Function* main = MP->getModule()->getFunction(mod->getEntryFunctionName());
+    llvm::Function* main = MP->getModule()->getFunction(pMod->getEntryFunctionName());
     if (!main) {
-        cerr << "error: entry symbol not found: " << mod->getEntryFunctionName() << endl;
+        cerr << "error: entry symbol not found: " << pMod->getEntryFunctionName() << endl;
         MP->getModule()->dump();
         delete EE;
         return;
@@ -160,38 +143,6 @@ void pDriver::JITmodule(llvm::ModuleProvider* MP, std::string entryFunction) {
 
 }
 
-/**
- * compile, then execute PHP source
- */
-void pDriver::executePHP(string fileName) {
-    cout << "compile and execute php file: " << fileName << endl;
-}
-
-
-/**
- * compile to llvm assembly
- */
-// void pDriver::compileToAsm(string fileName) {
-//     cout << "compiling " << fileName << " to llvm assembly " << endl;
-// }
-
-/**
- * compile to native binary
- */
-// void pDriver::compileToNative(string fileName) {
-//     cout << "compiling " << fileName << " to native binary " << endl;
-// }
-
-/**
- *  compile the given file to an pModule, which the caller then owns and must delete
- */
-pModule* pDriver::createModule(string fileName) {
-
-    return parser::parseSourceFile(fileName);
-
-}
-
-
 void pDriver::dumpTokens(string fileName) {
 
     lexer::pLexer l(fileName);
@@ -201,12 +152,17 @@ void pDriver::dumpTokens(string fileName) {
 
 void pDriver::dumpAST(string fileName) {
 
-    pModule* m = parser::parseSourceFile(fileName);
-    m->dumpAST();
-    delete m;
+    pModule m(fileName);
+    m.dumpAST();
 
 }
 
+void pDriver::dumpIR(string fileName) {
+
+    pModule m(fileName);
+    m.dumpIR();
+
+}
 
 }
 

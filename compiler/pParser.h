@@ -28,7 +28,7 @@ class pModule;
 
 namespace parser {
 
-pModule* parseSourceFile(std::string fileName);
+void parseSourceFile(std::string fileName, pModule* pMod);
 
 } } // namespace
 

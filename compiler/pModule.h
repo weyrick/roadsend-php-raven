@@ -43,13 +43,10 @@ private:
     std::string fileName;
     astType ast;
     llvm::Module* llvmModule;
+    bool llvmModuleOwner;
 
 public:
-    pModule(std::string name): fileName(name), llvmModule(NULL)
-    {
-
-    }
-
+    pModule(std::string name);
     ~pModule();
 
     astType& getAST() { return ast; }
@@ -60,7 +57,10 @@ public:
     void applyVisitor(AST::baseVisitor* v);
     void lowerToIR(pCompileTarget* target);
     void writeBitcode(std::string fileName);
+    void setLLVMModuleOwnership(bool v) { llvmModuleOwner = v; }
+
     void dumpAST();
+    void dumpIR();
 
 
 };

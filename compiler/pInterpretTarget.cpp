@@ -26,12 +26,10 @@ namespace rphp {
 void pInterpretTarget::execute(void) {
 
     pDriver driver;
-
-    pModule* m = driver.createModule(inputFile);
+    pModule* m = new pModule(inputFile);
     m->lowerToIR(this);
     driver.executeModule(m);
-    // TODO segfaults?
-    //delete m;
+    delete m;
 
 }
 

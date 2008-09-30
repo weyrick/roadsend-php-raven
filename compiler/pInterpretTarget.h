@@ -21,7 +21,6 @@
 #define RPHP_PINTERPRETTARGET_H_
 
 #include "pCompileTarget.h"
-#include "pStandAloneTargets.h"
 
 namespace rphp {
 
