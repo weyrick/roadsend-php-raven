@@ -8,6 +8,7 @@
 #include "pInterpretTarget.h"
 #include "pCompileTarget.h"
 #include "pStandAloneTargets.h"
+#include "pCompileAndLinkTarget.h"
 
 using namespace llvm;
 using namespace rphp;
@@ -72,6 +73,22 @@ int main( int argc, char* argv[] )
     }
     else if (dumpIR) {
         driver.dumpIR(inputFile);
+    }
+    else {
+        // default: compile and link single php script to native binary
+        std::string oFile = outputFile;
+        if (oFile.empty()) {
+            if (inputFile.find_first_of('.')) {
+                oFile = inputFile.substr(0, inputFile.find_first_of('.'));
+            }
+            else {
+                oFile = inputFile+".exe";
+            }
+        }
+        pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inputFile, "/", oFile);
+        if (!libSearchPath.empty())
+            saTarget->addLibSearchPath(libSearchPath);
+        target = saTarget;
     }
 
     if (!target) {
