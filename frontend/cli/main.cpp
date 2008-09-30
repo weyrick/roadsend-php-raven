@@ -31,6 +31,8 @@ int main( int argc, char* argv[] )
     cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
     cl::opt<std::string> mainFile ("main-file",cl::desc("Main entry script for stand alone programs"));
 
+    cl::opt<std::string> libSearchPath ("L",cl::desc("Add directory to linker search path"));
+
     cl::opt<bool> compileModule ("c", cl::desc("Compile a single source file to bitcode object file"));
     cl::opt<bool> linkSA ("link-sa", cl::desc("Link objects to stand alone executable"));
 
@@ -46,8 +48,18 @@ int main( int argc, char* argv[] )
         target = new pInterpretTarget(inputFile, "/");
     }
     else if (linkSA) {
+        if (outputFile.empty()) {
+            std::cerr << "no output file was specified" << std::endl;
+            return 1;
+        }
+        if (mainFile.empty()) {
+            std::cerr << "no main file was specified" << std::endl;
+            return 1;
+        }
         pStandAloneTarget* saTarget = new pStandAloneTarget(outputFile, mainFile);
         saTarget->addInputFile(inputFile);
+        if (!libSearchPath.empty())
+            saTarget->addLibSearchPath(libSearchPath);
         target = saTarget;
     }
     else if (dumpToks) {

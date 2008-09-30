@@ -18,6 +18,8 @@
 */
 
 #include <iostream>
+#include <vector>
+#include <string>
 
 #include <llvm/Module.h>
 #include <llvm/GlobalVariable.h>
@@ -25,6 +27,9 @@
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
 #include <llvm/Instructions.h>
+
+#include <llvm/Support/SystemUtils.h>
+#include <llvm/System/Program.h>
 
 #include "pGenSupport.h"
 #include "pStandAloneTargets.h"
@@ -106,8 +111,55 @@ Module* pStandAloneTarget::createStubModule(void) {
 void pStandAloneTarget::execute(void) {
 
     Module* M = createStubModule();
-    pGenSupport::writeBitcode(M, outputFile);
+    // TODO: outfile nameing
+    pGenSupport::writeBitcode(M, outputFile+".bc");
     delete M;
+
+    // the following is based on code from llvm/tools/llvm-ld.cpp
+
+    // link to native using llvm-ld
+    sys::Path ld = sys::Program::FindProgramByName("llvm-ld");
+    if (ld.isEmpty()) {
+        // TODO: error handling
+        std::cerr << "unable to link: llvm-ld not found" << std::endl;
+        return;
+    }
+
+    std::vector<std::string> args;
+    args.push_back("llvm-ld");
+    for (std::vector<std::string>::iterator i = libSearchPaths.begin(); i != libSearchPaths.end(); ++i) {
+        args.push_back("-L"+(*i));
+    }
+    args.push_back("-native");
+    args.push_back("-O4");
+    args.push_back("-lrphp-runtime");
+    args.push_back("-o");
+    args.push_back(outputFile);
+    args.push_back(outputFile+".bc");
+    for (std::vector<std::string>::iterator i = inputFiles.begin(); i != inputFiles.end(); ++i) {
+        args.push_back(*i);
+    }
+
+    std::vector<const char *> Args;
+    for (unsigned i = 0, e = args.size(); i != e; ++i)
+        Args.push_back(args[i].c_str());
+    Args.push_back(0);
+
+    std::vector<const char*>::const_iterator I = Args.begin(), E = Args.end();
+    for (; I != E; ++I)
+        if (*I)
+        cout << "'" << *I << "'" << " ";
+    std::cout << "\n" << std::flush;
+
+    std::string errMsg;
+    int R = sys::Program::ExecuteAndWait(
+        ld, &Args[0], 0, 0, 0, 0, &errMsg);
+
+    if (R != 0) {
+        // TODO: error handling
+        std::cerr << errMsg << std::endl;
+        return;
+    }
 
 }
 
