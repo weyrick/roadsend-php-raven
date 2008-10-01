@@ -30,12 +30,14 @@ public:
 
     virtual void visit_echoStmt(echoStmt*) = 0;
     virtual void visit_literalBString(literalBString*) = 0;
+    virtual void visit_inlineHtml(inlineHtml*) = 0;
 
 };
 
 class defaultVisitor: public baseVisitor {
 public:
     virtual void visit_echoStmt(echoStmt*);
+    virtual void visit_inlineHtml(inlineHtml*) = 0;
     virtual void visit_literalBString(literalBString*) = 0;
 
 };
@@ -43,6 +45,7 @@ public:
 class dumpVisitor: public defaultVisitor {
 public:
     void visit_echoStmt(echoStmt*);
+    void visit_inlineHtml(inlineHtml*);
     void visit_literalBString(literalBString* n);
 
 };

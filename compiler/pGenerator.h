@@ -49,6 +49,8 @@ class pGenerator: public AST::defaultVisitor {
 
     void createEntryPoint(void);
 
+    void doEchoLiteralStringIR(void);
+
 public:
 
     pGenerator(llvm::Module* m, pCompileTarget* t): llvmModule(m), target(t) {
@@ -62,6 +64,7 @@ public:
     // nodes
     void visit_echoStmt(AST::echoStmt*);
     void visit_literalBString(AST::literalBString*);
+    void visit_inlineHtml(AST::inlineHtml*);
 
 };
 

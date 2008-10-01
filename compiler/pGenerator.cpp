@@ -88,10 +88,27 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
 
 }
 
+void pGenerator::visit_inlineHtml(AST::inlineHtml* n) {
+
+    // generate the constant like a literalBString
+    visit_literalBString(static_cast<AST::literalBString*>(n));
+
+    // print it like an echo.
+    doEchoLiteralStringIR();
+
+}
+
 void pGenerator::visit_echoStmt(AST::echoStmt* n) {
 
     // codegen our rVal expression
     visit(n->getRVal());
+    doEchoLiteralStringIR();
+
+}
+
+// assumes literal is on top of stack
+void pGenerator::doEchoLiteralStringIR(void) {
+
     Value* rVal = valueStack.back();
     valueStack.pop();
 

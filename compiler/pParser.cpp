@@ -43,19 +43,26 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
     for (lexer::tokIteratorType iter = lexer.begin(); iter != lexer.end(); ++iter)
     {
         if ((*iter).id() == 0) {
-            // if we didn't match, we switch to state 1 which is our skip_toks (i.e. whitespace, comments)
-            iter.set_state(1);
-            // if we still haven't matched, then we have a lexer error or end of input
-            if ((*iter).id() == 0) {
-                std::cerr << "lexical scan error" << std::endl;
-                exit(-1);
-            }
-            // always switch back
-            iter.set_state(0);
+            std::cerr << "lexical scan error, unexpected: [" << (*iter).value() << "]" << std::endl;
+            exit(-1);
         }
         else {
-            // matched valid token
-            rphpParse(pParser, (*iter).id(), &(*iter).value(), pMod);
+            // matched valid token. either switch state, or pass to parser
+            if ((*iter).id() == T_OPEN_TAG) {
+                // go to php
+                iter.set_state(1);
+            }
+            else if ((*iter).id() == T_CLOSE_TAG) {
+                // go to html
+                iter.set_state(0);
+            }
+            else if ((*iter).id() == T_WHITESPACE) {
+                // skip
+            }
+            else {
+                // parse
+                rphpParse(pParser, (*iter).id(), &(*iter).value(), pMod);
+            }
         }
     }
 

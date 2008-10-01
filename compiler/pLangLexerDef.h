@@ -36,63 +36,37 @@ using namespace boost::spirit::lex;
 template <typename Lexer>
 struct rphpLangTokens : lexer_def<Lexer>
 {
-    typedef typename Lexer::token_set token_set;
 
     template <typename Self>
     void def (Self& self)
     {
 
-        if_ = token_def<>("if"/*, T_IF*/);
-        while_ = token_def<>("while"/*, T_WHILE*/);
-        else_ = token_def<>("else"/*, T_ELSE*/);
-        
-        semi = token_def<>(";", T_SEMI);
-        echo = token_def<>("echo", T_ECHO);
 
-        identifier = token_def<>("[a-zA-Z_][a-zA-Z0-9_]*"/*, T_IDENTIFIER*/);
+        // HTML (default) state tokens
+        self
+            = token_def<>("<\\?", T_OPEN_TAG)
+            | token_def<>(".+|\\n+", T_INLINE_HTML)
+            ;
 
-        //dqstring = token_def<>("\"([^\"\\\\]|\\\\.)*\"", T_CONSTANT_ENCAPSED_STRING);
-        dqstring = token_def<>("[\"][^\"]*[\"]", T_CONSTANT_ENCAPSED_STRING);
-        
-        variable = token_def<>("\\$[a-zA-Z_][a-zA-Z0-9_]*"/*, T_VARIABLE*/);
-        lnumber = token_def<>("[0-9]+"/*, T_LNUMBER*/);
-        
-        opentag = token_def<>("<\\?"/*, T_OPEN_TAG*/);
-        closetag = token_def<>("\\?>"/*, T_CLOSE_TAG*/);
-
-        skip_toks
-           = token_def<>("[ \\t\\n]+", T_WHITESPACE)
-           | token_def<>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/"/*, T_ML_COMMENT*/)
-           | token_def<>("\\/\\/.*$"/*, T_SL_COMMENT*/);
-
-        // associate the tokens and the token set with the lexer
-        self += token_def<>('(') | ')' | '{' | '}' | '=';
-        self += if_ | while_ | else_ | echo | opentag | closetag;
-        self += identifier | variable | lnumber | dqstring | semi;
-
-        // whitespace tokens in WS lexer state
-        self("WS") = skip_toks | opentag | closetag;
+        // PHP state tokens
+        self("PHP")
+            = token_def<>('(') | ')' | '{' | '}' | '='
+            | token_def<>(";", T_SEMI)
+            | token_def<>("\\?>", T_CLOSE_TAG)
+            | token_def<>("if"/*, T_IF*/)
+            | token_def<>("while"/*, T_WHILE*/)
+            | token_def<>("else"/*, T_ELSE*/)
+            | token_def<>("echo", T_ECHO)
+            | token_def<>("[a-zA-Z_][a-zA-Z0-9_]*"/*, T_IDENTIFIER*/) 
+            | token_def<>("\\$[a-zA-Z_][a-zA-Z0-9_]*"/*, T_VARIABLE*/) 
+            | token_def<>("[0-9]+"/*, T_LNUMBER*/)
+            | token_def<>("[ \\t\\n]+", T_WHITESPACE)
+            | token_def<>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/" /* multiline comment */)
+            | token_def<>("\\/\\/.*$" /* single line comment */)
+            | token_def<>("[\"][^\"]*[\"]", T_CONSTANT_ENCAPSED_STRING)
+            ;
 
     }
-
-    // TOKEN defs
-    // NOTE: tokens should use the default return type (tokenPairType below)
-
-    // these tokens have no value
-    token_def<> if_,
-                while_,
-                else_,
-                echo,
-                opentag,
-                closetag,
-                identifier,
-                variable,
-                dqstring,
-                lnumber,
-                semi;
-
-    // token set to be used as the skip parser (whitespace and comments)
-    token_set skip_toks;
 
 };
 

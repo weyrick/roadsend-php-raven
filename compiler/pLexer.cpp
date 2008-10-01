@@ -65,30 +65,30 @@ void pLexer::dumpTokens(void) {
     for (tokIteratorType iter = begin(); iter != end(); ++iter)
     {
         if ((*iter).id() == 0) {
-            // if we didn't match, we switch to state 1 which is our skip_toks (i.e. whitespace, comments)
-            iter.set_state(1);
-            // if we still haven't matched, then we have a lexer error or end of input
-            if ((*iter).id() == 0)
-                break;
-            val.str("");
-            if ((*iter).id() != T_WHITESPACE)
-                val << (*iter).value();
-            tokID = getTokenDescription((*iter).id());
-            if (tokID.size() == 0)
-                tokID = val.str();
-            std::cout << val.str() << " " << tokID << std::endl;
-            // always switch back
-            iter.set_state(0);
+            // no match
+            break;
         }
         else {
             // matched
+            // skip plain newlines in html state
             val.str("");
             if ((*iter).id() != T_WHITESPACE)
                 val << (*iter).value();
+            if (((*iter).state() == 0) && (val.str() == "\n"))
+                continue;
             tokID = getTokenDescription((*iter).id());
             if (tokID.size() == 0)
                 tokID = val.str();
             std::cout << val.str() << " " << tokID << std::endl;
+
+            if ((*iter).id() == T_OPEN_TAG) {
+                // go to php
+                iter.set_state(1);
+            }
+            else if ((*iter).id() == T_CLOSE_TAG) {
+                // go to html
+                iter.set_state(0);
+            }
         }
     }
 
@@ -102,17 +102,15 @@ const char* pLexer::getTokenDescription(const std::size_t t) {
             return "T_VARIABLE";*/
         case T_WHITESPACE:
             return "T_WHITESPACE";
-/*        case T_ML_COMMENT:
-            return "T_ML_COMMENT";
-        case T_SL_COMMENT:
-            return "T_SL_COMMENT";*/
+        case T_INLINE_HTML:
+            return "T_INLINE_HTML";
         case T_ECHO:
             return "T_ECHO";
-/*        case T_OPEN_TAG:
+        case T_OPEN_TAG:
             return "T_OPEN_TAG";
         case T_CLOSE_TAG:
             return "T_CLOSE_TAG";
-        case T_LNUMBER:
+/*        case T_LNUMBER:
             return "T_LNUMBER";
         case T_INLINE_HTML:
             return "T_INLINE_HTML";

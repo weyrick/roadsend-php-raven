@@ -26,11 +26,14 @@ void baseVisitor::visit(stmt* s) {
     // TODO: implement the dispatch better
     assert(s != NULL && "statement to visit is NULL");
     switch (s->getKind()) {
-    case AST::echoStmtKind:
-        visit_echoStmt(static_cast<AST::echoStmt*>(s));
+    case echoStmtKind:
+        visit_echoStmt(static_cast<echoStmt*>(s));
         break;
-    case AST::literalBStringKind:
-        visit_literalBString(static_cast<AST::literalBString*>(s));
+    case literalBStringKind:
+        visit_literalBString(static_cast<literalBString*>(s));
+        break;
+    case inlineHtmlKind:
+        visit_inlineHtml(static_cast<inlineHtml*>(s));
         break;
     }
 }
@@ -47,6 +50,10 @@ void dumpVisitor::visit_echoStmt(echoStmt* n) {
 
 void dumpVisitor::visit_literalBString(literalBString* n)  {
     std::cout << "literal bstring: " << n->getVal() << std::endl;
+}
+
+void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
+    std::cout << "inline HTML: " << n->getVal() << std::endl;
 }
 
 } } // namespace
