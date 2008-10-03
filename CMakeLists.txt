@@ -17,7 +17,8 @@ set(RPHP_RUNTIME_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/runtime/include)
 set(RPHP_COMPILER_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/compiler)
 
 Find_Package(Boost)
-FIND_PACKAGE(ICU)
+Find_Package(ICU)
+Find_Package(LLVM)
 
 #add_subdirectory(tools)
 add_subdirectory(runtime)

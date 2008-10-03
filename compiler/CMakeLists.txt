@@ -6,26 +6,11 @@ include_directories (
                      ${ICU_INCLUDE_DIRS}
                      ${RPHP_RUNTIME_INCLUDE_DIR}
                      ${RPHP_COMPILER_INCLUDE_DIR}
-                     ${LLVM_INCLUDE_DIRS}
+                     ${LLVM_INCLUDE_DIR}
                      ${Boost_INCLUDE_DIRS}
+                     # this one is for rphp_grammar generated files
                      ${CMAKE_CURRENT_BINARY_DIR}
                     )
-
-######
-
-# llvm rules
-
-# TODO: move this to a FindLLVM in cmake/modules
-# see frontend/cli/CMakeLists.txt as well
-EXECUTE_PROCESS(COMMAND llvm-config --libs core jit bitreader bitwriter linker interpreter OUTPUT_VARIABLE LLVM_LIBRARIES OUTPUT_STRIP_TRAILING_WHITESPACE)
-EXECUTE_PROCESS(COMMAND llvm-config --includedir OUTPUT_VARIABLE LLVM_INCLUDE_DIRS OUTPUT_STRIP_TRAILING_WHITESPACE)
-EXECUTE_PROCESS(COMMAND llvm-config --cppflags OUTPUT_VARIABLE LLVM_CPP_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-EXECUTE_PROCESS(COMMAND llvm-config --ldflags OUTPUT_VARIABLE LLVM_LD_FLAGS OUTPUT_STRIP_TRAILING_WHITESPACE)
-SEPARATE_ARGUMENTS(LLVM_LIBRARIES)
-SEPARATE_ARGUMENTS(LLVM_INCLUDE_DIRS)
-SEPARATE_ARGUMENTS(LLVM_CPP_FLAGS)
-
-add_definitions(${LLVM_CPP_FLAGS} -fPIC)
 
 #####
 
@@ -74,30 +59,37 @@ SET_SOURCE_FILES_PROPERTIES(rphp_grammar.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_SOUR
 
 ####
 
-# rphp-eval lib rules
+# source files that depend on llvm
+set(RPHP_LLVM_DEP_FILES
+    pGenerator.cpp
+    pGenSupport.cpp
+    pDriver.cpp
+    pStandAloneTargets.cpp
+    pModule.cpp
+    pIRTypes.cpp
+)
 
 set(EVAL_SRC_FILES
   rphp_grammar.cpp
   pLexer.cpp
   pASTVisitors.cpp
-  pDriver.cpp
   pParser.cpp
-  pModule.cpp
-  pGenerator.cpp
   pCompileTarget.cpp
   pInterpretTarget.cpp
-  pStandAloneTargets.cpp
   pCompileAndLinkTarget.cpp
   pLinkTarget.cpp
   pLibTargets.cpp
-  pGenSupport.cpp
-  pIRTypes.cpp
+  ${RPHP_LLVM_DEP_FILES}
+  ${LLVM_LIBS_INTERPRETER_OBJECTS}
 )
 
 add_library( rphp-eval SHARED ${EVAL_SRC_FILES} )
 set_target_properties( rphp-eval
-                       PROPERTIES LINK_FLAGS ${LLVM_LD_FLAGS}
+                       PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
                        # this tells cmake not to link the llvm libs into targets that link to rphp-eval
                        LINK_INTERFACE_LIBRARIES "" )
-target_link_libraries( rphp-eval rphp-runtime ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${LLVM_LIBRARIES})
-
+# these are llvm specific compile flags, needed only for source files that include llvm headers
+set_source_files_properties( ${RPHP_LLVM_DEP_FILES}
+                             PROPERTIES COMPILE_FLAGS ${LLVM_COMPILE_FLAGS}
+                           )
+target_link_libraries( rphp-eval rphp-runtime ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${LLVM_LIBS_CORE} ${LLVM_LIBS_INTERPRETER})
