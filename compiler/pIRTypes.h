@@ -41,6 +41,10 @@ public:
     // entry function for a single compiled php module
     llvm::FunctionType* moduleEntryFunType(void);
 
+    llvm::FunctionType* pVarBaseFunType();
+    llvm::Type* pVarType();
+    llvm::Type* pVarPointerType();
+
 };
 
 

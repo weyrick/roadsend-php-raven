@@ -29,11 +29,14 @@ void baseVisitor::visit(stmt* s) {
     case echoStmtKind:
         visit_echoStmt(static_cast<echoStmt*>(s));
         break;
+    case inlineHtmlKind:
+        visit_inlineHtml(static_cast<inlineHtml*>(s));
+        break;
     case literalBStringKind:
         visit_literalBString(static_cast<literalBString*>(s));
         break;
-    case inlineHtmlKind:
-        visit_inlineHtml(static_cast<inlineHtml*>(s));
+    case literalIntKind:
+        visit_literalInt(static_cast<literalInt*>(s));
         break;
     }
 }
@@ -48,12 +51,16 @@ void dumpVisitor::visit_echoStmt(echoStmt* n) {
     defaultVisitor::visit_echoStmt(n);
 }
 
+void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
+    std::cout << "inline HTML: " << n->getVal() << std::endl;
+}
+
 void dumpVisitor::visit_literalBString(literalBString* n)  {
     std::cout << "literal bstring: " << n->getVal() << std::endl;
 }
 
-void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
-    std::cout << "inline HTML: " << n->getVal() << std::endl;
+void dumpVisitor::visit_literalInt(literalInt* n)  {
+    std::cout << "literal int: " << n->getVal() << std::endl;
 }
 
 } } // namespace

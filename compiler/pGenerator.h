@@ -49,7 +49,15 @@ class pGenerator: public AST::defaultVisitor {
 
     void createEntryPoint(void);
 
-    void doEchoLiteralStringIR(void);
+    void emitEchoLiteralString(void);
+
+    // pVar
+    llvm::Value* emitVarCreate(void);
+    llvm::Value* emitVarCreate_pBString(llvm::Value*);
+    llvm::Value* emitVarCreate_pInt(llvm::Value*);
+
+    void emitVarConstruct(llvm::Value*);
+    void emitVarDestruct(llvm::Value*);
 
 public:
 
@@ -63,8 +71,9 @@ public:
 
     // nodes
     void visit_echoStmt(AST::echoStmt*);
-    void visit_literalBString(AST::literalBString*);
     void visit_inlineHtml(AST::inlineHtml*);
+    void visit_literalBString(AST::literalBString*);
+    void visit_literalInt(AST::literalInt*);
 
 };
 

@@ -98,8 +98,8 @@ void pLexer::dumpTokens(void) {
 const char* pLexer::getTokenDescription(const std::size_t t) {
 
     switch (t) {
-/*        case T_VARIABLE:
-            return "T_VARIABLE";*/
+        case T_VARIABLE:
+            return "T_VARIABLE";
         case T_WHITESPACE:
             return "T_WHITESPACE";
         case T_INLINE_HTML:
@@ -110,10 +110,8 @@ const char* pLexer::getTokenDescription(const std::size_t t) {
             return "T_OPEN_TAG";
         case T_CLOSE_TAG:
             return "T_CLOSE_TAG";
-/*        case T_LNUMBER:
+        case T_LNUMBER:
             return "T_LNUMBER";
-        case T_INLINE_HTML:
-            return "T_INLINE_HTML";
         case T_IF:
             return "T_IF";
         case T_ELSE:
@@ -121,7 +119,7 @@ const char* pLexer::getTokenDescription(const std::size_t t) {
         case T_WHILE:
             return "T_WHILE";
         case T_IDENTIFIER:
-            return "T_IDENTIFIER";*/
+            return "T_IDENTIFIER";
         case T_CONSTANT_ENCAPSED_STRING:
             return "T_CONSTANT_ENCAPSED_STRING";
     }

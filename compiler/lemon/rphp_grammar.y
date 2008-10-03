@@ -27,8 +27,15 @@ using namespace rphp;
 %type T_OPEN_TAG {int}
 %type T_CLOSE_TAG {int}
 
-// 
+// tokens
 %type T_INLINE_HTML {int}
+%type T_IF {int}
+%type T_WHILE {int}
+%type T_ELSE {int}
+
+// xxx temp, these are real nodes
+%type T_IDENTIFIER {int}
+%type T_VARIABLE {int}
 
 %syntax_error {  
   std::cerr << "Syntax error, unexpected: '" << *TOKEN << "'" << std::endl;
@@ -77,4 +84,7 @@ literal(A) ::= T_CONSTANT_ENCAPSED_STRING(B).
   else
     A = new AST::literalBString(std::string(start, --(*B).end()));
 }
+
+// literal integers (decimal)
+literal(A) ::= T_LNUMBER(B). { A = new AST::literalInt(std::string((*B).begin(), (*B).end())); }
 

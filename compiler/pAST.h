@@ -29,7 +29,8 @@ namespace rphp { namespace AST {
 enum nodeKind {
     echoStmtKind,
     literalBStringKind,
-    inlineHtmlKind
+    inlineHtmlKind,
+    literalIntKind
 };
 
 // statement base class
@@ -67,21 +68,29 @@ public:
 // literal expression base class
 struct literalExpr: public expr {
 
+    pBString val;
+
 public:
-    literalExpr(nodeKind k): expr(k) { }
+    literalExpr(nodeKind k, const pBString& v): expr(k), val(v) { }
+    
+    const pBString& getVal(void) { return val; }
 
 };
 
 // NODE: literal bstring
 struct literalBString: public literalExpr {
 
-    pBString val;
+public:
+    literalBString(const pBString& v): literalExpr(literalBStringKind, v) { }
+    literalBString(const pBString& v, nodeKind k): literalExpr(k, v) { }
+
+};
+
+// NODE: literal int
+struct literalInt: public literalExpr {
 
 public:
-    literalBString(const pBString& v): literalExpr(literalBStringKind), val(v) { }
-    literalBString(const pBString& v, nodeKind k): literalExpr(k), val(v) { }
-
-    const pBString& getVal(void) { return val; }
+    literalInt(const pBString& v): literalExpr(literalIntKind, v) { }
 
 };
 
