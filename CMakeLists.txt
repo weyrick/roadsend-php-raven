@@ -22,6 +22,7 @@ Find_Package(LLVM)
 
 #add_subdirectory(tools)
 add_subdirectory(runtime)
+add_subdirectory(runtime-ir)
 add_subdirectory(compiler)
 add_subdirectory(frontend/cli)
 
