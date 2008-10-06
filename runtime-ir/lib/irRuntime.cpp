@@ -37,6 +37,16 @@ extern "C" {
         e->outputManager->print(rphp::pBString(str));
     }
 
+    // print a pVar, coercing to string
+    void rphp_print_pVar(rphp::pRuntimeEngine* e, rphp::pVar v) {
+        v.convertToBString();
+        e->outputManager->print(v.getBString());
+    }
+
+    // create a new pVar from a bString
+    rphp::pVar rphp_make_pVar_from_cstr(char* str) {
+        return rphp::pVar(rphp::pBString(str));
+    }
 
 }
 

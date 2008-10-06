@@ -31,7 +31,11 @@ extern "C" {
 
     // print to runtime output buffer
     void rphp_print_cstr(rphp::pRuntimeEngine*, char* str);
+    
+    void rphp_print_pVar(rphp::pRuntimeEngine* e, rphp::pVar v);
 
+    rphp::pVar rphp_make_pVar_from_cstr(char* str);
+                                        
 }
 
 #endif /* RPHP_IRRUNTIME_H_ */
