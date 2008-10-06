@@ -35,6 +35,8 @@ extern "C" {
     void rphp_print_pVar(rphp::pRuntimeEngine* e, rphp::pVar v);
 
     rphp::pVar rphp_make_pVar_from_cstr(char* str);
+
+    void _make_pVar(void);
                                         
 }
 

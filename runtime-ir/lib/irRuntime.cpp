@@ -48,5 +48,10 @@ extern "C" {
         return rphp::pVar(rphp::pBString(str));
     }
 
+    void _make_pVar(void) {
+      rphp::pVar p;
+      p = 5;
+    }
+
 }
 
