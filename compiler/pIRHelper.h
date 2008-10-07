@@ -17,23 +17,25 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PIRTYPES_H_
-#define RPHP_PIRTYPES_H_
+#ifndef RPHP_PIRHELPER_H_
+#define RPHP_PIRHELPER_H_
 
 namespace llvm {
     class FunctionType;
     class Type;
+    class Module;
 }
 
 namespace rphp {
 
-class pIRTypes {
+class pIRHelper {
 
     llvm::FunctionType* moduleEntryFunTypeC;
+    llvm::Module* mod;
 
 public:
 
-    pIRTypes(void): moduleEntryFunTypeC(0) { }
+    pIRHelper(llvm::Module* m): moduleEntryFunTypeC(0), mod(m) { }
 
     // pointer to the runtime engine
     llvm::Type* runtimeEngineType(void);
@@ -42,7 +44,7 @@ public:
     llvm::FunctionType* moduleEntryFunType(void);
 
     llvm::FunctionType* pVarBaseFunType();
-    llvm::Type* pVarType();
+    const llvm::Type* pVarType();
     llvm::Type* pVarPointerType();
 
 };
@@ -50,4 +52,4 @@ public:
 
 } // namespace
 
-#endif /* RPHP_PIRTYPES_H_ */
+#endif /* RPHP_PIRHELPER_H_ */

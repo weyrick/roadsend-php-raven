@@ -25,7 +25,6 @@
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/ModuleProvider.h>
 #include <llvm/Support/MemoryBuffer.h>
-#include <llvm/ModuleProvider.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/ExecutionEngine/Interpreter.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
@@ -86,7 +85,6 @@ bool pDriver::executeModule(pModule* pMod) {
 // function and passing it a runtime instance
 bool pDriver::executeBC(string fileName) {
 
-    // Now we create the JIT.
     string errMsg;
     llvm::MemoryBuffer* mb = llvm::MemoryBuffer::getFile(fileName.c_str(), &errMsg);
     if (errMsg.length()) {

@@ -66,7 +66,7 @@ set(RPHP_LLVM_DEP_FILES
     pDriver.cpp
     pStandAloneTargets.cpp
     pModule.cpp
-    pIRTypes.cpp
+    pIRHelper.cpp
 )
 
 set(EVAL_SRC_FILES

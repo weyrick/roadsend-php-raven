@@ -24,7 +24,7 @@
 #include <string>
 #include <llvm/Support/IRBuilder.h>
 #include "pASTVisitors.h"
-#include "pIRTypes.h"
+#include "pIRHelper.h"
 
 namespace llvm {
     class Module;
@@ -37,35 +37,37 @@ class pCompileTarget;
 
 class pGenerator: public AST::defaultVisitor {
 
-    llvm::Module* llvmModule;
-    pCompileTarget* target;
-    pIRTypes IRTypes;
+private:
+    llvm::Module* llvmModule; // don't own
+    pCompileTarget* target; // don't own
+    pIRHelper* IRHelper; // own
 
     std::string entryFunctionName;
 
     llvm::IRBuilder currentBlock;
-    llvm::Value* runtimeEngine;
+    llvm::Value* runtimeEngine; // don't own
     std::queue<llvm::Value*> valueStack;
 
+private:
+    void loadAndLinkRuntimeIR(void);
     void createEntryPoint(void);
 
-    void emitEchoLiteralString(void);
+    //void emitEchoLiteralString(void);
 
     // pVar
+    /*
     llvm::Value* emitVarCreate(void);
     llvm::Value* emitVarCreate_pBString(llvm::Value*);
     llvm::Value* emitVarCreate_pInt(llvm::Value*);
 
     void emitVarConstruct(llvm::Value*);
     void emitVarDestruct(llvm::Value*);
-
+    */
+    
 public:
 
-    pGenerator(llvm::Module* m, pCompileTarget* t): llvmModule(m), target(t) {
-        createEntryPoint();
-    }
-
-    // destructor: we don't own any of our member objects
+    pGenerator(llvm::Module* m, pCompileTarget* t);
+    ~pGenerator(void);
 
     void finalize(void);
 

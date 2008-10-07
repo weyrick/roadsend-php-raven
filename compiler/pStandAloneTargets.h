@@ -20,8 +20,9 @@
 #ifndef RPHP_PSTANDALONETARGETS_H_
 #define RPHP_PSTANDALONETARGETS_H_
 
-#include "pIRTypes.h"
+#include "pIRHelper.h"
 #include "pLinkTarget.h"
+#include "pGenSupport.h"
 
 namespace rphp {
 
@@ -31,12 +32,18 @@ class pStandAloneTarget : public pLinkTarget {
 
 protected:
     std::string mainFile;
-    pIRTypes IRTypes;
+    pIRHelper* IRHelper;
 
     llvm::Module* createStubModule(void);
 
 public:
-    pStandAloneTarget(const std::string& outName, const std::string& mainName): mainFile(mainName), pLinkTarget(outName) { }
+    pStandAloneTarget(const std::string& outName, const std::string& mainName): mainFile(mainName), pLinkTarget(outName) {
+        IRHelper = new pIRHelper(pGenSupport::getRuntimeIR());
+    }
+
+    ~pStandAloneTarget(void) {
+        delete IRHelper;
+    }
 
     virtual void execute(void);
 

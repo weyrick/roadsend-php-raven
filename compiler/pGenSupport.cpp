@@ -18,7 +18,11 @@
 */
 
 #include <llvm/Module.h>
+#include <llvm/ModuleProvider.h>
+#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Bitcode/ReaderWriter.h>
+
+#include <iostream>
 #include <fstream>
 
 #include "pGenSupport.h"
@@ -46,6 +50,41 @@ bool pGenSupport::writeBitcode(llvm::Module* m, std::string outFile) {
     else {
         return false;
     }
+
+}
+
+
+llvm::Module* pGenSupport::readBitcode(std::string fileName) {
+
+    std::string errMsg;
+    llvm::MemoryBuffer* mb = llvm::MemoryBuffer::getFile(fileName.c_str(), &errMsg);
+    if (errMsg.length()) {
+        // TODO: errors
+        std::cerr << "error loading runtime IR file [" << fileName << "]: " << errMsg << std::endl;
+        exit(1);
+    }
+
+    llvm::ModuleProvider* mp = llvm::getBitcodeModuleProvider(mb, &errMsg);
+    if (errMsg.length()) {
+        // TODO: errors
+        std::cerr << "error parsing bitcode file [" << fileName << "]: " << errMsg << std::endl;
+        exit(1);
+    }
+
+    llvm::Module* mod =  mp->getModule();
+
+    // caller takes control of module
+    mp->releaseModule();
+    delete mp;
+
+    return mod;
+
+}
+
+llvm::Module* pGenSupport::getRuntimeIR() {
+
+    // TODO: ouch!
+    return readBitcode("/home/weyrick/workspace/rphp/runtime-ir/irRuntime.ir");
 
 }
 

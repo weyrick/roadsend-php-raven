@@ -51,7 +51,7 @@ Module* pStandAloneTarget::createStubModule(void) {
 
      // ** STARTUP **
      // startup function type
-     FunctionType *runtimeStartupFuncType = FunctionType::get(IRTypes.runtimeEngineType(), std::vector<const Type*>(), false);
+     FunctionType *runtimeStartupFuncType = FunctionType::get(IRHelper->runtimeEngineType(), std::vector<const Type*>(), false);
      // startup function
      Function *runtimeStartupFunc = Function::Create(runtimeStartupFuncType,
                                                      Function::ExternalLinkage,
@@ -62,8 +62,8 @@ Module* pStandAloneTarget::createStubModule(void) {
 
      // ** entry function call **
      std::vector<const Type*> printSig;
-     printSig.push_back(IRTypes.runtimeEngineType());
-     Function *entryFunc = Function::Create(IRTypes.moduleEntryFunType(),
+     printSig.push_back(IRHelper->runtimeEngineType());
+     Function *entryFunc = Function::Create(IRHelper->moduleEntryFunType(),
                                             Function::ExternalLinkage,
                                             pGenSupport::mangleModuleName(mainFile),
                                             M);
@@ -74,7 +74,7 @@ Module* pStandAloneTarget::createStubModule(void) {
 
      //  ** SHUTDOWN **
      // argument sig for shutdown function
-     std::vector<const Type*> engineSig(1, IRTypes.runtimeEngineType());
+     std::vector<const Type*> engineSig(1, IRHelper->runtimeEngineType());
      // shutdown function type
      FunctionType *runtimeDeleteFuncType = FunctionType::get(Type::VoidTy, engineSig, false);
      // shutdown function
@@ -131,7 +131,11 @@ void pStandAloneTarget::execute(void) {
         args.push_back("-L"+(*i));
     }
     args.push_back("-native");
-    args.push_back("-O4");
+    // TODO: opt flags -- full debug for now
+    args.push_back("-disable-opt");
+    args.push_back("-verify-each");
+    args.push_back("-v");
+    //
     args.push_back("-lrphp-runtime");
     args.push_back("-o");
     args.push_back(outputFile);
