@@ -47,7 +47,13 @@ public:
 };
 
 class dumpVisitor: public defaultVisitor {
+    int indentLevel;
+    void indent() { indentLevel += 2; }
+    void unindent() { indentLevel -= 2; }
+    void showindent();
 public:
+    dumpVisitor(void): indentLevel(0) { }
+    
     void visit_echoStmt(echoStmt*);
     void visit_inlineHtml(inlineHtml*);
     void visit_literalBString(literalBString* n);

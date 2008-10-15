@@ -48,20 +48,35 @@ void defaultVisitor::visit_echoStmt(echoStmt* n) {
     visit(n->getRVal());
 }
 
+// ** DUMP VISITOR **
+
+void dumpVisitor::showindent() {
+    if (indentLevel)
+        std::cout << std::string(" ", indentLevel);
+}
+
 void dumpVisitor::visit_echoStmt(echoStmt* n) {
-    std::cout << "echoStmt: ";
+    showindent();
+    std::cout << "(echoStmt:" << std::endl;
+    indent();
     defaultVisitor::visit_echoStmt(n);
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
 }
 
 void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
+    showindent();
     std::cout << "inline HTML: " << n->getVal() << std::endl;
 }
 
 void dumpVisitor::visit_literalBString(literalBString* n)  {
+    showindent();
     std::cout << "literal bstring: " << n->getVal() << std::endl;
 }
 
 void dumpVisitor::visit_literalInt(literalInt* n)  {
+    showindent();
     std::cout << "literal int: " << n->getVal() << std::endl;
 }
 
