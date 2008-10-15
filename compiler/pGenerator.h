@@ -39,6 +39,9 @@ class pCompileTarget;
 
 class pGenerator: public AST::defaultVisitor {
 
+public:
+    typedef std::vector<llvm::Value*> valueVectorType;
+
 private:
     llvm::Module* llvmModule; // don't own
     pCompileTarget* target; // don't own
@@ -48,11 +51,17 @@ private:
 
     llvm::IRBuilder currentBlock;
     llvm::Value* runtimeEngine; // don't own
+
+    llvm::Function* currentFunction;
+
     std::queue<llvm::Value*> valueStack;
+    std::queue<valueVectorType> destructList;
 
 private:
     void loadAndLinkRuntimeIR(void);
     void createEntryPoint(void);
+
+    llvm::Value* newVarOnStack(void);
 
     //void emitEchoLiteralString(void);
 

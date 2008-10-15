@@ -72,7 +72,7 @@ void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
 
 void dumpVisitor::visit_literalBString(literalBString* n)  {
     showindent();
-    std::cout << "literal bstring: " << n->getVal() << std::endl;
+    std::cout << "literal bstring: \"" << n->getVal() << "\"" << std::endl;
 }
 
 void dumpVisitor::visit_literalInt(literalInt* n)  {

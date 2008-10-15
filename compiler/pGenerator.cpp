@@ -93,15 +93,46 @@ void pGenerator::createEntryPoint(void) {
 
     // entry block
     currentBlock.SetInsertPoint(BasicBlock::Create("entry", initFun));
+    currentFunction = initFun;
+
+    destructList.push(valueVectorType());
 
 }
 
 void pGenerator::finalize(void) {
     // terminate entry function
     Function *initFun = llvmModule->getFunction(entryFunctionName);
+    // destructors in global module space
+    Function* destructor = llvmModule->getFunction("_ZN4rphp4pVarD1Ev");
+    assert(destructor != NULL);
+    for (valueVectorType::iterator i = destructList.back().begin(); i != destructList.back().end(); ++i) {
+        currentFunction->getEntryBlock().getInstList().push_back(CallInst::Create(destructor, *i));
+    }
+    destructList.pop();
+    // create return
     initFun->getEntryBlock().getInstList().push_back(ReturnInst::Create());
     // DEBUG
     verifyModule(*llvmModule);
+}
+
+// create a pVar on the stack. this handles construction
+// at the start of the current function, and destruction at it's end
+llvm::Value* pGenerator::newVarOnStack(void) {
+
+    
+    AllocaInst* pVarTmp = new AllocaInst(IRHelper->pVarType(), 0, "pVarTmp");
+    currentFunction->getEntryBlock().getInstList().push_front(pVarTmp);
+
+    Function* constructor = llvmModule->getFunction("_ZN4rphp4pVarC1Ev");
+    assert(constructor != NULL);
+    
+    CallInst* con = CallInst::Create(constructor, pVarTmp);
+    currentFunction->getEntryBlock().getInstList().push_back(con);
+
+    destructList.back().push_back(pVarTmp);
+
+    return pVarTmp;
+
 }
 
 void pGenerator::visit_literalBString(AST::literalBString* n) {
@@ -153,11 +184,8 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
     gvar_array__str->setInitializer(const_array_7);
 
     // allocate tmp pVar for return value
-    Value* pVarTmp = currentBlock.CreateAlloca(IRHelper->pVarType(), 0, "pVarTmp");
-    Function* constructor = llvmModule->getFunction("_ZN4rphp4pVarC1Ev");
-    assert(constructor != NULL);
-    currentBlock.CreateCall(constructor, pVarTmp);
-
+    Value* pVarTmp = newVarOnStack();
+    
     // convert cstr to pbstring
     Function* f = llvmModule->getFunction("rphp_make_pVar_from_cstr");
     assert(f != NULL);
