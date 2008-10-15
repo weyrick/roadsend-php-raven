@@ -61,7 +61,7 @@ private:
     void loadAndLinkRuntimeIR(void);
     void createEntryPoint(void);
 
-    llvm::Value* newVarOnStack(void);
+    llvm::Value* newVarOnStack(const char*);
 
     //void emitEchoLiteralString(void);
 

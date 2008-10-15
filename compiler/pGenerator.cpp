@@ -117,10 +117,10 @@ void pGenerator::finalize(void) {
 
 // create a pVar on the stack. this handles construction
 // at the start of the current function, and destruction at it's end
-llvm::Value* pGenerator::newVarOnStack(void) {
+llvm::Value* pGenerator::newVarOnStack(const char* name) {
 
     
-    AllocaInst* pVarTmp = new AllocaInst(IRHelper->pVarType(), 0, "pVarTmp");
+    AllocaInst* pVarTmp = new AllocaInst(IRHelper->pVarType(), 0, name);
     currentFunction->getEntryBlock().getInstList().push_front(pVarTmp);
 
     Function* constructor = llvmModule->getFunction("_ZN4rphp4pVarC1Ev");
@@ -184,7 +184,7 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
     gvar_array__str->setInitializer(const_array_7);
 
     // allocate tmp pVar for return value
-    Value* pVarTmp = newVarOnStack();
+    Value* pVarTmp = newVarOnStack("pBStrTmp");
     
     // convert cstr to pbstring
     Function* f = llvmModule->getFunction("rphp_make_pVar_from_cstr");
@@ -198,20 +198,29 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
 
 void pGenerator::visit_literalInt(AST::literalInt* n) {
 
-//     GlobalVariable* globalInt = new GlobalVariable(
-//     /*Type=*/IntegerType::get(32),
-//     /*isConstant=*/false,
-//     /*Linkage=*/GlobalValue::InternalLinkage,
-//     /*Initializer=*/0, // has initializer, specified below
-//     /*Name=*/".pInt",
-//     llvmModule);
-// 
-//     // TODO: others bases besides 10
-//     ConstantInt* const_int32 = ConstantInt::get(APInt(32,  n->getVal(), 10));
-// 
-//     globalInt->setInitializer(const_int32);
-// 
-//     valueStack.push(emitVarCreate_pInt(globalInt));
+    GlobalVariable* globalInt = new GlobalVariable(
+    /*Type=*/IntegerType::get(32),
+    /*isConstant=*/false,
+    /*Linkage=*/GlobalValue::InternalLinkage,
+    /*Initializer=*/0, // has initializer, specified below
+    /*Name=*/".pInt",
+    llvmModule);
+
+    // TODO: others bases besides 10
+    ConstantInt* const_int32 = ConstantInt::get(APInt(32,  n->getVal(), 10));
+
+    globalInt->setInitializer(const_int32);
+
+    // allocate tmp pVar for return value
+    Value* pVarTmp = newVarOnStack("pIntTmp");
+
+    // convert cstr to pbstring
+    Function* f = llvmModule->getFunction("rphp_make_pVar_from_pInt");
+    assert(f != NULL);
+    currentBlock.CreateCall2(f, pVarTmp, const_int32);
+
+    // push to stack
+    valueStack.push(pVarTmp);
 
 }
 

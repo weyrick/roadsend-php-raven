@@ -50,6 +50,11 @@ extern "C" {
         return rphp::pVar(rphp::pBString(str));
     }
 
+    // create a new pVar from a pInt
+    rphp::pVar rphp_make_pVar_from_pInt(rphp::pInt v) {
+        return rphp::pVar(v);
+    }
+
     void _make_pVar(void) {
       rphp::pVar p;
       p = 5;
