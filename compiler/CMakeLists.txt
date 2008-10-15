@@ -49,13 +49,13 @@ ADD_CUSTOM_COMMAND(
    ARGS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.y
    TARGET rphp-eval
    DEPENDS lemon
-   OUTPUTS rphp_grammar.cpp)
+   OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
 
 # Since rphp_grammar.c does not exists yet when cmake is run, mark
 # it as generated
-SET_SOURCE_FILES_PROPERTIES(rphp_grammar.cpp GENERATED)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp GENERATED)
 # make grammar depend on template so it regenerates if we change it
-SET_SOURCE_FILES_PROPERTIES(rphp_grammar.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/lempar.c)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/lempar.c)
 
 ####
 
@@ -70,7 +70,7 @@ set(RPHP_LLVM_DEP_FILES
 )
 
 set(EVAL_SRC_FILES
-  rphp_grammar.cpp
+  ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp
   pLexer.cpp
   pASTVisitors.cpp
   pParser.cpp

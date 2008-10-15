@@ -1,6 +1,8 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
+;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
 ;; as published by the Free Software Foundation; either version 2
@@ -84,7 +86,7 @@ llvm::Module* pGenSupport::readBitcode(std::string fileName) {
 llvm::Module* pGenSupport::getRuntimeIR() {
 
     // TODO: ouch!
-    return readBitcode("/home/weyrick/workspace/rphp/runtime-ir/irRuntime.ir");
+    return readBitcode("/home/weyrick/rphp/runtime-ir/irRuntime.ir");
 
 }
 

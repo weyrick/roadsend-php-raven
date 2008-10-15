@@ -16,9 +16,9 @@ MESSAGE( STATUS "CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH} )
 set(RPHP_RUNTIME_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/runtime/include)
 set(RPHP_COMPILER_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/compiler)
 
-Find_Package(Boost)
-Find_Package(ICU)
-Find_Package(LLVM)
+Find_Package(Boost REQUIRED)
+Find_Package(ICU REQUIRED)
+Find_Package(LLVM REQUIRED)
 
 #add_subdirectory(tools)
 add_subdirectory(runtime)
