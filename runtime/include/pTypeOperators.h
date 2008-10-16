@@ -21,6 +21,8 @@
 #ifndef RPHP_PTYPEOPERATIONS_H_
 #define RPHP_PTYPEOPERATIONS_H_
 
+#include <boost/lexical_cast.hpp>
+
 #include "pTypes.h"
 #include "pHash.h"
 #include "pObject.h"
@@ -128,13 +130,25 @@ public:
     }
 
     void operator()(pInt &v) {
-        // TODO: real conversion
-        var = pBString("some pInt");
+        using boost::lexical_cast;
+        using boost::bad_lexical_cast;
+        try {
+            var = pBString(lexical_cast<pBString>(v));
+        }
+        catch(bad_lexical_cast &) {
+            var = pBString("0");
+        }
     }
 
     void operator()(pFloat &v) {
-        // TODO: real conversion
-        var = pBString("some pFloat");
+        using boost::lexical_cast;
+        using boost::bad_lexical_cast;
+        try {
+            var = pBString(lexical_cast<pBString>(v));
+        }
+        catch(bad_lexical_cast &) {
+            var = pBString("0.0");
+        }
     }
 
     void operator()(pBString &v) { /* nothing */ }
