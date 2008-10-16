@@ -43,7 +43,10 @@ namespace rphp {
 
             pFunctionManager(pRuntimeEngine *r) : runtime(r) { }
             ~pFunctionManager() {
-                // TODO delete function signatures
+                // free function entries
+                for (functionRegistryType::iterator i = functionRegistry.begin(); i != functionRegistry.end(); ++i) {
+                    delete (*i).second;
+                }
             }
 
             void registerBuiltin(const pExtBase*, const pUString&, const pFunPointer1&);
