@@ -40,6 +40,12 @@ void baseVisitor::visit(stmt* s) {
     case literalIntKind:
         visit_literalInt(static_cast<literalInt*>(s));
         break;
+    case literalBoolKind:
+        visit_literalBool(static_cast<literalBool*>(s));
+        break;
+    case literalNullKind:
+        visit_literalNull(static_cast<literalNull*>(s));
+        break;
     }
 }
 
@@ -67,17 +73,32 @@ void dumpVisitor::visit_echoStmt(echoStmt* n) {
 
 void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
     showindent();
-    std::cout << "inline HTML: " << n->getVal() << std::endl;
+    std::cout << "inline HTML: " << n->getStringVal() << std::endl;
 }
 
 void dumpVisitor::visit_literalBString(literalBString* n)  {
     showindent();
-    std::cout << "literal bstring: \"" << n->getVal() << "\"" << std::endl;
+    std::cout << "literal bstring: \"" << n->getStringVal() << "\"" << std::endl;
 }
 
 void dumpVisitor::visit_literalInt(literalInt* n)  {
     showindent();
-    std::cout << "literal int: " << n->getVal() << std::endl;
+    std::cout << "literal int: " << n->getStringVal() << std::endl;
+}
+
+void dumpVisitor::visit_literalBool(literalBool* n)  {
+    showindent();
+    std::cout << "literal bool: ";
+    if (n->getBoolVal())
+        std::cout << "TRUE";
+    else
+        std::cout << "FALSE";
+    std::cout << std::endl;
+}
+
+void dumpVisitor::visit_literalNull(literalNull* n)  {
+    showindent();
+    std::cout << "literal NULL" << std::endl;
 }
 
 } } // namespace

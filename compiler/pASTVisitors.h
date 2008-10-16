@@ -34,6 +34,8 @@ public:
     virtual void visit_inlineHtml(inlineHtml*) = 0;
     virtual void visit_literalBString(literalBString*) = 0;
     virtual void visit_literalInt(literalInt*) = 0;
+    virtual void visit_literalBool(literalBool*) = 0;
+    virtual void visit_literalNull(literalNull*) = 0;
 
 };
 
@@ -43,6 +45,8 @@ public:
     virtual void visit_inlineHtml(inlineHtml*) = 0;
     virtual void visit_literalBString(literalBString*) = 0;
     virtual void visit_literalInt(literalInt*) = 0;
+    virtual void visit_literalBool(literalBool*) = 0;
+    virtual void visit_literalNull(literalNull*) = 0;
 
 };
 
@@ -58,6 +62,8 @@ public:
     void visit_inlineHtml(inlineHtml*);
     void visit_literalBString(literalBString* n);
     void visit_literalInt(literalInt*);
+    void visit_literalBool(literalBool*);
+    void visit_literalNull(literalNull*);
 
 };
 

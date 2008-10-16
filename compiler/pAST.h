@@ -30,9 +30,11 @@ namespace rphp { namespace AST {
 
 enum nodeKind {
     echoStmtKind,
-    literalBStringKind,
     inlineHtmlKind,
-    literalIntKind
+    literalBStringKind,
+    literalIntKind,
+    literalNullKind,
+    literalBoolKind
 };
 
 // statement base class
@@ -70,12 +72,13 @@ public:
 // literal expression base class
 struct literalExpr: public expr {
 
-    pBString val;
+    pBString stringVal;
 
 public:
-    literalExpr(nodeKind k, const pBString& v): expr(k), val(v) { }
+    literalExpr(nodeKind k): expr(k) { }
+    literalExpr(nodeKind k, const pBString& v): expr(k), stringVal(v) { }
     
-    const pBString& getVal(void) { return val; }
+    const pBString& getStringVal(void) { return stringVal; }
 
 };
 
@@ -93,6 +96,26 @@ struct literalInt: public literalExpr {
 
 public:
     literalInt(const pBString& v): literalExpr(literalIntKind, v) { }
+
+};
+
+// NODE: literal bool
+struct literalBool: public literalExpr {
+
+    bool boolVal;
+
+public:
+    literalBool(bool v): literalExpr(literalBoolKind), boolVal(v) { }
+
+    bool getBoolVal(void) { return boolVal; }
+
+};
+
+// NODE: literal null
+struct literalNull: public literalExpr {
+
+public:
+    literalNull(void): literalExpr(literalNullKind) { }
 
 };
 

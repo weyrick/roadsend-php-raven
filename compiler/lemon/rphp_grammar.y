@@ -23,6 +23,8 @@
 
 #include <iostream>
 #include <string>
+#include <cctype> // for toupper
+#include <algorithm>
 
 #include "pAST.h"
 #include "pModule.h"
@@ -103,3 +105,22 @@ literal(A) ::= T_CONSTANT_ENCAPSED_STRING(B).
 // literal integers (decimal)
 literal(A) ::= T_LNUMBER(B). { A = new AST::literalInt(std::string((*B).begin(), (*B).end())); }
 
+// literal identifier: null, true, false or string
+literal(A) ::= T_IDENTIFIER(B). {
+    // case insensitive checks
+    std::string ciTmp((*B).begin(), (*B).end());
+    transform(ciTmp.begin(), ciTmp.end(), ciTmp.begin(), toupper);
+    if (ciTmp == "NULL") {
+        A = new AST::literalNull();
+    }
+    else if (ciTmp == "TRUE") {
+        A = new AST::literalBool(true);
+    }
+    else if (ciTmp == "FALSE") {
+        A = new AST::literalBool(false);
+    }
+    else {
+        // default to normal string
+        A = new AST::literalBString(std::string((*B).begin(), (*B).end()));
+    }
+}

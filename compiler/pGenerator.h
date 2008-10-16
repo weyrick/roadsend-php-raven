@@ -87,6 +87,8 @@ public:
     void visit_inlineHtml(AST::inlineHtml*);
     void visit_literalBString(AST::literalBString*);
     void visit_literalInt(AST::literalInt*);
+    void visit_literalBool(AST::literalBool*);
+    void visit_literalNull(AST::literalNull*);
 
 };
 

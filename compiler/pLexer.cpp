@@ -121,7 +121,7 @@ const char* pLexer::getTokenDescription(const std::size_t t) {
         case T_WHILE:
             return "T_WHILE";
         case T_IDENTIFIER:
-            return "T_IDENTIFIER";
+            return "T_STRING";
         case T_CONSTANT_ENCAPSED_STRING:
             return "T_CONSTANT_ENCAPSED_STRING";
     }

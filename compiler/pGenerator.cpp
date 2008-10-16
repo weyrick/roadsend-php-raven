@@ -162,7 +162,7 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
     // turn it into a pVar and push
 //    valueStack.push(emitVarCreate_pBString(litStringRef));
 
-    ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->val.size()+1);
+    ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->getStringVal().size()+1);
 
     GlobalVariable* gvar_array__str = new GlobalVariable(
     /*Type=*/stringLiteralType,
@@ -173,7 +173,7 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
     llvmModule);
 
     // Constant Definitions
-    Constant* const_array_7 = ConstantArray::get(n->val.c_str(), true);
+    Constant* const_array_7 = ConstantArray::get(n->getStringVal().c_str(), true);
     std::vector<Constant*> const_ptr_8_indices;
     Constant* const_int32_9 = Constant::getNullValue(IntegerType::get(32));
     const_ptr_8_indices.push_back(const_int32_9);
@@ -207,7 +207,7 @@ void pGenerator::visit_literalInt(AST::literalInt* n) {
     llvmModule);
 
     // TODO: others bases besides 10
-    ConstantInt* const_int32 = ConstantInt::get(APInt(32,  n->getVal(), 10));
+    ConstantInt* const_int32 = ConstantInt::get(APInt(32,  n->getStringVal(), 10));
 
     globalInt->setInitializer(const_int32);
 
@@ -224,9 +224,17 @@ void pGenerator::visit_literalInt(AST::literalInt* n) {
 
 }
 
+void pGenerator::visit_literalBool(AST::literalBool* n) {
+
+}
+
+void pGenerator::visit_literalNull(AST::literalNull* n) {
+
+}
+
 void pGenerator::visit_inlineHtml(AST::inlineHtml* n) {
 
-    ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->val.size()+1);
+    ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->getStringVal().size()+1);
 
     GlobalVariable* gvar_array__str = new GlobalVariable(
     /*Type=*/stringLiteralType,
@@ -237,7 +245,7 @@ void pGenerator::visit_inlineHtml(AST::inlineHtml* n) {
     llvmModule);
 
     // Constant Definitions
-    Constant* const_array_7 = ConstantArray::get(n->val.c_str(), true);
+    Constant* const_array_7 = ConstantArray::get(n->getStringVal().c_str(), true);
     std::vector<Constant*> const_ptr_8_indices;
     Constant* const_int32_9 = Constant::getNullValue(IntegerType::get(32));
     const_ptr_8_indices.push_back(const_int32_9);
