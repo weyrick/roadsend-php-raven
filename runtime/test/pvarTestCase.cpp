@@ -163,9 +163,11 @@ void pvarTestCase::test_pHash() {
 // ** REF **
 pVar changeRef(pVar r) {
 
-    CPPUNIT_ASSERT( r.isRef() );
+    CPPUNIT_ASSERT( r.isBoxed() );
+    CPPUNIT_ASSERT( r.getPtr()->getRefCount() == 3 ); // (r, newr) from test_pVarRef, plus our r
 
-    pVarP r2(r.getRef());
+    pVarP r2(r.getPtr());
+    CPPUNIT_ASSERT( r2->getRefCount() == 4 ); // (r, newr) from test_pVarRef, plus our r and r2
     *r2 = 10;
 
     return pVar(r2);
@@ -174,18 +176,42 @@ pVar changeRef(pVar r) {
 
 void pvarTestCase::test_pVarRef() {
 
-    pVar r(pVarP(new pVar(5)));
+    pVarP ptr = new pVar(5);
+    pVar r(ptr);
 
-    CPPUNIT_ASSERT( r.isRef() );
-    CPPUNIT_ASSERT( r.getRef()->isInt() );
-    CPPUNIT_ASSERT( r.getRef()->getInt() == 5 );
+    // basic
+    CPPUNIT_ASSERT( r.isBoxed() );
+    CPPUNIT_ASSERT( r.getPtr()->isInt() );
+    CPPUNIT_ASSERT( r.getPtr()->getInt() == 5 );
+
+
+    // ref counting
+    CPPUNIT_ASSERT( ptr->getRefCount() == 2 ); // ptr and r
+    ptr.reset();
+    CPPUNIT_ASSERT( r.getPtr()->getRefCount() == 1 ); // r
+
+    pVar newr(r);
+    CPPUNIT_ASSERT( newr.getPtr()->getRefCount() == 2 ); // r, newr
+
+    // php reference flag
+    CPPUNIT_ASSERT( r.isRef() == false );
+    r.makeRef();
+    CPPUNIT_ASSERT( r.isRef() == true );
+    r.unmakeRef();
+    CPPUNIT_ASSERT( r.isRef() == false );
+
+    // ref flag only valid on boxed pvars
+    pVar x;
+    x.makeRef();
+    CPPUNIT_ASSERT( x.isRef() == false );
 
     pVar r2 = changeRef(r);
-    CPPUNIT_ASSERT( r.isRef() );
-    CPPUNIT_ASSERT( r.getRef()->isInt() );
-    CPPUNIT_ASSERT( r.getRef()->getInt() == 10 );
-    CPPUNIT_ASSERT( r.isRef() );
-    CPPUNIT_ASSERT( r.getRef() == r2.getRef() );
+    CPPUNIT_ASSERT( r.isBoxed() );
+    CPPUNIT_ASSERT( r.getPtr()->getRefCount() == 3 ); // r, r2, newr
+    CPPUNIT_ASSERT( r.getPtr()->isInt() );
+    CPPUNIT_ASSERT( r.getPtr()->getInt() == 10 );
+    CPPUNIT_ASSERT( r.isBoxed() );
+    CPPUNIT_ASSERT( r.getPtr() == r2.getPtr() );
 
     
 }
@@ -248,6 +274,6 @@ void pvarTestCase::test_visitor() {
     p.applyVisitor<tvisitor>();
     // object
     // resource
-    p = new pVar(1);
+    p = pVarP(new pVar(1));
     p.applyVisitor<tvisitor>();
 }

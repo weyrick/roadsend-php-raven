@@ -24,6 +24,7 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/intrusive_ptr.hpp>
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -67,7 +68,7 @@ typedef boost::shared_ptr<pResource> pResourceP;
 
 // a shared container for pvar variables: php reference variables
 class pVar;
-typedef boost::shared_ptr<pVar> pVarP;
+typedef boost::intrusive_ptr<pVar> pVarP;
 
 // main pVar variant type
 typedef boost::variant< pTriState,
@@ -94,7 +95,7 @@ typedef enum {
     pVarHashType_     = 5,
     pVarObjectType_   = 6,
     pVarResourceType_ = 7,
-    pVarRefType_      = 8
+    pVarPtrType_      = 8
 } pVarWhichType_;
 
 // this should be used by user code
@@ -108,7 +109,7 @@ typedef enum {
     pVarHashType,
     pVarObjectType,
     pVarResourceType,
-    pVarRefType
+    pVarPtrType
 } pVarType;
     
 // note, pUInt is not a base PHP type (all PHP numbers are signed)

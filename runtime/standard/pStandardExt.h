@@ -35,7 +35,7 @@ namespace rphp {
         void extensionStartup();
         void extensionShutdown();
 
-        pVar strlen(pVar str);
+        pInt strlen(pVar str);
 
     };
 

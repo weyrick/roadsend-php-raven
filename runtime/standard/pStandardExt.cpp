@@ -37,7 +37,7 @@ void pStandardExt::extensionShutdown() {
 
 /* Library Implementation */
 
-pVar pStandardExt::strlen(pVar v) {
+pInt pStandardExt::strlen(pVar v) {
     return (pInt)v.convertToBString().length();
 }
 

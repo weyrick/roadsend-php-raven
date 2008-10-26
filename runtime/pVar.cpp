@@ -75,6 +75,28 @@ bool pVar::evalAsBool() const {
     return v.convertToBool();
 }
 
+void intrusive_ptr_add_ref(pVar* v) {
+    v->incRefCount();
+#ifdef RPHP_PVAR_DEBUG
+    std::cout << "pVarP [" << v << "]: inc ref count, now: " << v->getRefCount() << std::endl;
+#endif
+}
+
+void intrusive_ptr_release(pVar* v) {
+    v->decRefCount();
+    boost::int32_t c = v->getRefCount();
+#ifdef RPHP_PVAR_DEBUG
+    std::cout << "pVarP [" << v << "]: dec ref count, now: " << c << std::endl;
+#endif
+    if (c == 0) {
+        delete v;
+    }
+    else if (c == 1) {
+        // if refcount drops to 1, ensure the pVar is not flagged as a php reference
+        v->unmakeRef();
+    }
+}
+
 std::ostream& operator << (std::ostream& os, const pVar& v)
 {
     return os << v.pVarData_ << std::endl;

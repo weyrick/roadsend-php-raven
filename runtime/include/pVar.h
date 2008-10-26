@@ -21,46 +21,89 @@
 #ifndef RPHP_PVAR_H_
 #define RPHP_PVAR_H_
 
+#include <boost/cstdint.hpp>
+
 #include <iostream>
 #include "pTypes.h"
+
+// each pVar holds an int32 which stores both refcount (lower 31 bits)
+// and the "is php reference" flag (high bit)
+#define PVAR_RCNT_BITS 0x7fffffff
+#define PVAR_RFLAG_BIT 0x80000000
 
 namespace rphp {
 
 class pVar {
 
 private:
+    // variant
     pVarDataType pVarData_;
+    // ref count (lower 31) and ref flag (high bit)
+    boost::int32_t refData;
 
 public:
 
     /* constructors */
 
     // default null
-    pVar(void): pVarData_(pNull) { }
+    pVar(void): pVarData_(pNull), refData(0) {
+#ifdef RPHP_PVAR_DEBUG
+        std::cout << "pVar [" << this << "]: default construct (pNull)" << std::endl;
+#endif
+    }
 
     // generic
     template <typename T>
-    pVar(const T &v): pVarData_(v) { }
+    pVar(const T &v): pVarData_(v), refData(0) {
+#ifdef RPHP_PVAR_DEBUG
+        std::cout << "pVar [" << this << "]: generic construct to: " << pVarData_.which() << std::endl;
+#endif
+    }
 
     // some specializations to avoid ambiguity
 
     // default to binary strings
-    pVar(const char* str): pVarData_(pBString(str)) { }
+    pVar(const char* str): pVarData_(pBString(str)), refData(0) {
+#ifdef RPHP_PVAR_DEBUG
+        std::cout << "pVar [" << this << "]: binary string construct" << std::endl;
+#endif
+    }
     // specify type of string to make from literal
-    pVar(const char* str, pVarType t) {
+    pVar(const char* str, pVarType t): refData(0) {
         if (t == pVarUStringType) {
             pVarData_ = pUStringP(new UnicodeString(str));
         }
         else {
             pVarData_ = pBString(str);
         }
+#ifdef RPHP_PVAR_DEBUG
+        std::cout << "pVar [" << this << "]: string construct with type specification: " << t << std::endl;
+#endif
     }
-    pVar(int i): pVarData_(pInt(i)) { }
+    pVar(int i): pVarData_(pInt(i)), refData(0) {
+#ifdef RPHP_PVAR_DEBUG
+        std::cout << "pVar [" << this << "]: int construct: " << i << std::endl;
+#endif
+    }
 
     // convenience function for creating a new empty hash
     void newEmptyHash(void);
 
     /* default copy constructor */
+#ifdef RPHP_PVAR_DEBUG
+    pVar(pVar const& v) {
+        std::cout << "pVar [" << this << "]: copy construct from type: " << v.getType() << std::endl;
+        pVarData_ = v.pVarData_;
+        refData = v.refData;
+    }
+#endif
+
+    /* default destructor */
+#ifdef RPHP_PVAR_DEBUG
+    ~pVar(void) {
+        std::cout << "pVar [" << this << "]: destruct" << std::endl;
+    }
+#endif    
 
     /* assignment */
     template <typename T>
@@ -70,6 +113,33 @@ public:
     // default to binary strings
     void operator=(const char* str) { pVarData_ = pBString(str); }
     void operator=(int i) { pVarData_ = pInt(i); }
+
+    /* reference counting counting */
+    inline boost::int32_t getRefCount(void) {
+        // note, refcount only makes sense if variant type is NOT pVarP
+        return refData & PVAR_RCNT_BITS;
+    }
+
+    inline boost::int32_t incRefCount(void) {
+        // TODO: overflow?
+        refData += 1;
+    }
+    inline boost::int32_t decRefCount(void) {
+        refData -= 1;
+    }
+
+    /* php reference variable flag */
+    inline bool isRef(void) {
+        return refData & PVAR_RFLAG_BIT;
+    }
+    // this only make sense when the variant type is pVarP,
+    inline void makeRef(void) {
+        if (pVarData_.which() == pVarPtrType_)
+            refData |= PVAR_RFLAG_BIT;
+    }
+    inline void unmakeRef(void) {
+        refData ^= PVAR_RFLAG_BIT;
+    }
 
     /* custom visitors */
     template <typename T>
@@ -106,8 +176,8 @@ public:
     bool isResource() const {
         return (pVarData_.which() == pVarResourceType_);
     }
-    bool isRef() const {
-        return (pVarData_.which() == pVarRefType_);
+    bool isBoxed() const {
+        return (pVarData_.which() == pVarPtrType_);
     }
 
     // stream interface
@@ -207,15 +277,19 @@ public:
         return boost::get<const pResourceP&>(pVarData_);
     }
     
-    pVarP& getRef() {
+    pVarP& getPtr() {
         return boost::get<pVarP&>(pVarData_);
     }
     
-    const pVarP& getRef() const {
+    const pVarP& getPtr() const {
         return boost::get<const pVarP&>(pVarData_);
     }
 
 };
+
+// used by boost::instrusive_ptr to handle ref counting
+void intrusive_ptr_add_ref(pVar* v);
+void intrusive_ptr_release(pVar* v);
 
 } /* namespace rphp */
 
