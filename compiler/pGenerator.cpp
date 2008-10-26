@@ -198,18 +198,18 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
 
 void pGenerator::visit_literalInt(AST::literalInt* n) {
 
-    GlobalVariable* globalInt = new GlobalVariable(
-    /*Type=*/IntegerType::get(32),
-    /*isConstant=*/false,
-    /*Linkage=*/GlobalValue::InternalLinkage,
-    /*Initializer=*/0, // has initializer, specified below
-    /*Name=*/".pInt",
-    llvmModule);
+//     GlobalVariable* globalInt = new GlobalVariable(
+//     /*Type=*/IntegerType::get(32),
+//     /*isConstant=*/false,
+//     /*Linkage=*/GlobalValue::InternalLinkage,
+//     /*Initializer=*/0, // has initializer, specified below
+//     /*Name=*/".pInt",
+//     llvmModule);
 
-    // TODO: others bases besides 10
-    ConstantInt* const_int32 = ConstantInt::get(APInt(32,  n->getStringVal(), 10));
+    // TODO: other bases besides 10
+    ConstantInt* const_int = ConstantInt::get(APInt(32,  n->getStringVal(), 10));
 
-    globalInt->setInitializer(const_int32);
+//    globalInt->setInitializer(const_int32);
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pIntTmp");
@@ -217,7 +217,7 @@ void pGenerator::visit_literalInt(AST::literalInt* n) {
     // convert cstr to pbstring
     Function* f = llvmModule->getFunction("rphp_make_pVar_from_pInt");
     assert(f != NULL);
-    currentBlock.CreateCall2(f, pVarTmp, const_int32);
+    currentBlock.CreateCall2(f, pVarTmp, const_int);
 
     // push to stack
     valueStack.push(pVarTmp);
@@ -226,9 +226,37 @@ void pGenerator::visit_literalInt(AST::literalInt* n) {
 
 void pGenerator::visit_literalBool(AST::literalBool* n) {
 
+//     GlobalVariable* globalInt = new GlobalVariable(
+//     /*Type=*/IntegerType::get(32),
+//     /*isConstant=*/false,
+//     /*Linkage=*/GlobalValue::InternalLinkage,
+//     /*Initializer=*/0, // has initializer, specified below
+//     /*Name=*/".pBool",
+//     llvmModule);
+
+    ConstantInt* cbool = ConstantInt::get(APInt(32,  (n->getBoolVal()) ? "1" : "0", 10));
+
+//    globalInt->setInitializer(const_int32);
+
+    // allocate tmp pVar for return value
+    Value* pVarTmp = newVarOnStack("pBoolTmp");
+
+    // convert cstr to pbstring
+    Function* f = llvmModule->getFunction("rphp_make_pVar_bool");
+    assert(f != NULL);
+    currentBlock.CreateCall2(f, pVarTmp, cbool);
+
+    // push to stack
+    valueStack.push(pVarTmp);
+
 }
 
 void pGenerator::visit_literalNull(AST::literalNull* n) {
+    
+    Value* pVarTmp = newVarOnStack("pNullTmp");
+
+    // push to stack
+    valueStack.push(pVarTmp);
 
 }
 

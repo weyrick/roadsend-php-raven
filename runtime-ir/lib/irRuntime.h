@@ -39,6 +39,8 @@ extern "C" {
     rphp::pVar rphp_make_pVar_from_cstr(char* str);
 
     rphp::pVar rphp_make_pVar_from_pInt(rphp::pInt v);
+    
+    rphp::pVar rphp_make_pVar_bool(int v);
 
     void _make_pVar(void);
                                         

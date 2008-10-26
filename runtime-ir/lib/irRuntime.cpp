@@ -55,6 +55,12 @@ extern "C" {
         return rphp::pVar(v);
     }
 
+    
+    // create a new bool pVar
+    rphp::pVar rphp_make_pVar_bool(int v) {
+        return (v) ? rphp::pVar(rphp::pTrue) : rphp::pVar(rphp::pFalse);
+    }
+    
     void _make_pVar(void) {
       rphp::pVar p;
       p = 5;

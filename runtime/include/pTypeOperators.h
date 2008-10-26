@@ -126,7 +126,12 @@ public:
     pVar_convertToBStringVisitor(pVarDataType &v) : var(v) { }
 
     void operator()(pTriState &v) {
+        if (pNull(v)) {
+            var = pBString("");
+        }
+        else {
             (v) ? var = pBString("1") : var = pBString("0");
+        }
     }
 
     void operator()(pInt &v) {
