@@ -23,7 +23,7 @@ else (LLVM_INCLUDE_DIR)
   )
   
   find_program(LLVM_GXX_EXECUTABLE
-      NAMES llvm-g++
+      NAMES llvm-g++ llvmg++
       PATHS
       /opt/local/bin
   )
