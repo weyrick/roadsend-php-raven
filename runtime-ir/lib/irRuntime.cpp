@@ -2,6 +2,7 @@
  * Roadsend PHP Compiler Runtime Libraries
  *
  * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ *                    Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -20,6 +21,8 @@
 
 #include <iostream>
 #include "irRuntime.h"
+#include <unicode/ustream.h>
+#include "pTypes.h"
 
 extern "C" {
 
@@ -59,6 +62,11 @@ extern "C" {
     // create a new bool pVar
     rphp::pVar rphp_make_pVar_bool(int v) {
         return (v) ? rphp::pVar(rphp::pTrue) : rphp::pVar(rphp::pFalse);
+    }
+
+    rphp::pVar rphp_make_object(const UnicodeString& className)
+    {
+	return rphp::pObjectP( new rphp::pObject(className) );
     }
     
     void _make_pVar(void) {

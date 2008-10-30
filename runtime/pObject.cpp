@@ -2,6 +2,7 @@
  * Roadsend PHP Compiler Runtime Libraries
  *
  * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ *               2008 Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -19,7 +20,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
+#include <unicode/unistr.h>
 #include "pObject.h"
+#include "pRuntime.h"
 
 namespace rphp {
 
@@ -27,6 +30,15 @@ namespace rphp {
         return os << "pobject" << std::endl;
     }
 
+    pObject::pObject( const pUString& className )
+	: _properties(),
+	  _runtimeFunctions()
+    {
+	// find pClass in class hash table and associate it with the object
+//	_class = rphp::pRuntime::getClass( className );
+	// copy properties
+	_properties = _class->properties();
+    }
 }
 
 

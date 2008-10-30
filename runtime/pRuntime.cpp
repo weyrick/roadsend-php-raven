@@ -44,6 +44,16 @@ pRuntimeEngine::~pRuntimeEngine() {
     delete extManager;
 }
 
+    rphp::pClass* pRuntimeEngine::getClass( const pUString& className )
+    {
+	return _classes[ className ];
+    }
+
+    void pRuntimeEngine::addClass( pClass* class_ )
+    {
+	_classes[ class_->name() ] = class_;	
+    }
+    
 } /* end namespace rphp */
 
 

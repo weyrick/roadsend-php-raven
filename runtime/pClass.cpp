@@ -1,8 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
- *                    Thomas Moenicke <tm@php-qt.org>
+ * Copyright (c) 2008 Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -19,34 +18,42 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_IRRUNTIME_H_
-#define RPHP_IRRUNTIME_H_
+#include "pVar.h"
+#include "pHash.h"
+#include "pObject.h"
 
-#include "pRuntime.h"
+#include <boost/foreach.hpp>
 
-extern "C" {
-
-    // create a new runtime engine
-    rphp::pRuntimeEngine* rphp_newRuntimeEngine();
-
-    // destroy runtime engine
-    void rphp_deleteRuntimeEngine(rphp::pRuntimeEngine*);
-
-    // print to runtime output buffer
-    void rphp_print_cstr(rphp::pRuntimeEngine*, char* str);
+namespace rphp
+{
     
-    void rphp_print_pVar(rphp::pRuntimeEngine* e, rphp::pVar v);
+    class pHash;
 
-    rphp::pVar rphp_make_pVar_from_cstr(char* str);
+    pClass::pClass()
+    {
+    }
 
-    rphp::pVar rphp_make_pVar_from_pInt(rphp::pInt v);
+    pHash pClass::properties()
+    {
+	pHash result;
+/*
+  BOOST_FOREACH( pVar property, _properties )
+    {
+	result.append( property );
+    }
+*/
+	return result;
+    }
 
-    rphp::pVar rphp_make_object( const UnicodeString& className );
+    const pUString& pClass::name() const
+    {
+	return _name;
+    }
+
+    void pClass::setName( const pUString& name )
+    {
+	_name = name;
+    }
     
-    rphp::pVar rphp_make_pVar_bool(int v);
-
-    void _make_pVar(void);
-                                        
 }
 
-#endif /* RPHP_IRRUNTIME_H_ */

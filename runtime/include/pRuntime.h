@@ -2,6 +2,7 @@
  * Roadsend PHP Compiler Runtime Libraries
  *
  * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ *               2008 Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -33,6 +34,8 @@
 
 namespace rphp {
 
+    typedef boost::unordered_map<pUString, pClass*> pClassList;
+    
     class pExtManager;
 
     class pRuntimeEngine {
@@ -45,7 +48,7 @@ namespace rphp {
             // class manager
             // --> similar to funciton manager, but stores builtin and currently defined classes
             // --> interface for new class definition
-
+	    pClassList _classes;
 
             // global data:
             // --> $GLOBAL and other superglobal symbol table, argc, argv,
@@ -66,6 +69,9 @@ namespace rphp {
             pRuntimeEngine();
             ~pRuntimeEngine();
 
+	    pClass* getClass( const pUString& className );
+	    void addClass( pClass* class_ );
+	    
             // function manager
             // --> store list of available functions, including builtins (from extension manager) which stay on page reset,
             //     and the currently defined via php code, which are reset each page

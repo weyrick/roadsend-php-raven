@@ -2,6 +2,7 @@
  * Roadsend PHP Compiler Runtime Libraries
  *
  * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ *               2008 Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -22,7 +23,7 @@
 #define RPHP_POBJECT_H_
 
 #include <iostream>
-
+#include <unicode/unistr.h>
 #include "pHash.h"
 
 /*
@@ -47,9 +48,17 @@ namespace rphp {
     };
 
     class pClass {
-
+    private:
+	pHash _properties;
+	pHash _functions;
+	pUString _name;
+    public:
+	pClass();
+	pHash properties();
             // bitset of class flags: abstract, final, interface, abstract-implied
             // class name, case sensitive (as declared)
+	const pUString& name() const;
+	void setName( const pUString& name );
             // canonical name, lowercased
             // list of parent classes (only 1, unless interface)
             // list of interfaces the class implements
@@ -61,15 +70,17 @@ namespace rphp {
 
     class pObject {
         private:
-            pHash properties; // copied from declared
-            const pClass* parentClass;
+            pHash _properties; // copied from declared
+            const pClass* _parentClass;
+	    pHash _runtimeFunctions;
+	    pClass* _class;
             // object instance id
             // hash for properties created on the fly
         public:
-            pObject() : properties() { }
+            pObject(const pUString& className);
 
             const pHash::size_type getNumProperties() {
-                return properties.getSize();
+                return _properties.getSize();
             }
 
     };

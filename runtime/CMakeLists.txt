@@ -12,6 +12,7 @@ set(RUNTIME_SRC_FILES
   pResource.cpp
   pHash.cpp
   pObject.cpp
+  pClass.cpp
   pRuntime.cpp
   pOutputBuffer.cpp
   pOutputManager.cpp
