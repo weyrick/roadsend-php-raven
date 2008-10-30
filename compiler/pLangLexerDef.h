@@ -46,7 +46,7 @@ struct rphpLangTokens : lexer_def<Lexer>
 
         // HTML (default) state tokens
         self
-            = token_def<>("<\\?", T_OPEN_TAG)
+            = token_def<>("<\\?|<\\?PHP|<\\?php", T_OPEN_TAG)
             | token_def<>(".+|\\n+", T_INLINE_HTML)
             ;
 
