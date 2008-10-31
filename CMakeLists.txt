@@ -20,7 +20,6 @@ Find_Package(Boost REQUIRED)
 Find_Package(ICU REQUIRED)
 Find_Package(LLVM REQUIRED)
 
-#add_subdirectory(tools)
 add_subdirectory(runtime)
 add_subdirectory(runtime-ir)
 add_subdirectory(compiler)
