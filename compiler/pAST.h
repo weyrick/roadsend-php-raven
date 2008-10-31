@@ -28,6 +28,7 @@
 
 namespace rphp { namespace AST {
 
+// NOTE: if you change this, check static dispatch table in pASTVisitors.cpp!
 enum nodeKind {
     echoStmtKind,
     inlineHtmlKind,

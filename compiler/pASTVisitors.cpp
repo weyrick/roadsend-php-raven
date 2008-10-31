@@ -24,29 +24,22 @@
 
 namespace rphp { namespace AST {
 
+baseVisitor::dispatchFunType baseVisitor::dispatchTable[] = {
+    // NOTE: requires same order as nodeKind enum in pAST.h
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_echoStmt),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_inlineHtml),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalBString),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalInt),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalNull),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalBool)
+};
+
+
 void baseVisitor::visit(stmt* s) {
-    // TODO: implement the dispatch better
-    assert(s != NULL && "statement to visit is NULL");
-    switch (s->getKind()) {
-    case echoStmtKind:
-        visit_echoStmt(static_cast<echoStmt*>(s));
-        break;
-    case inlineHtmlKind:
-        visit_inlineHtml(static_cast<inlineHtml*>(s));
-        break;
-    case literalBStringKind:
-        visit_literalBString(static_cast<literalBString*>(s));
-        break;
-    case literalIntKind:
-        visit_literalInt(static_cast<literalInt*>(s));
-        break;
-    case literalBoolKind:
-        visit_literalBool(static_cast<literalBool*>(s));
-        break;
-    case literalNullKind:
-        visit_literalNull(static_cast<literalNull*>(s));
-        break;
-    }
+
+    if (s)
+      (this->*dispatchTable[s->stmtKind])(s);
+
 }
 
 
