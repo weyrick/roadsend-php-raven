@@ -24,7 +24,7 @@
 
 namespace rphp { namespace AST {
 
-baseVisitor::dispatchFunType baseVisitor::dispatchTable[] = {
+baseVisitor::dispatchFunType baseVisitor::dispatchTable_[] = {
     // NOTE: requires same order as nodeKind enum in pAST.h
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_echoStmt),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_inlineHtml),
@@ -38,7 +38,7 @@ baseVisitor::dispatchFunType baseVisitor::dispatchTable[] = {
 void baseVisitor::visit(stmt* s) {
 
     if (s)
-      (this->*dispatchTable[s->stmtKind])(s);
+      (this->*dispatchTable_[s->getKind()])(s);
 
 }
 
@@ -50,8 +50,8 @@ void defaultVisitor::visit_echoStmt(echoStmt* n) {
 // ** DUMP VISITOR **
 
 void dumpVisitor::showindent() {
-    if (indentLevel)
-        std::cout << std::string(" ", indentLevel);
+    if (indentLevel_)
+        std::cout << std::string(" ", indentLevel_);
 }
 
 void dumpVisitor::visit_echoStmt(echoStmt* n) {

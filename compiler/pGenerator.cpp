@@ -39,7 +39,7 @@ using namespace llvm;
 
 namespace rphp {
 
-pGenerator::pGenerator(llvm::Module* m, pCompileTarget* t): llvmModule(m), target(t), IRHelper(0) {
+pGenerator::pGenerator(llvm::Module* m, pCompileTarget* t): llvmModule_(m), target_(t), IRHelper_(0) {
 
     loadAndLinkRuntimeIR();
     createEntryPoint();
@@ -48,7 +48,7 @@ pGenerator::pGenerator(llvm::Module* m, pCompileTarget* t): llvmModule(m), targe
     
 pGenerator::~pGenerator(void) {
 
-    delete IRHelper;
+    delete IRHelper_;
 
 }
 
@@ -61,7 +61,7 @@ void pGenerator::loadAndLinkRuntimeIR(void) {
 
     // here we link the irRuntime.ir with our clean module so it already includes
     // definitions of types and functions we need for code generation
-    Linker l(llvmModule->getModuleIdentifier()+"_link", llvmModule);
+    Linker l(llvmModule_->getModuleIdentifier()+"_link", llvmModule_);
     l.LinkInModule(irMod, &errMsg);
     if (errMsg.length()) {
         // TODO: errors
@@ -73,46 +73,46 @@ void pGenerator::loadAndLinkRuntimeIR(void) {
     l.releaseModule();
 
     // IRHelper knows how to pull types out of the composite module
-    IRHelper = new pIRHelper(llvmModule);
+    IRHelper_ = new pIRHelper(llvmModule_);
 
 }
 
 void pGenerator::createEntryPoint(void) {
 
     // script top level initialization function
-    entryFunctionName = pGenSupport::mangleModuleName(llvmModule->getModuleIdentifier());
+    entryFunctionName_ = pGenSupport::mangleModuleName(llvmModule_->getModuleIdentifier());
 
     // entry function
-    Function *initFun = Function::Create(IRHelper->moduleEntryFunType(),
+    Function *initFun = Function::Create(IRHelper_->moduleEntryFunType(),
                                          Function::ExternalLinkage,
-                                         entryFunctionName,
-                                         llvmModule);
+                                         entryFunctionName_,
+                                         llvmModule_);
 
-    runtimeEngine = initFun->arg_begin();
-    runtimeEngine->setName("rEngine");
+    runtimeEngine_ = initFun->arg_begin();
+    runtimeEngine_->setName("rEngine");
 
     // entry block
-    currentBlock.SetInsertPoint(BasicBlock::Create("entry", initFun));
-    currentFunction = initFun;
+    currentBlock_.SetInsertPoint(BasicBlock::Create("entry", initFun));
+    currentFunction_ = initFun;
 
-    destructList.push(valueVectorType());
+    destructList_.push(valueVectorType());
 
 }
 
 void pGenerator::finalize(void) {
     // terminate entry function
-    Function *initFun = llvmModule->getFunction(entryFunctionName);
+    Function *initFun = llvmModule_->getFunction(entryFunctionName_);
     // destructors in global module space
-    Function* destructor = llvmModule->getFunction("_ZN4rphp4pVarD1Ev");
+    Function* destructor = llvmModule_->getFunction("_ZN4rphp4pVarD1Ev");
     assert(destructor != NULL);
-    for (valueVectorType::iterator i = destructList.back().begin(); i != destructList.back().end(); ++i) {
-        currentFunction->getEntryBlock().getInstList().push_back(CallInst::Create(destructor, *i));
+    for (valueVectorType::iterator i = destructList_.back().begin(); i != destructList_.back().end(); ++i) {
+        currentFunction_->getEntryBlock().getInstList().push_back(CallInst::Create(destructor, *i));
     }
-    destructList.pop();
+    destructList_.pop();
     // create return
     initFun->getEntryBlock().getInstList().push_back(ReturnInst::Create());
     // DEBUG
-    verifyModule(*llvmModule);
+    verifyModule(*llvmModule_);
 }
 
 // create a pVar on the stack. this handles construction
@@ -120,16 +120,16 @@ void pGenerator::finalize(void) {
 llvm::Value* pGenerator::newVarOnStack(const char* name) {
 
     
-    AllocaInst* pVarTmp = new AllocaInst(IRHelper->pVarType(), 0, name);
-    currentFunction->getEntryBlock().getInstList().push_front(pVarTmp);
+    AllocaInst* pVarTmp = new AllocaInst(IRHelper_->pVarType(), 0, name);
+    currentFunction_->getEntryBlock().getInstList().push_front(pVarTmp);
 
-    Function* constructor = llvmModule->getFunction("_ZN4rphp4pVarC1Ev");
+    Function* constructor = llvmModule_->getFunction("_ZN4rphp4pVarC1Ev");
     assert(constructor != NULL);
     
     CallInst* con = CallInst::Create(constructor, pVarTmp);
-    currentFunction->getEntryBlock().getInstList().push_back(con);
+    currentFunction_->getEntryBlock().getInstList().push_back(con);
 
-    destructList.back().push_back(pVarTmp);
+    destructList_.back().push_back(pVarTmp);
 
     return pVarTmp;
 
@@ -147,7 +147,7 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
 //     /*Linkage=*/GlobalValue::InternalLinkage,
 //     /*Initializer=*/0, // has initializer, specified below
 //     /*Name=*/".pBString",
-//     llvmModule);
+//     llvmModule_);
 // 
 //     Constant* const_array_7 = ConstantArray::get(n->getVal().c_str(), true);
 //     std::vector<Constant*> const_ptr_8_indices;
@@ -160,7 +160,7 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
 //     globalStr->setInitializer(const_array_7);
 
     // turn it into a pVar and push
-//    valueStack.push(emitVarCreate_pBString(litStringRef));
+//    valueStack_.push(emitVarCreate_pBString(litStringRef));
 
     ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->getStringVal().size()+1);
 
@@ -170,7 +170,7 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
     /*Linkage=*/GlobalValue::InternalLinkage,
     /*Initializer=*/0, // has initializer, specified below
     /*Name=*/".str",
-    llvmModule);
+    llvmModule_);
 
     // Constant Definitions
     Constant* const_array_7 = ConstantArray::get(n->getStringVal().c_str(), true);
@@ -187,12 +187,12 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
     Value* pVarTmp = newVarOnStack("pBStrTmp");
     
     // convert cstr to pbstring
-    Function* f = llvmModule->getFunction("rphp_make_pVar_from_cstr");
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_from_cstr");
     assert(f != NULL);
-    currentBlock.CreateCall2(f, pVarTmp, strPtr);
+    currentBlock_.CreateCall2(f, pVarTmp, strPtr);
 
     // push to stack
-    valueStack.push(pVarTmp);
+    valueStack_.push(pVarTmp);
 
 }
 
@@ -204,7 +204,7 @@ void pGenerator::visit_literalInt(AST::literalInt* n) {
 //     /*Linkage=*/GlobalValue::InternalLinkage,
 //     /*Initializer=*/0, // has initializer, specified below
 //     /*Name=*/".pInt",
-//     llvmModule);
+//     llvmModule_);
 
     // TODO: other bases besides 10
     ConstantInt* const_int = ConstantInt::get(APInt(32,  n->getStringVal(), 10));
@@ -215,12 +215,12 @@ void pGenerator::visit_literalInt(AST::literalInt* n) {
     Value* pVarTmp = newVarOnStack("pIntTmp");
 
     // convert cstr to pbstring
-    Function* f = llvmModule->getFunction("rphp_make_pVar_from_pInt");
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_from_pInt");
     assert(f != NULL);
-    currentBlock.CreateCall2(f, pVarTmp, const_int);
+    currentBlock_.CreateCall2(f, pVarTmp, const_int);
 
     // push to stack
-    valueStack.push(pVarTmp);
+    valueStack_.push(pVarTmp);
 
 }
 
@@ -232,7 +232,7 @@ void pGenerator::visit_literalBool(AST::literalBool* n) {
 //     /*Linkage=*/GlobalValue::InternalLinkage,
 //     /*Initializer=*/0, // has initializer, specified below
 //     /*Name=*/".pBool",
-//     llvmModule);
+//     llvmModule_);
 
     ConstantInt* cbool = ConstantInt::get(APInt(32,  (n->getBoolVal()) ? "1" : "0", 10));
 
@@ -242,12 +242,12 @@ void pGenerator::visit_literalBool(AST::literalBool* n) {
     Value* pVarTmp = newVarOnStack("pBoolTmp");
 
     // convert cstr to pbstring
-    Function* f = llvmModule->getFunction("rphp_make_pVar_bool");
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_bool");
     assert(f != NULL);
-    currentBlock.CreateCall2(f, pVarTmp, cbool);
+    currentBlock_.CreateCall2(f, pVarTmp, cbool);
 
     // push to stack
-    valueStack.push(pVarTmp);
+    valueStack_.push(pVarTmp);
 
 }
 
@@ -256,7 +256,7 @@ void pGenerator::visit_literalNull(AST::literalNull* n) {
     Value* pVarTmp = newVarOnStack("pNullTmp");
 
     // push to stack
-    valueStack.push(pVarTmp);
+    valueStack_.push(pVarTmp);
 
 }
 
@@ -270,7 +270,7 @@ void pGenerator::visit_inlineHtml(AST::inlineHtml* n) {
     /*Linkage=*/GlobalValue::InternalLinkage,
     /*Initializer=*/0, // has initializer, specified below
     /*Name=*/".str",
-    llvmModule);
+    llvmModule_);
 
     // Constant Definitions
     Constant* const_array_7 = ConstantArray::get(n->getStringVal().c_str(), true);
@@ -283,44 +283,44 @@ void pGenerator::visit_inlineHtml(AST::inlineHtml* n) {
     // Global Variable Definitions
     gvar_array__str->setInitializer(const_array_7);
 
-    Function *f = llvmModule->getFunction("rphp_print_cstr");
+    Function *f = llvmModule_->getFunction("rphp_print_cstr");
     assert(f != NULL);
 
-    currentBlock.CreateCall2(f, runtimeEngine, strPtr);
+    currentBlock_.CreateCall2(f, runtimeEngine_, strPtr);
 
 }
 
 void pGenerator::visit_echoStmt(AST::echoStmt* n) {
 
     visit(n->getRVal());
-    Value* rVal = valueStack.back();
-    valueStack.pop();
+    Value* rVal = valueStack_.back();
+    valueStack_.pop();
 
-    Function *f = llvmModule->getFunction("rphp_print_pVar");
+    Function *f = llvmModule_->getFunction("rphp_print_pVar");
     assert(f != NULL);
 
-    currentBlock.CreateCall2(f, runtimeEngine, rVal);
+    currentBlock_.CreateCall2(f, runtimeEngine_, rVal);
 
 }
 
 // assumes literal is on top of stack
 // void pGenerator::emitEchoLiteralString(void) {
 // 
-//     Value* rVal = valueStack.back();
-//     valueStack.pop();
+//     Value* rVal = valueStack_.back();
+//     valueStack_.pop();
 // 
 //     // argument sig for print function
 //     std::vector<const Type*> printSig;
-//     printSig.push_back(IRHelper->runtimeEngineType());
-//     printSig.push_back(IRHelper->pVarPointerType());
+//     printSig.push_back(IRHelper_->runtimeEngineType());
+//     printSig.push_back(IRHelper_->pVarPointerType());
 // 
 //     // print function type
 //     FunctionType *printFuncType = FunctionType::get(Type::VoidTy, printSig, false);
 // 
 //     // print function
-//     //Constant *printFunc = llvmModule->getOrInsertFunction("rphp_print_pvar", printFuncType);
+//     //Constant *printFunc = llvmModule_->getOrInsertFunction("rphp_print_pvar", printFuncType);
 // 
-//     //currentBlock.CreateCall2(printFunc, runtimeEngine, rVal);
+//     //currentBlock_.CreateCall2(printFunc, runtimeEngine, rVal);
 // 
 // }
 
@@ -328,7 +328,7 @@ void pGenerator::visit_echoStmt(AST::echoStmt* n) {
 // llvm::Value* emitVarCreate() {
 // 
 //     /*
-//     AllocaInst* pVar_p = new AllocaInst(IRHelper->pVarType(), "pVarBString", currentBlock.getInsertBlock());
+//     AllocaInst* pVar_p = new AllocaInst(IRHelper_->pVarType(), "pVarBString", currentBlock_.getInsertBlock());
 //     pVar_p->setAlignment(4);
 //     emitVarConstruct(pVar_p);
 //     
@@ -349,11 +349,11 @@ void pGenerator::visit_echoStmt(AST::echoStmt* n) {
 //     // call runtime to create pVar from char*
 //     // TODO: inline this
 //     std::vector<const Type*> fSig;
-//     printSig.push_back(IRHelper->charPointerType(), 0);
-//     FunctionType *fFuncType = FunctionType::get(IRHelper->pVarType(), fSig, false);
-//     Constant *Func = llvmModule->getOrInsertFunction("rphp_create_pVar_pBString", fFuncType);
+//     printSig.push_back(IRHelper_->charPointerType(), 0);
+//     FunctionType *fFuncType = FunctionType::get(IRHelper_->pVarType(), fSig, false);
+//     Constant *Func = llvmModule_->getOrInsertFunction("rphp_create_pVar_pBString", fFuncType);
 // 
-//     return currentBlock.CreateCall2(printFunc, runtimeEngine, rVal);
+//     return currentBlock_.CreateCall2(printFunc, runtimeEngine, rVal);
 //     */
 //     
 // }
@@ -369,11 +369,11 @@ void pGenerator::visit_echoStmt(AST::echoStmt* n) {
 // void pGenerator::emitVarConstruct(llvm::Value* v) {
 // 
 //     Function* pVarConstructFun = Function::Create(
-//     /*Type=*/IRHelper->pVarBaseFunType(),
+//     /*Type=*/IRHelper_->pVarBaseFunType(),
 //     /*Linkage=*/GlobalValue::LinkOnceLinkage ,
-//     /*Name=*/"_ZN4rphp4pVarC1Ev", llvmModule);
+//     /*Name=*/"_ZN4rphp4pVarC1Ev", llvmModule_);
 // 
-//     currentBlock.CreateCall(pVarConstructFun, v);
+//     currentBlock_.CreateCall(pVarConstructFun, v);
 // 
 // }
 // 
@@ -382,11 +382,11 @@ void pGenerator::visit_echoStmt(AST::echoStmt* n) {
 // void pGenerator::emitVarDestruct(llvm::Value* v) {
 // 
 //     Function* pVarDestructFun = Function::Create(
-//     /*Type=*/IRHelper->pVarBaseFunType(),
+//     /*Type=*/IRHelper_->pVarBaseFunType(),
 //     /*Linkage=*/GlobalValue::LinkOnceLinkage ,
-//     /*Name=*/"_ZN4rphp4pVarD1Ev", llvmModule);
+//     /*Name=*/"_ZN4rphp4pVarD1Ev", llvmModule_);
 // 
-//     currentBlock.CreateCall(pVarDestructFun, v);
+//     currentBlock_.CreateCall(pVarDestructFun, v);
 // 
 // }
 

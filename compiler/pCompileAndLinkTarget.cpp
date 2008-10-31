@@ -28,8 +28,8 @@ namespace rphp {
 
 void pCompileAndLinkTarget::execute(void) {
 
-    addInputFile(cTarget->getInputFileName()+".bc");
-    cTarget->execute();
+    addInputFile(cTarget_->getInputFileName()+".bc");
+    cTarget_->execute();
     pStandAloneTarget::execute();
 
 }

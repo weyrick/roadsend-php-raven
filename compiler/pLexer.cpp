@@ -30,34 +30,29 @@
 namespace rphp { namespace lexer {
 
 
-pLexer::pLexer(std::string fName): tokens(), lexer(tokens), fileName(fName) {
+pLexer::pLexer(std::string fName): tokens_(), lexer_(tokens_), fileName_(fName) {
 
-    std::ifstream instream(fileName.c_str());
+    std::ifstream instream(fileName_.c_str());
     if (!instream.is_open()) {
-        std::cerr << "Couldn't open file: " << fileName << std::endl;
+        std::cerr << "Couldn't open file: " << fileName_ << std::endl;
         exit(-1);
     }
     instream.unsetf(std::ios::skipws);
-    contents =  std::string(std::istreambuf_iterator<char>(instream.rdbuf()),
+    contents_ =  std::string(std::istreambuf_iterator<char>(instream.rdbuf()),
                             std::istreambuf_iterator<char>());
 
-    sourceBegin = contents.begin();
-    sourceEnd = contents.end();
+    sourceBegin_ = contents_.begin();
+    sourceEnd_ = contents_.end();
     
 }
 
 tokIteratorType pLexer::begin(void) {
-
-    return lexer.begin(sourceBegin, sourceEnd);
-
+    return lexer_.begin(sourceBegin_, sourceEnd_);
 }
 
 tokIteratorType pLexer::end(void) {
-
-    return lexer.end();
-
+    return lexer_.end();
 }
-
 
 void pLexer::dumpTokens(void) {
 
@@ -97,7 +92,7 @@ void pLexer::dumpTokens(void) {
 
 }
 
-const char* pLexer::getTokenDescription(const std::size_t t) {
+const char* pLexer::getTokenDescription(const std::size_t t) const {
 
     switch (t) {
         case T_VARIABLE:

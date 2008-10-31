@@ -42,7 +42,7 @@ namespace rphp {
 
 Module* pStandAloneTarget::createStubModule(void) {
 
-     Module *M = new Module(outputFile);
+     Module *M = new Module(outputFile_);
 
      FunctionType *FT = FunctionType::get(Type::VoidTy, std::vector<const Type*>(),
                                          /*not vararg*/false);
@@ -53,7 +53,7 @@ Module* pStandAloneTarget::createStubModule(void) {
 
      // ** STARTUP **
      // startup function type
-     FunctionType *runtimeStartupFuncType = FunctionType::get(IRHelper->runtimeEngineType(), std::vector<const Type*>(), false);
+     FunctionType *runtimeStartupFuncType = FunctionType::get(IRHelper_->runtimeEngineType(), std::vector<const Type*>(), false);
      // startup function
      Function *runtimeStartupFunc = Function::Create(runtimeStartupFuncType,
                                                      Function::ExternalLinkage,
@@ -64,10 +64,10 @@ Module* pStandAloneTarget::createStubModule(void) {
 
      // ** entry function call **
      std::vector<const Type*> printSig;
-     printSig.push_back(IRHelper->runtimeEngineType());
-     Function *entryFunc = Function::Create(IRHelper->moduleEntryFunType(),
+     printSig.push_back(IRHelper_->runtimeEngineType());
+     Function *entryFunc = Function::Create(IRHelper_->moduleEntryFunType(),
                                             Function::ExternalLinkage,
-                                            pGenSupport::mangleModuleName(mainFile),
+                                            pGenSupport::mangleModuleName(mainFile_),
                                             M);
      std::vector<Value*> entryArgs;
      entryArgs.push_back(runtimeStartInstr);
@@ -76,7 +76,7 @@ Module* pStandAloneTarget::createStubModule(void) {
 
      //  ** SHUTDOWN **
      // argument sig for shutdown function
-     std::vector<const Type*> engineSig(1, IRHelper->runtimeEngineType());
+     std::vector<const Type*> engineSig(1, IRHelper_->runtimeEngineType());
      // shutdown function type
      FunctionType *runtimeDeleteFuncType = FunctionType::get(Type::VoidTy, engineSig, false);
      // shutdown function
@@ -114,7 +114,7 @@ void pStandAloneTarget::execute(void) {
 
     Module* M = createStubModule();
     // TODO: outfile nameing
-    pGenSupport::writeBitcode(M, outputFile+".bc");
+    pGenSupport::writeBitcode(M, outputFile_+".bc");
     delete M;
 
     // the following is based on code from llvm/tools/llvm-ld.cpp
@@ -129,7 +129,7 @@ void pStandAloneTarget::execute(void) {
 
     std::vector<std::string> args;
     args.push_back("llvm-ld");
-    for (std::vector<std::string>::iterator i = libSearchPaths.begin(); i != libSearchPaths.end(); ++i) {
+    for (std::vector<std::string>::iterator i = libSearchPaths_.begin(); i != libSearchPaths_.end(); ++i) {
         args.push_back("-L"+(*i));
     }
     args.push_back("-native");
@@ -140,9 +140,9 @@ void pStandAloneTarget::execute(void) {
     //
     args.push_back("-lrphp-runtime");
     args.push_back("-o");
-    args.push_back(outputFile);
-    args.push_back(outputFile+".bc");
-    for (std::vector<std::string>::iterator i = inputFiles.begin(); i != inputFiles.end(); ++i) {
+    args.push_back(outputFile_);
+    args.push_back(outputFile_+".bc");
+    for (std::vector<std::string>::iterator i = inputFiles_.begin(); i != inputFiles_.end(); ++i) {
         args.push_back(*i);
     }
 

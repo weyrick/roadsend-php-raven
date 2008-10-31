@@ -30,14 +30,14 @@ namespace rphp { namespace lexer {
 class pLexer {
 
 private:
-    pLangTokens tokens;
-    pLangLexer lexer;
+    pLangTokens tokens_;
+    pLangLexer lexer_;
 
-    std::string fileName;
-    std::string contents;
+    std::string fileName_;
+    std::string contents_;
 
-    std::string::iterator sourceBegin;
-    std::string::iterator sourceEnd;
+    std::string::iterator sourceBegin_;
+    std::string::iterator sourceEnd_;
 
 public:
 
@@ -49,10 +49,10 @@ public:
     tokIteratorType end(void);
 
     void dumpTokens(void);
-    const char* getTokenDescription(const std::size_t t);
+    const char* getTokenDescription(const std::size_t t) const;
 
     pLangTokens& getTokens(void) {
-        return tokens;
+        return tokens_;
     }
 
 };

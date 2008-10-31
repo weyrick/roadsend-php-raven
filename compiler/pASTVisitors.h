@@ -29,7 +29,7 @@ namespace rphp { namespace AST {
 class baseVisitor {
 private:
     typedef void (baseVisitor::*dispatchFunType)(stmt *);
-    static dispatchFunType dispatchTable[];
+    static dispatchFunType dispatchTable_[];
 
 public:
     virtual void visit(stmt*);
@@ -55,12 +55,12 @@ public:
 };
 
 class dumpVisitor: public defaultVisitor {
-    int indentLevel;
-    void indent() { indentLevel += 2; }
-    void unindent() { indentLevel -= 2; }
+    int indentLevel_;
+    void indent() { indentLevel_ += 2; }
+    void unindent() { indentLevel_ -= 2; }
     void showindent();
 public:
-    dumpVisitor(void): indentLevel(0) { }
+    dumpVisitor(void): indentLevel_(0) { }
 
     void visit_echoStmt(echoStmt*);
     void visit_inlineHtml(inlineHtml*);

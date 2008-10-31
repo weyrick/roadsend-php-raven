@@ -30,20 +30,20 @@ namespace rphp {
 class pCompileTarget: public pTarget {
 
 protected:
-    std::string inputFile;
-    std::string projectRoot;
+    std::string inputFile_;
+    std::string projectRoot_;
 
     // INT options:
     // compileOptimizationLevel - compiler optimization level
     // verbosityLevel           - informational verbosity level
 
 public:
-    pCompileTarget(const std::string& fileName, const std::string& root): inputFile(fileName), projectRoot(root) { }
+    pCompileTarget(const std::string& fileName, const std::string& root): inputFile_(fileName), projectRoot_(root) { }
 
     virtual void execute(void);
 
-    const std::string& getInputFileName(void) { return inputFile; }
-    const std::string& getProjectRoot(void) { return projectRoot; }
+    const std::string& getInputFileName(void) const { return inputFile_; }
+    const std::string& getProjectRoot(void) const { return projectRoot_; }
 
 };
 

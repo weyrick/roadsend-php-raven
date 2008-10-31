@@ -32,12 +32,12 @@ namespace rphp {
 
 class pIRHelper {
 
-    llvm::FunctionType* moduleEntryFunTypeC;
-    llvm::Module* mod;
+    llvm::FunctionType* moduleEntryFunTypeC_;
+    llvm::Module* mod_;
 
 public:
 
-    pIRHelper(llvm::Module* m): moduleEntryFunTypeC(0), mod(m) { }
+    pIRHelper(llvm::Module* m): moduleEntryFunTypeC_(0), mod_(m) { }
 
     // pointer to the runtime engine
     llvm::Type* runtimeEngineType(void);

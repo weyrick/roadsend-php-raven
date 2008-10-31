@@ -32,15 +32,15 @@ using namespace llvm;
 namespace rphp {
 
 Type* pIRHelper::runtimeEngineType() {
-    return PointerType::get(mod->getTypeByName("struct.rphp::pRuntimeEngine"), 0);
+    return PointerType::get(mod_->getTypeByName("struct.rphp::pRuntimeEngine"), 0);
 }
 
 Type* pIRHelper::pVarPointerType() {
-    return PointerType::get(mod->getTypeByName("struct.rphp::pVar"), 0);
+    return PointerType::get(mod_->getTypeByName("struct.rphp::pVar"), 0);
 }
 
 const Type* pIRHelper::pVarType() {
-    return mod->getTypeByName("struct.rphp::pVar");
+    return mod_->getTypeByName("struct.rphp::pVar");
 }
 
 // void (*)(pVar*)
@@ -59,17 +59,17 @@ FunctionType* pIRHelper::pVarBaseFunType() {
 
 FunctionType* pIRHelper::moduleEntryFunType() {
 
-    if (moduleEntryFunTypeC)
-        return moduleEntryFunTypeC;
+    if (moduleEntryFunTypeC_)
+        return moduleEntryFunTypeC_;
 
     // entry function type: void (*)(pRuntimeEngine*)
     std::vector<const Type*> efArgs;
     efArgs.push_back(runtimeEngineType());
-    moduleEntryFunTypeC = FunctionType::get(Type::VoidTy, /* return type */
+    moduleEntryFunTypeC_ = FunctionType::get(Type::VoidTy, /* return type */
                                            efArgs, /* arguments */
                                            false /*not vararg*/);
 
-    return moduleEntryFunTypeC;
+    return moduleEntryFunTypeC_;
 
 }
 

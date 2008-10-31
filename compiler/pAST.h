@@ -39,23 +39,23 @@ enum nodeKind {
 };
 
 // statement base class
-struct stmt {
+class stmt {
 
-    nodeKind stmtKind;
+    nodeKind kind_;
 
-    pUInt startLineNum;
-    pUInt endLineNum;
+    pUInt startLineNum_;
+    pUInt endLineNum_;
 
 public:
-    stmt(nodeKind k): stmtKind(k) { }
+    stmt(nodeKind k): kind_(k) { }
     virtual ~stmt(void) { }
 
-    const nodeKind getKind(void) { return stmtKind; }
+    nodeKind getKind(void) const { return kind_; }
 
 };
 
 // declaration base class
-struct decl: public stmt {
+class decl: public stmt {
 
 public:
 
@@ -63,7 +63,7 @@ public:
 };
 
 // expression base class
-struct expr: public stmt {
+class expr: public stmt {
 
 public:
     expr(nodeKind k): stmt(k) { }
@@ -71,20 +71,20 @@ public:
 };
 
 // literal expression base class
-struct literalExpr: public expr {
+class literalExpr: public expr {
 
-    pBString stringVal;
+    pBString stringVal_;
 
 public:
     literalExpr(nodeKind k): expr(k) { }
-    literalExpr(nodeKind k, const pBString& v): expr(k), stringVal(v) { }
+    literalExpr(nodeKind k, const pBString& v): expr(k), stringVal_(v) { }
     
-    const pBString& getStringVal(void) { return stringVal; }
+    const pBString& getStringVal(void) const { return stringVal_; }
 
 };
 
 // NODE: literal bstring
-struct literalBString: public literalExpr {
+class literalBString: public literalExpr {
 
 public:
     literalBString(const pBString& v): literalExpr(literalBStringKind, v) { }
@@ -93,7 +93,7 @@ public:
 };
 
 // NODE: literal int
-struct literalInt: public literalExpr {
+class literalInt: public literalExpr {
 
 public:
     literalInt(const pBString& v): literalExpr(literalIntKind, v) { }
@@ -101,19 +101,19 @@ public:
 };
 
 // NODE: literal bool
-struct literalBool: public literalExpr {
+class literalBool: public literalExpr {
 
-    bool boolVal;
+    bool boolVal_;
 
 public:
-    literalBool(bool v): literalExpr(literalBoolKind), boolVal(v) { }
+    literalBool(bool v): literalExpr(literalBoolKind), boolVal_(v) { }
 
-    bool getBoolVal(void) { return boolVal; }
+    bool getBoolVal(void) const { return boolVal_; }
 
 };
 
 // NODE: literal null
-struct literalNull: public literalExpr {
+class literalNull: public literalExpr {
 
 public:
     literalNull(void): literalExpr(literalNullKind) { }
@@ -121,7 +121,7 @@ public:
 };
 
 // NODE: inline html
-struct inlineHtml: public literalBString {
+class inlineHtml: public literalBString {
 
 public:
     inlineHtml(const pBString& v): literalBString(v, inlineHtmlKind) { }
@@ -129,15 +129,15 @@ public:
 };
 
 // NODE: echo statement
-struct echoStmt: public stmt {
+class echoStmt: public stmt {
 
-    expr* rVal;
+    expr* rVal_;
 
 public:
-    echoStmt(expr* v): stmt(echoStmtKind), rVal(v) { }
-    ~echoStmt(void) { delete rVal; }
+    echoStmt(expr* v): stmt(echoStmtKind), rVal_(v) { }
+    ~echoStmt(void) { delete rVal_; }
 
-    expr* getRVal(void) { return rVal; }
+    expr* getRVal(void) { return rVal_; }
 
 };
 

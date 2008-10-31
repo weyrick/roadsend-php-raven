@@ -28,7 +28,7 @@ namespace rphp {
 void pInterpretTarget::execute(void) {
 
     pDriver driver;
-    pModule* m = new pModule(inputFile);
+    pModule* m = new pModule(inputFile_);
     m->lowerToIR(this);
     driver.executeModule(m);
     delete m;

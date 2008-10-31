@@ -30,9 +30,9 @@ void pCompileTarget::execute(void) {
     std::string outputFile;
 
     // TODO: check stringOptions for outputFile
-    outputFile = inputFile+".bc";
+    outputFile = inputFile_+".bc";
 
-    pModule  m(inputFile);
+    pModule  m(inputFile_);
     m.lowerToIR(this);
     m.writeBitcode(outputFile);
 

@@ -43,19 +43,19 @@ public:
     typedef std::vector<llvm::Value*> valueVectorType;
 
 private:
-    llvm::Module* llvmModule; // don't own
-    pCompileTarget* target; // don't own
-    pIRHelper* IRHelper; // own
+    llvm::Module* llvmModule_; // don't own
+    pCompileTarget* target_; // don't own
+    pIRHelper* IRHelper_; // own
 
-    std::string entryFunctionName;
+    std::string entryFunctionName_;
 
-    llvm::IRBuilder currentBlock;
-    llvm::Value* runtimeEngine; // don't own
+    llvm::IRBuilder currentBlock_;
+    llvm::Value* runtimeEngine_; // don't own
 
-    llvm::Function* currentFunction;
+    llvm::Function* currentFunction_;
 
-    std::queue<llvm::Value*> valueStack;
-    std::queue<valueVectorType> destructList;
+    std::queue<llvm::Value*> valueStack_;
+    std::queue<valueVectorType> destructList_;
 
 private:
     void loadAndLinkRuntimeIR(void);

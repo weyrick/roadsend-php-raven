@@ -33,19 +33,19 @@ class pTarget {
 
 protected:
     // hash table for generic options
-    boost::unordered_map<std::string, std::string> stringOptions;
-    boost::unordered_map<std::string, int> intOptions;
+    boost::unordered_map<std::string, std::string> stringOptions_;
+    boost::unordered_map<std::string, int> intOptions_;
 
 public:
 
     virtual void execute(void) = 0;
 
     void setOption(std::string k, std::string v) {
-        stringOptions[k] = v;
+        stringOptions_[k] = v;
     }
 
     void setOption(std::string k, int v) {
-        intOptions[k] = v;
+        intOptions_[k] = v;
     }
 
 };

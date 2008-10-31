@@ -33,23 +33,23 @@ namespace rphp {
 class pStandAloneTarget : public pLinkTarget {
 
 protected:
-    std::string mainFile;
-    pIRHelper* IRHelper;
+    std::string mainFile_;
+    pIRHelper* IRHelper_;
 
     llvm::Module* createStubModule(void);
 
 public:
-    pStandAloneTarget(const std::string& outName, const std::string& mainName): mainFile(mainName), pLinkTarget(outName) {
-        IRHelper = new pIRHelper(pGenSupport::getRuntimeIR());
+    pStandAloneTarget(const std::string& outName, const std::string& mainName): mainFile_(mainName), pLinkTarget(outName) {
+        IRHelper_ = new pIRHelper(pGenSupport::getRuntimeIR());
     }
 
     ~pStandAloneTarget(void) {
-        delete IRHelper;
+        delete IRHelper_;
     }
 
     virtual void execute(void);
 
-    const std::string& getMainFileName(void) { return mainFile; }
+    const std::string& getMainFileName(void) const { return mainFile_; }
 
 
 };

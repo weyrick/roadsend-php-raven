@@ -29,14 +29,14 @@ namespace rphp {
 
 class pCompileAndLinkTarget : public pStandAloneTarget {
 
-    pCompileTarget* cTarget;
+    pCompileTarget* cTarget_;
 
 public:
     pCompileAndLinkTarget(const std::string& fileName,
                           const std::string& root,
-                          const std::string& outName): pStandAloneTarget(outName, fileName), cTarget(new pCompileTarget(fileName, root)) { }
+                          const std::string& outName): pStandAloneTarget(outName, fileName), cTarget_(new pCompileTarget(fileName, root)) { }
 
-    ~pCompileAndLinkTarget(void) { delete cTarget; }
+    ~pCompileAndLinkTarget(void) { delete cTarget_; }
 
     virtual void execute(void);
 

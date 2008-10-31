@@ -36,24 +36,24 @@ namespace rphp {
 class pLinkTarget : public pTarget {
 
 protected:
-    std::string outputFile;
-    std::vector<std::string> inputFiles;
-    std::vector<std::string> libSearchPaths;
+    std::string outputFile_;
+    std::vector<std::string> inputFiles_;
+    std::vector<std::string> libSearchPaths_;
 
     // link options (static, dynamic)
 
 public:
-    pLinkTarget(std::string outFile): outputFile(outFile) { }
+    pLinkTarget(std::string outFile): outputFile_(outFile) { }
 
     void addInputFile(std::string f) {
-        inputFiles.push_back(f);
+        inputFiles_.push_back(f);
     }
 
     void addLibSearchPath(std::string f) {
-        libSearchPaths.push_back(f);
+        libSearchPaths_.push_back(f);
     }
 
-    const std::string& getOutputFileName(void) { return outputFile; }
+    const std::string& getOutputFileName(void) const { return outputFile_; }
 
 };
 
