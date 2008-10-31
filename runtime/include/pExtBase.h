@@ -32,13 +32,13 @@ class pRuntimeEngine;
 class pExtBase {
 
 protected:
-    std::string extName_;
+    pIdentString extName_;
     pRuntimeEngine* runtime_;
 
-    void registerBuiltin(pUString name, pFunPointer1 f);
+    void registerBuiltin(pIdentString name, pFunPointer1 f);
 
 public:
-    pExtBase(pRuntimeEngine *r, std::string eName) : runtime_(r), extName_(eName) { }
+    pExtBase(pRuntimeEngine *r, pIdentString eName) : runtime_(r), extName_(eName) { }
 
     virtual void extensionStartup() = 0;
     virtual void extensionShutdown() = 0;

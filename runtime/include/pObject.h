@@ -23,7 +23,6 @@
 #define RPHP_POBJECT_H_
 
 #include <iostream>
-#include <unicode/unistr.h>
 #include "pHash.h"
 
 /*
@@ -51,14 +50,14 @@ class pClass {
 private:
     pHash properties_;
     pHash methods_; // TODO: this can be unordered map
-    pUString name_;
+    pIdentString name_;
 public:
     pClass();
     pHash properties();
         // bitset of class flags: abstract, final, interface, abstract-implied
         // class name, case sensitive (as declared)
-    const pUString& getName() const;
-    void setName( const pUString& name );
+    const pIdentString& getName() const;
+    void setName( const pIdentString& name );
         // canonical name, lowercased
         // list of parent classes (only 1, unless interface)
         // list of interfaces the class implements
@@ -77,7 +76,7 @@ class pObject {
         // object instance id
         // hash for properties created on the fly
     public:
-        pObject(const pUString& className);
+        pObject(const pIdentString& className);
 
         pHash::size_type getNumProperties() const {
             return properties_.getSize();

@@ -27,28 +27,26 @@
 namespace rphp
 {
     
-    class pHash;
+pClass::pClass() {  }
 
-    pClass::pClass() {  }
-
-    pHash pClass::properties()  {
-        pHash result;
+pHash pClass::properties()  {
+    pHash result;
 /*
-  BOOST_FOREACH( pVar property, _properties )
-    {
-    result.append( property );
-    }
+BOOST_FOREACH( pVar property, _properties )
+{
+result.append( property );
+}
 */
-        return result;
-    }
+    return result;
+}
 
-    const pUString& pClass::getName() const {
-        return name_;
-    }
+const pIdentString& pClass::getName() const {
+    return name_;
+}
 
-    void pClass::setName( const pUString& name ) {
-        name_ = name;
-    }
+void pClass::setName( const pIdentString& name ) {
+    name_ = name;
+}
     
 }
 

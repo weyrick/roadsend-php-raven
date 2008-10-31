@@ -32,7 +32,7 @@ class pExtBase;
 typedef enum { pBuiltinFunType, pUserFunType } pFunType;
 
 struct pFunctionParam {
-    pUString paramName;
+    pIdentString paramName;
     bool isOptional;
     pVar defaultValue;
     bool isByRef;
@@ -51,7 +51,7 @@ class pFunctionSig {
     // docComment?
 
     // signature
-    const pUString functionName_;
+    const pIdentString name_;
     const pFunType funType_;
     const pUInt requiredArity_;
     const pUInt maxArity_;
@@ -64,9 +64,9 @@ class pFunctionSig {
 public:
 
     // standard builtin function: one argument
-    pFunctionSig(const pExtBase* e, const pUString& f, const pFunPointer1& fun) :
+    pFunctionSig(const pExtBase* e, const pIdentString& f, const pFunPointer1& fun) :
         parentExtension_(e),
-        functionName_(f),
+        name_(f),
         funType_(pBuiltinFunType),
         requiredArity_(1),
         maxArity_(1),

@@ -20,25 +20,25 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include <unicode/unistr.h>
 #include "pObject.h"
 #include "pRuntime.h"
 
 namespace rphp {
 
-    std::ostream& operator << (std::ostream& os, const rphp::pObject& h) {
-        return os << "pobject" << std::endl;
-    }
+std::ostream& operator << (std::ostream& os, const rphp::pObject& h) {
+    return os << "pobject" << std::endl;
+}
 
-    pObject::pObject( const pUString& className )
-    : properties_(),
-      runtimeFunctions_()
-    {
-    // find pClass in class hash table and associate it with the object
+pObject::pObject( const pIdentString& className )
+: properties_(),
+    runtimeFunctions_()
+{
+// find pClass in class hash table and associate it with the object
 //  class_ = rphp::pRuntime::getClass( className );
-    // copy properties
-    properties_ = class_->properties();
-    }
+// copy properties
+properties_ = class_->properties();
+}
+
 }
 
 

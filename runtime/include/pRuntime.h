@@ -34,7 +34,7 @@
 
 namespace rphp {
 
-typedef boost::unordered_map<pUString, pClass*> pClassList;
+typedef boost::unordered_map<pIdentString, pClass*> pClassList;
 
 class pExtManager;
 
@@ -64,7 +64,7 @@ public:
     pRuntimeEngine();
     ~pRuntimeEngine();
 
-    pClass* getClass( const pUString& className );
+    pClass* getClass( const pIdentString& className );
     void addClass( pClass* class_ );
 
     // function manager

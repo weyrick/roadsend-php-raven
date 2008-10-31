@@ -121,6 +121,9 @@ typedef boost::tuple<const pUString, const pUInt> pSourceLocation;
 // source locations: filename/startlinenum/endlinenum
 typedef boost::tuple<const pUString, const pUInt, const pUInt> pSourceStartEndLocation;
 
+// string type used for identifiers
+typedef pBString pIdentString;
+
 // php function signatures
 typedef boost::function<pVar (pVar)> pFunPointer1;
     

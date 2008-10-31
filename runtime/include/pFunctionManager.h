@@ -29,7 +29,7 @@
 
 namespace rphp {
 
-typedef boost::unordered_map<pUString, pFunctionSig*> functionRegistryType;
+typedef boost::unordered_map<pIdentString, pFunctionSig*> functionRegistryType;
 
 class pRuntimeEngine;
 
@@ -49,10 +49,11 @@ public:
         }
     }
 
-    void registerBuiltin(const pExtBase*, const pUString&, const pFunPointer1&);
+    void registerBuiltin(const pExtBase*, const pIdentString&, const pFunPointer1&);
 
-    pVar invoke(pUString funName, pVar arg1) {
-        functionRegistryType::iterator function = functionRegistry_.find(funName.toLower());
+    pVar invoke(pIdentString funName, pVar arg1) {
+        // TODO: case insensitivity for pIdentString?
+        functionRegistryType::iterator function = functionRegistry_.find(funName);
         // TODO this needs to throw a runtime error if the function wasn't found
         if (function != functionRegistry_.end()) {
             return (*function).second->invoke(arg1);
