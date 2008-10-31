@@ -26,24 +26,24 @@
 
 namespace rphp {
 
-    class pRuntimeEngine;
-    class pExtBase;
+class pRuntimeEngine;
+class pExtBase;
 
-    class pExtManager {
+class pExtManager {
 
-        typedef std::deque<pExtBase*> extRegistryType;
+typedef std::deque<pExtBase*> extRegistryType;
 
-        private:
-            pRuntimeEngine* runtime;
-            extRegistryType extRegistry;
+private:
+    pRuntimeEngine* runtime_;
+    extRegistryType extRegistry_;
 
-        public:
-            pExtManager(pRuntimeEngine *r): runtime(r) { }
-            ~pExtManager();
+public:
+    pExtManager(pRuntimeEngine *r): runtime_(r) { }
+    ~pExtManager();
 
-            void startUp();
+    void startUp();
 
-    };
+};
 
 }
 

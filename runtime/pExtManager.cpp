@@ -35,16 +35,16 @@ pExtManager::pExtManager(pRuntimeEngine *r) : runtime(r) {
 void pExtManager::startUp() {
 
     // initialize standard library
-    pStandardExt* sext = new pStandardExt(runtime);
+    pStandardExt* sext = new pStandardExt(runtime_);
     sext->extensionStartup();
-    extRegistry.push_back(sext);
+    extRegistry_.push_back(sext);
 
 }
 
 pExtManager::~pExtManager() {
 
     // shutdown extensions
-    for (extRegistryType::iterator i=extRegistry.begin(); i!=extRegistry.end(); ++i) {
+    for (extRegistryType::iterator i=extRegistry_.begin(); i!=extRegistry_.end(); ++i) {
         (*i)->extensionShutdown();
         delete *i;
     }

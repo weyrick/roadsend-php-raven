@@ -34,69 +34,54 @@
 
 namespace rphp {
 
-    typedef boost::unordered_map<pUString, pClass*> pClassList;
-    
-    class pExtManager;
+typedef boost::unordered_map<pUString, pClass*> pClassList;
 
-    class pRuntimeEngine {
+class pExtManager;
 
-        private:
-            // extension manager
-            // --> for loading and registering dynamic extensions (pcre, mysql, etc) and their associated functions, classes
-            pExtManager* extManager;
+class pRuntimeEngine {
 
-            // class manager
-            // --> similar to funciton manager, but stores builtin and currently defined classes
-            // --> interface for new class definition
-	    pClassList _classes;
+    // class manager
+    // --> similar to funciton manager, but stores builtin and currently defined classes
+    // --> interface for new class definition
+    pClassList classes_; // TODO: move to class manager
 
-            // global data:
-            // --> $GLOBAL and other superglobal symbol table, argc, argv,
-            // --> constants (with define()). support builtins (PATH_SEPARATOR, etc) and interface for dynamic verisons
+    // global data:
+    // --> $GLOBAL and other superglobal symbol table, argc, argv,
+    // --> constants (with define()). support builtins (PATH_SEPARATOR, etc) and interface for dynamic verisons
 
-            // include files: include paths, all files included
+    // include files: include paths, all files included
 
-            // runtime reset functionality (for page resets)
+    // runtime reset functionality (for page resets)
 
-            // maintainance: startup, shutdown hooks. signal/slots?
+    // maintainance: startup, shutdown hooks. signal/slots?
 
-            // php.ini compatilbility
+    // php.ini compatilbility
 
-            // error manager
+    // error manager
 
-        public:
+public:
 
-            pRuntimeEngine();
-            ~pRuntimeEngine();
+    pRuntimeEngine();
+    ~pRuntimeEngine();
 
-	    pClass* getClass( const pUString& className );
-	    void addClass( pClass* class_ );
-	    
-            // function manager
-            // --> store list of available functions, including builtins (from extension manager) which stay on page reset,
-            //     and the currently defined via php code, which are reset each page
-            // --> interface for new function definition
-            pFunctionManager* functionManager;
+    pClass* getClass( const pUString& className );
+    void addClass( pClass* class_ );
 
-            // output buffering management
-            pOutputManager* outputManager;
+    // function manager
+    // --> store list of available functions, including builtins (from extension manager) which stay on page reset,
+    //     and the currently defined via php code, which are reset each page
+    // --> interface for new function definition
+    pFunctionManager* functionManager;
 
-    };
+    // extension manager
+    // --> for loading and registering dynamic extensions (pcre, mysql, etc) and their associated functions, classes
+    pExtManager* extManager;
+
+    // output buffering management
+    pOutputManager* outputManager;
+
+};
 
 } /* end namespace rphp */
-
-/* start C interface */
-extern "C" {
-
-    // create a new runtime engine
-    rphp::pRuntimeEngine* rphp_newRuntimeEngine();
-
-    // destroy runtime engine
-    void rphp_deleteRuntimeEngine(rphp::pRuntimeEngine*);
-
-    // print to runtime output buffer
-    void rphp_print_cstr(rphp::pRuntimeEngine*, char* str);
-
-}
 
 #endif /* RPHP_PRUNTIME_H_ */

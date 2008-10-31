@@ -25,71 +25,73 @@
 
 namespace rphp {
 
-    class pOutputBuffer {
+class pOutputBuffer {
 
-    public:
+public:
 
-        typedef enum { bufTypeBinary, bufTypeUnicode } bufTypeT;
+    typedef enum { bufTypeBinary, bufTypeUnicode } bufTypeT;
 
-            // constructors
+private:
 
-            // specify type
-            pOutputBuffer(bufTypeT t) : bBuffer(0), uBuffer(0), bType(t) {
-                switch (t) {
-                    case bufTypeBinary:
-                        bBuffer = new pBString();
-                        break;
-                    case bufTypeUnicode:
-                        uBuffer = new pUString();
-                        break;
-                }
-            }
+    pUString *uBuffer_;
+    pBString *bBuffer_;
+    bufTypeT bType_;
 
-            // destructor
-            ~pOutputBuffer() {
-                if (uBuffer)
-                    delete uBuffer;
-                if (bBuffer)
-                    delete bBuffer;
-            }
+public:
 
-            const char* getRawBuffer() {
-                switch (bType) {
-                    case bufTypeBinary:
-                        return bBuffer->c_str();
-                    case bufTypeUnicode:
-                        return (const char*)uBuffer->getTerminatedBuffer();
-                }
-            }
+    // constructors
 
-            void operator<< (const pBString& str) {
-                switch (bType) {
-                    case bufTypeBinary:
-                        bBuffer->append(str);
-                        break;
-                    case bufTypeUnicode:
-                        // TODO: this doesn't seem so efficient. but how often will it be used?
-                        uBuffer->append(pUString(str.c_str(),str.length(), US_INV));
-                        break;
-                }
-            }
+    // specify type
+    pOutputBuffer(bufTypeT t) : bBuffer_(0), uBuffer_(0), bType_(t) {
+        switch (t) {
+            case bufTypeBinary:
+                bBuffer_ = new pBString();
+                break;
+            case bufTypeUnicode:
+                uBuffer_ = new pUString();
+                break;
+        }
+    }
 
-            void operator<< (const pUString& str) {
-                if (bType == bufTypeBinary) {
-                    // convert to unicode buffer
-                    uBuffer = new pUString(bBuffer->c_str(), bBuffer->length(), US_INV);
-                    delete bBuffer;
-                }
-                uBuffer->append(str);
-            }
+    // destructor
+    ~pOutputBuffer() {
+        if (uBuffer_)
+            delete uBuffer_;
+        if (bBuffer_)
+            delete bBuffer_;
+    }
 
-    private:
+    const char* getRawBuffer() {
+        switch (bType_) {
+            case bufTypeBinary:
+                return bBuffer_->c_str();
+            case bufTypeUnicode:
+                return (const char*)uBuffer_->getTerminatedBuffer();
+        }
+    }
 
-            pUString *uBuffer;
-            pBString *bBuffer;
-            bufTypeT bType;
+    void operator<< (const pBString& str) {
+        switch (bType_) {
+            case bufTypeBinary:
+                bBuffer_->append(str);
+                break;
+            case bufTypeUnicode:
+                // TODO: this doesn't seem so efficient. but how often will it be used?
+                uBuffer_->append(pUString(str.c_str(),str.length(), US_INV));
+                break;
+        }
+    }
 
-    };
+    void operator<< (const pUString& str) {
+        if (bType_ == bufTypeBinary) {
+            // convert to unicode buffer
+            uBuffer_ = new pUString(bBuffer_->c_str(), bBuffer_->length(), US_INV);
+            delete bBuffer_;
+        }
+        uBuffer_->append(str);
+    }
+
+};
 
 }
 

@@ -25,7 +25,7 @@ namespace rphp {
 
 void pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pUString& funName, const pFunPointer1& f) {
 
-    functionRegistry[funName] = new pFunctionSig(sourceExt, funName, f);
+    functionRegistry_[funName] = new pFunctionSig(sourceExt, funName, f);
 
 }
 

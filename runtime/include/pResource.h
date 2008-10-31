@@ -25,15 +25,14 @@
 
 namespace rphp {
 
-    class pResource {
-        private:
-        public:
-            pResource()  { }
+class pResource {
+    public:
+        pResource()  { }
 
 
-    };
+};
 
-    std::ostream& operator << (std::ostream& os, const rphp::pResource& h);
+std::ostream& operator << (std::ostream& os, const rphp::pResource& h);
 
 }
 

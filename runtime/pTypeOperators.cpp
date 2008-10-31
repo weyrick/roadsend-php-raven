@@ -27,16 +27,16 @@ namespace rphp {
 void pVar_convertToIntVisitor::operator()(pBString &v) {
     // TODO: handle floats
     try {
-        var = boost::lexical_cast<pInt>(v);
+        var_ = boost::lexical_cast<pInt>(v);
     } catch(boost::bad_lexical_cast &) {
-        var = 0l;
+        var_ = 0l;
     }
 }
 
 void pVar_convertToIntVisitor:: operator()(pUStringP &v) {
     // TODO: do a real conversion here
     // should handle both integers and floats
-    var = 0l;
+    var_ = 0l;
 }
 
 } /* namespace rphp */

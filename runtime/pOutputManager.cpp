@@ -24,10 +24,10 @@
 namespace rphp {
 
 void pOutputManager::flushAndFreeAll() {
-    while( !bufferStack.empty() ) {
-        std::cout << bufferStack.top()->getRawBuffer();
-        delete bufferStack.top();
-        bufferStack.pop();
+    while( !bufferStack_.empty() ) {
+        std::cout << bufferStack_.top()->getRawBuffer();
+        delete bufferStack_.top();
+        bufferStack_.pop();
     }
 }
 

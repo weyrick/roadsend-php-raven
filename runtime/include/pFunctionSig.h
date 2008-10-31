@@ -26,62 +26,62 @@
 
 namespace rphp {
 
-    class pClass;
-    class pExtBase;
+class pClass;
+class pExtBase;
 
-    typedef enum { pBuiltinFunType, pUserFunType } pFunType;
+typedef enum { pBuiltinFunType, pUserFunType } pFunType;
 
-    struct pFunctionParam {
-        pUString paramName;
-        bool isOptional;
-        pVar defaultValue;
-        bool isByRef;
-        bool isArray;      // array type hint
-        pClass* classHint; // class type hint
-    };
+struct pFunctionParam {
+    pUString paramName;
+    bool isOptional;
+    pVar defaultValue;
+    bool isByRef;
+    bool isArray;      // array type hint
+    pClass* classHint; // class type hint
+};
 
-    class pFunctionSig {
-        private:
-            // declaration location (user function)
-            const pSourceStartEndLocation sourceLocation;
+class pFunctionSig {
 
-            // or parent extension (only builtins)
-            const pExtBase* parentExtension;
+    // declaration location (user function)
+    const pSourceStartEndLocation sourceLocation_;
 
-            // docComment?
+    // or parent extension (only builtins)
+    const pExtBase* parentExtension_;
 
-            // signature
-            const pUString functionName;
-            const pFunType funType;
-            const pUInt requiredArity;
-            const pUInt maxArity;
-            const bool isVarArity;
+    // docComment?
 
-            std::vector<pFunctionParam> paramList;
+    // signature
+    const pUString functionName_;
+    const pFunType funType_;
+    const pUInt requiredArity_;
+    const pUInt maxArity_;
+    const bool isVarArity_;
 
-            const pFunPointer1 funPointer1;
+    std::vector<pFunctionParam> paramList_;
 
-        public:
+    const pFunPointer1 funPointer1_;
 
-            // standard builtin function: one argument
-            pFunctionSig(const pExtBase* e, const pUString& f, const pFunPointer1& fun) :
-                parentExtension(e),
-                functionName(f),
-                funType(pBuiltinFunType),
-                requiredArity(1),
-                maxArity(1),
-                isVarArity(false),
-                funPointer1(fun)
-            {
+public:
 
-            }
+    // standard builtin function: one argument
+    pFunctionSig(const pExtBase* e, const pUString& f, const pFunPointer1& fun) :
+        parentExtension_(e),
+        functionName_(f),
+        funType_(pBuiltinFunType),
+        requiredArity_(1),
+        maxArity_(1),
+        isVarArity_(false),
+        funPointer1_(fun)
+    {
 
-            // invocation
-            pVar invoke(pVar arg1) {
-                return funPointer1(arg1);
-            }
+    }
 
-    };
+    // invocation
+    pVar invoke(pVar arg1) {
+        return funPointer1_(arg1);
+    }
+
+};
 
 }
 

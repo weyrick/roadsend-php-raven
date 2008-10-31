@@ -67,27 +67,6 @@ public:
 
 };
 
-// a visitor for determining phash key type
-class hKeyGetType : public boost::static_visitor<hKeyType> {
-
-public:
-
-    hKeyType operator()(const pInt &k) const {
-        return hKeyInt;
-    }
-
-    /*
-    hKeyType operator()(const pBString &k) const {
-        return hKeyBStr;
-    }
-    */
-
-    hKeyType operator()(const pUString &k) const {
-        return hKeyUStr;
-    }
-
-};
-
 // define the container stored in stableHash
 struct h_container {
 
@@ -122,59 +101,58 @@ typedef nth_index<stableHash,1>::type seq_index;
 */
 class pHash {
 
-    private:
-        stableHash hashData;
-        pInt maxIntKey;
+    stableHash hashData_;
+    pInt maxIntKey_;
 
-    public:
+public:
 
-        // types
-        typedef stableHash::size_type size_type;
+    // types
+    typedef stableHash::size_type size_type;
 
-        typedef stableHash::iterator iterator;
+    typedef stableHash::iterator iterator;
 
-        // construct/destroy/copy
-        pHash() : maxIntKey(0) {
+    // construct/destroy/copy
+    pHash() : maxIntKey_(0) {
 #ifdef RPHP_PVAR_DEBUG
-        std::cerr << "pHash(): create" << std::endl;
+    std::cerr << "pHash(): create" << std::endl;
 #endif
-        }
+    }
 
-        // default copy construtor, destructor
+    // default copy construtor, destructor
 
 #ifdef RPHP_PVAR_DEBUG
-        pHash(pHash const& p) : maxIntKey(p.maxIntKey), hashData(p.hashData) {
-            std::cerr << "pHash(): copy construct (full data copy)" << std::endl;
-        }
+    pHash(pHash const& p) : maxIntKey_(p.maxIntKey_), hashData_(p.hashData_) {
+        std::cerr << "pHash(): copy construct (full data copy)" << std::endl;
+    }
 
-        ~pHash() {
-            std::cerr << "pHash(): destruct" << std::endl;
-        }
+    ~pHash() {
+        std::cerr << "pHash(): destruct" << std::endl;
+    }
 #endif
 
-        // modifiers
-        void insert(const pUString &key, const pVar& data);
-        //void insert(const pBString &key, pVarP data);
-        void insert(const pInt &key, const pVar& data);
-        void insertNext(const pVar& data);
+    // modifiers
+    void insert(const pUString &key, const pVar& data);
+    //void insert(const pBString &key, pVarP data);
+    void insert(const pInt &key, const pVar& data);
+    void insertNext(const pVar& data);
 
-        size_type remove(const pUString &key);
-        //void remove(const pBString &key);
-        size_type remove(const pInt &key);
+    size_type remove(const pUString &key);
+    //void remove(const pBString &key);
+    size_type remove(const pInt &key);
 
-        // queries
-        size_type getSize() const { return hashData.size(); }
-        bool keyExists(const pUString &key) const;
-        //bool keyExists(const pBString &key) const;
-        bool keyExists(const pInt &key) const;
+    // queries
+    size_type getSize() const { return hashData_.size(); }
+    bool keyExists(const pUString &key) const;
+    //bool keyExists(const pBString &key) const;
+    bool keyExists(const pInt &key) const;
 
-        // dump of contents
-        void varDump() const;
+    // dump of contents
+    void varDump() const;
 
-        // lookup
-        pVar operator[] (const pUString &key) const;
-        //pVarP operator[] (const pBString &key) const;
-        pVar operator[] (const pInt &key) const;
+    // lookup
+    pVar operator[] (const pUString &key) const;
+    //pVarP operator[] (const pBString &key) const;
+    pVar operator[] (const pInt &key) const;
 
 
 };

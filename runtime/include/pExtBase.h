@@ -27,23 +27,23 @@
 
 namespace rphp {
 
-    class pRuntimeEngine;
+class pRuntimeEngine;
 
-    class pExtBase {
+class pExtBase {
 
-    protected:
-        std::string extName;
-        pRuntimeEngine* runtime;
+protected:
+    std::string extName_;
+    pRuntimeEngine* runtime_;
 
-        void registerBuiltin(pUString name, pFunPointer1 f);
+    void registerBuiltin(pUString name, pFunPointer1 f);
 
-    public:
-        pExtBase(pRuntimeEngine *r, std::string eName) : runtime(r), extName(eName) { }
+public:
+    pExtBase(pRuntimeEngine *r, std::string eName) : runtime_(r), extName_(eName) { }
 
-        virtual void extensionStartup() = 0;
-        virtual void extensionShutdown() = 0;
+    virtual void extensionStartup() = 0;
+    virtual void extensionShutdown() = 0;
 
-    };
+};
 
 }
 

@@ -33,41 +33,41 @@ namespace rphp {
 class pVar_convertToBoolVisitor : public boost::static_visitor<void> {
 
 protected:
-    pVarDataType &var;
+    pVarDataType &var_;
 
 public:
-    pVar_convertToBoolVisitor(pVarDataType &v) : var(v) { }
+    pVar_convertToBoolVisitor(pVarDataType &v) : var_(v) { }
 
     void operator()(pTriState &v)  {
-        (pNull(v)) ? var = pFalse : var = v;
+        (pNull(v)) ? var_ = pFalse : var_ = v;
     }
 
     void operator()(pInt &v) {
-        (v) ? var = pTrue : var = pFalse;
+        (v) ? var_ = pTrue : var_ = pFalse;
     }
 
     void operator()(pFloat &v) {
-        (v) ? var = pTrue : var = pFalse;
+        (v) ? var_ = pTrue : var_ = pFalse;
     }
 
     void operator()(pBString &v) {
-        (v.empty()) ? var = pFalse : var = pTrue;
+        (v.empty()) ? var_ = pFalse : var_ = pTrue;
     }
 
     void operator()(pUStringP &v) {
-        (v->isEmpty()) ? var = pFalse : var = pTrue;
+        (v->isEmpty()) ? var_ = pFalse : var_ = pTrue;
     }
 
     void operator()(pHashP &v) {
-        (v->getSize()) ? var = pTrue : var = pFalse;
+        (v->getSize()) ? var_ = pTrue : var_ = pFalse;
     }
 
     void operator()(pObjectP &v) {
-        (v->getNumProperties()) ? var = pTrue : var = pFalse;
+        (v->getNumProperties()) ? var_ = pTrue : var_ = pFalse;
     }
 
     void operator()(pResourceP &v) {
-        var = pTrue;
+        var_ = pTrue;
     }
 
     void operator()(pVarP &v) {
@@ -80,19 +80,19 @@ public:
 /* a visitor for converting to a php number (long or float), in place */
 class pVar_convertToIntVisitor : public boost::static_visitor<void> {
 protected:
-    pVarDataType &var;
+    pVarDataType &var_;
 
 public:
-    pVar_convertToIntVisitor(pVarDataType &v) : var(v) { }
+    pVar_convertToIntVisitor(pVarDataType &v) : var_(v) { }
 
     void operator()(pTriState &v)  {
-            (v) ? var = 1l : var = 0l;
+            (v) ? var_ = 1l : var_ = 0l;
     }
 
     void operator()(pInt &v) { /* nothing */ }
     
     void operator()(pFloat &v) {
-        var = (pInt)v;
+        var_ = (pInt)v;
     }
 
     void operator()(pBString &v);
@@ -100,16 +100,16 @@ public:
     void operator()(pUStringP &v);
 
     void operator()(pHashP &v) {
-        var = (pInt)v->getSize();
+        var_ = (pInt)v->getSize();
     }
 
     void operator()(pObjectP &v) {
-        var = (pInt)v->getNumProperties();
+        var_ = (pInt)v->getNumProperties();
     }
 
     void operator()(pResourceP &v) {
         // TODO: return static resource count
-        var = 0l;
+        var_ = 0l;
     }
 
     void operator()(pVarP &v) {
@@ -120,17 +120,17 @@ public:
 
 class pVar_convertToBStringVisitor : public boost::static_visitor<void> {
 protected:
-    pVarDataType &var;
+    pVarDataType &var_;
 
 public:
-    pVar_convertToBStringVisitor(pVarDataType &v) : var(v) { }
+    pVar_convertToBStringVisitor(pVarDataType &v) : var_(v) { }
 
     void operator()(pTriState &v) {
         if (pNull(v)) {
-            var = pBString("");
+            var_ = pBString("");
         }
         else {
-            (v) ? var = pBString("1") : var = pBString("0");
+            (v) ? var_ = pBString("1") : var_ = pBString("0");
         }
     }
 
@@ -138,10 +138,10 @@ public:
         using boost::lexical_cast;
         using boost::bad_lexical_cast;
         try {
-            var = pBString(lexical_cast<pBString>(v));
+            var_ = pBString(lexical_cast<pBString>(v));
         }
         catch(bad_lexical_cast &) {
-            var = pBString("0");
+            var_ = pBString("0");
         }
     }
 
@@ -149,10 +149,10 @@ public:
         using boost::lexical_cast;
         using boost::bad_lexical_cast;
         try {
-            var = pBString(lexical_cast<pBString>(v));
+            var_ = pBString(lexical_cast<pBString>(v));
         }
         catch(bad_lexical_cast &) {
-            var = pBString("0.0");
+            var_ = pBString("0.0");
         }
     }
 
@@ -163,16 +163,16 @@ public:
     }
 
     void operator()(pHashP &v) {
-        var = pBString("array");
+        var_ = pBString("array");
     }
 
     void operator()(pObjectP &v) {
         // TODO: toString
-        var = pBString("object");
+        var_ = pBString("object");
     }
 
     void operator()(pResourceP &v) {
-        var = pBString("resource");
+        var_ = pBString("resource");
     }
 
     void operator()(pVarP &v) const {

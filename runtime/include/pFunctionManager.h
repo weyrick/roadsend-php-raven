@@ -29,40 +29,40 @@
 
 namespace rphp {
 
-    typedef boost::unordered_map<pUString, pFunctionSig*> functionRegistryType;
+typedef boost::unordered_map<pUString, pFunctionSig*> functionRegistryType;
 
-    class pRuntimeEngine;
+class pRuntimeEngine;
 
-    class pFunctionManager {
+class pFunctionManager {
 
-        private:
-            pRuntimeEngine* runtime;
-            functionRegistryType functionRegistry;
+private:
+    pRuntimeEngine* runtime_;
+    functionRegistryType functionRegistry_;
 
-        public:
+public:
 
-            pFunctionManager(pRuntimeEngine *r) : runtime(r) { }
-            ~pFunctionManager() {
-                // free function entries
-                for (functionRegistryType::iterator i = functionRegistry.begin(); i != functionRegistry.end(); ++i) {
-                    delete (*i).second;
-                }
-            }
+    pFunctionManager(pRuntimeEngine *r) : runtime_(r) { }
+    ~pFunctionManager() {
+        // free function entries
+        for (functionRegistryType::iterator i = functionRegistry_.begin(); i != functionRegistry_.end(); ++i) {
+            delete (*i).second;
+        }
+    }
 
-            void registerBuiltin(const pExtBase*, const pUString&, const pFunPointer1&);
+    void registerBuiltin(const pExtBase*, const pUString&, const pFunPointer1&);
 
-            pVar invoke(pUString funName, pVar arg1) {
-                functionRegistryType::iterator function = functionRegistry.find(funName.toLower());
-                // TODO this needs to throw a runtime error if the function wasn't found
-                if (function != functionRegistry.end()) {
-                    return (*function).second->invoke(arg1);
-                }
-                else {
-                    return pNull;
-                }
-            }
+    pVar invoke(pUString funName, pVar arg1) {
+        functionRegistryType::iterator function = functionRegistry_.find(funName.toLower());
+        // TODO this needs to throw a runtime error if the function wasn't found
+        if (function != functionRegistry_.end()) {
+            return (*function).second->invoke(arg1);
+        }
+        else {
+            return pNull;
+        }
+    }
 
-    };
+};
 
 }
 

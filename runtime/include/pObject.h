@@ -39,53 +39,53 @@
 
 namespace rphp {
 
-    class pMethod {
-        // method name, case sensitive (as declared)
+class pMethod {
+    // method name, case sensitive (as declared)
+    // canonical name, lowercased
+    // origin class: original defining class pClass*, used in inheritance
+    // final, abstract flags
+    // function pointer (common class with normal functions?)
+};
+
+class pClass {
+private:
+    pHash properties_;
+    pHash methods_; // TODO: this can be unordered map
+    pUString name_;
+public:
+    pClass();
+    pHash properties();
+        // bitset of class flags: abstract, final, interface, abstract-implied
+        // class name, case sensitive (as declared)
+    const pUString& getName() const;
+    void setName( const pUString& name );
         // canonical name, lowercased
-        // origin class: original defining class pClass*, used in inheritance
-        // final, abstract flags
-        // function pointer (common class with normal functions?)
-    };
+        // list of parent classes (only 1, unless interface)
+        // list of interfaces the class implements
+        // constructor, destructor, method array
+        // declared properties (including visibility, static info)
+        // class constants
 
-    class pClass {
+};
+
+class pObject {
     private:
-	pHash _properties;
-	pHash _functions;
-	pUString _name;
+        pHash properties_; // copied from declared
+        const pClass* parentClass_;
+        pHash runtimeFunctions_;
+        pClass* class_;
+        // object instance id
+        // hash for properties created on the fly
     public:
-	pClass();
-	pHash properties();
-            // bitset of class flags: abstract, final, interface, abstract-implied
-            // class name, case sensitive (as declared)
-	const pUString& name() const;
-	void setName( const pUString& name );
-            // canonical name, lowercased
-            // list of parent classes (only 1, unless interface)
-            // list of interfaces the class implements
-            // constructor, destructor, method array
-            // declared properties (including visibility, static info)
-            // class constants
+        pObject(const pUString& className);
 
-    };
+        pHash::size_type getNumProperties() const {
+            return properties_.getSize();
+        }
 
-    class pObject {
-        private:
-            pHash _properties; // copied from declared
-            const pClass* _parentClass;
-	    pHash _runtimeFunctions;
-	    pClass* _class;
-            // object instance id
-            // hash for properties created on the fly
-        public:
-            pObject(const pUString& className);
+};
 
-            const pHash::size_type getNumProperties() {
-                return _properties.getSize();
-            }
-
-    };
-
-    std::ostream& operator << (std::ostream& os, const rphp::pObject& h);
+std::ostream& operator << (std::ostream& os, const rphp::pObject& h);
 
 }
 

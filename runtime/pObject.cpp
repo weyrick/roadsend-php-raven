@@ -31,13 +31,13 @@ namespace rphp {
     }
 
     pObject::pObject( const pUString& className )
-	: _properties(),
-	  _runtimeFunctions()
+    : properties_(),
+      runtimeFunctions_()
     {
-	// find pClass in class hash table and associate it with the object
-//	_class = rphp::pRuntime::getClass( className );
-	// copy properties
-	_properties = _class->properties();
+    // find pClass in class hash table and associate it with the object
+//  class_ = rphp::pRuntime::getClass( className );
+    // copy properties
+    properties_ = class_->properties();
     }
 }
 

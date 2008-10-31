@@ -30,73 +30,72 @@
 namespace rphp {
 
 template <class T>
-class CowPtr
-{
-    public:
-        typedef boost::shared_ptr<T> RefPtr;
+class CowPtr {
+public:
+    typedef boost::shared_ptr<T> RefPtr;
 
-    private:
-        RefPtr m_sp;
+private:
+    RefPtr sPtr_;
 
-        void detach() {
-            T* tmp = m_sp.get();
-            if( !( tmp == 0 || m_sp.unique() ) ) {
+    void detach() {
+        T* tmp = sPtr_.get();
+        if( !( tmp == 0 || sPtr_.unique() ) ) {
 #ifdef RPHP_PVAR_DEBUG
-                std::cerr << "COW: detach, full copy" << std::endl;
+            std::cerr << "COW: detach, full copy" << std::endl;
 #endif
-                m_sp = RefPtr( new T( *tmp ) );
-            }
+            sPtr_ = RefPtr( new T( *tmp ) );
         }
- 
-    public:
-        CowPtr(T* t)
-            :   m_sp(t) {
+    }
+
+public:
+    CowPtr(T* t)
+        :   sPtr_(t) {
 #ifdef RPHP_PVAR_DEBUG
-            std::cerr << "COW: create from T*" << std::endl;
+        std::cerr << "COW: create from T*" << std::endl;
 #endif
-        }
-        CowPtr(const RefPtr& refptr)
-            :   m_sp(refptr) {
+    }
+    CowPtr(const RefPtr& refptr)
+        :   sPtr_(refptr) {
 #ifdef RPHP_PVAR_DEBUG
-            std::cerr << "COW: create from shared_ptr<T>" << std::endl;
+        std::cerr << "COW: create from shared_ptr<T>" << std::endl;
 #endif
-        }
-        CowPtr(const CowPtr& cowptr)
-            :   m_sp(cowptr.m_sp)  {
+    }
+    CowPtr(const CowPtr& cowptr)
+        :   sPtr_(cowptr.sPtr_)  {
 #ifdef RPHP_PVAR_DEBUG
-            std::cerr << "COW: copy construct" << std::endl;
+        std::cerr << "COW: copy construct" << std::endl;
 #endif
-        }
+    }
 
-        CowPtr& operator=(const CowPtr& rhs) {
+    CowPtr& operator=(const CowPtr& rhs) {
 #ifdef RPHP_PVAR_DEBUG
-            std::cerr << "COW: shallow assign" << std::endl;
+        std::cerr << "COW: shallow assign" << std::endl;
 #endif
-            m_sp = rhs.m_sp; // no need to check for self-assignment with boost::shared_ptr
-            return *this;
-        }
+        sPtr_ = rhs.sPtr_; // no need to check for self-assignment with boost::shared_ptr
+        return *this;
+    }
 
-        bool operator==(const CowPtr& rhs) {
-            return (m_sp == rhs.m_sp);
-        }
+    bool operator==(const CowPtr& rhs) {
+        return (sPtr_ == rhs.sPtr_);
+    }
 
-        const T& operator*() const {
-            return *m_sp;
-        }
+    const T& operator*() const {
+        return *sPtr_;
+    }
 
-        T& operator*() {
-            detach();
-            return *m_sp;
-        }
+    T& operator*() {
+        detach();
+        return *sPtr_;
+    }
 
-        const T* operator->() const {
-            return m_sp.operator->();
-        }
-        
-        T* operator->() {
-            detach();
-            return m_sp.operator->();
-        }
+    const T* operator->() const {
+        return sPtr_.operator->();
+    }
+
+    T* operator->() {
+        detach();
+        return sPtr_.operator->();
+    }
 };
 
 }

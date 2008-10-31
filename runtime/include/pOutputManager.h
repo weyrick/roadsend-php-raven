@@ -27,44 +27,43 @@
 
 namespace rphp {
 
-    class pRuntimeEngine;
+class pRuntimeEngine;
 
-    class pOutputManager {
+class pOutputManager {
 
-        private:
-            pRuntimeEngine* runtime;
-            std::stack<pOutputBuffer*> bufferStack;
+    pRuntimeEngine* runtime_;
+    std::stack<pOutputBuffer*> bufferStack_;
 
-        public:
+public:
 
-            // constructors
-            pOutputManager(pRuntimeEngine *r) : runtime(r) {
-                // default output buffer
-                // TODO: check the runtime config for which type of default buffer to use
-                bufferStack.push(new pOutputBuffer(pOutputBuffer::bufTypeBinary));
-            }
+    // constructors
+    pOutputManager(pRuntimeEngine *r) : runtime_(r) {
+        // default output buffer
+        // TODO: check the runtime config for which type of default buffer to use
+        bufferStack_.push(new pOutputBuffer(pOutputBuffer::bufTypeBinary));
+    }
 
-            ~pOutputManager() {
-                flushAndFreeAll();
-            }
+    ~pOutputManager() {
+        flushAndFreeAll();
+    }
 
-            // flush one or more buffers
-            void flushAndFreeAll();
+    // flush one or more buffers
+    void flushAndFreeAll();
 
-            // printing to the current buffer
-            void print(pBString str) {
-                if (bufferStack.empty())
-                    return;
-                *bufferStack.top() << str;
-            }
+    // printing to the current buffer
+    void print(pBString str) {
+        if (bufferStack_.empty())
+            return;
+        *bufferStack_.top() << str;
+    }
 
-            void print(pUString str) {
-                if (bufferStack.empty())
-                    return;
-                *bufferStack.top() << str;
-            }
+    void print(pUString str) {
+        if (bufferStack_.empty())
+            return;
+        *bufferStack_.top() << str;
+    }
 
-    };
+};
 
 }
 

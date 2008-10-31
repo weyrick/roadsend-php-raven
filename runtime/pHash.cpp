@@ -24,114 +24,112 @@
 
 
 namespace boost {
-	std::size_t hash_value(rphp::hKeyVar const& k) {
-        return boost::apply_visitor(rphp::hKeyHasher(), k);
-    }
+std::size_t hash_value(rphp::hKeyVar const& k) {
+    return boost::apply_visitor(rphp::hKeyHasher(), k);
+}
 }
 
 namespace rphp {
 
-    void pHash::insert(const pUString &key, const pVar& data) {
-        // TODO check numeric string, set maxIntKey accordingly
-        hashData.insert(h_container(key, data));
-    }
+void pHash::insert(const pUString &key, const pVar& data) {
+    // TODO check numeric string, set maxIntKey accordingly
+    hashData_.insert(h_container(key, data));
+}
 
-    /*
-    void pHash::insert(const pBString &key, pVarP data) {
-        // TODO check numeric string, set maxIntKey accordingly
-        hashData.insert(h_container(key, data));
-    }
-    */
+/*
+void pHash::insert(const pBString &key, pVarP data) {
+    // TODO check numeric string, set maxIntKey accordingly
+    hashData_.insert(h_container(key, data));
+}
+*/
 
-    void pHash::insert(const pInt &key, const pVar& data) {
-        if (key > maxIntKey)
-            maxIntKey = key+1;
-        hashData.insert(h_container(key, data));
-    }
+void pHash::insert(const pInt &key, const pVar& data) {
+    if (key > maxIntKey_)
+        maxIntKey_ = key+1;
+    hashData_.insert(h_container(key, data));
+}
 
-    void pHash::insertNext(const pVar& data) {
-        hashData.insert(h_container(maxIntKey++, data));
-    }
+void pHash::insertNext(const pVar& data) {
+    hashData_.insert(h_container(maxIntKey_++, data));
+}
 
-    pHash::size_type pHash::remove(const pUString &key) {
-        return hashData.erase(key);
-    }
+pHash::size_type pHash::remove(const pUString &key) {
+    return hashData_.erase(key);
+}
 
-    pHash::size_type pHash::remove(const pInt &key) {
-        return hashData.erase(key);
-    }
+pHash::size_type pHash::remove(const pInt &key) {
+    return hashData_.erase(key);
+}
 
 
-    // query
-    bool pHash::keyExists(const pUString &key) const {
-        stableHash::iterator k = hashData.find(key);
-        return (k != hashData.end());
-    }
-    /*
-    bool pHash::keyExists(const pBString &key) const {
-        stableHash::iterator k = hashData.find(key);
-        return (k != hashData.end());
-    }
-    */
-    bool pHash::keyExists(const pInt &key) const {
-        stableHash::iterator k = hashData.find(key);
-        return (k != hashData.end());
-    }
+// query
+bool pHash::keyExists(const pUString &key) const {
+    stableHash::iterator k = hashData_.find(key);
+    return (k != hashData_.end());
+}
+/*
+bool pHash::keyExists(const pBString &key) const {
+    stableHash::iterator k = hashData_.find(key);
+    return (k != hashData_.end());
+}
+*/
+bool pHash::keyExists(const pInt &key) const {
+    stableHash::iterator k = hashData_.find(key);
+    return (k != hashData_.end());
+}
 
-    // lookup
-    pVar pHash::operator[] ( const pUString &key ) const {
-        stableHash::iterator k = hashData.find(key);
-        if (k == hashData.end())
-            return pVar(); // pNull
+// lookup
+pVar pHash::operator[] ( const pUString &key ) const {
+    stableHash::iterator k = hashData_.find(key);
+    if (k == hashData_.end())
+        return pVar(); // pNull
+    else
+        return (*k).pData;
+}
+
+/*
+pVarP pHash::operator[] ( const pBString &key ) const {
+    stableHash::iterator k = hashData_.find(key);
+    if (k == hashData_.end())
+        return pVarP();
+    else
+        return (*k).pData;
+}
+*/
+
+pVar pHash::operator[] ( const pInt &key ) const {
+    stableHash::iterator k = hashData_.find(key);
+    if (k == hashData_.end())
+        return pVar(); // pNull
+    else
+        return (*k).pData;
+}
+
+// output
+std::ostream& operator << (std::ostream& os, const rphp::pHash& h)
+{
+    return os << "php_hash:" << std::endl;
+}
+
+void pHash::varDump() const {
+
+
+    std::cout << "array(" << hashData_.size() << ") {" << std::endl;
+
+    const seq_index& ot = get<1>(hashData_);
+
+    hKeyType kType;
+
+    for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
+        if ((*it).key.which() == hKeyInt)
+            std::cout << "   [" << (*it).key << "] => " << (*it).pData << std::endl;
         else
-            return (*k).pData;
+            std::cout << "   ['" << (*it).key << "'] => " << (*it).pData << std::endl;
     }
 
-    /*
-    pVarP pHash::operator[] ( const pBString &key ) const {
-        stableHash::iterator k = hashData.find(key);
-        if (k == hashData.end())
-            return pVarP();
-        else
-            return (*k).pData;
-    }
-    */
+    std::cout << "}" << std::endl;
 
-    pVar pHash::operator[] ( const pInt &key ) const {
-        stableHash::iterator k = hashData.find(key);
-        if (k == hashData.end())
-            return pVar(); // pNull
-        else
-            return (*k).pData;
-    }
-
-    // output
-    std::ostream& operator << (std::ostream& os, const rphp::pHash& h)
-    {
-        return os << "php_hash:" << std::endl;
-    }
-
-    void pHash::varDump() const {
-
-
-        std::cout << "array(" << hashData.size() << ") {" << std::endl;
-
-        const seq_index& ot = get<1>(hashData);
-
-        hKeyType kType;
-
-        for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
-            kType = boost::apply_visitor(rphp::hKeyGetType(), (*it).key);
-            if (kType == hKeyInt)
-                std::cout << "   [" << (*it).key << "] => " << (*it).pData << std::endl;
-            else
-                std::cout << "   ['" << (*it).key << "'] => " << (*it).pData << std::endl;
-        }
-
-        std::cout << "}" << std::endl;
-
-    }
-
+}
 
 } /* namespace rphp */
 
