@@ -54,26 +54,3 @@ pRuntimeEngine::~pRuntimeEngine() {
     
 } /* end namespace rphp */
 
-
-/* start C interface */
-extern "C" {
-
-    // create a new runtime engine
-    rphp::pRuntimeEngine* rphp_newRuntimeEngine() {
-        rphp::pRuntimeEngine* rt = new rphp::pRuntimeEngine();
-        return rt;
-    }
-
-    // destroy runtime engine
-    void rphp_deleteRuntimeEngine(rphp::pRuntimeEngine* e) {
-        delete e;
-    }
-
-    // print a c string to the current output buffer in the given runtime
-    void rphp_print_cstr(rphp::pRuntimeEngine* e, char* str) {
-        e->outputManager->print(rphp::pBString(str));
-    }
-
-
-}
-
