@@ -52,8 +52,7 @@ public:
     void registerBuiltin(const pExtBase*, const pIdentString&, const pFunPointer1&);
 
     pVar invoke(pIdentString funName, pVar arg1) {
-        // TODO: case insensitivity for pIdentString?
-        functionRegistryType::iterator function = functionRegistry_.find(funName);
+        functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
         // TODO this needs to throw a runtime error if the function wasn't found
         if (function != functionRegistry_.end()) {
             return (*function).second->invoke(arg1);

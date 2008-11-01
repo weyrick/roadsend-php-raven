@@ -29,4 +29,12 @@ U_NAMESPACE_BEGIN
 std::size_t hash_value(const rphp::pUString &v);
 U_NAMESPACE_END
 
+namespace rphp {
+
+// case conversion
+pBString toLowerCopy(const pBString& v);
+pUString toLowerCopy(const pUString& v);
+
+}
+
 #endif /* RPHP_PSUPPORT_H_ */

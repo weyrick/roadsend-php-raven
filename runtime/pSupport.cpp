@@ -19,6 +19,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "pSupport.h"
+#include <boost/algorithm/string/case_conv.hpp>
 
 /*
    This defines a boost compatible hash function for UnicodeString
@@ -29,4 +30,17 @@ std::size_t hash_value(const rphp::pUString &v) {
 }
 U_NAMESPACE_END
 
+namespace rphp {
+
+// std
+pBString toLowerCopy(const pBString& v) {
+    return boost::algorithm::to_lower_copy(v);
+}
+
+// unicode
+pUString toLowerCopy(const pUString& v) {
+    return UnicodeString(v).toLower();
+}
+
+}
 
