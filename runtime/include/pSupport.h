@@ -21,8 +21,11 @@
 #ifndef RPHP_PSUPPORT_H_
 #define RPHP_PSUPPORT_H_
 
+#include <boost/foreach.hpp>
 #include "pTypes.h"
-#include "pSupport.h"
+
+#define foreach         BOOST_FOREACH
+#define reverse_foreach BOOST_REVERSE_FOREACH
 
 U_NAMESPACE_BEGIN
 // boost compatible hash function for UnicodeString

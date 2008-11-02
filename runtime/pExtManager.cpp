@@ -20,6 +20,7 @@
 
 #include <iostream>
 #include "pExtManager.h"
+#include "pSupport.h"
 
 #include "standard/pStandardExt.h"
 
@@ -44,9 +45,9 @@ void pExtManager::startUp() {
 pExtManager::~pExtManager() {
 
     // shutdown extensions
-    for (extRegistryType::iterator i=extRegistry_.begin(); i!=extRegistry_.end(); ++i) {
-        (*i)->extensionShutdown();
-        delete *i;
+    foreach (extRegistryType::value_type i, extRegistry_) {
+        i->extensionShutdown();
+        delete i;
     }
 
 }

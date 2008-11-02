@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include "pSupport.h"
 #include <boost/algorithm/string/case_conv.hpp>
+#include "pSupport.h"
 
 /*
    This defines a boost compatible hash function for UnicodeString

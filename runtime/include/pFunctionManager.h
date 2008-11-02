@@ -44,14 +44,14 @@ public:
     pFunctionManager(pRuntimeEngine *r) : runtime_(r) { }
     ~pFunctionManager() {
         // free function entries
-        for (functionRegistryType::iterator i = functionRegistry_.begin(); i != functionRegistry_.end(); ++i) {
-            delete (*i).second;
+        foreach (functionRegistryType::value_type i, functionRegistry_) {
+            delete i.second;
         }
     }
 
     void registerBuiltin(const pExtBase*, const pIdentString&, const pFunPointer1&);
 
-    pVar invoke(pIdentString funName, pVar arg1) {
+    pVar invoke(const pIdentString& funName, pVar arg1) {
         functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
         // TODO this needs to throw a runtime error if the function wasn't found
         if (function != functionRegistry_.end()) {
