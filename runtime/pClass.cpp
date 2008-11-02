@@ -40,7 +40,7 @@ result.append( property );
     return result;
 }
 
-const pIdentString& pClass::getName() const {
+const pIdentString& pClass::name() const {
     return name_;
 }
 

@@ -49,7 +49,7 @@ pRuntimeEngine::~pRuntimeEngine() {
     }
 
     void pRuntimeEngine::addClass( pClass* class_ ) {
-        classes_[ class_->getName() ] = class_;
+        classes_[ class_->name() ] = class_;
     }
     
 } /* end namespace rphp */

@@ -30,13 +30,12 @@ std::ostream& operator << (std::ostream& os, const rphp::pObject& h) {
 }
 
 pObject::pObject( const pIdentString& className )
-: properties_(),
-    runtimeFunctions_()
+: properties_()
 {
-// find pClass in class hash table and associate it with the object
-//  class_ = rphp::pRuntime::getClass( className );
-// copy properties
-properties_ = class_->properties();
+    // find pClass in class hash table and associate it with the object
+    //  class_ = rphp::pRuntime::getClass( className );
+    // copy properties
+    properties_ = class_->properties();
 }
 
 }

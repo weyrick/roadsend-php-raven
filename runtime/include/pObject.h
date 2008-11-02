@@ -22,8 +22,12 @@
 #ifndef RPHP_POBJECT_H_
 #define RPHP_POBJECT_H_
 
+#include <boost/cstdint.hpp>
+#include <boost/unordered_map.hpp>
 #include <iostream>
+#include <vector>
 #include "pHash.h"
+#include "pTypes.h"
 
 /*
 ; PHP5 case sensitivity:
@@ -38,43 +42,42 @@
 
 namespace rphp {
 
+class pFunctionSig;
+class pClass;
+
 class pMethod {
-    // method name, case sensitive (as declared)
-    // canonical name, lowercased
-    // origin class: original defining class pClass*, used in inheritance
-    // final, abstract flags
-    // function pointer (common class with normal functions?)
+    pIdentString name_;          // method name, case sensitive (as declared)
+                                 // canonical name, lowercased XXX needed?
+    pClass* definingClass_;      // origin class: original defining class pClass*, used in inheritance
+    boost::uint_fast8_t flags_;  // final, abstract flags
+    pFunctionSig* signature_;    // function pointer
 };
+
+typedef boost::unordered_map<pIdentString, pMethod*> methodRegistryType;
 
 class pClass {
 private:
-    pHash properties_;
-    pHash methods_; // TODO: this can be unordered map
-    pIdentString name_;
+    pHash properties_;                // declared properties
+    methodRegistryType methods_;      // declared methods
+    pIdentString name_;               // class name, case sensitive (as declared)
+    boost::uint_fast8_t flags_;       // class flags: abstract, final, interface, abstract-implied
+    std::vector<pClass*> extends_;    // list of parent classes (only 1, unless interface)
+    std::vector<pClass*> implements_; // list of interfaces the class implements
+    pHash constants_;                 // class constants
 public:
     pClass();
     pHash properties();
-        // bitset of class flags: abstract, final, interface, abstract-implied
-        // class name, case sensitive (as declared)
-    const pIdentString& getName() const;
+    const pIdentString& name() const;
     void setName( const pIdentString& name );
-        // canonical name, lowercased
-        // list of parent classes (only 1, unless interface)
-        // list of interfaces the class implements
-        // constructor, destructor, method array
-        // declared properties (including visibility, static info)
-        // class constants
 
 };
 
 class pObject {
     private:
         pHash properties_; // copied from declared
-        const pClass* parentClass_;
-        pHash runtimeFunctions_;
-        pClass* class_;
-        // object instance id
-        // hash for properties created on the fly
+        pHash runtimeProperties_; // hash for properties created on the fly
+        pClass* class_;  // which class we instantiate
+        pUInt instance_; // object instance id
     public:
         pObject(const pIdentString& className);
 
