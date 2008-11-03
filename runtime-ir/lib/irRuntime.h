@@ -41,7 +41,7 @@ extern "C" {
 
     rphp::pVar rphp_make_pVar_from_pInt(rphp::pInt v);
 
-    rphp::pVar rphp_make_object( const UnicodeString& className );
+    rphp::pVar rphp_make_object( char* name );
     
     rphp::pVar rphp_make_pVar_bool(int v);
 

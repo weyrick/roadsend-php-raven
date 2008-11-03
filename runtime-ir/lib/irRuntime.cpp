@@ -64,9 +64,8 @@ extern "C" {
         return (v) ? rphp::pVar(rphp::pTrue) : rphp::pVar(rphp::pFalse);
     }
 
-    rphp::pVar rphp_make_object(const UnicodeString& className)
-    {
-	return rphp::pObjectP( new rphp::pObject(className) );
+    rphp::pVar rphp_make_object(char *className) {
+        return rphp::pObjectP( new rphp::pObject(className) );
     }
     
     void _make_pVar(void) {
