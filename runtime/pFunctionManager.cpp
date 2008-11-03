@@ -19,14 +19,34 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
+#include "pSupport.h"
+#include "pFunction.h"
 #include "pFunctionManager.h"
 
 namespace rphp {
+
+pFunctionManager::~pFunctionManager() {
+    // free function entries
+    foreach (functionRegistryType::value_type i, functionRegistry_) {
+        delete i.second;
+    }
+}
 
 void pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pIdentString& funName, const pFunPointer1& f) {
 
     functionRegistry_[toLowerCopy(funName)] = new pFunction(sourceExt, funName, f);
 
+}
+
+pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1) {
+    functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
+    // TODO this needs to throw a runtime error if the function wasn't found
+    if (function != functionRegistry_.end()) {
+        return (*function).second->invoke(arg1);
+    }
+    else {
+        return pNull;
+    }
 }
 
 

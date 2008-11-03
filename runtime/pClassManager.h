@@ -18,34 +18,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include <iostream>
-#include "pRuntime.h"
-#include "pExtManager.h"
+#ifndef RPHP_PCLASSMANAGER
+#define RPHP_PCLASSMANAGER
+
+#include <boost/unordered_map.hpp>
 
 namespace rphp {
 
-pRuntimeEngine::pRuntimeEngine() : globals_(),
-                                   classManager(new pClassManager(this)),
-                                   functionManager(new pFunctionManager(this)),
-                                   extManager(new pExtManager(this)),
-                                   outputManager(new pOutputManager(this))
-{
 
-    // runtime initialization
-    extManager->startUp();
+class pRuntimeEngine;
+class pClass;
+
+typedef boost::unordered_map<pIdentString, pClass*> classRegistryType;
+
+class pClassManager {
+
+private:
+    pRuntimeEngine* runtime_;
+    classRegistryType classRegistry_;
+
+public:
+
+    pClassManager(pRuntimeEngine *r) : runtime_(r), classRegistry_() { }
+    ~pClassManager();
+
+    //pClass* getClass( const pIdentString& className );
+    //void addClass( pClass* class_ );
+
+
+};
 
 }
 
-
-pRuntimeEngine::~pRuntimeEngine() {
-
-    // runtime shutdown
-    delete outputManager; // will flush
-    delete functionManager;
-    delete extManager;
-    delete classManager;
-    
-}
-
-} /* end namespace rphp */
-
+#endif /* RPHP_PCLASSMANAGER_ */

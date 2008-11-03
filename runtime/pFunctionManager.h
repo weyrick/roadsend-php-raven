@@ -21,17 +21,15 @@
 #ifndef RPHP_PFUNCTIONMANAGER
 #define RPHP_PFUNCTIONMANAGER
 
-#include <string>
 #include <boost/unordered_map.hpp>
-
-#include "pFunction.h"
-#include "pSupport.h"
 
 namespace rphp {
 
 typedef boost::unordered_map<pIdentString, pFunction*> functionRegistryType;
 
 class pRuntimeEngine;
+class pFunction;
+class pExtBase;
 
 class pFunctionManager {
 
@@ -41,27 +39,13 @@ private:
 
 public:
 
-    pFunctionManager(pRuntimeEngine *r) : runtime_(r) { }
-    ~pFunctionManager() {
-        // free function entries
-        foreach (functionRegistryType::value_type i, functionRegistry_) {
-            delete i.second;
-        }
-    }
+    pFunctionManager(pRuntimeEngine *r) : runtime_(r), functionRegistry_() { }
+    ~pFunctionManager();
 
     void registerBuiltin(const pExtBase*, const pIdentString&, const pFunPointer1&);
 
-    pVar invoke(const pIdentString& funName, pVar arg1) {
-        functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
-        // TODO this needs to throw a runtime error if the function wasn't found
-        if (function != functionRegistry_.end()) {
-            return (*function).second->invoke(arg1);
-        }
-        else {
-            return pNull;
-        }
-    }
-
+    pVar invoke(const pIdentString& funName, pVar arg1);
+    
 };
 
 }

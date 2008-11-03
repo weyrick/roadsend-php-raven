@@ -22,6 +22,8 @@
 #ifndef RPHP_PRUNTIME_H_
 #define RPHP_PRUNTIME_H_
 
+#include <boost/unordered_map.hpp>
+
 #include "pTypes.h"
 #include "pVar.h"
 #include "pHash.h"
@@ -30,23 +32,20 @@
 #include "pVarOperators.h"
 
 #include "pFunctionManager.h"
+#include "pClassManager.h"
 #include "pOutputManager.h"
 
 namespace rphp {
 
-typedef boost::unordered_map<pIdentString, pClass*> pClassList;
-
 class pExtManager;
+typedef boost::unordered_map<pIdentString, pVarP> globalRegistryType;
 
 class pRuntimeEngine {
 
-    // class manager
-    // --> similar to funciton manager, but stores builtin and currently defined classes
-    // --> interface for new class definition
-    pClassList classes_; // TODO: move to class manager
-
     // global data:
     // --> $GLOBAL and other superglobal symbol table, argc, argv,
+    globalRegistryType globals_;
+
     // --> constants (with define()). support builtins (PATH_SEPARATOR, etc) and interface for dynamic verisons
 
     // include files: include paths, all files included
@@ -64,14 +63,16 @@ public:
     pRuntimeEngine();
     ~pRuntimeEngine();
 
-    pClass* getClass( const pIdentString& className );
-    void addClass( pClass* class_ );
-
     // function manager
     // --> store list of available functions, including builtins (from extension manager) which stay on page reset,
     //     and the currently defined via php code, which are reset each page
     // --> interface for new function definition
     pFunctionManager* functionManager;
+
+    // class manager
+    // --> similar to funciton manager, but stores builtin and currently defined classes
+    // --> interface for new class definition
+    pClassManager* classManager;
 
     // extension manager
     // --> for loading and registering dynamic extensions (pcre, mysql, etc) and their associated functions, classes

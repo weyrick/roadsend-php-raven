@@ -19,33 +19,28 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pRuntime.h"
-#include "pExtManager.h"
+#include "pObject.h"
+#include "pClassManager.h"
+#include "pSupport.h"
 
 namespace rphp {
 
-pRuntimeEngine::pRuntimeEngine() : globals_(),
-                                   classManager(new pClassManager(this)),
-                                   functionManager(new pFunctionManager(this)),
-                                   extManager(new pExtManager(this)),
-                                   outputManager(new pOutputManager(this))
-{
+pClassManager::~pClassManager() {
+    foreach (classRegistryType::value_type i, classRegistry_) {
+        delete i.second;
+    }
+}
 
-    // runtime initialization
-    extManager->startUp();
+/*
+rphp::pClass* pRuntimeEngine::getClass( const pIdentString& className ) {
+    return classes_[ className ];
+}
+
+void pRuntimeEngine::addClass( pClass* class_ ) {
+    classes_[ class_->name() ] = class_;
+}
+*/
 
 }
 
-
-pRuntimeEngine::~pRuntimeEngine() {
-
-    // runtime shutdown
-    delete outputManager; // will flush
-    delete functionManager;
-    delete extManager;
-    delete classManager;
-    
-}
-
-} /* end namespace rphp */
 

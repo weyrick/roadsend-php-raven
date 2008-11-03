@@ -16,6 +16,7 @@ set(RUNTIME_SRC_FILES
   pRuntime.cpp
   pOutputBuffer.cpp
   pOutputManager.cpp
+  pClassManager.cpp
   pFunctionManager.cpp
   pFunction.cpp
   pExtBase.cpp
