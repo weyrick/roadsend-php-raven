@@ -42,21 +42,32 @@
 
 namespace rphp {
 
-class pFunctionSig;
+class pFunction;
 class pClass;
 
 class pMethod {
+
+    const static int FINAL    = 0x01;
+    const static int ABSTRACT = 0x02;
+    
     pIdentString name_;          // method name, case sensitive (as declared)
                                  // canonical name, lowercased XXX needed?
     pClass* definingClass_;      // origin class: original defining class pClass*, used in inheritance
     boost::uint_fast8_t flags_;  // final, abstract flags
-    pFunctionSig* signature_;    // function pointer
+    pFunction* signature_;       // function pointer
+    
 };
 
 typedef boost::unordered_map<pIdentString, pMethod*> methodRegistryType;
 
 class pClass {
 private:
+
+    const static int ABSTRACT  = 0x01;
+    const static int FINAL     = 0x02;
+    const static int INTERFACE = 0x03;
+    const static int ABSTRACT_IMPLIED = 0x04;
+    
     pHash properties_;                // declared properties
     methodRegistryType methods_;      // declared methods
     pIdentString name_;               // class name, case sensitive (as declared)
@@ -64,6 +75,7 @@ private:
     std::vector<pClass*> extends_;    // list of parent classes (only 1, unless interface)
     std::vector<pClass*> implements_; // list of interfaces the class implements
     pHash constants_;                 // class constants
+    
 public:
     pClass();
     pHash properties();
@@ -81,8 +93,8 @@ class pObject {
     public:
         pObject(const pIdentString& className);
 
-        pHash::size_type getNumProperties() const {
-            return properties_.getSize();
+        pHash::size_type numProperties() const {
+            return properties_.size() + runtimeProperties_.size();
         }
 
 };

@@ -141,7 +141,7 @@ public:
     size_type remove(const pInt &key);
 
     // queries
-    size_type getSize() const { return hashData_.size(); }
+    size_type size() const { return hashData_.size(); }
     bool keyExists(const pUString &key) const;
     //bool keyExists(const pBString &key) const;
     bool keyExists(const pInt &key) const;

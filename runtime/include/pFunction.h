@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_PFUNCTIONSIG
-#define RPHP_PFUNCTIONSIG
+#ifndef RPHP_PFUNCTION
+#define RPHP_PFUNCTION
 
 #include <vector>
 #include "pVar.h"
@@ -40,10 +40,10 @@ struct pFunctionParam {
     pClass* classHint; // class type hint
 };
 
-class pFunctionSig {
+class pFunction {
 
     // declaration location (user function)
-    const pSourceStartEndLocation sourceLocation_;
+    pSourceStartEndLocation sourceLocation_;
 
     // or parent extension (only builtins)
     const pExtBase* parentExtension_;
@@ -51,11 +51,11 @@ class pFunctionSig {
     // docComment?
 
     // signature
-    const pIdentString name_;
-    const pFunType funType_;
-    const pUInt requiredArity_;
-    const pUInt maxArity_;
-    const bool isVarArity_;
+    pIdentString name_;
+    pFunType funType_;
+    pUInt requiredArity_;
+    pUInt maxArity_;
+    bool isVarArity_;
 
     std::vector<pFunctionParam> paramList_;
 
@@ -64,7 +64,7 @@ class pFunctionSig {
 public:
 
     // standard builtin function: one argument
-    pFunctionSig(const pExtBase* e, const pIdentString& f, const pFunPointer1& fun) :
+    pFunction(const pExtBase* e, const pIdentString& f, const pFunPointer1& fun) :
         parentExtension_(e),
         name_(f),
         funType_(pBuiltinFunType),
@@ -85,4 +85,4 @@ public:
 
 }
 
-#endif /* RPHP_PFUNCTIONSIG */
+#endif /* RPHP_PFUNCTION */

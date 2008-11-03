@@ -125,13 +125,13 @@ void pvarTestCase::test_pFloat() {
 // ** HASH **
 pVar hashObserver(pVar H) {
     // use const pHash, which will not copy data
-    CPPUNIT_ASSERT( H.getConstHash()->getSize() == 1 );
+    CPPUNIT_ASSERT( H.getConstHash()->size() == 1 );
     return H;
 }
 
 pVar hashMutator(pVar H) {
     // use non const pHash which copies data
-    CPPUNIT_ASSERT( H.getHash()->getSize() == 1 );
+    CPPUNIT_ASSERT( H.getHash()->size() == 1 );
     return H;
 }
 
@@ -144,11 +144,11 @@ void pvarTestCase::test_pHash() {
     CPPUNIT_ASSERT( h1.isHash() );
 
     h1.getHash()->insert("foo", 5);
-    CPPUNIT_ASSERT( h1.getHash()->getSize() == 1 );
+    CPPUNIT_ASSERT( h1.getHash()->size() == 1 );
 
     // test copy on write
     pVar h2(h1);
-    CPPUNIT_ASSERT( h2.getConstHash()->getSize() == 1 );
+    CPPUNIT_ASSERT( h2.getConstHash()->size() == 1 );
     // this calls CowPtr::operator==, which calls boost::shared_ptr::operator== to
     // see if they point to the same object
     CPPUNIT_ASSERT( h1.getHash() == h2.getHash() );
@@ -242,7 +242,7 @@ public:
     }
 
     void operator()(const pHashP &v) const {
-        CPPUNIT_ASSERT( v->getSize() == 1 );
+        CPPUNIT_ASSERT( v->size() == 1 );
     }
 
     void operator()(const pObjectP &v) const {

@@ -17,7 +17,7 @@ set(RUNTIME_SRC_FILES
   pOutputBuffer.cpp
   pOutputManager.cpp
   pFunctionManager.cpp
-  pFunctionSig.cpp
+  pFunction.cpp
   pExtBase.cpp
   pExtManager.cpp
   standard/pStandardExt.cpp

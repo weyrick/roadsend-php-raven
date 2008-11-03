@@ -59,11 +59,11 @@ public:
     }
 
     void operator()(pHashP &v) {
-        (v->getSize()) ? var_ = pTrue : var_ = pFalse;
+        (v->size()) ? var_ = pTrue : var_ = pFalse;
     }
 
     void operator()(pObjectP &v) {
-        (v->getNumProperties()) ? var_ = pTrue : var_ = pFalse;
+        (v->numProperties()) ? var_ = pTrue : var_ = pFalse;
     }
 
     void operator()(pResourceP &v) {
@@ -100,11 +100,11 @@ public:
     void operator()(pUStringP &v);
 
     void operator()(pHashP &v) {
-        var_ = (pInt)v->getSize();
+        var_ = (pInt)v->size();
     }
 
     void operator()(pObjectP &v) {
-        var_ = (pInt)v->getNumProperties();
+        var_ = (pInt)v->numProperties();
     }
 
     void operator()(pResourceP &v) {

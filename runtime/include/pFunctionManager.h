@@ -24,12 +24,12 @@
 #include <string>
 #include <boost/unordered_map.hpp>
 
-#include "pFunctionSig.h"
+#include "pFunction.h"
 #include "pSupport.h"
 
 namespace rphp {
 
-typedef boost::unordered_map<pIdentString, pFunctionSig*> functionRegistryType;
+typedef boost::unordered_map<pIdentString, pFunction*> functionRegistryType;
 
 class pRuntimeEngine;
 
