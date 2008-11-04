@@ -28,7 +28,7 @@ baseVisitor::dispatchFunType baseVisitor::dispatchTable_[] = {
     // NOTE: requires same order as nodeKind enum in pAST.h
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_echoStmt),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_inlineHtml),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalBString),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalString),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalInt),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalFloat),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalNull),
@@ -70,9 +70,9 @@ void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
     std::cout << "inline HTML: " << n->getStringVal() << std::endl;
 }
 
-void dumpVisitor::visit_literalBString(literalBString* n)  {
+void dumpVisitor::visit_literalString(literalString* n)  {
     showindent();
-    std::cout << "literal bstring: \"" << n->getStringVal() << "\"" << std::endl;
+    std::cout << "literal string: \"" << n->getStringVal() << "\"" << std::endl;
 }
 
 void dumpVisitor::visit_literalInt(literalInt* n)  {

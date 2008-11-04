@@ -36,7 +36,7 @@ public:
 
     virtual void visit_echoStmt(echoStmt*) = 0;
     virtual void visit_inlineHtml(inlineHtml*) = 0;
-    virtual void visit_literalBString(literalBString*) = 0;
+    virtual void visit_literalString(literalString*) = 0;
     virtual void visit_literalInt(literalInt*) = 0;
     virtual void visit_literalFloat(literalFloat*) = 0;
     virtual void visit_literalBool(literalBool*) = 0;
@@ -48,7 +48,7 @@ class defaultVisitor: public baseVisitor {
 public:
     virtual void visit_echoStmt(echoStmt*);
     virtual void visit_inlineHtml(inlineHtml*) = 0;
-    virtual void visit_literalBString(literalBString*) = 0;
+    virtual void visit_literalString(literalString*) = 0;
     virtual void visit_literalInt(literalInt*) = 0;
     virtual void visit_literalFloat(literalFloat*) = 0;
     virtual void visit_literalBool(literalBool*) = 0;
@@ -66,7 +66,7 @@ public:
 
     void visit_echoStmt(echoStmt*);
     void visit_inlineHtml(inlineHtml*);
-    void visit_literalBString(literalBString* n);
+    void visit_literalString(literalString* n);
     void visit_literalInt(literalInt*);
     void visit_literalFloat(literalFloat*);
     void visit_literalBool(literalBool*);

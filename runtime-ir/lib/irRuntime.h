@@ -32,21 +32,27 @@ extern "C" {
     // destroy runtime engine
     void rphp_deleteRuntimeEngine(rphp::pRuntimeEngine*);
 
+    // debug
     // print to runtime output buffer
     void rphp_print_cstr(rphp::pRuntimeEngine*, char* str);
     
     void rphp_print_pVar(rphp::pRuntimeEngine* e, rphp::pVar v);
+    //
 
-    rphp::pVar rphp_make_pVar_from_cstr(char* str);
+    // pVar creation
+    rphp::pVar rphp_make_pVar_pBString(char* str);
 
-    rphp::pVar rphp_make_pVar_from_pInt(rphp::pInt v);
+    rphp::pVar rphp_make_pVar_pUString(char* str);
 
-    rphp::pVar rphp_make_pVar_from_pFloat(rphp::pFloat v);
+    rphp::pVar rphp_make_pVar_pInt(rphp::pInt v);
 
-    rphp::pVar rphp_make_object( char* name );
+    rphp::pVar rphp_make_pVar_pFloat(rphp::pFloat v);
+
+    rphp::pVar rphp_make_pVar_pBool(int v);
+
+    rphp::pVar rphp_make_pVar_pObject( char* name );
+    //
     
-    rphp::pVar rphp_make_pVar_bool(int v);
-
     void _make_pVar(void);
                                         
 }

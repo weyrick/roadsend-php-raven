@@ -85,7 +85,7 @@ public:
     // nodes
     void visit_echoStmt(AST::echoStmt*);
     void visit_inlineHtml(AST::inlineHtml*);
-    void visit_literalBString(AST::literalBString*);
+    void visit_literalString(AST::literalString*);
     void visit_literalInt(AST::literalInt*);
     void visit_literalFloat(AST::literalFloat*);
     void visit_literalBool(AST::literalBool*);

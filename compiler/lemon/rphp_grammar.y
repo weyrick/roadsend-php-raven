@@ -91,15 +91,15 @@ expr(A) ::= literal(B). { A = B; }
 /** LITERALS **/
 %type literal {AST::literalExpr*}
 
-// literal bstring, double quotes
+// literal string, double quotes
 literal(A) ::= T_CONSTANT_ENCAPSED_STRING(B).
 {
   // substring out the quotes, special case for empty string
   std::string::iterator start = (*B).begin();
   if (++start == (*B).end())
-    A = new AST::literalBString(std::string());
+    A = new AST::literalString(std::string());
   else
-    A = new AST::literalBString(std::string(start, --(*B).end()));
+    A = new AST::literalString(std::string(start, --(*B).end()));
 }
 
 // literal integers (decimal)
@@ -124,6 +124,6 @@ literal(A) ::= T_IDENTIFIER(B). {
     }
     else {
         // default to normal string
-        A = new AST::literalBString(std::string((*B).begin(), (*B).end()));
+        A = new AST::literalString(std::string((*B).begin(), (*B).end()));
     }
 }

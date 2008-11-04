@@ -48,27 +48,32 @@ extern "C" {
         e->outputManager->print(v.getBString());
     }
 
-    // create a new pVar from a bString
-    rphp::pVar rphp_make_pVar_from_cstr(char* str) {
+    // create a new binary string
+    rphp::pVar rphp_make_pVar_pBString(char* str) {
         return rphp::pVar(rphp::pBString(str));
+    }
+    
+    // create a new unicode string
+    rphp::pVar rphp_make_pVar_pUString(char* str) {
+        return rphp::pVar(rphp::pUStringP(new rphp::pUString(str)));
     }
 
     // create a new pVar from a pInt
-    rphp::pVar rphp_make_pVar_from_pInt(rphp::pInt v) {
+    rphp::pVar rphp_make_pVar_pInt(rphp::pInt v) {
         return rphp::pVar(v);
     }
 
     // create a new pVar from a pFloat
-    rphp::pVar rphp_make_pVar_from_pFloat(rphp::pFloat v) {
+    rphp::pVar rphp_make_pVar_pFloat(rphp::pFloat v) {
         return rphp::pVar(v);
     }
     
     // create a new bool pVar
-    rphp::pVar rphp_make_pVar_bool(int v) {
+    rphp::pVar rphp_make_pVar_pBool(int v) {
         return (v) ? rphp::pVar(rphp::pTrue) : rphp::pVar(rphp::pFalse);
     }
 
-    rphp::pVar rphp_make_object(char *className) {
+    rphp::pVar rphp_make_pVar_pObject(char *className) {
         return rphp::pObjectP( new rphp::pObject(className) );
     }
     

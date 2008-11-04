@@ -32,7 +32,7 @@ namespace rphp { namespace AST {
 enum nodeKind {
     echoStmtKind,
     inlineHtmlKind,
-    literalBStringKind,
+    literalStringKind,
     literalIntKind,
     literalFloatKind,
     literalNullKind,
@@ -85,11 +85,11 @@ public:
 };
 
 // NODE: literal bstring
-class literalBString: public literalExpr {
+class literalString: public literalExpr {
 
 public:
-    literalBString(const pBString& v): literalExpr(literalBStringKind, v) { }
-    literalBString(const pBString& v, nodeKind k): literalExpr(k, v) { }
+    literalString(const pBString& v): literalExpr(literalStringKind, v) { }
+    literalString(const pBString& v, nodeKind k): literalExpr(k, v) { }
 
 };
 
@@ -130,10 +130,10 @@ public:
 };
 
 // NODE: inline html
-class inlineHtml: public literalBString {
+class inlineHtml: public literalString {
 
 public:
-    inlineHtml(const pBString& v): literalBString(v, inlineHtmlKind) { }
+    inlineHtml(const pBString& v): literalString(v, inlineHtmlKind) { }
 
 };
 

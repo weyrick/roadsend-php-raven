@@ -135,32 +135,7 @@ llvm::Value* pGenerator::newVarOnStack(const char* name) {
 
 }
 
-void pGenerator::visit_literalBString(AST::literalBString* n) {
-
-//     assert(n->getVal().size() > 0);
-// 
-//     ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->getVal().size()+1);
-// 
-//     GlobalVariable* globalStr = new GlobalVariable(
-//     /*Type=*/stringLiteralType,
-//     /*isConstant=*/true,
-//     /*Linkage=*/GlobalValue::InternalLinkage,
-//     /*Initializer=*/0, // has initializer, specified below
-//     /*Name=*/".pBString",
-//     llvmModule_);
-// 
-//     Constant* const_array_7 = ConstantArray::get(n->getVal().c_str(), true);
-//     std::vector<Constant*> const_ptr_8_indices;
-//     Constant* const_int32_9 = Constant::getNullValue(IntegerType::get(32));
-//     const_ptr_8_indices.push_back(const_int32_9);
-//     const_ptr_8_indices.push_back(const_int32_9);
-//     Constant* litStringRef = ConstantExpr::getGetElementPtr(globalStr, &const_ptr_8_indices[0], const_ptr_8_indices.size() );
-// 
-//     // Global Variable Definitions
-//     globalStr->setInitializer(const_array_7);
-
-    // turn it into a pVar and push
-//    valueStack_.push(emitVarCreate_pBString(litStringRef));
+void pGenerator::visit_literalString(AST::literalString* n) {
 
     ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->getStringVal().size()+1);
 
@@ -187,7 +162,7 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
     Value* pVarTmp = newVarOnStack("pBStrTmp");
     
     // convert cstr to pbstring
-    Function* f = llvmModule_->getFunction("rphp_make_pVar_from_cstr");
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_pBString");
     assert(f != NULL);
     currentBlock_.CreateCall2(f, pVarTmp, strPtr);
 
@@ -204,8 +179,7 @@ void pGenerator::visit_literalInt(AST::literalInt* n) {
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pIntTmp");
 
-    // convert cstr to pbstring
-    Function* f = llvmModule_->getFunction("rphp_make_pVar_from_pInt");
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_pInt");
     assert(f != NULL);
     currentBlock_.CreateCall2(f, pVarTmp, const_int);
 
@@ -221,8 +195,7 @@ void pGenerator::visit_literalFloat(AST::literalFloat* n) {
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pFloatTmp");
 
-    // convert cstr to pbstring
-    Function* f = llvmModule_->getFunction("rphp_make_pVar_from_pFloat");
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_pFloat");
     assert(f != NULL);
     currentBlock_.CreateCall2(f, pVarTmp, const_float);
 
@@ -234,23 +207,12 @@ void pGenerator::visit_literalFloat(AST::literalFloat* n) {
 
 void pGenerator::visit_literalBool(AST::literalBool* n) {
 
-//     GlobalVariable* globalInt = new GlobalVariable(
-//     /*Type=*/IntegerType::get(32),
-//     /*isConstant=*/false,
-//     /*Linkage=*/GlobalValue::InternalLinkage,
-//     /*Initializer=*/0, // has initializer, specified below
-//     /*Name=*/".pBool",
-//     llvmModule_);
-
     ConstantInt* cbool = ConstantInt::get(APInt(32,  (n->getBoolVal()) ? "1" : "0", 10));
-
-//    globalInt->setInitializer(const_int32);
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pBoolTmp");
 
-    // convert cstr to pbstring
-    Function* f = llvmModule_->getFunction("rphp_make_pVar_bool");
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_pBool");
     assert(f != NULL);
     currentBlock_.CreateCall2(f, pVarTmp, cbool);
 
@@ -310,93 +272,6 @@ void pGenerator::visit_echoStmt(AST::echoStmt* n) {
     currentBlock_.CreateCall2(f, runtimeEngine_, rVal);
 
 }
-
-// assumes literal is on top of stack
-// void pGenerator::emitEchoLiteralString(void) {
-// 
-//     Value* rVal = valueStack_.back();
-//     valueStack_.pop();
-// 
-//     // argument sig for print function
-//     std::vector<const Type*> printSig;
-//     printSig.push_back(IRHelper_->runtimeEngineType());
-//     printSig.push_back(IRHelper_->pVarPointerType());
-// 
-//     // print function type
-//     FunctionType *printFuncType = FunctionType::get(Type::VoidTy, printSig, false);
-// 
-//     // print function
-//     //Constant *printFunc = llvmModule_->getOrInsertFunction("rphp_print_pvar", printFuncType);
-// 
-//     //currentBlock_.CreateCall2(printFunc, runtimeEngine, rVal);
-// 
-// }
-
-// allocate a pVar on the stack in the current block, return pVar*
-// llvm::Value* emitVarCreate() {
-// 
-//     /*
-//     AllocaInst* pVar_p = new AllocaInst(IRHelper_->pVarType(), "pVarBString", currentBlock_.getInsertBlock());
-//     pVar_p->setAlignment(4);
-//     emitVarConstruct(pVar_p);
-//     
-//     return pVar_p;
-//     */
-// 
-// }
-
-// create a new pVar on the stack and assign a pBString to it
-// return pVar*
-// llvm::Value* pGenerator::emitVarCreate_pBString(llvm::Value*) {
-// 
-//     /*
-//     Value* pVar_p = emitVarCreate();
-//     rphp_create_pVar_pBString
-//     return pVar_p;
-//     
-//     // call runtime to create pVar from char*
-//     // TODO: inline this
-//     std::vector<const Type*> fSig;
-//     printSig.push_back(IRHelper_->charPointerType(), 0);
-//     FunctionType *fFuncType = FunctionType::get(IRHelper_->pVarType(), fSig, false);
-//     Constant *Func = llvmModule_->getOrInsertFunction("rphp_create_pVar_pBString", fFuncType);
-// 
-//     return currentBlock_.CreateCall2(printFunc, runtimeEngine, rVal);
-//     */
-//     
-// }
-
-// create a new pVar on the stack and assign a pBString to it
-// return pVar*
-// llvm::Value* pGenerator::emitVarCreate_pInt(llvm::Value*) {
-// 
-//     
-// }
-
-// // call pVar::pVar(pVar*)
-// void pGenerator::emitVarConstruct(llvm::Value* v) {
-// 
-//     Function* pVarConstructFun = Function::Create(
-//     /*Type=*/IRHelper_->pVarBaseFunType(),
-//     /*Linkage=*/GlobalValue::LinkOnceLinkage ,
-//     /*Name=*/"_ZN4rphp4pVarC1Ev", llvmModule_);
-// 
-//     currentBlock_.CreateCall(pVarConstructFun, v);
-// 
-// }
-// 
-// 
-// // call pVar::~pVar(pVar*)
-// void pGenerator::emitVarDestruct(llvm::Value* v) {
-// 
-//     Function* pVarDestructFun = Function::Create(
-//     /*Type=*/IRHelper_->pVarBaseFunType(),
-//     /*Linkage=*/GlobalValue::LinkOnceLinkage ,
-//     /*Name=*/"_ZN4rphp4pVarD1Ev", llvmModule_);
-// 
-//     currentBlock_.CreateCall(pVarDestructFun, v);
-// 
-// }
 
 
 } // namespace
