@@ -34,6 +34,7 @@ enum nodeKind {
     inlineHtmlKind,
     literalBStringKind,
     literalIntKind,
+    literalFloatKind,
     literalNullKind,
     literalBoolKind
 };
@@ -97,6 +98,14 @@ class literalInt: public literalExpr {
 
 public:
     literalInt(const pBString& v): literalExpr(literalIntKind, v) { }
+
+};
+
+// NODE: literal float
+class literalFloat: public literalExpr {
+
+public:
+    literalFloat(const pBString& v): literalExpr(literalFloatKind, v) { }
 
 };
 

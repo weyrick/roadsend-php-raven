@@ -109,6 +109,8 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
             return "T_CLOSE_TAG";
         case T_LNUMBER:
             return "T_LNUMBER";
+        case T_DNUMBER:
+            return "T_DNUMBER";
         case T_IF:
             return "T_IF";
         case T_ELSE:

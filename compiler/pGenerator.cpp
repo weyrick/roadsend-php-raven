@@ -198,18 +198,8 @@ void pGenerator::visit_literalBString(AST::literalBString* n) {
 
 void pGenerator::visit_literalInt(AST::literalInt* n) {
 
-//     GlobalVariable* globalInt = new GlobalVariable(
-//     /*Type=*/IntegerType::get(32),
-//     /*isConstant=*/false,
-//     /*Linkage=*/GlobalValue::InternalLinkage,
-//     /*Initializer=*/0, // has initializer, specified below
-//     /*Name=*/".pInt",
-//     llvmModule_);
-
     // TODO: other bases besides 10
     ConstantInt* const_int = ConstantInt::get(APInt(32,  n->getStringVal(), 10));
-
-//    globalInt->setInitializer(const_int32);
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pIntTmp");
@@ -223,6 +213,24 @@ void pGenerator::visit_literalInt(AST::literalInt* n) {
     valueStack_.push(pVarTmp);
 
 }
+
+void pGenerator::visit_literalFloat(AST::literalFloat* n) {
+
+    ConstantFP* const_float = ConstantFP::get(APFloat(APFloat::IEEEdouble,  n->getStringVal().c_str()));
+
+    // allocate tmp pVar for return value
+    Value* pVarTmp = newVarOnStack("pFloatTmp");
+
+    // convert cstr to pbstring
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_from_pFloat");
+    assert(f != NULL);
+    currentBlock_.CreateCall2(f, pVarTmp, const_float);
+
+    // push to stack
+    valueStack_.push(pVarTmp);
+
+}
+
 
 void pGenerator::visit_literalBool(AST::literalBool* n) {
 

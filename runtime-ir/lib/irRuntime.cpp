@@ -58,6 +58,10 @@ extern "C" {
         return rphp::pVar(v);
     }
 
+    // create a new pVar from a pFloat
+    rphp::pVar rphp_make_pVar_from_pFloat(rphp::pFloat v) {
+        return rphp::pVar(v);
+    }
     
     // create a new bool pVar
     rphp::pVar rphp_make_pVar_bool(int v) {

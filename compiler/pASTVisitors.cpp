@@ -30,6 +30,7 @@ baseVisitor::dispatchFunType baseVisitor::dispatchTable_[] = {
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_inlineHtml),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalBString),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalInt),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalFloat),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalNull),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalBool)
 };
@@ -77,6 +78,11 @@ void dumpVisitor::visit_literalBString(literalBString* n)  {
 void dumpVisitor::visit_literalInt(literalInt* n)  {
     showindent();
     std::cout << "literal int: " << n->getStringVal() << std::endl;
+}
+
+void dumpVisitor::visit_literalFloat(literalFloat* n)  {
+    showindent();
+    std::cout << "literal float: " << n->getStringVal() << std::endl;
 }
 
 void dumpVisitor::visit_literalBool(literalBool* n)  {
