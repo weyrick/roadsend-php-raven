@@ -46,9 +46,10 @@ private:
     astType ast;
     llvm::Module* llvmModule;
     bool llvmModuleOwner;
+    bool defaultUnicode_;
 
 public:
-    pModule(std::string name);
+    pModule(std::string name, bool dUnicode = true);
     ~pModule();
 
     astType& getAST() { return ast; }
@@ -60,6 +61,8 @@ public:
     bool lowerToIR(pCompileTarget* target);
     bool writeBitcode(std::string fileName);
     void setLLVMModuleOwnership(bool v) { llvmModuleOwner = v; }
+
+    bool defaultUnicode(void) const { return defaultUnicode_; }
 
     void dumpAST();
     void dumpIR();

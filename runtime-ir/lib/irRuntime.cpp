@@ -44,8 +44,11 @@ extern "C" {
 
     // print a pVar, coercing to string
     void rphp_print_pVar(rphp::pRuntimeEngine* e, rphp::pVar v) {
-        v.convertToBString();
-        e->outputManager->print(v.getBString());
+        v.convertToString();
+        if (v.isUString())
+            e->outputManager->print(v.getUString());
+        else
+            e->outputManager->print(v.getBString());
     }
 
     // create a new binary string
@@ -54,8 +57,9 @@ extern "C" {
     }
     
     // create a new unicode string
-    rphp::pVar rphp_make_pVar_pUString(char* str) {
-        return rphp::pVar(rphp::pUStringP(new rphp::pUString(str)));
+    rphp::pVar rphp_make_pVar_pUString(char* str, size_t len) {
+        // our code generator always generates UTF-16BE
+        return rphp::pVar(rphp::pUStringP(new rphp::pUString(str, len, "UTF-16BE")));
     }
 
     // create a new pVar from a pInt

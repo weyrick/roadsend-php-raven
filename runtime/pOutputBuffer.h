@@ -61,7 +61,28 @@ public:
             delete bBuffer_;
     }
 
-    const char* getRawBuffer() {
+    size_t length(void) const {
+        switch (bType_) {
+            case bufTypeBinary:
+                return bBuffer_->length();
+            case bufTypeUnicode:
+                return uBuffer_->length();
+        }
+    }
+
+    bufTypeT getBufferType() const {
+        return bType_;
+    }
+
+    const pBString* getBBuffer() const {
+        return bBuffer_;
+    }
+
+    const pUString* getUBuffer() const {
+        return uBuffer_;
+    }
+
+    const char* getRawBuffer() const {
         switch (bType_) {
             case bufTypeBinary:
                 return bBuffer_->c_str();
@@ -77,7 +98,7 @@ public:
                 break;
             case bufTypeUnicode:
                 // TODO: this doesn't seem so efficient. but how often will it be used?
-                uBuffer_->append(pUString(str.c_str(),str.length(), US_INV));
+                uBuffer_->append(pUString(str.c_str(), str.length(), US_INV));
                 break;
         }
     }

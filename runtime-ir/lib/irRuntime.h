@@ -42,7 +42,7 @@ extern "C" {
     // pVar creation
     rphp::pVar rphp_make_pVar_pBString(char* str);
 
-    rphp::pVar rphp_make_pVar_pUString(char* str);
+    rphp::pVar rphp_make_pVar_pUString(char* str, size_t len);
 
     rphp::pVar rphp_make_pVar_pInt(rphp::pInt v);
 

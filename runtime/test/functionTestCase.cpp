@@ -18,7 +18,7 @@ CPPUNIT_TEST_SUITE_REGISTRATION( functionTestCase );
 void functionTestCase::basic()
 {
 
-    rphp::pVar testString = rphp::pBString("a new era has dawned");
+    rphp::pVar testString(rphp::pBString("a new era has dawned"));
 
     rphp::pVar testStringSize = runtime.functionManager->invoke("strlen", testString);
 

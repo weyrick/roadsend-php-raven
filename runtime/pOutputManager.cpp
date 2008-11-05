@@ -18,14 +18,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
+#include <unicode/ustream.h>
 #include <iostream>
+
 #include "pOutputManager.h"
 
 namespace rphp {
 
 void pOutputManager::flushAndFreeAll() {
     while( !bufferStack_.empty() ) {
-        std::cout << bufferStack_.top()->getRawBuffer();
+        if (bufferStack_.top()->pOutputBuffer::bufTypeUnicode) {
+            std::cout << *(bufferStack_.top()->getUBuffer());
+        }
+        else {
+            std::cout << *(bufferStack_.top()->getBBuffer());
+        }
         delete bufferStack_.top();
         bufferStack_.pop();
     }

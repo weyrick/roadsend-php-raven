@@ -40,7 +40,7 @@ public:
     pOutputManager(pRuntimeEngine *r) : runtime_(r) {
         // default output buffer
         // TODO: check the runtime config for which type of default buffer to use
-        bufferStack_.push(new pOutputBuffer(pOutputBuffer::bufTypeBinary));
+        bufferStack_.push(new pOutputBuffer(pOutputBuffer::bufTypeUnicode));
     }
 
     ~pOutputManager() {
@@ -51,16 +51,16 @@ public:
     void flushAndFreeAll();
 
     // printing to the current buffer
-    void print(pBString str) {
+    void print(const pBString& str) {
         if (bufferStack_.empty())
             return;
         *bufferStack_.top() << str;
     }
 
-    void print(pUString str) {
+    void print(const pUStringP& str) {
         if (bufferStack_.empty())
             return;
-        *bufferStack_.top() << str;
+        *bufferStack_.top() << *str;
     }
 
 };

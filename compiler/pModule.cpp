@@ -30,7 +30,12 @@
 
 namespace rphp {
 
-pModule::pModule(std::string name): fileName(name), llvmModule(NULL), llvmModuleOwner(true) {
+pModule::pModule(std::string name, bool dUnicode):
+    fileName(name),
+    llvmModule(NULL),
+    llvmModuleOwner(true),
+    defaultUnicode_(dUnicode)
+{
 
     // TODO error handling
     parser::parseSourceFile(fileName, this);

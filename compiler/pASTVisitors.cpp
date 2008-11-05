@@ -20,6 +20,7 @@
 */
 
 #include <iostream>
+#include <unicode/ustream.h>
 #include "pASTVisitors.h"
 
 namespace rphp { namespace AST {
@@ -67,12 +68,26 @@ void dumpVisitor::visit_echoStmt(echoStmt* n) {
 
 void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
     showindent();
-    std::cout << "inline HTML: " << n->getStringVal() << std::endl;
+    std::cout << "inline HTML ";
+    if (n->isUnicode()) {
+        std::cout << "[unicode]: " << n->getUStringVal();
+    }
+    else {
+        std::cout << "[binary]: " << n->getStringVal();
+    }
+    std::cout << std::endl;
 }
 
 void dumpVisitor::visit_literalString(literalString* n)  {
     showindent();
-    std::cout << "literal string: \"" << n->getStringVal() << "\"" << std::endl;
+    std::cout << "literal string ";
+    if (n->isUnicode()) {
+        std::cout << "[unicode]: \"" << n->getUStringVal();
+    }
+    else {
+        std::cout << "[binary]: \"" << n->getStringVal();
+    }
+    std::cout << "\"" << std::endl;
 }
 
 void dumpVisitor::visit_literalInt(literalInt* n)  {

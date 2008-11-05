@@ -25,6 +25,7 @@
 #include <string>
 #include <cctype> // for toupper
 #include <algorithm>
+#include <unicode/unistr.h>
 
 #include "pAST.h"
 #include "pModule.h"
@@ -94,12 +95,33 @@ expr(A) ::= literal(B). { A = B; }
 // literal string, double quotes
 literal(A) ::= T_CONSTANT_ENCAPSED_STRING(B).
 {
+  // binary specifier?
+  bool doUnicode = pMod->defaultUnicode();
+  std::string::iterator start;
+  if ( *(*B).begin() == 'b') {
+      // binary
+      doUnicode = false;
+      start = ++(*B).begin();
+  }
+  else {
+      // according to module default
+      start = (*B).begin();
+  }
   // substring out the quotes, special case for empty string
-  std::string::iterator start = (*B).begin();
-  if (++start == (*B).end())
-    A = new AST::literalString(std::string());
-  else
-    A = new AST::literalString(std::string(start, --(*B).end()));
+  if (++start == (*B).end()) {
+    if (doUnicode) {
+        A = new AST::literalString(UnicodeString());
+    } else {
+        A = new AST::literalString(std::string());
+    }
+  }
+  else {
+    if (doUnicode) {
+        A = new AST::literalString(UnicodeString(std::string(start, --(*B).end()).c_str(),-1,US_INV));
+    } else {
+        A = new AST::literalString(std::string(start, --(*B).end()));
+    }
+  }
 }
 
 // literal integers (decimal)

@@ -75,6 +75,15 @@ bool pVar::evalAsBool() const {
     return v.convertToBool();
 }
 
+// convert to BString or UString as appropriate
+void pVar::convertToString() {
+    if (isBString() || isUString())
+        return;
+    // TODO: check runtime setting for conversion,
+    // do unicode or binary
+    convertToBString();
+}
+
 void intrusive_ptr_add_ref(pVar* v) {
     v->incRefCount();
 #ifdef RPHP_PVAR_DEBUG

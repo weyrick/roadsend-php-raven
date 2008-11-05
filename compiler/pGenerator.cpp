@@ -30,6 +30,10 @@
 
 #include <llvm/Linker.h>
 
+#include <unicode/ustream.h>
+#include <unicode/ustring.h>
+#include <unicode/uchriter.h>
+
 #include "pGenerator.h"
 #include "pCompileTarget.h"
 #include "pIRHelper.h"
@@ -137,34 +141,63 @@ llvm::Value* pGenerator::newVarOnStack(const char* name) {
 
 void pGenerator::visit_literalString(AST::literalString* n) {
 
-    ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->getStringVal().size()+1);
+    bool isUnicode = n->isUnicode();
+    size_t slen;
 
-    GlobalVariable* gvar_array__str = new GlobalVariable(
-    /*Type=*/stringLiteralType,
-    /*isConstant=*/true,
-    /*Linkage=*/GlobalValue::InternalLinkage,
-    /*Initializer=*/0, // has initializer, specified below
-    /*Name=*/".str",
-    llvmModule_);
+    slen = (isUnicode) ? (n->getUStringVal().length()*2) :
+                          n->getStringVal().length()+1;
 
-    // Constant Definitions
-    Constant* const_array_7 = ConstantArray::get(n->getStringVal().c_str(), true);
-    std::vector<Constant*> const_ptr_8_indices;
-    Constant* const_int32_9 = Constant::getNullValue(IntegerType::get(32));
-    const_ptr_8_indices.push_back(const_int32_9);
-    const_ptr_8_indices.push_back(const_int32_9);
-    Constant* strPtr = ConstantExpr::getGetElementPtr(gvar_array__str, &const_ptr_8_indices[0], const_ptr_8_indices.size() );
+    // global value creation
+    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(8), slen);
+    GlobalVariable* gVarStr = new GlobalVariable(
+                                    /*Type=*/byteArrayType,
+                                    /*isConstant=*/true,
+                                    /*Linkage=*/GlobalValue::InternalLinkage,
+                                    /*Initializer=*/0, // has initializer, specified below
+                                    /*Name=*/((isUnicode) ? ".ustr" : ".str"),
+                                    llvmModule_);
+
+    // constant definition
+    Constant* constArray;
+    if (isUnicode) {
+        // turn UTF-16 into its bytearray representation
+        std::string ustr;
+        const UChar *urep = n->getUStringBuf();
+        UCharCharacterIterator iter(urep, u_strlen(urep));
+        for (UChar c = iter.first(); c != CharacterIterator::DONE; c = iter.next()) {
+            // big endian. we convert the other way by specifying UTF-16BE
+            // during construction of UnicodeString
+            ustr.push_back(c & 0xFF00);
+            ustr.push_back(c & 0x00FF);
+        }
+        constArray = ConstantArray::get(ustr, false /* add null */);
+    }
+    else {
+        constArray = ConstantArray::get(n->getStringVal(), true);
+    }
+
+    gVarStr->setInitializer(constArray);
+
+    // get pointer to global str
+    std::vector<Constant*> indices;
+    Constant* nullC = Constant::getNullValue(IntegerType::get(32));
+    indices.push_back(nullC);
+    indices.push_back(nullC);
+    Constant* strPtr = ConstantExpr::getGetElementPtr(gVarStr, &indices[0], indices.size() );
  
-    // Global Variable Definitions
-    gvar_array__str->setInitializer(const_array_7);
-
     // allocate tmp pVar for return value
-    Value* pVarTmp = newVarOnStack("pBStrTmp");
+    Value* pVarTmp = newVarOnStack((isUnicode)?"pUStrTmp":"pBStrTmp");
     
     // convert cstr to pbstring
-    Function* f = llvmModule_->getFunction("rphp_make_pVar_pBString");
+    Function* f = llvmModule_->getFunction((isUnicode)?"rphp_make_pVar_pUString":"rphp_make_pVar_pBString");
     assert(f != NULL);
-    currentBlock_.CreateCall2(f, pVarTmp, strPtr);
+
+    if (isUnicode) {
+        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(APInt(32, slen)));
+    }
+    else {
+        currentBlock_.CreateCall2(f, pVarTmp, strPtr);
+    }
 
     // push to stack
     valueStack_.push(pVarTmp);

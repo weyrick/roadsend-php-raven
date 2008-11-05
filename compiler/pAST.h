@@ -77,7 +77,7 @@ class literalExpr: public expr {
     pBString stringVal_;
 
 public:
-    literalExpr(nodeKind k): expr(k) { }
+    literalExpr(nodeKind k): expr(k), stringVal_() { }
     literalExpr(nodeKind k, const pBString& v): expr(k), stringVal_(v) { }
     
     const pBString& getStringVal(void) const { return stringVal_; }
@@ -87,9 +87,25 @@ public:
 // NODE: literal bstring
 class literalString: public literalExpr {
 
+    pUString uStringVal_;
+    bool isUnicode_;
+
 public:
-    literalString(const pBString& v): literalExpr(literalStringKind, v) { }
-    literalString(const pBString& v, nodeKind k): literalExpr(k, v) { }
+    literalString(const pBString& v): literalExpr(literalStringKind, v), uStringVal_(), isUnicode_(false) { }
+    literalString(const pBString& v, nodeKind k): literalExpr(k, v), uStringVal_(), isUnicode_(false) { }
+
+    literalString(const pUString& v): literalExpr(literalStringKind), uStringVal_(v), isUnicode_(true) { }
+    literalString(const pUString& v, nodeKind k): literalExpr(k), uStringVal_(v), isUnicode_(true) { }
+
+    const pUString& getUStringVal(void) const { return uStringVal_; }
+
+    // getTerminatedBuffer may mutate, so we do it here then return a const
+    const UChar* getUStringBuf(void) {
+        uStringVal_.getTerminatedBuffer();
+        return uStringVal_.getBuffer();
+    }
+
+    bool isUnicode(void) const { return isUnicode_; }
 
 };
 
@@ -134,6 +150,7 @@ class inlineHtml: public literalString {
 
 public:
     inlineHtml(const pBString& v): literalString(v, inlineHtmlKind) { }
+    inlineHtml(const pUString& v): literalString(v, inlineHtmlKind) { }
 
 };
 

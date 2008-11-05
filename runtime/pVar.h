@@ -190,6 +190,7 @@ public:
     pTriState& convertToBool();
     pInt& convertToInt();
     // float
+    void convertToString();
     pBString& convertToBString();
     // ustring
     // hash

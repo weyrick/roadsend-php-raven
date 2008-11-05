@@ -66,7 +66,7 @@ struct rphpLangTokens : lexer_def<Lexer>
             | token_def<>("[ \\t\\n]+", T_WHITESPACE)
             | token_def<>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/" /* multiline comment */)
             | token_def<>("\\/\\/.*$" /* single line comment */)
-            | token_def<>("[\"][^\"]*[\"]", T_CONSTANT_ENCAPSED_STRING)
+            | token_def<>("b*[\"][^\"]*[\"]", T_CONSTANT_ENCAPSED_STRING)
             ;
 
     }
