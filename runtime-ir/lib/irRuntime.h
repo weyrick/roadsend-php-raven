@@ -54,6 +54,7 @@ extern "C" {
     //
     
     void _make_pVar(void);
+    void _assign_pVar(void);
                                         
 }
 

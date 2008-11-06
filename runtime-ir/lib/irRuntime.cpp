@@ -86,5 +86,11 @@ extern "C" {
       p = 5;
     }
 
+    void _assign_pVar(void) {
+      rphp::pVar l;
+      rphp::pVar r;
+      l = r;
+    }
+
 }
 

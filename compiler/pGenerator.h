@@ -24,7 +24,11 @@
 
 #include <queue>
 #include <string>
+
+#include <boost/unordered_map.hpp>
+
 #include <llvm/Support/IRBuilder.h>
+
 #include "pASTVisitors.h"
 #include "pIRHelper.h"
 
@@ -34,6 +38,8 @@ namespace llvm {
 }
 
 namespace rphp {
+
+typedef boost::unordered_map<pIdentString, llvm::Value*> symbolTableType;
 
 class pCompileTarget;
 
@@ -56,6 +62,8 @@ private:
 
     std::queue<llvm::Value*> valueStack_;
     std::queue<valueVectorType> destructList_;
+
+    symbolTableType globalSymbols_;
 
 private:
     void loadAndLinkRuntimeIR(void);

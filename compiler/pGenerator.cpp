@@ -306,11 +306,37 @@ void pGenerator::visit_echoStmt(AST::echoStmt* n) {
 
 }
 
-void pGenerator::visit_assignment(AST::assignment*) {
+void pGenerator::visit_assignment(AST::assignment* n) {
+
+    // gen rval
+    visit(n->rVal());
+    Value* rVal = valueStack_.back();
+    valueStack_.pop();
+
+    // gen lval
+    visit(n->lVal());
+    Value* lVal = valueStack_.back();
+    valueStack_.pop();
+
+    Function* f = llvmModule_->getFunction("_ZN4rphp4pVaraSERKS0_");
+    assert(f != NULL);
+
+    currentBlock_.CreateCall2(f, lVal, rVal);
 
 }
 
-void pGenerator::visit_var(AST::var*) {
+void pGenerator::visit_var(AST::var* n) {
+
+    symbolTableType::iterator sym = globalSymbols_.find(n->name());
+    if (sym == globalSymbols_.end()) {
+        Value* v = newVarOnStack(n->name().c_str());
+        globalSymbols_[n->name()] = v;
+        valueStack_.push(v);
+    }
+    else {
+        valueStack_.push((*sym).second);
+    }
+    
 
 }
 
