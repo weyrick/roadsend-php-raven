@@ -50,10 +50,10 @@ using namespace rphp;
 %type T_IF {int}
 %type T_WHILE {int}
 %type T_ELSE {int}
+%type T_ASSIGN {int}
 
 // xxx temp, these are real nodes
 %type T_IDENTIFIER {int}
-%type T_VARIABLE {int}
 
 %syntax_error {  
   std::cerr << "Syntax error, unexpected: '" << *TOKEN << "'" << std::endl;
@@ -71,12 +71,14 @@ statement_list ::= statement_list statement(A). { pMod->getAST().push_back(A); }
 
 /******** STATEMENTS ********/
 %type statement {AST::stmt*}
-statement(A) ::= echo(B). { A = B; }
 statement(A) ::= inlineHTML(B). { A = B; }
+statement(A) ::= echo(B) T_SEMI. { A = B; }
+statement(A) ::= expr(B) T_SEMI. { A = B; }
+statement ::= T_SEMI.
 
 // echo
 %type echo {AST::echoStmt*}
-echo(A) ::= T_ECHO expr(B) T_SEMI. { A = new AST::echoStmt(B); }
+echo(A) ::= T_ECHO expr(B). { A = new AST::echoStmt(B); }
 
 // inline html
 %type inlineHTML {AST::inlineHtml*}
@@ -88,6 +90,8 @@ inlineHTML(A) ::= T_INLINE_HTML(B).
 /****** EXPRESSIONS *********/
 %type expr {AST::expr*}
 expr(A) ::= literal(B). { A = B; }
+expr(A) ::= assignment(B). { A = B; }
+expr(A) ::= lval(B). { A = B; }
 
 /** LITERALS **/
 %type literal {AST::literalExpr*}
@@ -137,7 +141,8 @@ literal(A) ::= T_LNUMBER(B). { A = new AST::literalInt(std::string((*B).begin(),
 literal(A) ::= T_DNUMBER(B). { A = new AST::literalFloat(std::string((*B).begin(), (*B).end())); }
 
 // literal identifier: null, true, false or string
-literal(A) ::= T_IDENTIFIER(B). {
+literal(A) ::= T_IDENTIFIER(B).
+{
     // case insensitive checks
     std::string ciTmp((*B).begin(), (*B).end());
     transform(ciTmp.begin(), ciTmp.end(), ciTmp.begin(), toupper);
@@ -155,3 +160,22 @@ literal(A) ::= T_IDENTIFIER(B). {
         A = new AST::literalString(std::string((*B).begin(), (*B).end()));
     }
 }
+
+/** ASSIGNMENT **/
+%type assignment {AST::assignment*}
+assignment(A) ::= lval(L) T_ASSIGN expr(R).
+{
+    A = new AST::assignment(L, R);
+}
+
+/** LVALS **/
+%type lval {AST::expr*}
+lval(A) ::= variable_lVal(B). { A = B; }
+
+%type variable_lVal {AST::var*}
+variable_lVal(A) ::= T_VARIABLE(B).
+{
+    // strip $. TODO: unicode identifiers?
+    A = new AST::var(std::string(++(*B).begin(), (*B).end()));
+}
+

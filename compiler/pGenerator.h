@@ -37,7 +37,7 @@ namespace rphp {
 
 class pCompileTarget;
 
-class pGenerator: public AST::defaultVisitor {
+class pGenerator: public AST::baseVisitor {
 
 public:
     typedef std::vector<llvm::Value*> valueVectorType;
@@ -90,6 +90,8 @@ public:
     void visit_literalFloat(AST::literalFloat*);
     void visit_literalBool(AST::literalBool*);
     void visit_literalNull(AST::literalNull*);
+    void visit_assignment(AST::assignment*);
+    void visit_var(AST::var*);
 
 };
 

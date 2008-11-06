@@ -41,22 +41,12 @@ public:
     virtual void visit_literalFloat(literalFloat*) = 0;
     virtual void visit_literalBool(literalBool*) = 0;
     virtual void visit_literalNull(literalNull*) = 0;
+    virtual void visit_assignment(assignment*) = 0;
+    virtual void visit_var(var*) = 0;
 
 };
 
-class defaultVisitor: public baseVisitor {
-public:
-    virtual void visit_echoStmt(echoStmt*);
-    virtual void visit_inlineHtml(inlineHtml*) = 0;
-    virtual void visit_literalString(literalString*) = 0;
-    virtual void visit_literalInt(literalInt*) = 0;
-    virtual void visit_literalFloat(literalFloat*) = 0;
-    virtual void visit_literalBool(literalBool*) = 0;
-    virtual void visit_literalNull(literalNull*) = 0;
-
-};
-
-class dumpVisitor: public defaultVisitor {
+class dumpVisitor: public baseVisitor {
     int indentLevel_;
     void indent() { indentLevel_ += 2; }
     void unindent() { indentLevel_ -= 2; }
@@ -71,6 +61,8 @@ public:
     void visit_literalFloat(literalFloat*);
     void visit_literalBool(literalBool*);
     void visit_literalNull(literalNull*);
+    void visit_assignment(assignment*);
+    void visit_var(var*);
 
 };
 

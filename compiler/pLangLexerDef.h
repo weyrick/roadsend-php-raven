@@ -52,7 +52,8 @@ struct rphpLangTokens : lexer_def<Lexer>
 
         // PHP state tokens
         self("PHP")
-            = token_def<>('(') | ')' | '{' | '}' | '='
+            = token_def<>('(') | ')' | '{' | '}'
+            | token_def<>("=", T_ASSIGN)
             | token_def<>(";", T_SEMI)
             | token_def<>("\\?>", T_CLOSE_TAG)
             | token_def<>("if", T_IF)

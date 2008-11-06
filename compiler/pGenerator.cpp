@@ -295,7 +295,7 @@ void pGenerator::visit_inlineHtml(AST::inlineHtml* n) {
 
 void pGenerator::visit_echoStmt(AST::echoStmt* n) {
 
-    visit(n->getRVal());
+    visit(n->rVal());
     Value* rVal = valueStack_.back();
     valueStack_.pop();
 
@@ -303,6 +303,14 @@ void pGenerator::visit_echoStmt(AST::echoStmt* n) {
     assert(f != NULL);
 
     currentBlock_.CreateCall2(f, runtimeEngine_, rVal);
+
+}
+
+void pGenerator::visit_assignment(AST::assignment*) {
+
+}
+
+void pGenerator::visit_var(AST::var*) {
 
 }
 

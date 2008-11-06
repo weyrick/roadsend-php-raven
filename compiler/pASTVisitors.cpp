@@ -33,34 +33,32 @@ baseVisitor::dispatchFunType baseVisitor::dispatchTable_[] = {
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalInt),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalFloat),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalNull),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalBool)
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalBool),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_assignment),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_var)
 };
 
 
 void baseVisitor::visit(stmt* s) {
 
-    if (s)
+    if (s) {
       (this->*dispatchTable_[s->getKind()])(s);
+    }
 
-}
-
-
-void defaultVisitor::visit_echoStmt(echoStmt* n) {
-    visit(n->getRVal());
 }
 
 // ** DUMP VISITOR **
 
 void dumpVisitor::showindent() {
     if (indentLevel_)
-        std::cout << std::string(" ", indentLevel_);
+        std::cout << std::string(indentLevel_, ' ');
 }
 
 void dumpVisitor::visit_echoStmt(echoStmt* n) {
     showindent();
     std::cout << "(echoStmt:" << std::endl;
     indent();
-    defaultVisitor::visit_echoStmt(n);
+    visit(n->rVal());
     unindent();
     showindent();
     std::cout << ")" << std::endl;
@@ -114,6 +112,38 @@ void dumpVisitor::visit_literalNull(literalNull* n)  {
     showindent();
     std::cout << "literal NULL" << std::endl;
 }
+
+void dumpVisitor::visit_assignment(assignment* n)  {
+    showindent();
+    std::cout << "(assignment:" << std::endl;
+    indent();
+
+    showindent();
+    std::cout << "(lval: " << std::endl;
+    indent();
+    visit(n->lVal());
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+    
+    showindent();
+    std::cout << "(rval: " << std::endl;
+    indent();
+    visit(n->rVal());
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+    
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+}
+
+void dumpVisitor::visit_var(var* n)  {
+    showindent();
+    std::cout << "var: $" << n->name() << std::endl;
+}
+
 
 } } // namespace
 

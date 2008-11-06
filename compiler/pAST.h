@@ -36,7 +36,9 @@ enum nodeKind {
     literalIntKind,
     literalFloatKind,
     literalNullKind,
-    literalBoolKind
+    literalBoolKind,
+    assignmentKind,
+    varKind
 };
 
 // statement base class
@@ -163,10 +165,39 @@ public:
     echoStmt(expr* v): stmt(echoStmtKind), rVal_(v) { }
     ~echoStmt(void) { delete rVal_; }
 
-    expr* getRVal(void) { return rVal_; }
+    expr* rVal(void) { return rVal_; }
 
 };
 
+// NODE: var
+class var: public expr {
+
+    pIdentString name_;
+
+public:
+    var(const pIdentString& name): expr(varKind), name_(name) { }
+
+    const pIdentString& name(void) const { return name_; }
+
+};
+
+// NODE: assignment
+class assignment: public expr {
+
+    expr* lVal_;
+    expr* rVal_;
+
+public:
+    assignment(expr* lVal, expr* rVal): expr(assignmentKind), lVal_(lVal), rVal_(rVal) { }
+    ~assignment(void) {
+        delete lVal_;
+        delete rVal_;
+    }
+
+    expr* lVal(void) { return lVal_; }
+    expr* rVal(void) { return rVal_; }
+
+};
 
 } } // namespace
 
