@@ -38,7 +38,7 @@ extern "C" {
     }
 
     // print a c string to the current output buffer in the given runtime
-    void rphp_print_cstr(rphp::pRuntimeEngine* e, char* str) {
+    void rphp_print_cstr(rphp::pRuntimeEngine* e, const char* str) {
         e->outputManager->print(rphp::pBString(str));
     }
 
@@ -52,12 +52,12 @@ extern "C" {
     }
 
     // create a new binary string
-    rphp::pVar rphp_make_pVar_pBString(char* str) {
+    rphp::pVar rphp_make_pVar_pBString(const char* str) {
         return rphp::pVar(rphp::pBString(str));
     }
     
     // create a new unicode string
-    rphp::pVar rphp_make_pVar_pUString(char* str, size_t len) {
+    rphp::pVar rphp_make_pVar_pUString(const char* str, size_t len) {
         // our code generator always generates UTF-16BE
         return rphp::pVar(rphp::pUStringP(new rphp::pUString(str, len, "UTF-16BE")));
     }
@@ -77,7 +77,7 @@ extern "C" {
         return (v) ? rphp::pVar(rphp::pTrue) : rphp::pVar(rphp::pFalse);
     }
 
-    rphp::pVar rphp_make_pVar_pObject(char *className) {
+    rphp::pVar rphp_make_pVar_pObject(const char *className) {
         return rphp::pObjectP( new rphp::pObject(className) );
     }
     

@@ -49,7 +49,7 @@ private:
     bool defaultUnicode_;
 
 public:
-    pModule(std::string name, bool dUnicode = true);
+    pModule(std::string name, bool dUnicode = false);
     ~pModule();
 
     astType& getAST() { return ast; }
@@ -63,6 +63,9 @@ public:
     void setLLVMModuleOwnership(bool v) { llvmModuleOwner = v; }
 
     bool defaultUnicode(void) const { return defaultUnicode_; }
+    // XXX this is temporary. called from the parser for now, so
+    // that it's not hard coded
+    const char* encoding(void) const { return "UTF-16"; }
 
     void dumpAST();
     void dumpIR();

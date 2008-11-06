@@ -34,15 +34,15 @@ extern "C" {
 
     // debug
     // print to runtime output buffer
-    void rphp_print_cstr(rphp::pRuntimeEngine*, char* str);
+    void rphp_print_cstr(rphp::pRuntimeEngine*, const char* str);
     
     void rphp_print_pVar(rphp::pRuntimeEngine* e, rphp::pVar v);
     //
 
     // pVar creation
-    rphp::pVar rphp_make_pVar_pBString(char* str);
+    rphp::pVar rphp_make_pVar_pBString(const char* str);
 
-    rphp::pVar rphp_make_pVar_pUString(char* str, size_t len);
+    rphp::pVar rphp_make_pVar_pUString(const char* str, size_t len);
 
     rphp::pVar rphp_make_pVar_pInt(rphp::pInt v);
 
@@ -50,7 +50,7 @@ extern "C" {
 
     rphp::pVar rphp_make_pVar_pBool(int v);
 
-    rphp::pVar rphp_make_pVar_pObject( char* name );
+    rphp::pVar rphp_make_pVar_pObject(const char* name );
     //
     
     void _make_pVar(void);

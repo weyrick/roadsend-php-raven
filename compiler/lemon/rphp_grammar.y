@@ -103,6 +103,11 @@ literal(A) ::= T_CONSTANT_ENCAPSED_STRING(B).
       doUnicode = false;
       start = ++(*B).begin();
   }
+  else if ( *(*B).begin() == 'u') {
+      // unicode
+      doUnicode = true;
+      start = ++(*B).begin();
+  }
   else {
       // according to module default
       start = (*B).begin();
@@ -117,7 +122,8 @@ literal(A) ::= T_CONSTANT_ENCAPSED_STRING(B).
   }
   else {
     if (doUnicode) {
-        A = new AST::literalString(UnicodeString(std::string(start, --(*B).end()).c_str(),-1,US_INV));
+        std::string tmp(start, --(*B).end());
+        A = new AST::literalString(UnicodeString(tmp.data(), tmp.length(), pMod->encoding()));
     } else {
         A = new AST::literalString(std::string(start, --(*B).end()));
     }
