@@ -30,6 +30,7 @@
 
 #include <unicode/unistr.h>
 
+#include "pUString.h"
 #include "CowPtr.h"
 
 namespace rphp {
@@ -51,8 +52,8 @@ typedef double pFloat;
 typedef std::string pBString;
 
 // unicode strings, using the ICU library
-typedef UnicodeString pUString;
-typedef CowPtr<pUString> pUStringP;
+// defined in pUString.h
+typedef boost::shared_ptr<pUString> pUStringP;
 
 // php hash tables
 class pHash;
@@ -75,7 +76,7 @@ typedef boost::variant< pTriState,
                         pInt,
                         pFloat,
                         pBString,
-                        pUStringP,
+                        pUString,
                         pHashP,
                         pObjectP,
                         pResourceP,
@@ -115,14 +116,17 @@ typedef enum {
 // note, pUInt is not a base PHP type (all PHP numbers are signed)
 typedef unsigned long pUInt;
 
-// source locations: filename/linenum
-typedef boost::tuple<const pUString, const pUInt> pSourceLocation;
-
-// source locations: filename/startlinenum/endlinenum
-typedef boost::tuple<const pUString, const pUInt, const pUInt> pSourceStartEndLocation;
-
 // string type used for identifiers
 typedef pBString pIdentString;
+
+// string type used for filenames
+typedef pBString pFilenameString;
+
+// source locations: filename/linenum
+typedef boost::tuple<const pFilenameString, const pUInt> pSourceLocation;
+
+// source locations: filename/startlinenum/endlinenum
+typedef boost::tuple<const pFilenameString, const pUInt, const pUInt> pSourceStartEndLocation;
 
 // php function signatures
 typedef boost::function<pVar (pVar)> pFunPointer1;

@@ -31,17 +31,10 @@ std::size_t hash_value(rphp::hKeyVar const& k) {
 
 namespace rphp {
 
-void pHash::insert(const pUString &key, const pVar& data) {
+void pHash::insert(const pIdentString &key, const pVar& data) {
     // TODO check numeric string, set maxIntKey accordingly
     hashData_.insert(h_container(key, data));
 }
-
-/*
-void pHash::insert(const pBString &key, pVarP data) {
-    // TODO check numeric string, set maxIntKey accordingly
-    hashData_.insert(h_container(key, data));
-}
-*/
 
 void pHash::insert(const pInt &key, const pVar& data) {
     if (key > maxIntKey_)
@@ -53,7 +46,7 @@ void pHash::insertNext(const pVar& data) {
     hashData_.insert(h_container(maxIntKey_++, data));
 }
 
-pHash::size_type pHash::remove(const pUString &key) {
+pHash::size_type pHash::remove(const pIdentString &key) {
     return hashData_.erase(key);
 }
 
@@ -63,39 +56,24 @@ pHash::size_type pHash::remove(const pInt &key) {
 
 
 // query
-bool pHash::keyExists(const pUString &key) const {
+bool pHash::keyExists(const pIdentString &key) const {
     stableHash::iterator k = hashData_.find(key);
     return (k != hashData_.end());
 }
-/*
-bool pHash::keyExists(const pBString &key) const {
-    stableHash::iterator k = hashData_.find(key);
-    return (k != hashData_.end());
-}
-*/
+
 bool pHash::keyExists(const pInt &key) const {
     stableHash::iterator k = hashData_.find(key);
     return (k != hashData_.end());
 }
 
 // lookup
-pVar pHash::operator[] ( const pUString &key ) const {
+pVar pHash::operator[] ( const pIdentString &key ) const {
     stableHash::iterator k = hashData_.find(key);
     if (k == hashData_.end())
         return pVar(); // pNull
     else
         return (*k).pData;
 }
-
-/*
-pVarP pHash::operator[] ( const pBString &key ) const {
-    stableHash::iterator k = hashData_.find(key);
-    if (k == hashData_.end())
-        return pVarP();
-    else
-        return (*k).pData;
-}
-*/
 
 pVar pHash::operator[] ( const pInt &key ) const {
     stableHash::iterator k = hashData_.find(key);

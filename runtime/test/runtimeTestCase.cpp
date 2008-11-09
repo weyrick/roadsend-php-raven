@@ -27,6 +27,6 @@ void runtimeTestCase::outputBuffer()
     uBuffer << pBString("12345");
     CPPUNIT_ASSERT( uBuffer.length() == 10 );
 
-    CPPUNIT_ASSERT( *uBuffer.getUBuffer() == pUString("1234512345") );
+    CPPUNIT_ASSERT( *uBuffer.getUBuffer() == UnicodeString("1234512345") );
 
 }

@@ -33,7 +33,7 @@ void pVar_convertToIntVisitor::operator()(pBString &v) {
     }
 }
 
-void pVar_convertToIntVisitor:: operator()(pUStringP &v) {
+void pVar_convertToIntVisitor:: operator()(pUString &v) {
     // TODO: do a real conversion here
     // should handle both integers and floats
     var_ = 0l;

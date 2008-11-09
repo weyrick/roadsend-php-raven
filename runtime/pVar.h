@@ -70,7 +70,7 @@ public:
     // specify type of string to make from literal
     pVar(const char* str, pVarType t): refData_(0) {
         if (t == pVarUStringType) {
-            pVarData_ = pUStringP(new UnicodeString(str));
+            pVarData_ = pUString(str);
         }
         else {
             pVarData_ = pBString(str);
@@ -241,12 +241,12 @@ public:
         return boost::get<const pBString&>(pVarData_);
     }
 
-    pUStringP& getUString() {
-        return boost::get<pUStringP&>(pVarData_);
+    pUString& getUString() {
+        return boost::get<pUString&>(pVarData_);
     }
     
-    const pUStringP& getUString() const {
-        return boost::get<const pUStringP&>(pVarData_);
+    const pUString& getUString() const {
+        return boost::get<const pUString&>(pVarData_);
     }
 
     pHashP& getHash() {

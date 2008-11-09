@@ -33,7 +33,7 @@ public:
 
 private:
 
-    pUString *uBuffer_;
+    UnicodeString *uBuffer_;
     pBString *bBuffer_;
     bufTypeT bType_;
 
@@ -48,7 +48,7 @@ public:
                 bBuffer_ = new pBString();
                 break;
             case bufTypeUnicode:
-                uBuffer_ = new pUString();
+                uBuffer_ = new UnicodeString();
                 break;
         }
     }
@@ -78,7 +78,7 @@ public:
         return bBuffer_;
     }
 
-    const pUString* getUBuffer() const {
+    const UnicodeString* getUBuffer() const {
         return uBuffer_;
     }
 
@@ -98,7 +98,7 @@ public:
                 break;
             case bufTypeUnicode:
                 // TODO: this doesn't seem so efficient. but how often will it be used?
-                uBuffer_->append(pUString(str.c_str(), str.length(), US_INV));
+                uBuffer_->append(UnicodeString(str.c_str(), str.length(), US_INV));
                 break;
         }
     }
@@ -106,10 +106,10 @@ public:
     void operator<< (const pUString& str) {
         if (bType_ == bufTypeBinary) {
             // convert to unicode buffer
-            uBuffer_ = new pUString(bBuffer_->c_str(), bBuffer_->length(), US_INV);
+            uBuffer_ = new UnicodeString(str.readonlyICUString());
             delete bBuffer_;
         }
-        uBuffer_->append(str);
+        uBuffer_->append(str.readonlyICUString());
     }
 
 };

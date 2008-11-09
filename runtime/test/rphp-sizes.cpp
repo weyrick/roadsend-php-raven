@@ -11,6 +11,7 @@ int main(void) {
     std::cout << "pBString: " << sizeof(pBString) << std::endl;
     std::cout << "pUString: " << sizeof(pUString) << std::endl;
     std::cout << "pUStringP: " << sizeof(pUStringP) << std::endl;
+    std::cout << "UnicodeString: " << sizeof(UnicodeString) << std::endl;
     std::cout << "pHash: " << sizeof(pHash) << std::endl;
     std::cout << "pHashP: " << sizeof(pHashP) << std::endl;
     std::cout << "pObject: " << sizeof(pObject) << std::endl;

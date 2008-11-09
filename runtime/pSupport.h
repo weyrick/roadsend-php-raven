@@ -27,12 +27,10 @@
 #define foreach         BOOST_FOREACH
 #define reverse_foreach BOOST_REVERSE_FOREACH
 
-U_NAMESPACE_BEGIN
-// boost compatible hash function for UnicodeString
-std::size_t hash_value(const rphp::pUString &v);
-U_NAMESPACE_END
-
 namespace rphp {
+
+// boost compatible hash function for pUString
+std::size_t hash_value(const pUString &v);
 
 // case conversion
 pBString toLowerCopy(const pBString& v);

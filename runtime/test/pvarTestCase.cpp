@@ -7,6 +7,7 @@ driver for testing pVars
 
 #include <cppunit/config/SourcePrefix.h>
 #include <iostream>
+#include <unicode/ustream.h>
 
 #include "pRuntime.h"
 #include "pvarTestCase.h"
@@ -121,6 +122,43 @@ void pvarTestCase::test_pFloat() {
 
 }
 
+// ** UNICODE STRING **
+void pvarTestCase::test_pUString() {
+
+    pVar v(pUString("12345"));
+
+    CPPUNIT_ASSERT( v.getUString().length() == 5 );
+    CPPUNIT_ASSERT( v.getUString().readonlyICUString() == UnicodeString("12345") );
+
+    pUString u = v.getUString();
+    pVar x(u); // x should have a shared ptr to v's buffer now, until write
+    CPPUNIT_ASSERT( x.getUString().getBuffer() == v.getUString().getBuffer() );
+    pUString& z = x.getUString(); // should be the same
+    // now we change z via a UnicodeString. it should detach and not change v/x
+    UnicodeString ustr(z.checkoutICUString());
+    CPPUNIT_ASSERT( x.getUString().getBuffer() != v.getUString().getBuffer() );
+    CPPUNIT_ASSERT( ustr.getBuffer() == z.getBuffer() );
+    ustr = "abcde";
+    ustr.toUpper();
+    z.checkinICUString(ustr);
+    // ustr shouldn't be used anymore
+    CPPUNIT_ASSERT( v.getUString().readonlyICUString() == UnicodeString("12345") );
+    CPPUNIT_ASSERT( z.readonlyICUString() == UnicodeString("ABCDE") );
+
+    // expand
+    UnicodeString ustr2(z.checkoutICUString());
+    ustr2 = "foobarbaz";
+    z.checkinICUString(ustr2);
+    CPPUNIT_ASSERT( z.readonlyICUString() == UnicodeString("foobarbaz") );
+
+    // contract
+    UnicodeString ustr3(z.checkoutICUString());
+    ustr3 = "1";
+    z.checkinICUString(ustr3);
+    CPPUNIT_ASSERT( z.readonlyICUString() == UnicodeString("1") );
+
+
+}
 
 // ** HASH **
 pVar hashObserver(pVar H) {
@@ -237,8 +275,8 @@ public:
         CPPUNIT_ASSERT( v == "test" );
     }
 
-    void operator()(const pUStringP &v) const {
-        CPPUNIT_ASSERT( *v == "utest" );
+    void operator()(const pUString &v) const {
+        CPPUNIT_ASSERT( v.readonlyICUString() == UnicodeString("utest") );
     }
 
     void operator()(const pHashP &v) const {
@@ -267,7 +305,7 @@ void pvarTestCase::test_visitor() {
     p.applyVisitor<tvisitor>();
     p = "test";
     p.applyVisitor<tvisitor>();
-    p = pUStringP(new pUString("utest"));
+    p = pUString("utest");
     p.applyVisitor<tvisitor>();
     p.newEmptyHash();
     p.getHash()->insert("foo", 1);

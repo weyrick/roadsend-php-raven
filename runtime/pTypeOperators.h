@@ -54,8 +54,8 @@ public:
         (v.empty()) ? var_ = pFalse : var_ = pTrue;
     }
 
-    void operator()(pUStringP &v) {
-        (v->isEmpty()) ? var_ = pFalse : var_ = pTrue;
+    void operator()(pUString &v) {
+        (v.empty()) ? var_ = pFalse : var_ = pTrue;
     }
 
     void operator()(pHashP &v) {
@@ -97,7 +97,7 @@ public:
 
     void operator()(pBString &v);
 
-    void operator()(pUStringP &v);
+    void operator()(pUString &v);
 
     void operator()(pHashP &v) {
         var_ = (pInt)v->size();
@@ -158,7 +158,7 @@ public:
 
     void operator()(pBString &v) { /* nothing */ }
 
-    void operator()(pUStringP &v) {
+    void operator()(pUString &v) {
         // TODO
     }
 

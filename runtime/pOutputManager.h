@@ -57,10 +57,10 @@ public:
         *bufferStack_.top() << str;
     }
 
-    void print(const pUStringP& str) {
+    void print(const pUString& str) {
         if (bufferStack_.empty())
             return;
-        *bufferStack_.top() << *str;
+        *bufferStack_.top() << str.readonlyICUString();
     }
 
 };

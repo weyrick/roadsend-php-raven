@@ -59,7 +59,7 @@ extern "C" {
     // create a new unicode string
     rphp::pVar rphp_make_pVar_pUString(const char* str, size_t len) {
         // our code generator always generates UTF-16BE
-        return rphp::pVar(rphp::pUStringP(new rphp::pUString(str, len, "UTF-16BE")));
+        return rphp::pVar(UnicodeString(str, len, "UTF-16BE"));
     }
 
     // create a new pVar from a pInt

@@ -35,8 +35,8 @@ using namespace boost::multi_index;
 
 // custom key type
 namespace rphp {
-    typedef boost::variant< pInt, /*pBString,*/ pUString > hKeyVar;
-    typedef enum { hKeyInt, /*hKeyBStr,*/ hKeyUStr  } hKeyType;
+    typedef boost::variant< pInt, pIdentString > hKeyVar;
+    typedef enum { hKeyInt, hKeyStr  } hKeyType;
 }
 
 // customer key hasher
@@ -55,14 +55,9 @@ public:
         return static_cast<std::size_t>(k);
     }
 
-    /*
-    std::size_t operator()(const pBString &k) const {
+    std::size_t operator()(const pIdentString &k) const {
         return boost::hash_value(k);
-    }
-    */
-
-    std::size_t operator()(const pUString &k) const {
-        return static_cast<std::size_t>(k.hashCode());
+        //return static_cast<std::size_t>(k.hashCode());
     }
 
 };
@@ -73,9 +68,7 @@ struct h_container {
     pVar pData;
     hKeyVar key;
 
-    h_container(const pUString k, pVar d) : pData(d), key(k) { }
-
-    //   h_container(const pBString k, pVarP d) : pData(d), key(k) { }
+    h_container(const pIdentString k, pVar d) : pData(d), key(k) { }
 
     h_container(const pInt k, pVar d) : pData(d), key(k) { }
 
@@ -131,27 +124,23 @@ public:
 #endif
 
     // modifiers
-    void insert(const pUString &key, const pVar& data);
-    //void insert(const pBString &key, pVarP data);
+    void insert(const pIdentString &key, const pVar& data);
     void insert(const pInt &key, const pVar& data);
     void insertNext(const pVar& data);
 
-    size_type remove(const pUString &key);
-    //void remove(const pBString &key);
+    size_type remove(const pIdentString &key);
     size_type remove(const pInt &key);
 
     // queries
     size_type size() const { return hashData_.size(); }
-    bool keyExists(const pUString &key) const;
-    //bool keyExists(const pBString &key) const;
+    bool keyExists(const pIdentString &key) const;
     bool keyExists(const pInt &key) const;
 
     // dump of contents
     void varDump() const;
 
     // lookup
-    pVar operator[] (const pUString &key) const;
-    //pVarP operator[] (const pBString &key) const;
+    pVar operator[] (const pIdentString &key) const;
     pVar operator[] (const pInt &key) const;
 
 
