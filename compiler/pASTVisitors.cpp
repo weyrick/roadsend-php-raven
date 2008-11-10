@@ -35,7 +35,8 @@ baseVisitor::dispatchFunType baseVisitor::dispatchTable_[] = {
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalNull),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalBool),
     reinterpret_cast<dispatchFunType>(&baseVisitor::visit_assignment),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_var)
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_var),
+    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_functionInvoke)
 };
 
 
@@ -144,6 +145,28 @@ void dumpVisitor::visit_var(var* n)  {
     std::cout << "var: $" << n->name() << std::endl;
 }
 
+void dumpVisitor::visit_functionInvoke(functionInvoke* n)  {
+
+    showindent();
+    std::cout << "(function invoke: " << n->name() << std::endl;
+
+    indent();
+    showindent();
+    std::cout << "(arguments: " << std::endl;
+    indent();
+    for (int i = 0; i < n->argList().size(); i++) {
+        showindent();
+        std::cout << i+1 << ": " << std::endl;
+        visit(n->argList()[i]);
+    }
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+    unindent();    
+    showindent();
+    std::cout << ")" << std::endl;
+
+}
 
 } } // namespace
 

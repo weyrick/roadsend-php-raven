@@ -38,7 +38,8 @@ enum nodeKind {
     literalNullKind,
     literalBoolKind,
     assignmentKind,
-    varKind
+    varKind,
+    functionInvokeKind
 };
 
 // statement base class
@@ -72,6 +73,8 @@ public:
     expr(nodeKind k): stmt(k) { }
 
 };
+
+typedef std::vector<expr*> expressionList;
 
 // literal expression base class
 class literalExpr: public expr {
@@ -198,6 +201,35 @@ public:
     expr* rVal(void) { return rVal_; }
 
 };
+
+// NODE: function invoke
+class functionInvoke: public expr {
+
+    pIdentString name_;
+    expressionList argList_;
+
+public:
+    functionInvoke(pIdentString name, expressionList* argList):
+        expr(functionInvokeKind),
+        name_(name),
+        argList_(*argList)
+    {
+        // free parser's version, which we've copied
+        delete argList;
+    }
+    
+    ~functionInvoke(void) {
+        for (expressionList::iterator i = argList_.begin(); i != argList_.end(); ++i) {
+            delete *i;
+        }
+    }
+
+    const pIdentString& name(void) { return name_; }
+    expressionList& argList(void) { return argList_; }
+    const expressionList& argList(void) const { return argList_; }
+
+};
+
 
 } } // namespace
 

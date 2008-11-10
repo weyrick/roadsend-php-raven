@@ -44,6 +44,11 @@ using namespace rphp;
 %type T_WHITESPACE {int}
 %type T_OPEN_TAG {int}
 %type T_CLOSE_TAG {int}
+%type T_LEFTPAREN {int}
+%type T_RIGHTPAREN {int}
+%type T_LEFTCURLY {int}
+%type T_RIGHTCURLY {int}
+%type T_COMMA {int}
 
 // tokens
 %type T_INLINE_HTML {int}
@@ -92,6 +97,7 @@ inlineHTML(A) ::= T_INLINE_HTML(B).
 expr(A) ::= literal(B). { A = B; }
 expr(A) ::= assignment(B). { A = B; }
 expr(A) ::= lval(B). { A = B; }
+expr(A) ::= functionInvoke(B). { A = B; }
 
 /** LITERALS **/
 %type literal {AST::literalExpr*}
@@ -177,5 +183,29 @@ variable_lVal(A) ::= T_VARIABLE(B).
 {
     // strip $. TODO: unicode identifiers?
     A = new AST::var(std::string(++(*B).begin(), (*B).end()));
+}
+
+/** ARGLIST **/
+%type argList {AST::expressionList*}
+argList(A) ::= expr(B). {
+    A = new AST::expressionList();
+    A->push_back(B);
+}
+argList(A) ::= expr(B) T_COMMA argList(C).
+{
+    C->push_back(B);
+    A = C;
+}
+argList(A) ::= . {
+    A = new AST::expressionList();
+}
+
+/** FUNCTION INVOKE **/
+%type functionInvoke {AST::functionInvoke*}
+functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
+{
+    A = new AST::functionInvoke(std::string((*B).begin(), (*B).end()), // f name
+                                C // expression list: arguments
+                               );
 }
 

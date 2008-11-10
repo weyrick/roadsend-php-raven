@@ -34,15 +34,16 @@ private:
 public:
     virtual void visit(stmt*);
 
-    virtual void visit_echoStmt(echoStmt*) = 0;
-    virtual void visit_inlineHtml(inlineHtml*) = 0;
-    virtual void visit_literalString(literalString*) = 0;
-    virtual void visit_literalInt(literalInt*) = 0;
-    virtual void visit_literalFloat(literalFloat*) = 0;
-    virtual void visit_literalBool(literalBool*) = 0;
-    virtual void visit_literalNull(literalNull*) = 0;
-    virtual void visit_assignment(assignment*) = 0;
-    virtual void visit_var(var*) = 0;
+    virtual void visit_echoStmt(echoStmt*) { }
+    virtual void visit_inlineHtml(inlineHtml*) { }
+    virtual void visit_literalString(literalString*) { }
+    virtual void visit_literalInt(literalInt*) { }
+    virtual void visit_literalFloat(literalFloat*) { }
+    virtual void visit_literalBool(literalBool*) { }
+    virtual void visit_literalNull(literalNull*) { }
+    virtual void visit_assignment(assignment*) { }
+    virtual void visit_var(var*) { }
+    virtual void visit_functionInvoke(functionInvoke*) { }
 
 };
 
@@ -63,6 +64,7 @@ public:
     void visit_literalNull(literalNull*);
     void visit_assignment(assignment*);
     void visit_var(var*);
+    void visit_functionInvoke(functionInvoke*);
 
 };
 
