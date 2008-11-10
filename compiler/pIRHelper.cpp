@@ -21,6 +21,7 @@
 
 #include <llvm/Module.h>
 #include <llvm/DerivedTypes.h>
+#include <llvm/Constants.h>
 
 #include <iostream>
 #include <string>
@@ -73,6 +74,32 @@ FunctionType* pIRHelper::moduleEntryFunType() {
 
 }
 
+llvm::Constant* pIRHelper::stringConstant(const std::string& s) {
+
+    // global value creation
+    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(8), s.length()+1);
+    GlobalVariable* gVarStr = new GlobalVariable(
+                                    /*Type=*/byteArrayType,
+                                    /*isConstant=*/true,
+                                    /*Linkage=*/GlobalValue::InternalLinkage,
+                                    /*Initializer=*/0, // has initializer, specified below
+                                    /*Name=*/".ir_str",
+                                    mod_);
+
+    // constant definition
+    Constant* constArray = ConstantArray::get(s, true);
+    gVarStr->setInitializer(constArray);
+
+    // get pointer to global str
+    std::vector<Constant*> indices;
+    Constant* nullC = Constant::getNullValue(IntegerType::get(32));
+    indices.push_back(nullC);
+    indices.push_back(nullC);
+
+    return ConstantExpr::getGetElementPtr(gVarStr, &indices[0], indices.size() );
+
+
+}
 
 } // namespace
 

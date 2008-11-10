@@ -26,6 +26,7 @@ namespace llvm {
     class FunctionType;
     class Type;
     class Module;
+    class Constant;
 }
 
 namespace rphp {
@@ -48,6 +49,8 @@ public:
     llvm::FunctionType* pVarBaseFunType();
     const llvm::Type* pVarType();
     llvm::Type* pVarPointerType();
+
+    llvm::Constant* stringConstant(const std::string& s);
 
 };
 

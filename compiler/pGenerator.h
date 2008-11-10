@@ -70,18 +70,6 @@ private:
     void createEntryPoint(void);
 
     llvm::Value* newVarOnStack(const char*);
-
-    //void emitEchoLiteralString(void);
-
-    // pVar
-    /*
-    llvm::Value* emitVarCreate(void);
-    llvm::Value* emitVarCreate_pBString(llvm::Value*);
-    llvm::Value* emitVarCreate_pInt(llvm::Value*);
-
-    void emitVarConstruct(llvm::Value*);
-    void emitVarDestruct(llvm::Value*);
-    */
     
 public:
 
@@ -100,6 +88,7 @@ public:
     void visit_literalNull(AST::literalNull*);
     void visit_assignment(AST::assignment*);
     void visit_var(AST::var*);
+    void visit_functionInvoke(AST::functionInvoke*);
 
 };
 

@@ -265,31 +265,10 @@ void pGenerator::visit_literalNull(AST::literalNull* n) {
 
 void pGenerator::visit_inlineHtml(AST::inlineHtml* n) {
 
-    ArrayType* stringLiteralType = ArrayType::get(IntegerType::get(8), n->getStringVal().size()+1);
-
-    GlobalVariable* gvar_array__str = new GlobalVariable(
-    /*Type=*/stringLiteralType,
-    /*isConstant=*/true,
-    /*Linkage=*/GlobalValue::InternalLinkage,
-    /*Initializer=*/0, // has initializer, specified below
-    /*Name=*/".str",
-    llvmModule_);
-
-    // Constant Definitions
-    Constant* const_array_7 = ConstantArray::get(n->getStringVal().c_str(), true);
-    std::vector<Constant*> const_ptr_8_indices;
-    Constant* const_int32_9 = Constant::getNullValue(IntegerType::get(32));
-    const_ptr_8_indices.push_back(const_int32_9);
-    const_ptr_8_indices.push_back(const_int32_9);
-    Constant* strPtr = ConstantExpr::getGetElementPtr(gvar_array__str, &const_ptr_8_indices[0], const_ptr_8_indices.size() );
- 
-    // Global Variable Definitions
-    gvar_array__str->setInitializer(const_array_7);
-
     Function *f = llvmModule_->getFunction("rphp_print_cstr");
     assert(f != NULL);
 
-    currentBlock_.CreateCall2(f, runtimeEngine_, strPtr);
+    currentBlock_.CreateCall2(f, runtimeEngine_, IRHelper_->stringConstant(n->getStringVal()));
 
 }
 
@@ -340,6 +319,21 @@ void pGenerator::visit_var(AST::var* n) {
 
 }
 
+void pGenerator::visit_functionInvoke(AST::functionInvoke* n) {
+
+    // TODO: this is hard coded to one argument. probably want this more flexible
+    visit(n->argList()[0]);
+    Value* arg1 = valueStack_.back();
+    valueStack_.pop();
+
+    Function *f = llvmModule_->getFunction("rphp_funCall1");
+    assert(f != NULL);
+    
+    Value* retval = newVarOnStack("retval");
+    Value *result = currentBlock_.CreateCall4(f, retval, runtimeEngine_, IRHelper_->stringConstant(n->name()), arg1);
+    valueStack_.push(retval);
+
+}
 
 } // namespace
 

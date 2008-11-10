@@ -80,6 +80,10 @@ extern "C" {
     rphp::pVar rphp_make_pVar_pObject(const char *className) {
         return rphp::pObjectP( new rphp::pObject(className) );
     }
+
+    rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1) {
+        return r->functionManager->invoke(name, arg1);
+    }
     
     void _make_pVar(void) {
       rphp::pVar p;
