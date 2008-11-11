@@ -23,10 +23,13 @@
 
 namespace rphp {
 
-void pExtBase::registerBuiltin(pIdentString name, pFunPointer1 f) {
-
-    runtime_->functionManager->registerBuiltin(this, name, f);
-
+template <typename fPointerType>
+pFunction* pExtBase::registerBuiltin(const pIdentString& name, const fPointerType& f) {
+    return runtime_->functionManager->registerBuiltin(this, name, f);
 }
+
+// template defines
+template pFunction* pExtBase::registerBuiltin<pFunPointer1>(const pIdentString& name, const pFunPointer1& f);
+template pFunction* pExtBase::registerBuiltin<pFunPointer3>(const pIdentString& name, const pFunPointer3& f);
 
 }

@@ -32,9 +32,12 @@ pFunctionManager::~pFunctionManager() {
     }
 }
 
-void pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pIdentString& funName, const pFunPointer1& f) {
+template <typename fPointerType>
+pFunction* pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pIdentString& funName, const fPointerType& fP) {
 
-    functionRegistry_[toLowerCopy(funName)] = new pFunction(sourceExt, funName, f);
+    pFunction *f = new pFunction(sourceExt, funName, fP);
+    functionRegistry_[toLowerCopy(funName)] = f;
+    return f;
 
 }
 
@@ -49,6 +52,9 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1) {
     }
 }
 
+// template defines
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer1>(const pExtBase* sourceExt, const pIdentString& funName, const pFunPointer1& fP);
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer3>(const pExtBase* sourceExt, const pIdentString& funName, const pFunPointer3& fP);
 
 }
 

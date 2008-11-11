@@ -36,6 +36,7 @@ namespace rphp {
         void extensionShutdown();
 
         pInt strlen(pVar str);
+        pVar strpos(pVar haystack, pVar needle, pVar offset);
 
     };
 

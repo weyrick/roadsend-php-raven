@@ -42,7 +42,8 @@ public:
     pFunctionManager(pRuntimeEngine *r) : runtime_(r), functionRegistry_() { }
     ~pFunctionManager();
 
-    void registerBuiltin(const pExtBase*, const pIdentString&, const pFunPointer1&);
+    template <typename fPointerType>
+    pFunction* registerBuiltin(const pExtBase*, const pIdentString&, const fPointerType&);
 
     pVar invoke(const pIdentString& funName, pVar arg1);
     

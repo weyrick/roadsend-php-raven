@@ -29,6 +29,7 @@
 #include <boost/tuple/tuple.hpp>
 
 #include <unicode/unistr.h>
+#include <vector>
 
 #include "pUString.h"
 #include "CowPtr.h"
@@ -130,6 +131,11 @@ typedef boost::tuple<const pFilenameString, const pUInt, const pUInt> pSourceSta
 
 // php function signatures
 typedef boost::function<pVar (pVar)> pFunPointer1;
+typedef boost::function<pVar (pVar, pVar)> pFunPointer2;
+typedef boost::function<pVar (pVar, pVar, pVar)> pFunPointer3;
+typedef boost::function<pVar (pVar, pVar, pVar, pVar)> pFunPointer4;
+typedef boost::function<pVar (pVar, pVar, pVar, pVar, pVar)> pFunPointer5;
+typedef boost::function<pVar (std::vector<pVar&>)> pFunPointerN;
     
 } /* namespace rphp */
 

@@ -17,6 +17,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
+
+#include "pFunction.h"
 #include "pStandardExt.h"
 
 namespace rphp {
@@ -25,7 +27,17 @@ void pStandardExt::extensionStartup() {
 
     //std::cout << "initializing standard extension" << std::endl;
 
-    registerBuiltin("strlen", boost::bind(&pStandardExt::strlen, this, _1));
+    pFunction* f;
+
+    f = registerBuiltin("strlen", (pFunPointer1)boost::bind(&pStandardExt::strlen, this, _1));
+    f->param(0)->setName("string");
+    
+    f = registerBuiltin("strpos", (pFunPointer3)boost::bind(&pStandardExt::strpos, this, _1, _2, _3));
+    f->setRequiredArity(2);
+    f->param(0)->setName("haystack");
+    f->param(1)->setName("needle");
+    f->param(2)->setName("offset");
+    f->param(2)->setDefault(0);
 
 }
 
@@ -40,5 +52,12 @@ void pStandardExt::extensionShutdown() {
 pInt pStandardExt::strlen(pVar v) {
     return (pInt)v.convertToBString().length();
 }
+
+pVar pStandardExt::strpos(pVar haystack, pVar needle, pVar offset) {
+
+    return pNull;
+
+}
+
 
 }

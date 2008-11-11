@@ -28,6 +28,7 @@
 namespace rphp {
 
 class pRuntimeEngine;
+class pFunction;
 
 class pExtBase {
 
@@ -35,8 +36,9 @@ protected:
     pIdentString extName_;
     pRuntimeEngine* runtime_;
 
-    void registerBuiltin(pIdentString name, pFunPointer1 f);
-
+    template <typename fPointerType>
+    pFunction* registerBuiltin(const pIdentString& name, const fPointerType& f);
+    
 public:
     pExtBase(pRuntimeEngine *r, pIdentString eName) : runtime_(r), extName_(eName) { }
 
