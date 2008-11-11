@@ -154,7 +154,7 @@ void pStandAloneTarget::execute(void) {
     std::vector<const char*>::const_iterator I = Args.begin(), E = Args.end();
     for (; I != E; ++I)
         if (*I)
-        cout << "'" << *I << "'" << " ";
+        std::cout << "'" << *I << "'" << " ";
     std::cout << "\n" << std::flush;
 
     std::string errMsg;

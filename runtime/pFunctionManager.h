@@ -46,6 +46,7 @@ public:
     pFunction* registerBuiltin(const pExtBase*, const pIdentString&, const fPointerType&);
 
     pVar invoke(const pIdentString& funName, pVar arg1);
+    pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3);
     
 };
 

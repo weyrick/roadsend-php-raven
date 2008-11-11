@@ -16,10 +16,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
+#include <boost/algorithm/string.hpp>
+#include <boost/range/iterator_range.hpp>
+
 #include <iostream>
 
 #include "pFunction.h"
 #include "pStandardExt.h"
+
+using namespace boost;
+using namespace boost::algorithm;
 
 namespace rphp {
 
@@ -29,10 +35,10 @@ void pStandardExt::extensionStartup() {
 
     pFunction* f;
 
-    f = registerBuiltin("strlen", (pFunPointer1)boost::bind(&pStandardExt::strlen, this, _1));
+    f = registerBuiltin("strlen", (pFunPointer1)bind(&pStandardExt::strlen, this, _1));
     f->param(0)->setName("string");
     
-    f = registerBuiltin("strpos", (pFunPointer3)boost::bind(&pStandardExt::strpos, this, _1, _2, _3));
+    f = registerBuiltin("strpos", (pFunPointer3)bind(&pStandardExt::strpos, this, _1, _2, _3));
     f->setRequiredArity(2);
     f->param(0)->setName("haystack");
     f->param(1)->setName("needle");
@@ -53,9 +59,21 @@ pInt pStandardExt::strlen(pVar v) {
     return (pInt)v.convertToBString().length();
 }
 
-pVar pStandardExt::strpos(pVar haystack, pVar needle, pVar offset) {
+pVar pStandardExt::strpos(pVar haystackV, pVar needleV, pVar offsetV) {
 
-    return pNull;
+    pBString haystack = haystackV.convertToBString();
+    pBString needle = needleV.convertToBString();
+    pInt offset = offsetV.convertToInt();
+
+    // TODO: use offset
+
+    iterator_range<pBString::iterator> result = find_first(haystack, needle);
+    if (result.begin() == haystack.end()) {
+        return pNull;
+    }
+    else {
+        return (pInt)(result.begin() - haystack.begin());
+    }
 
 }
 

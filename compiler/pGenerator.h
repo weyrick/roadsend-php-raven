@@ -55,7 +55,7 @@ private:
 
     std::string entryFunctionName_;
 
-    llvm::IRBuilder currentBlock_;
+    llvm::IRBuilder<> currentBlock_;
     llvm::Value* runtimeEngine_; // don't own
 
     llvm::Function* currentFunction_;

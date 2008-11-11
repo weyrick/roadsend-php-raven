@@ -52,6 +52,18 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1) {
     }
 }
 
+pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3) {
+    functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
+    // TODO this needs to throw a runtime error if the function wasn't found
+    if (function != functionRegistry_.end()) {
+        return (*function).second->invoke(arg1,arg2,arg3);
+    }
+    else {
+        return pNull;
+    }
+}
+
+
 // template defines
 template pFunction* pFunctionManager::registerBuiltin<pFunPointer1>(const pExtBase* sourceExt, const pIdentString& funName, const pFunPointer1& fP);
 template pFunction* pFunctionManager::registerBuiltin<pFunPointer3>(const pExtBase* sourceExt, const pIdentString& funName, const pFunPointer3& fP);

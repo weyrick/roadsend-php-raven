@@ -81,8 +81,18 @@ extern "C" {
         return rphp::pObjectP( new rphp::pObject(className) );
     }
 
+    /*
+    rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name) {
+        return r->functionManager->invoke(name);
+    }
+    */
+
     rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1) {
         return r->functionManager->invoke(name, arg1);
+    }
+
+    rphp::pVar rphp_funCall3(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3) {
+        return r->functionManager->invoke(name, arg1, arg2, arg3);
     }
     
     void _make_pVar(void) {

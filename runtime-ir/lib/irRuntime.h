@@ -54,7 +54,12 @@ extern "C" {
     //
 
     // function invocation
+    rphp::pVar rphp_funCall0(rphp::pRuntimeEngine* r, const char* name);
     rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
+    //rphp::pVar rphp_funCall2(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
+    rphp::pVar rphp_funCall3(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3);
+    //rphp::pVar rphp_funCall4(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
+    //rphp::pVar rphp_funCall5(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
 
     //
     

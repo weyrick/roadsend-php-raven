@@ -39,20 +39,26 @@ void pVar::convertToNull() {
 }
 
 pTriState& pVar::convertToBool() {
-    pVar_convertToBoolVisitor cv(pVarData_);
-    boost::apply_visitor(cv, pVarData_);
+    if (!isBool()) {
+        pVar_convertToBoolVisitor cv(pVarData_);
+        boost::apply_visitor(cv, pVarData_);
+    }
     return getBool();
 }
 
 pInt& pVar::convertToInt() {
-    pVar_convertToIntVisitor cv(pVarData_);
-    boost::apply_visitor(cv, pVarData_);
+    if (!isInt()) {
+        pVar_convertToIntVisitor cv(pVarData_);
+        boost::apply_visitor(cv, pVarData_);
+    }
     return getInt();
 }
 
 pBString& pVar::convertToBString() {
-    pVar_convertToBStringVisitor cv(pVarData_);
-    boost::apply_visitor(cv, pVarData_);
+    if (!isBString()) {
+        pVar_convertToBStringVisitor cv(pVarData_);
+        boost::apply_visitor(cv, pVarData_);
+    }
     return getBString();
 }
 

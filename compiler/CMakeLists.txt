@@ -81,6 +81,7 @@ set(EVAL_SRC_FILES
   pLibTargets.cpp
   ${RPHP_LLVM_DEP_FILES}
   ${LLVM_LIBS_INTERPRETER_OBJECTS}
+  ${LLVM_LIBS_NATIVE_OBJECTS}
 )
 
 add_library( rphp-eval SHARED ${EVAL_SRC_FILES} )
@@ -92,4 +93,4 @@ set_target_properties( rphp-eval
 set_source_files_properties( ${RPHP_LLVM_DEP_FILES}
                              PROPERTIES COMPILE_FLAGS ${LLVM_COMPILE_FLAGS}
                            )
-target_link_libraries( rphp-eval rphp-runtime ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${LLVM_LIBS_CORE} ${LLVM_LIBS_INTERPRETER})
+target_link_libraries( rphp-eval rphp-runtime ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${LLVM_LIBS_CORE} ${LLVM_LIBS_INTERPRETER} ${LLVM_LIBS_NATIVE})

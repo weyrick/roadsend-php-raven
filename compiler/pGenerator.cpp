@@ -207,7 +207,7 @@ void pGenerator::visit_literalString(AST::literalString* n) {
 void pGenerator::visit_literalInt(AST::literalInt* n) {
 
     // TODO: other bases besides 10
-    ConstantInt* const_int = ConstantInt::get(APInt(32,  n->getStringVal(), 10));
+    ConstantInt* const_int = ConstantInt::get(APInt(32,  n->getStringVal().data(), n->getStringVal().length(), 10));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pIntTmp");
@@ -240,7 +240,7 @@ void pGenerator::visit_literalFloat(AST::literalFloat* n) {
 
 void pGenerator::visit_literalBool(AST::literalBool* n) {
 
-    ConstantInt* cbool = ConstantInt::get(APInt(32,  (n->getBoolVal()) ? "1" : "0", 10));
+    ConstantInt* cbool = ConstantInt::get(APInt(32,  (n->getBoolVal()) ? "1" : "0", 1, 10));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pBoolTmp");
@@ -321,16 +321,47 @@ void pGenerator::visit_var(AST::var* n) {
 
 void pGenerator::visit_functionInvoke(AST::functionInvoke* n) {
 
-    // TODO: this is hard coded to one argument. probably want this more flexible
-    visit(n->argList()[0]);
-    Value* arg1 = valueStack_.back();
-    valueStack_.pop();
-
-    Function *f = llvmModule_->getFunction("rphp_funCall1");
+    Function *f;
+    switch (n->argList().size()) {
+        case 0:
+            f = llvmModule_->getFunction("rphp_funCall0");
+        break;
+        case 1:
+            f = llvmModule_->getFunction("rphp_funCall1");
+        break;
+        case 2:
+            f = llvmModule_->getFunction("rphp_funCall2");
+        break;
+        case 3:
+            f = llvmModule_->getFunction("rphp_funCall3");
+        break;
+        case 4:
+            f = llvmModule_->getFunction("rphp_funCall4");
+        break;
+        case 5:
+            f = llvmModule_->getFunction("rphp_funCall5");
+        break;
+        default:
+            f = llvmModule_->getFunction("rphp_funCallN");
+        break;
+    }
     assert(f != NULL);
-    
+
     Value* retval = newVarOnStack("retval");
-    Value *result = currentBlock_.CreateCall4(f, retval, runtimeEngine_, IRHelper_->stringConstant(n->name()), arg1);
+    std::vector<Value*> callArgList;
+    callArgList.push_back(retval);
+    callArgList.push_back(runtimeEngine_);
+    callArgList.push_back(IRHelper_->stringConstant(n->name()));
+    
+    // visit arguments in reverse order, add to call arg list as we go
+    for (AST::expressionList::reverse_iterator i = n->argList().rbegin(); i != n->argList().rend(); ++i) {
+        visit(*i);
+        callArgList.push_back(valueStack_.back());
+        valueStack_.pop();
+    }
+    
+    Value *result = currentBlock_.CreateCall(f, callArgList.begin(), callArgList.end());
+
     valueStack_.push(retval);
 
 }
