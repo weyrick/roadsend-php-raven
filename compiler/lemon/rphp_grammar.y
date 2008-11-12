@@ -61,7 +61,7 @@ using namespace rphp;
 %type T_IDENTIFIER {int}
 
 %syntax_error {  
-  std::cerr << "Syntax error, unexpected: '" << *TOKEN << "'" << std::endl;
+  pMod->parseError(TOKEN);
 }   
 %stack_overflow {  
   std::cerr << "Parser stack overflow" << std::endl;

@@ -50,21 +50,7 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
     for (lexer::tokIteratorType iter = lexer.tokBegin(); iter != lexer.tokEnd(); ++iter)
     {
         if ((*iter).id() == 0) {
-            // we want to show the source line we are parsing, up to the error
-            // it will be lastNewline+1 up until the lastToken.end() + 1
-            sourceStringType errorLine(pMod->lastNewline()+1, pMod->lastToken().end()+1);
-            sourceStringType errorChar(pMod->lastToken().end(), pMod->lastToken().end()+1);
-            std::cerr << errorLine << std::endl;
-            // arrow
-            std::cerr << sourceStringType((pMod->lastToken().end()+1)-(pMod->lastNewline()+1)-1,' ') << "^" << std::endl;
-            std::cerr << "parse error, unexpected: ["
-                      << errorChar
-                      << "] in "
-                      << pMod->filename()
-                      << " on line "
-                      << pMod->currentLineNum()
-                      <<  std::endl;
-            exit(-1);
+            pMod->parseError(NULL);
         }
         else {
             // matched valid token. either switch state, or pass to parser
@@ -77,7 +63,7 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
                 iter.set_state(0);
             }
             else if ((*iter).id() == T_WHITESPACE || (*iter).id() == T_INLINE_HTML) {
-                // count newlines, save last one, skip
+                // handle newlines
                 sourceIteratorType lastNL;
                 pUInt nlCnt(0);
                 // O(n) for each token
@@ -91,7 +77,7 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
                     pMod->incLineNum(nlCnt);
                     pMod->setLastNewline(lastNL);
                 }
-                // allow actually parse T_INLINE_HTML, not whitespace
+                // only actually parse T_INLINE_HTML, not whitespace
                 if ((*iter).id() == T_INLINE_HTML)
                     rphpParse(pParser, (*iter).id(), &(*iter).value(), pMod);
                 pMod->setLastToken((*iter).value());

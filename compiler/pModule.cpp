@@ -20,6 +20,7 @@
 */
 
 #include <llvm/Module.h>
+#include <iostream>
 
 #include "pModule.h"
 #include "pASTVisitors.h"
@@ -101,6 +102,45 @@ bool pModule::writeBitcode(pFilenameString filename) {
 
 std::string pModule::getEntryFunctionName() {
     return pGenSupport::mangleModuleName(filename_);
+}
+
+void pModule::parseError(sourceRangeType* r) {
+
+    // show the line the error occured on
+    // if it was a lex error, we show 1 character. if it was a parse error,
+    // we show up the length of the problem token
+    pUInt probsize;
+    if (r) {
+        probsize = (*r).end()-(*r).begin();
+    }
+    else {
+        probsize = 1;
+    }
+    sourceStringType errorLine(lastNewline()+1, lastToken().end()+probsize);
+
+    sourceStringType problem;
+    if (r) {
+        problem.append((*r).begin(), (*r).end());
+    }
+    else {
+        problem.append(lastToken().end(), lastToken().end()+1);
+    }
+
+    std::cerr << errorLine << std::endl;
+    
+    // arrow
+    std::cerr << sourceStringType((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
+    std::cerr << "parse error: unexpected '"
+                << problem
+                << "' in "
+                << filename()
+                << " on line "
+                << currentLineNum()
+                <<  std::endl;
+
+    // what now?
+    exit(-1);
+
 }
 
 } // namespace

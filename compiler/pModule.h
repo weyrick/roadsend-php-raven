@@ -87,6 +87,8 @@ public:
     void setLastToken(sourceRangeType i) { lastToken_ = i; }
     const sourceRangeType& lastToken(void) const { return lastToken_; }
 
+    void parseError(sourceRangeType* r);
+
     void dumpAST();
     void dumpIR();
 
