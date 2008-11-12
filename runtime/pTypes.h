@@ -21,6 +21,7 @@
 #ifndef RPHP_PTYPES_H_
 #define RPHP_PTYPES_H_
 
+#include <boost/cstdint.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
@@ -115,7 +116,7 @@ typedef enum {
 } pVarType;
     
 // note, pUInt is not a base PHP type (all PHP numbers are signed)
-typedef unsigned long pUInt;
+typedef boost::uint_fast32_t pUInt;
 
 // string type used for identifiers
 typedef pBString pIdentString;

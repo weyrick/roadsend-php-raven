@@ -19,47 +19,23 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PLEXER_H_
-#define RPHP_PLEXER_H_
+#ifndef RPHP_PCOMPILERTYPES_H_
+#define RPHP_PCOMPILERTYPES_H_
 
-#include <string>
-#include "pLangLexerDef.h"
+#include <boost/range/iterator_range.hpp>
 
-namespace rphp { namespace lexer {
+// import runtime types
+#include "pTypes.h"
 
-class pLexer {
+namespace rphp {
 
-private:
-    pLangTokens tokens_;
-    pLangLexer lexer_;
+// iterator type used to expose the underlying input stream
+typedef std::string sourceStringType;
+typedef std::string::iterator sourceIteratorType;
 
-    pFilenameString fileName_;
-    sourceStringType contents_;
+// iterator pair used as value for matched tokens
+typedef boost::iterator_range<sourceIteratorType> sourceRangeType;
 
-    sourceIteratorType sourceBegin_;
-    sourceIteratorType sourceEnd_;
+} // namespace
 
-public:
-
-    typedef tokIteratorType iterator_type;
-
-    pLexer(std::string);
-
-    tokIteratorType tokBegin(void);
-    tokIteratorType tokEnd(void);
-
-    const sourceIteratorType sourceBegin(void) const;
-    const sourceIteratorType sourceEnd(void) const;
-
-    void dumpTokens(void);
-    const char* getTokenDescription(const std::size_t t) const;
-
-    pLangTokens& getTokens(void) {
-        return tokens_;
-    }
-
-};
-
-} } // namespace
-
-#endif /* RPHP_PLEXER_H_ */
+#endif /* RPHP_PCOMPILERTYPES_H_ */

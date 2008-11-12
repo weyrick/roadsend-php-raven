@@ -30,7 +30,7 @@
 namespace rphp { namespace lexer {
 
 
-pLexer::pLexer(std::string fName): tokens_(), lexer_(tokens_), fileName_(fName) {
+pLexer::pLexer(pFilenameString fName): tokens_(), lexer_(tokens_), fileName_(fName) {
 
     std::ifstream instream(fileName_.c_str());
     if (!instream.is_open()) {
@@ -46,12 +46,20 @@ pLexer::pLexer(std::string fName): tokens_(), lexer_(tokens_), fileName_(fName) 
     
 }
 
-tokIteratorType pLexer::begin(void) {
+tokIteratorType pLexer::tokBegin(void) {
     return lexer_.begin(sourceBegin_, sourceEnd_);
 }
 
-tokIteratorType pLexer::end(void) {
+tokIteratorType pLexer::tokEnd(void) {
     return lexer_.end();
+}
+
+const sourceIteratorType pLexer::sourceBegin(void) const {
+    return sourceBegin_;
+}
+
+const sourceIteratorType pLexer::sourceEnd(void) const {
+    return sourceEnd_;
 }
 
 void pLexer::dumpTokens(void) {
@@ -59,7 +67,7 @@ void pLexer::dumpTokens(void) {
     std::string tokID;
     std::stringstream val;
 
-    for (tokIteratorType iter = begin(); iter != end(); ++iter)
+    for (tokIteratorType iter = tokBegin(); iter != tokEnd(); ++iter)
     {
         if ((*iter).id() == 0) {
             // no match

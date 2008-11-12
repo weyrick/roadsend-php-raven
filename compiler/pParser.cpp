@@ -27,7 +27,7 @@
 
 /* generated rphp_grammar parser interface */
 void* rphpParseAlloc(void *(*)(size_t));
-void  rphpParse(void *, int, rphp::lexer::tokenPairType*, rphp::pModule*);
+void  rphpParse(void *, int, rphp::sourceRangeType*, rphp::pModule*);
 void  rphpParseFree(void *, void (*)(void*));
 void  rphpParseTrace(FILE *, char *);
 
@@ -42,10 +42,28 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
     // DEBUG
     //rphpParseTrace(stderr, "trace: ");
 
-    for (lexer::tokIteratorType iter = lexer.begin(); iter != lexer.end(); ++iter)
+    // start at begining of source file
+    pMod->incLineNum(); // line 1
+    pMod->setLastToken(sourceRangeType(lexer.sourceBegin(),lexer.sourceBegin()));
+    pMod->setLastNewline(lexer.sourceBegin()); 
+
+    for (lexer::tokIteratorType iter = lexer.tokBegin(); iter != lexer.tokEnd(); ++iter)
     {
         if ((*iter).id() == 0) {
-            std::cerr << "lexical scan error, unexpected: [" << (*iter).value() << "]" << std::endl;
+            // we want to show the source line we are parsing, up to the error
+            // it will be lastNewline+1 up until the lastToken.end() + 1
+            sourceStringType errorLine(pMod->lastNewline()+1, pMod->lastToken().end()+1);
+            sourceStringType errorChar(pMod->lastToken().end(), pMod->lastToken().end()+1);
+            std::cerr << errorLine << std::endl;
+            // arrow
+            std::cerr << sourceStringType((pMod->lastToken().end()+1)-(pMod->lastNewline()+1)-1,' ') << "^" << std::endl;
+            std::cerr << "parse error, unexpected: ["
+                      << errorChar
+                      << "] in "
+                      << pMod->filename()
+                      << " on line "
+                      << pMod->currentLineNum()
+                      <<  std::endl;
             exit(-1);
         }
         else {
@@ -58,12 +76,30 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
                 // go to html
                 iter.set_state(0);
             }
-            else if ((*iter).id() == T_WHITESPACE) {
-                // skip
+            else if ((*iter).id() == T_WHITESPACE || (*iter).id() == T_INLINE_HTML) {
+                // count newlines, save last one, skip
+                sourceIteratorType lastNL;
+                pUInt nlCnt(0);
+                // O(n) for each token
+                for (sourceIteratorType i = (*iter).value().begin(); i != (*iter).value().end(); ++i) {
+                    if (*i == '\n') {
+                        nlCnt++;
+                        lastNL = i;
+                    }                    
+                }
+                if (nlCnt) {
+                    pMod->incLineNum(nlCnt);
+                    pMod->setLastNewline(lastNL);
+                }
+                // allow actually parse T_INLINE_HTML, not whitespace
+                if ((*iter).id() == T_INLINE_HTML)
+                    rphpParse(pParser, (*iter).id(), &(*iter).value(), pMod);
+                pMod->setLastToken((*iter).value());
             }
             else {
                 // parse
                 rphpParse(pParser, (*iter).id(), &(*iter).value(), pMod);
+                pMod->setLastToken((*iter).value());
             }
         }
     }

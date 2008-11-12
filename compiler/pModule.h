@@ -24,6 +24,8 @@
 
 #include <vector>
 
+#include "pCompilerTypes.h"
+
 namespace llvm {
     class Module;
 }
@@ -42,30 +44,48 @@ public:
     typedef std::vector<AST::stmt*> astType;
 
 private:
-    std::string fileName;
-    astType ast;
-    llvm::Module* llvmModule;
-    bool llvmModuleOwner;
+    pFilenameString filename_;
+    astType ast_;
+    llvm::Module* llvmModule_;
+    bool llvmModuleOwner_;
     bool defaultUnicode_;
 
+    // error reporting
+    pUInt currentLineNum_;
+    sourceIteratorType lastNewline_;
+    sourceRangeType lastToken_;
+
 public:
-    pModule(std::string name, bool dUnicode = false);
+    pModule(pFilenameString name, bool dUnicode = false);
     ~pModule();
 
-    astType& getAST() { return ast; }
-    llvm::Module* getLLVMModule() { return llvmModule; }
+    astType& getAST() { return ast_; }
+    llvm::Module* getLLVMModule() { return llvmModule_; }
 
     std::string getEntryFunctionName();
 
+    const pFilenameString& filename() { return filename_; }
+
     void applyVisitor(AST::baseVisitor* v);
     bool lowerToIR(pCompileTarget* target);
-    bool writeBitcode(std::string fileName);
-    void setLLVMModuleOwnership(bool v) { llvmModuleOwner = v; }
+    bool writeBitcode(pFilenameString filename);
+    void setLLVMModuleOwnership(bool v) { llvmModuleOwner_ = v; }
 
+    // during parse
     bool defaultUnicode(void) const { return defaultUnicode_; }
     // XXX this is temporary. called from the parser for now, so
     // that it's not hard coded
     const char* encoding(void) const { return "UTF-16"; }
+
+    pUInt currentLineNum() const { return currentLineNum_; }
+    void incLineNum(void) { currentLineNum_++; }
+    void incLineNum(pUInt i) { currentLineNum_ +=i; }
+
+    void setLastNewline(sourceIteratorType i) { lastNewline_ = i; }
+    const sourceIteratorType& lastNewline(void) const { return lastNewline_; }
+
+    void setLastToken(sourceRangeType i) { lastToken_ = i; }
+    const sourceRangeType& lastToken(void) const { return lastToken_; }
 
     void dumpAST();
     void dumpIR();

@@ -21,8 +21,6 @@
 #ifndef RPHP_PVAR_H_
 #define RPHP_PVAR_H_
 
-#include <boost/cstdint.hpp>
-
 #include <iostream>
 #include "pTypes.h"
 

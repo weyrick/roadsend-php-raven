@@ -29,6 +29,7 @@
 #include <boost/spirit/include/lex_lexer_lexertl.hpp>
 #include <string>
 
+#include "pCompilerTypes.h"
 #include "rphp_grammar.h"
 
 namespace rphp { namespace lexer {
@@ -43,6 +44,8 @@ struct rphpLangTokens : lexer_def<Lexer>
     void def (Self& self)
     {
 
+        // macros
+        //void add_pattern (char_type const* state, string_type const& name, string_type const& patterndef)
 
         // HTML (default) state tokens
         self
@@ -78,16 +81,9 @@ struct rphpLangTokens : lexer_def<Lexer>
 
 };
 
-// iterator type used to expose the underlying input stream
-// TODO: parameterize this for wstring
-typedef std::string::iterator sourceIteratorType;
-
 // token type. this should list all types used as return values in the
 // token lexer definition
 typedef lexertl_token<sourceIteratorType> languageTokenType;
-
-// iterator pair used as value for matched tokens
-typedef boost::iterator_range<languageTokenType::iterator_type> tokenPairType;
 
 // Here we use the lexertl based lexer engine.
 typedef lexertl_lexer<languageTokenType> lexerEngineType;
@@ -100,7 +96,7 @@ typedef boost::spirit::lex::lexer<pLangTokens> pLangLexer;
 
 // this is the iterator type exposed by the lexer, which dereferences to
 // a token
-typedef boost::spirit::lex::lexer<pLangTokens>::iterator_type tokIteratorType;
+typedef pLangLexer::iterator_type tokIteratorType;
 
 } } // namespace
 

@@ -27,17 +27,17 @@
 #include <algorithm>
 #include <unicode/unistr.h>
 
+#include "pCompilerTypes.h"
 #include "pAST.h"
 #include "pModule.h"
-#include "pLangLexerDef.h"
 
 using namespace rphp;
 
 }  
 
 %name rphpParse
-%token_type {lexer::tokenPairType*}
-%default_type {lexer::tokenPairType*}
+%token_type {sourceRangeType*}
+%default_type {sourceRangeType*}
 %extra_argument {pModule* pMod}
 
 // these don't exist in the parser, just in the lexer

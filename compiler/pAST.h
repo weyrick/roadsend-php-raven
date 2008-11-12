@@ -24,7 +24,7 @@
 
 #include <vector>
 
-#include "pTypes.h"
+#include "pCompilerTypes.h"
 
 namespace rphp { namespace AST {
 

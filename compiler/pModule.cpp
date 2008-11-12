@@ -30,31 +30,33 @@
 
 namespace rphp {
 
-pModule::pModule(std::string name, bool dUnicode):
-    fileName(name),
-    llvmModule(NULL),
-    llvmModuleOwner(true),
-    defaultUnicode_(dUnicode)
+pModule::pModule(pFilenameString name, bool dUnicode):
+    filename_(name),
+    llvmModule_(NULL),
+    llvmModuleOwner_(true),
+    defaultUnicode_(dUnicode),
+    currentLineNum_(0),
+    lastNewline_(),
+    lastToken_()
 {
 
-    // TODO error handling
-    parser::parseSourceFile(fileName, this);
+    parser::parseSourceFile(filename_, this);
 
 }
 
 pModule::~pModule() {
     // free up statements
-    for(astType::iterator s = ast.begin(); s != ast.end(); ++s) {
+    for(astType::iterator s = ast_.begin(); s != ast_.end(); ++s) {
         delete *s;
     }
     // only if codegen was performed, and we are still the owner
     // we aren't the owner if the llvmModule was executed in the JIT, for example
-    if (llvmModuleOwner)
-        delete llvmModule;
+    if (llvmModuleOwner_)
+        delete llvmModule_;
 }
 
 void pModule::applyVisitor(AST::baseVisitor* v) {
-    for(astType::iterator s = ast.begin(); s != ast.end(); ++s) {
+    for(astType::iterator s = ast_.begin(); s != ast_.end(); ++s) {
         v->visit(*s);
     }
 }
@@ -68,9 +70,9 @@ void pModule::dumpAST() {
 
 void pModule::dumpIR() {
 
-    pCompileTarget* target = new pCompileTarget(fileName, "/");
+    pCompileTarget* target = new pCompileTarget(filename_, "/");
     if (lowerToIR(target))
-        llvmModule->dump();
+        llvmModule_->dump();
     delete target;
 
 }
@@ -79,26 +81,26 @@ void pModule::dumpIR() {
 bool pModule::lowerToIR(pCompileTarget* target) {
 
     assert(target != NULL);
-    assert(llvmModule == NULL);
+    assert(llvmModule_ == NULL);
 
-    llvmModule = new llvm::Module(fileName);
-    pGenerator codeGen(llvmModule, target);
+    llvmModule_ = new llvm::Module(filename_);
+    pGenerator codeGen(llvmModule_, target);
     applyVisitor(&codeGen);
     codeGen.finalize();
 
-    //bool broken = verifyModule(llvmModule, ReturnStatusAction);
+    //bool broken = verifyModule(llvmModule_, ReturnStatusAction);
     return true;
 
 }
 
-bool pModule::writeBitcode(std::string fileName) {
+bool pModule::writeBitcode(pFilenameString filename) {
 
-    return pGenSupport::writeBitcode(llvmModule, fileName);
+    return pGenSupport::writeBitcode(llvmModule_, filename);
 
 }
 
 std::string pModule::getEntryFunctionName() {
-    return pGenSupport::mangleModuleName(fileName);
+    return pGenSupport::mangleModuleName(filename_);
 }
 
 } // namespace
