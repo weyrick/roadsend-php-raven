@@ -152,6 +152,18 @@ void pDriver::dumpTokens(string fileName) {
 
 }
 
+// preprocess the source file, dump to stdout
+void pDriver::dumpPre(string fileName) {
+
+    lexer::pLexer l(fileName);
+    bool success = l.preprocess();
+    std::cout << l.contents();
+    if (!success) {
+        std::cout << "preprocess failed due to lex error" << std::endl;
+    }
+
+}
+
 // dump the parse tree from the given source file
 void pDriver::dumpAST(string fileName) {
 

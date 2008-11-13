@@ -72,9 +72,35 @@ struct rphpLangTokens : lexer_def<Lexer>
             | token_def<>("[0-9]+", T_LNUMBER)
             | token_def<>("([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)", T_DNUMBER)
             | token_def<>("[ \\t\\n]+", T_WHITESPACE)
-            | token_def<>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/" /* multiline comment */)
-            | token_def<>("\\/\\/.*$" /* single line comment */)
-            | token_def<>("[bu]*[\"][^\"]*[\"]", T_CONSTANT_ENCAPSED_STRING)
+            | token_def<>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_MULTILINE_COMMENT)
+            | token_def<>("\\/\\/.*$", T_SINGLELINE_COMMENT)
+            | token_def<>("[bu]*[\"][^\"]*[\"]", T_DQ_STRING)
+            | token_def<>("[bu]*[\'][^\']*[\']", T_SQ_STRING)
+            ;
+
+    }
+
+};
+
+#define T_DQ_DONE        0
+#define T_DQ_DQ          1
+#define T_DQ_NEWLINE     2
+#define T_DQ_PASSTHROUGH 3
+
+template <typename Lexer>
+struct rphpDQTokens : lexer_def<Lexer>
+{
+
+    template <typename Self>
+    void def (Self& self)
+    {
+
+
+        self
+            = token_def<>("\\\\n", T_DQ_NEWLINE)
+            | token_def<>('"', T_DQ_DQ)
+            // FIXME: this is inefficient. does lexertl have an "unmatched"?
+            | token_def<>(".{1}", T_DQ_PASSTHROUGH)
             ;
 
     }
@@ -85,14 +111,18 @@ struct rphpLangTokens : lexer_def<Lexer>
 // token lexer definition
 typedef lexertl_token<sourceIteratorType> languageTokenType;
 
-// Here we use the lexertl based lexer engine.
+// use the lexertl based lexer engine.
 typedef lexertl_lexer<languageTokenType> lexerEngineType;
 
-// specialize the tokens with this engine
+// specialize the grammar tokens with this engine
 typedef rphpLangTokens<lexerEngineType> pLangTokens;
 
-// actual lexer type
+// specialize the double quote tokens
+typedef rphpDQTokens<lexerEngineType> pPreprocessTokens;
+
+// actual lexer types
 typedef boost::spirit::lex::lexer<pLangTokens> pLangLexer;
+typedef boost::spirit::lex::lexer<pPreprocessTokens> pPreprocessLexer;
 
 // this is the iterator type exposed by the lexer, which dereferences to
 // a token

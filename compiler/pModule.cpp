@@ -110,26 +110,29 @@ void pModule::parseError(sourceRangeType* r) {
     // if it was a lex error, we show 1 character. if it was a parse error,
     // we show up the length of the problem token
     pUInt probsize;
-    if (r) {
-        probsize = (*r).end()-(*r).begin();
-    }
-    else {
-        probsize = 1;
-    }
-    sourceStringType errorLine(lastNewline()+1, lastToken().end()+probsize);
-
     sourceStringType problem;
     if (r) {
+        probsize = (*r).end()-(*r).begin();
         problem.append((*r).begin(), (*r).end());
     }
     else {
+        probsize = 1;
         problem.append(lastToken().end(), lastToken().end()+1);
     }
 
-    std::cerr << errorLine << std::endl;
-    
-    // arrow
-    std::cerr << sourceStringType((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
+    sourceIteratorType eLineStart(lastNewline()+1);
+    sourceIteratorType eLineStop(lastToken().end()+probsize);
+    sourceStringType errorLine;
+    if (eLineStop > eLineStart)
+        errorLine.append(eLineStart, eLineStop);
+
+    // error line with arrow    
+    if (!errorLine.empty()) {
+        std::cerr << errorLine << std::endl;
+        std::cerr << sourceStringType((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
+    }
+
+    // message
     std::cerr << "parse error: unexpected '"
                 << problem
                 << "' in "

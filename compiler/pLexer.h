@@ -22,7 +22,6 @@
 #ifndef RPHP_PLEXER_H_
 #define RPHP_PLEXER_H_
 
-#include <string>
 #include "pLangLexerDef.h"
 
 namespace rphp { namespace lexer {
@@ -43,7 +42,9 @@ public:
 
     typedef tokIteratorType iterator_type;
 
-    pLexer(std::string);
+    pLexer(pFilenameString);
+
+    bool preprocess(void);
 
     tokIteratorType tokBegin(void);
     tokIteratorType tokEnd(void);
@@ -53,6 +54,8 @@ public:
 
     void dumpTokens(void);
     const char* getTokenDescription(const std::size_t t) const;
+
+    const sourceStringType& contents(void) const { return contents_; }
 
     pLangTokens& getTokens(void) {
         return tokens_;

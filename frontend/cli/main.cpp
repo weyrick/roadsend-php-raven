@@ -27,6 +27,7 @@ int main( int argc, char* argv[] )
     cl::opt<bool> dumpToks ("dump-toks", cl::desc("Dump tokens from lexer"));
     cl::opt<bool> dumpIR ("dump-ir", cl::desc("Dump IR "));
     cl::opt<bool> dumpAST ("dump-ast", cl::desc("Dump AST"));
+    cl::opt<bool> dumpPre ("dump-pre", cl::desc("Preprocess the source file and dump it to stdout"));
     cl::opt<bool> iBC ("i", cl::desc("Interpret bytecode"));
     cl::opt<bool> iSF ("f", cl::desc("Execute source file immediately"));
 
@@ -72,6 +73,9 @@ int main( int argc, char* argv[] )
     }
     else if (dumpIR) {
         driver.dumpIR(inputFile);
+    }
+    else if (dumpPre) {
+        driver.dumpPre(inputFile);
     }
     else {
         // default: compile and link single php script to native binary

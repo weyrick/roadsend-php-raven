@@ -37,6 +37,9 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
 
     lexer::pLexer lexer(fileName);
 
+    // prepare source buffer for main parse
+    lexer.preprocess();
+
     void* pParser = rphpParseAlloc(malloc);
 
     // DEBUG
@@ -47,22 +50,27 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
     pMod->setLastToken(sourceRangeType(lexer.sourceBegin(),lexer.sourceBegin()));
     pMod->setLastNewline(lexer.sourceBegin()); 
 
+    pUInt curID = 0;
     for (lexer::tokIteratorType iter = lexer.tokBegin(); iter != lexer.tokEnd(); ++iter)
     {
-        if ((*iter).id() == 0) {
+        curID = (*iter).id();
+        if (curID == 0) {
             pMod->parseError(NULL);
         }
         else {
             // matched valid token. either switch state, or pass to parser
-            if ((*iter).id() == T_OPEN_TAG) {
+            if (curID == T_OPEN_TAG) {
                 // go to php
                 iter.set_state(1);
             }
-            else if ((*iter).id() == T_CLOSE_TAG) {
+            else if (curID == T_CLOSE_TAG) {
                 // go to html
                 iter.set_state(0);
             }
-            else if ((*iter).id() == T_WHITESPACE || (*iter).id() == T_INLINE_HTML) {
+            else if (curID == T_WHITESPACE ||
+                     curID == T_INLINE_HTML ||
+                     curID == T_MULTILINE_COMMENT ||
+                     curID == T_SINGLELINE_COMMENT) {
                 // handle newlines
                 sourceIteratorType lastNL;
                 pUInt nlCnt(0);
@@ -78,13 +86,13 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
                     pMod->setLastNewline(lastNL);
                 }
                 // only actually parse T_INLINE_HTML, not whitespace
-                if ((*iter).id() == T_INLINE_HTML)
-                    rphpParse(pParser, (*iter).id(), &(*iter).value(), pMod);
+                if (curID == T_INLINE_HTML)
+                    rphpParse(pParser, curID, &(*iter).value(), pMod);
                 pMod->setLastToken((*iter).value());
             }
             else {
                 // parse
-                rphpParse(pParser, (*iter).id(), &(*iter).value(), pMod);
+                rphpParse(pParser, curID, &(*iter).value(), pMod);
                 pMod->setLastToken((*iter).value());
             }
         }

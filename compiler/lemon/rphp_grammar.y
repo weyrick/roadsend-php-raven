@@ -49,6 +49,8 @@ using namespace rphp;
 %type T_LEFTCURLY {int}
 %type T_RIGHTCURLY {int}
 %type T_COMMA {int}
+%type T_SINGLELINE_COMMENT {int}
+%type T_MULTILINE_COMMENT {int}
 
 // tokens
 %type T_INLINE_HTML {int}
@@ -56,6 +58,7 @@ using namespace rphp;
 %type T_WHILE {int}
 %type T_ELSE {int}
 %type T_ASSIGN {int}
+%type T_DQ_STRING {int}
 
 // xxx temp, these are real nodes
 %type T_IDENTIFIER {int}
@@ -102,8 +105,10 @@ expr(A) ::= functionInvoke(B). { A = B; }
 /** LITERALS **/
 %type literal {AST::literalExpr*}
 
-// literal string, double quotes
-literal(A) ::= T_CONSTANT_ENCAPSED_STRING(B).
+// literal string
+// note, this assumes the preprocessor has been run, and thus we
+// only need to handle single quoted strings
+literal(A) ::= T_SQ_STRING(B).
 {
   // binary specifier?
   bool doUnicode = pMod->defaultUnicode();
