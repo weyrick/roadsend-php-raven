@@ -33,29 +33,29 @@ private:
     pLangLexer lexer_;
 
     pFilenameString fileName_;
-    sourceStringType contents_;
+    pSourceString contents_;
 
-    sourceIteratorType sourceBegin_;
-    sourceIteratorType sourceEnd_;
+    pSourceCharIterator sourceBegin_;
+    pSourceCharIterator sourceEnd_;
 
 public:
 
-    typedef tokIteratorType iterator_type;
+    typedef pTokenIterator iterator_type;
 
     pLexer(pFilenameString);
 
     bool preprocess(void);
 
-    tokIteratorType tokBegin(void);
-    tokIteratorType tokEnd(void);
+    pTokenIterator tokBegin(void);
+    pTokenIterator tokEnd(void);
 
-    const sourceIteratorType sourceBegin(void) const;
-    const sourceIteratorType sourceEnd(void) const;
+    const pSourceCharIterator sourceBegin(void) const;
+    const pSourceCharIterator sourceEnd(void) const;
 
     void dumpTokens(void);
     const char* getTokenDescription(const std::size_t t) const;
 
-    const sourceStringType& contents(void) const { return contents_; }
+    const pSourceString& contents(void) const { return contents_; }
 
     pLangTokens& getTokens(void) {
         return tokens_;

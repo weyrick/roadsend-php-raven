@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "pCompilerTypes.h"
+#include "pAST.h"
 
 namespace llvm {
     class Module;
@@ -40,26 +41,24 @@ namespace AST {
 class pCompileTarget;
 
 class pModule {
-public:
-    typedef std::vector<AST::stmt*> astType;
 
 private:
     pFilenameString filename_;
-    astType ast_;
+    AST::statementList ast_;
     llvm::Module* llvmModule_;
     bool llvmModuleOwner_;
     bool defaultUnicode_;
 
     // error reporting
     pUInt currentLineNum_;
-    sourceIteratorType lastNewline_;
-    sourceRangeType lastToken_;
+    pSourceCharIterator lastNewline_;
+    pSourceRange lastToken_;
 
 public:
     pModule(pFilenameString name, bool dUnicode = false);
     ~pModule();
 
-    astType& getAST() { return ast_; }
+    AST::statementList& getAST() { return ast_; }
     llvm::Module* getLLVMModule() { return llvmModule_; }
 
     std::string getEntryFunctionName();
@@ -81,13 +80,13 @@ public:
     void incLineNum(void) { currentLineNum_++; }
     void incLineNum(pUInt i) { currentLineNum_ +=i; }
 
-    void setLastNewline(sourceIteratorType i) { lastNewline_ = i; }
-    const sourceIteratorType& lastNewline(void) const { return lastNewline_; }
+    void setLastNewline(pSourceCharIterator i) { lastNewline_ = i; }
+    const pSourceCharIterator& lastNewline(void) const { return lastNewline_; }
 
-    void setLastToken(sourceRangeType i) { lastToken_ = i; }
-    const sourceRangeType& lastToken(void) const { return lastToken_; }
+    void setLastToken(pSourceRange i) { lastToken_ = i; }
+    const pSourceRange& lastToken(void) const { return lastToken_; }
 
-    void parseError(sourceRangeType* r);
+    void parseError(pSourceRange* r);
 
     void dumpAST();
     void dumpIR();

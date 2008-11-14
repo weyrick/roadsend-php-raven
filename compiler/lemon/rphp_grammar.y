@@ -36,8 +36,8 @@ using namespace rphp;
 }  
 
 %name rphpParse
-%token_type {sourceRangeType*}
-%default_type {sourceRangeType*}
+%token_type {pSourceRange*}
+%default_type {pSourceRange*}
 %extra_argument {pModule* pMod}
 
 // these don't exist in the parser, just in the lexer

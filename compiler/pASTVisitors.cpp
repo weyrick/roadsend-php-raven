@@ -25,18 +25,18 @@
 
 namespace rphp { namespace AST {
 
-baseVisitor::dispatchFunType baseVisitor::dispatchTable_[] = {
+baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
     // NOTE: requires same order as nodeKind enum in pAST.h
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_echoStmt),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_inlineHtml),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalString),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalInt),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalFloat),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalNull),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_literalBool),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_assignment),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_var),
-    reinterpret_cast<dispatchFunType>(&baseVisitor::visit_functionInvoke)
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_echoStmt),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_inlineHtml),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalString),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalInt),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalFloat),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalNull),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalBool),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_assignment),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_var),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionInvoke)
 };
 
 

@@ -28,8 +28,8 @@ namespace rphp { namespace AST {
 
 class baseVisitor {
 private:
-    typedef void (baseVisitor::*dispatchFunType)(stmt *);
-    static dispatchFunType dispatchTable_[];
+    typedef void (baseVisitor::*dispatchFunction)(stmt *);
+    static dispatchFunction dispatchTable_[];
 
 public:
     virtual void visit(stmt*);

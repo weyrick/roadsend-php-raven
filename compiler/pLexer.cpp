@@ -38,8 +38,8 @@ pLexer::pLexer(pFilenameString fName): tokens_(), lexer_(tokens_), fileName_(fNa
         exit(-1);
     }
     instream.unsetf(std::ios::skipws);
-    contents_ =  sourceStringType(std::istreambuf_iterator<sourceStringType::value_type>(instream.rdbuf()),
-                                  std::istreambuf_iterator<sourceStringType::value_type>());
+    contents_ =  pSourceString(std::istreambuf_iterator<pSourceString::value_type>(instream.rdbuf()),
+                               std::istreambuf_iterator<pSourceString::value_type>());
 
     sourceBegin_ = contents_.begin();
     sourceEnd_ = contents_.end();
@@ -52,7 +52,7 @@ bool pLexer::preprocess(void) {
     pPreprocessLexer preLexer(preTokens);
     bool rewrote = false;
 
-    sourceStringType buffer;
+    pSourceString buffer;
     buffer.reserve(contents_.capacity());
 
     /*
@@ -65,7 +65,7 @@ bool pLexer::preprocess(void) {
         
     */
     pUInt curID = 0;
-    for (tokIteratorType iter = tokBegin(); iter != tokEnd(); ++iter) {
+    for (pTokenIterator iter = tokBegin(); iter != tokEnd(); ++iter) {
 
         curID = (*iter).id();
         if (curID == 0) {
@@ -91,11 +91,11 @@ bool pLexer::preprocess(void) {
 
             // we now use the preprocessor lexer to find the tokens within
             // this double quoted string
-            sourceIteratorType dqStart((*iter).value().begin()),
-                               dqEnd((*iter).value().end());
-            for (tokIteratorType dqIter = preLexer.begin(dqStart, dqEnd);
-                 dqIter != preLexer.end();
-                 ++dqIter)
+            pSourceCharIterator dqStart((*iter).value().begin()),
+                                dqEnd((*iter).value().end());
+            for (pTokenIterator dqIter = preLexer.begin(dqStart, dqEnd);
+                                dqIter != preLexer.end();
+                                ++dqIter)
             {
                 // iterate over DQ tokens
                 switch((*dqIter).id()) {
@@ -103,11 +103,11 @@ bool pLexer::preprocess(void) {
                         goto endOfDQ; // omg!
                     case T_DQ_DQ:
                         // replace with single
-                        buffer.append("\'");
+                        buffer.push_back('\'');
                         break;
                     case T_DQ_NEWLINE:
                         // replace newline escape sequence with literal newline
-                        buffer.append(1, RPHP_NEWLINE);
+                        buffer.push_back(RPHP_NEWLINE);
                         break;
                     case T_DQ_PASSTHROUGH:
                     default:
@@ -145,19 +145,19 @@ bool pLexer::preprocess(void) {
     
 }
 
-tokIteratorType pLexer::tokBegin(void) {
+pTokenIterator pLexer::tokBegin(void) {
     return lexer_.begin(sourceBegin_, sourceEnd_);
 }
 
-tokIteratorType pLexer::tokEnd(void) {
+pTokenIterator pLexer::tokEnd(void) {
     return lexer_.end();
 }
 
-const sourceIteratorType pLexer::sourceBegin(void) const {
+const pSourceCharIterator pLexer::sourceBegin(void) const {
     return sourceBegin_;
 }
 
-const sourceIteratorType pLexer::sourceEnd(void) const {
+const pSourceCharIterator pLexer::sourceEnd(void) const {
     return sourceEnd_;
 }
 
@@ -167,7 +167,7 @@ void pLexer::dumpTokens(void) {
     std::string tokID;
     std::stringstream val;
 
-    for (tokIteratorType iter = tokBegin(); iter != tokEnd(); ++iter)
+    for (pTokenIterator iter = tokBegin(); iter != tokEnd(); ++iter)
     {
         if ((*iter).id() == 0) {
             // no match

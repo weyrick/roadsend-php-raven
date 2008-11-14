@@ -27,7 +27,7 @@
 
 /* generated rphp_grammar parser interface */
 void* rphpParseAlloc(void *(*)(size_t));
-void  rphpParse(void *, int, rphp::sourceRangeType*, rphp::pModule*);
+void  rphpParse(void *, int, rphp::pSourceRange*, rphp::pModule*);
 void  rphpParseFree(void *, void (*)(void*));
 void  rphpParseTrace(FILE *, char *);
 
@@ -47,11 +47,11 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
 
     // start at begining of source file
     pMod->incLineNum(); // line 1
-    pMod->setLastToken(sourceRangeType(lexer.sourceBegin(),lexer.sourceBegin()));
+    pMod->setLastToken(pSourceRange(lexer.sourceBegin(),lexer.sourceBegin()));
     pMod->setLastNewline(lexer.sourceBegin()); 
 
     pUInt curID = 0;
-    for (lexer::tokIteratorType iter = lexer.tokBegin(); iter != lexer.tokEnd(); ++iter)
+    for (lexer::pLexer::iterator_type iter = lexer.tokBegin(); iter != lexer.tokEnd(); ++iter)
     {
         curID = (*iter).id();
         if (curID == 0) {
@@ -72,10 +72,10 @@ void parseSourceFile(std::string fileName, pModule* pMod) {
                      curID == T_MULTILINE_COMMENT ||
                      curID == T_SINGLELINE_COMMENT) {
                 // handle newlines
-                sourceIteratorType lastNL;
+                pSourceCharIterator lastNL;
                 pUInt nlCnt(0);
-                // O(n) for each token
-                for (sourceIteratorType i = (*iter).value().begin(); i != (*iter).value().end(); ++i) {
+                // O(n)
+                for (pSourceCharIterator i = (*iter).value().begin(); i != (*iter).value().end(); ++i) {
                     if (*i == '\n') {
                         nlCnt++;
                         lastNL = i;

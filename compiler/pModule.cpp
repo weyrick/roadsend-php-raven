@@ -47,7 +47,7 @@ pModule::pModule(pFilenameString name, bool dUnicode):
 
 pModule::~pModule() {
     // free up statements
-    for(astType::iterator s = ast_.begin(); s != ast_.end(); ++s) {
+    for(AST::statementList::iterator s = ast_.begin(); s != ast_.end(); ++s) {
         delete *s;
     }
     // only if codegen was performed, and we are still the owner
@@ -57,7 +57,7 @@ pModule::~pModule() {
 }
 
 void pModule::applyVisitor(AST::baseVisitor* v) {
-    for(astType::iterator s = ast_.begin(); s != ast_.end(); ++s) {
+    for(AST::statementList::iterator s = ast_.begin(); s != ast_.end(); ++s) {
         v->visit(*s);
     }
 }
@@ -104,13 +104,13 @@ std::string pModule::getEntryFunctionName() {
     return pGenSupport::mangleModuleName(filename_);
 }
 
-void pModule::parseError(sourceRangeType* r) {
+void pModule::parseError(pSourceRange* r) {
 
     // show the line the error occured on
     // if it was a lex error, we show 1 character. if it was a parse error,
     // we show up the length of the problem token
     pUInt probsize;
-    sourceStringType problem;
+    pSourceString problem;
     if (r) {
         probsize = (*r).end()-(*r).begin();
         problem.append((*r).begin(), (*r).end());
@@ -120,16 +120,16 @@ void pModule::parseError(sourceRangeType* r) {
         problem.append(lastToken().end(), lastToken().end()+1);
     }
 
-    sourceIteratorType eLineStart(lastNewline()+1);
-    sourceIteratorType eLineStop(lastToken().end()+probsize);
-    sourceStringType errorLine;
+    pSourceCharIterator eLineStart(lastNewline()+1);
+    pSourceCharIterator eLineStop(lastToken().end()+probsize);
+    pSourceString errorLine;
     if (eLineStop > eLineStart)
         errorLine.append(eLineStart, eLineStop);
 
     // error line with arrow    
     if (!errorLine.empty()) {
         std::cerr << errorLine << std::endl;
-        std::cerr << sourceStringType((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
+        std::cerr << pSourceString((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
     }
 
     // message

@@ -58,6 +58,8 @@ public:
 
 };
 
+typedef std::vector<stmt*> statementList;
+
 // declaration base class
 class decl: public stmt {
 

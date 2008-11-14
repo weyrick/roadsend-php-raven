@@ -109,16 +109,16 @@ struct rphpDQTokens : lexer_def<Lexer>
 
 // token type. this should list all types used as return values in the
 // token lexer definition
-typedef lexertl_token<sourceIteratorType> languageTokenType;
+typedef lexertl_token<pSourceCharIterator> pSourceToken;
 
 // use the lexertl based lexer engine.
-typedef lexertl_lexer<languageTokenType> lexerEngineType;
+typedef lexertl_lexer<pSourceToken> pLexerEngine;
 
 // specialize the grammar tokens with this engine
-typedef rphpLangTokens<lexerEngineType> pLangTokens;
+typedef rphpLangTokens<pLexerEngine> pLangTokens;
 
 // specialize the double quote tokens
-typedef rphpDQTokens<lexerEngineType> pPreprocessTokens;
+typedef rphpDQTokens<pLexerEngine> pPreprocessTokens;
 
 // actual lexer types
 typedef boost::spirit::lex::lexer<pLangTokens> pLangLexer;
@@ -126,7 +126,7 @@ typedef boost::spirit::lex::lexer<pPreprocessTokens> pPreprocessLexer;
 
 // this is the iterator type exposed by the lexer, which dereferences to
 // a token
-typedef pLangLexer::iterator_type tokIteratorType;
+typedef pLangLexer::iterator_type pTokenIterator;
 
 } } // namespace
 

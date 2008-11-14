@@ -22,19 +22,27 @@
 #ifndef RPHP_PCOMPILERTYPES_H_
 #define RPHP_PCOMPILERTYPES_H_
 
+#include <string>
 #include <boost/range/iterator_range.hpp>
+#include <unicode/unistr.h>
+#include <unicode/schriter.h>
 
 // import runtime types
 #include "pTypes.h"
 
 namespace rphp {
 
-// iterator type used to expose the underlying input stream
-typedef std::string sourceStringType;
-typedef std::string::iterator sourceIteratorType;
+// string and iterator types used to expose the
+// underlying source input streams
+typedef std::string pSourceString;
+typedef UnicodeString pUSourceString;
+
+typedef std::string::iterator pSourceCharIterator;
+typedef StringCharacterIterator pUSourceCharIterator;
 
 // iterator pair used as value for matched tokens
-typedef boost::iterator_range<sourceIteratorType> sourceRangeType;
+typedef boost::iterator_range<pSourceCharIterator> pSourceRange;
+typedef boost::iterator_range<pUSourceCharIterator> pUSourceRange;
 
 } // namespace
 
