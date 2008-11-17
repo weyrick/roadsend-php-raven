@@ -95,6 +95,12 @@ extern "C" {
         return r->functionManager->invoke(name, arg1, arg2, arg3);
     }
     
+    rphp::pVar rphp_newCall(rphp::pRuntimeEngine* r, const char* className, rphp::pVar arg1) {
+      rphp::pVar result = rphp_make_pVar_pObject( className );
+      // invoke method call "__construct" on result
+      return result;
+    }
+
     void _make_pVar(void) {
       rphp::pVar p;
       p = 5;
