@@ -92,7 +92,7 @@ echo(A) ::= T_ECHO expr(B). { A = new AST::echoStmt(B); }
 %type inlineHTML {AST::inlineHtml*}
 inlineHTML(A) ::= T_INLINE_HTML(B).
 {
-    A = new AST::inlineHtml(std::string((*B).begin(), (*B).end()));
+    A = new AST::inlineHtml(*B);
 }
 
 /****** EXPRESSIONS *********/
@@ -111,16 +111,11 @@ expr(A) ::= functionInvoke(B). { A = B; }
 literal(A) ::= T_SQ_STRING(B).
 {
   // binary specifier?
-  bool doUnicode = pMod->defaultUnicode();
-  std::string::iterator start;
+  bool binaryString = false;
+  pSourceCharIterator start;
   if ( *(*B).begin() == 'b') {
       // binary
-      doUnicode = false;
-      start = ++(*B).begin();
-  }
-  else if ( *(*B).begin() == 'u') {
-      // unicode
-      doUnicode = true;
+      binaryString = true;
       start = ++(*B).begin();
   }
   else {
@@ -129,46 +124,37 @@ literal(A) ::= T_SQ_STRING(B).
   }
   // substring out the quotes, special case for empty string
   if (++start == (*B).end()) {
-    if (doUnicode) {
-        A = new AST::literalString(UnicodeString());
-    } else {
-        A = new AST::literalString(std::string());
-    }
+    A = new AST::literalString(binaryString);
   }
   else {
-    if (doUnicode) {
-        std::string tmp(start, --(*B).end());
-        A = new AST::literalString(UnicodeString(tmp.data(), tmp.length(), pMod->encoding()));
-    } else {
-        A = new AST::literalString(std::string(start, --(*B).end()));
-    }
+    A = new AST::literalString(pSourceRange(start, --(*B).end()), binaryString);
   }
 }
 
 // literal integers (decimal)
-literal(A) ::= T_LNUMBER(B). { A = new AST::literalInt(std::string((*B).begin(), (*B).end())); }
+literal(A) ::= T_LNUMBER(B). { A = new AST::literalInt(*B); }
 
 // literal integers (float)
-literal(A) ::= T_DNUMBER(B). { A = new AST::literalFloat(std::string((*B).begin(), (*B).end())); }
+literal(A) ::= T_DNUMBER(B). { A = new AST::literalFloat(*B); }
 
 // literal identifier: null, true, false or string
 literal(A) ::= T_IDENTIFIER(B).
 {
     // case insensitive checks
-    std::string ciTmp((*B).begin(), (*B).end());
+    pSourceString ciTmp((*B).begin(), (*B).end());
     transform(ciTmp.begin(), ciTmp.end(), ciTmp.begin(), toupper);
-    if (ciTmp == "NULL") {
+    if (ciTmp == L"NULL") {
         A = new AST::literalNull();
     }
-    else if (ciTmp == "TRUE") {
+    else if (ciTmp == L"TRUE") {
         A = new AST::literalBool(true);
     }
-    else if (ciTmp == "FALSE") {
+    else if (ciTmp == L"FALSE") {
         A = new AST::literalBool(false);
     }
     else {
         // default to normal string
-        A = new AST::literalString(std::string((*B).begin(), (*B).end()));
+        A = new AST::literalString(*B);
     }
 }
 
@@ -186,8 +172,8 @@ lval(A) ::= variable_lVal(B). { A = B; }
 %type variable_lVal {AST::var*}
 variable_lVal(A) ::= T_VARIABLE(B).
 {
-    // strip $. TODO: unicode identifiers?
-    A = new AST::var(std::string(++(*B).begin(), (*B).end()));
+    // strip $
+    A = new AST::var(pSourceRange(++(*B).begin(), (*B).end()));
 }
 
 /** ARGLIST **/
@@ -209,8 +195,8 @@ argList(A) ::= . {
 %type functionInvoke {AST::functionInvoke*}
 functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
-    A = new AST::functionInvoke(std::string((*B).begin(), (*B).end()), // f name
-                                C // expression list: arguments
-                               );
+    A = new AST::functionInvoke(*B, // f name
+                                 C  // expression list: arguments
+                                );
 }
 

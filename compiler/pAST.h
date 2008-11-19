@@ -81,38 +81,29 @@ typedef std::vector<expr*> expressionList;
 // literal expression base class
 class literalExpr: public expr {
 
-    pBString stringVal_;
+    const pSourceRange stringVal_;
 
 public:
     literalExpr(nodeKind k): expr(k), stringVal_() { }
-    literalExpr(nodeKind k, const pBString& v): expr(k), stringVal_(v) { }
+    literalExpr(nodeKind k, const pSourceRange& v): expr(k), stringVal_(v) { }
     
-    const pBString& getStringVal(void) const { return stringVal_; }
+    pSourceString getStringVal(void) const {
+        return pSourceString(stringVal_.begin(), stringVal_.end());
+    }
 
 };
 
 // NODE: literal bstring
 class literalString: public literalExpr {
 
-    UnicodeString uStringVal_;
-    bool isUnicode_;
+    bool isBinary_;
 
 public:
-    literalString(const pBString& v): literalExpr(literalStringKind, v), uStringVal_(), isUnicode_(false) { }
-    literalString(const pBString& v, nodeKind k): literalExpr(k, v), uStringVal_(), isUnicode_(false) { }
+    literalString(bool isBinary): literalExpr(literalStringKind), isBinary_(isBinary) { }
+    literalString(const pSourceRange& v, bool isBinary): literalExpr(literalStringKind, v), isBinary_(isBinary) { }
+    literalString(const pSourceRange& v, nodeKind k): literalExpr(k, v), isBinary_(false) { }
 
-    literalString(const UnicodeString& v): literalExpr(literalStringKind), uStringVal_(v), isUnicode_(true) { }
-    literalString(const UnicodeString& v, nodeKind k): literalExpr(k), uStringVal_(v), isUnicode_(true) { }
-
-    const UnicodeString& getUStringVal(void) const { return uStringVal_; }
-
-    // getTerminatedBuffer may mutate, so we do it here then return a const
-    const UChar* getUStringBuf(void) {
-        uStringVal_.getTerminatedBuffer();
-        return uStringVal_.getBuffer();
-    }
-
-    bool isUnicode(void) const { return isUnicode_; }
+    bool isBinary(void) const { return isBinary_; }
 
 };
 
@@ -120,7 +111,7 @@ public:
 class literalInt: public literalExpr {
 
 public:
-    literalInt(const pBString& v): literalExpr(literalIntKind, v) { }
+    literalInt(const pSourceRange& v): literalExpr(literalIntKind, v) { }
 
 };
 
@@ -128,7 +119,7 @@ public:
 class literalFloat: public literalExpr {
 
 public:
-    literalFloat(const pBString& v): literalExpr(literalFloatKind, v) { }
+    literalFloat(const pSourceRange& v): literalExpr(literalFloatKind, v) { }
 
 };
 
@@ -156,8 +147,7 @@ public:
 class inlineHtml: public literalString {
 
 public:
-    inlineHtml(const pBString& v): literalString(v, inlineHtmlKind) { }
-    inlineHtml(const UnicodeString& v): literalString(v, inlineHtmlKind) { }
+    inlineHtml(const pSourceRange& v): literalString(v, inlineHtmlKind) { }
 
 };
 
@@ -177,12 +167,14 @@ public:
 // NODE: var
 class var: public expr {
 
-    pIdentString name_;
+    const pSourceRange name_;
 
 public:
-    var(const pIdentString& name): expr(varKind), name_(name) { }
+    var(const pSourceRange& name): expr(varKind), name_(name) { }
 
-    const pIdentString& name(void) const { return name_; }
+    pIdentString name(void) const {
+        return pIdentString(name_.begin(), name_.end());
+    }
 
 };
 
@@ -207,11 +199,11 @@ public:
 // NODE: function invoke
 class functionInvoke: public expr {
 
-    pIdentString name_;
+    const pSourceRange name_;
     expressionList argList_;
 
 public:
-    functionInvoke(pIdentString name, expressionList* argList):
+    functionInvoke(const pSourceRange& name, expressionList* argList):
         expr(functionInvokeKind),
         name_(name),
         argList_(*argList)
@@ -226,7 +218,9 @@ public:
         }
     }
 
-    const pIdentString& name(void) { return name_; }
+    pIdentString name(void) const {
+        return pIdentString(name_.begin(), name_.end());
+    }
     expressionList& argList(void) { return argList_; }
     const expressionList& argList(void) const { return argList_; }
 

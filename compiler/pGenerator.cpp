@@ -30,10 +30,6 @@
 
 #include <llvm/Linker.h>
 
-#include <unicode/ustream.h>
-#include <unicode/ustring.h>
-#include <unicode/uchriter.h>
-
 #include "pGenerator.h"
 #include "pCompileTarget.h"
 #include "pIRHelper.h"
@@ -141,49 +137,18 @@ llvm::Value* pGenerator::newVarOnStack(const char* name) {
 
 void pGenerator::visit_literalString(AST::literalString* n) {
 
-    bool isUnicode = n->isUnicode();
-    size_t slen;
-
-    slen = (isUnicode) ? (n->getUStringVal().length()*2) :
-                          n->getStringVal().length()+1;
-
-    // global value creation
-    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(8), slen);
-    GlobalVariable* gVarStr = new GlobalVariable(
-                                    /*Type=*/byteArrayType,
-                                    /*isConstant=*/true,
-                                    /*Linkage=*/GlobalValue::InternalLinkage,
-                                    /*Initializer=*/0, // has initializer, specified below
-                                    /*Name=*/((isUnicode) ? ".ustr" : ".str"),
-                                    llvmModule_);
-
-    // constant definition
-    Constant* constArray;
+    bool isUnicode = !n->isBinary();
+    int32_t finalLen(0);
+    
+    Constant* strPtr;
     if (isUnicode) {
-        // turn UTF-16 into its bytearray representation
-        std::string ustr;
-        const UChar *urep = n->getUStringBuf();
-        UCharCharacterIterator iter(urep, u_strlen(urep));
-        for (UChar c = iter.first(); c != CharacterIterator::DONE; c = iter.next()) {
-            // big endian. we convert the other way by specifying UTF-16BE
-            // during construction of UnicodeString
-            ustr.push_back(c & 0xFF00);
-            ustr.push_back(c & 0x00FF);
-        }
-        constArray = ConstantArray::get(ustr, false /* add null */);
+        strPtr = IRHelper_->stringConstant(n->getStringVal(), finalLen);
     }
     else {
-        constArray = ConstantArray::get(n->getStringVal(), true);
+        // strip unicodeyness
+        std::string strLiteral(n->getStringVal().begin(), n->getStringVal().end());
+        strPtr = IRHelper_->stringConstant(strLiteral, finalLen);
     }
-
-    gVarStr->setInitializer(constArray);
-
-    // get pointer to global str
-    std::vector<Constant*> indices;
-    Constant* nullC = Constant::getNullValue(IntegerType::get(32));
-    indices.push_back(nullC);
-    indices.push_back(nullC);
-    Constant* strPtr = ConstantExpr::getGetElementPtr(gVarStr, &indices[0], indices.size() );
  
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack((isUnicode)?"pUStrTmp":"pBStrTmp");
@@ -193,7 +158,7 @@ void pGenerator::visit_literalString(AST::literalString* n) {
     assert(f != NULL);
 
     if (isUnicode) {
-        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(APInt(32, slen)));
+        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(APInt(32, finalLen)));
     }
     else {
         currentBlock_.CreateCall2(f, pVarTmp, strPtr);
@@ -207,7 +172,8 @@ void pGenerator::visit_literalString(AST::literalString* n) {
 void pGenerator::visit_literalInt(AST::literalInt* n) {
 
     // TODO: other bases besides 10
-    ConstantInt* const_int = ConstantInt::get(APInt(32,  n->getStringVal().data(), n->getStringVal().length(), 10));
+    std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
+    ConstantInt* const_int = ConstantInt::get(APInt(32,  numLiteral.data(), numLiteral.length(), 10));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pIntTmp");
@@ -223,7 +189,8 @@ void pGenerator::visit_literalInt(AST::literalInt* n) {
 
 void pGenerator::visit_literalFloat(AST::literalFloat* n) {
 
-    ConstantFP* const_float = ConstantFP::get(APFloat(APFloat::IEEEdouble,  n->getStringVal().c_str()));
+    std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
+    ConstantFP* const_float = ConstantFP::get(APFloat(APFloat::IEEEdouble,  numLiteral.c_str()));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pFloatTmp");
@@ -268,7 +235,8 @@ void pGenerator::visit_inlineHtml(AST::inlineHtml* n) {
     Function *f = llvmModule_->getFunction("rphp_print_cstr");
     assert(f != NULL);
 
-    currentBlock_.CreateCall2(f, runtimeEngine_, IRHelper_->stringConstant(n->getStringVal()));
+    int32_t finalLen(0);
+    currentBlock_.CreateCall2(f, runtimeEngine_, IRHelper_->stringConstant(n->getStringVal(), finalLen));
 
 }
 
@@ -351,7 +319,8 @@ void pGenerator::visit_functionInvoke(AST::functionInvoke* n) {
     std::vector<Value*> callArgList;
     callArgList.push_back(retval);
     callArgList.push_back(runtimeEngine_);
-    callArgList.push_back(IRHelper_->stringConstant(n->name()));
+    int32_t len(0);
+    callArgList.push_back(IRHelper_->stringConstant(n->name(),len));
     
     // visit arguments in reverse order, add to call arg list as we go
     for (AST::expressionList::reverse_iterator i = n->argList().rbegin(); i != n->argList().rend(); ++i) {

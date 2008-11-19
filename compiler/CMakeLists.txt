@@ -71,6 +71,7 @@ set(RPHP_LLVM_DEP_FILES
 
 set(EVAL_SRC_FILES
   ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp
+  pSourceFile.cpp
   pLexer.cpp
   pASTVisitors.cpp
   pParser.cpp

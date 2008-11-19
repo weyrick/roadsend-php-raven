@@ -145,22 +145,26 @@ bool pDriver::JITmodule(llvm::ModuleProvider* MP, std::string entryFunction) {
 }
 
 // lex and then dump tokens from the given source file
-void pDriver::dumpTokens(string fileName) {
+void pDriver::dumpTokens(string fileName, string encoding) {
 
-    lexer::pLexer l(fileName);
+    pSourceFile* source = new pSourceFile(fileName, encoding);
+    lexer::pLexer l(source);
     l.dumpTokens();
-
+    delete source;
+    
 }
 
 // preprocess the source file, dump to stdout
-void pDriver::dumpPre(string fileName) {
+void pDriver::dumpPre(string fileName, string encoding) {
 
-    lexer::pLexer l(fileName);
+    pSourceFile* source = new pSourceFile(fileName, encoding);
+    lexer::pLexer l(source);
     bool success = l.preprocess();
-    std::cout << l.contents();
+    std::wcout << l.contents();
     if (!success) {
         std::cout << "preprocess failed due to lex error" << std::endl;
     }
+    delete source;
 
 }
 

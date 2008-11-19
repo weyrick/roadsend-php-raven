@@ -23,8 +23,11 @@
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
 
+#include <unicode/schriter.h>
+#include <unicode/unistr.h>
+#include <unicode/ustring.h>
+
 #include <iostream>
-#include <string>
 
 #include "pIRHelper.h"
 
@@ -74,16 +77,18 @@ FunctionType* pIRHelper::moduleEntryFunType() {
 
 }
 
-llvm::Constant* pIRHelper::stringConstant(const std::string& s) {
+llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLen) {
 
-    // global value creation
-    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(8), s.length()+1);
+    finalLen = s.length()+1;
+
+    // global value creation    
+    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(8), finalLen);
     GlobalVariable* gVarStr = new GlobalVariable(
                                     /*Type=*/byteArrayType,
                                     /*isConstant=*/true,
                                     /*Linkage=*/GlobalValue::InternalLinkage,
                                     /*Initializer=*/0, // has initializer, specified below
-                                    /*Name=*/".ir_str",
+                                    /*Name=*/".bstr",
                                     mod_);
 
     // constant definition
@@ -100,6 +105,60 @@ llvm::Constant* pIRHelper::stringConstant(const std::string& s) {
 
 
 }
+
+llvm::Constant* pIRHelper::stringConstant(const std::wstring& s, int32_t& finalLen) {
+
+    // NOTE: icu defines U_SIZEOF_WCHAR_T, U_WCHAR_IS_UTF16 and U_WCHAR_IS_UTF32 for more portability in the future
+    // also U_IS_BIG_ENDIAN
+    // first we convert wstring to unicodestring, then get the byte representation
+    UnicodeString ucnv;
+    UChar* dest = ucnv.getBuffer(s.length());
+    int32_t newLength;
+    UErrorCode errorCode(U_ZERO_ERROR);
+    u_strFromUTF32(dest,
+                   ucnv.getCapacity(),
+                   &newLength,
+                   static_cast<const UChar32*>((void*)s.data()),
+                   s.length(),
+                   &errorCode);
+    assert(U_SUCCESS(errorCode));
+    ucnv.releaseBuffer(newLength);
+
+    // byte representation
+    std::string ustr;
+    StringCharacterIterator iter(ucnv);
+    for (UChar c = iter.first(); c != CharacterIterator::DONE; c = iter.next()) {
+        // big endian. we convert the other way by specifying UTF-16BE
+        // during construction of UnicodeString
+        ustr.push_back(c & 0xFF00);
+        ustr.push_back(c & 0x00FF);
+    }
+    finalLen = ustr.length();
+
+    // global value creation
+    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(8), finalLen);
+    GlobalVariable* gVarStr = new GlobalVariable(
+                                    /*Type=*/byteArrayType,
+                                    /*isConstant=*/true,
+                                    /*Linkage=*/GlobalValue::InternalLinkage,
+                                    /*Initializer=*/0, // has initializer, specified below
+                                    /*Name=*/".ustr",
+                                    mod_);
+
+    // constant definition
+    Constant* constArray = ConstantArray::get(ustr, false);
+    gVarStr->setInitializer(constArray);
+
+    // get pointer to global str
+    std::vector<Constant*> indices;
+    Constant* nullC = Constant::getNullValue(IntegerType::get(32));
+    indices.push_back(nullC);
+    indices.push_back(nullC);
+
+    return ConstantExpr::getGetElementPtr(gVarStr, &indices[0], indices.size() );
+
+}
+
 
 } // namespace
 

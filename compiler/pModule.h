@@ -25,6 +25,7 @@
 #include <vector>
 
 #include "pCompilerTypes.h"
+#include "pSourceFile.h"
 #include "pAST.h"
 
 namespace llvm {
@@ -43,39 +44,37 @@ class pCompileTarget;
 class pModule {
 
 private:
-    pFilenameString filename_;
+    const pSourceFile* source_;
+
+    // code generation
     AST::statementList ast_;
     llvm::Module* llvmModule_;
     bool llvmModuleOwner_;
-    bool defaultUnicode_;
 
-    // error reporting
+    // error reporting. move to parseContext struct/class/tuple?
     pUInt currentLineNum_;
     pSourceCharIterator lastNewline_;
     pSourceRange lastToken_;
 
 public:
-    pModule(pFilenameString name, bool dUnicode = false);
+    pModule(pFileNameString name, std::string encoding = "US-ASCII");
     ~pModule();
 
-    AST::statementList& getAST() { return ast_; }
-    llvm::Module* getLLVMModule() { return llvmModule_; }
-
+    // INSPECTION
     std::string getEntryFunctionName();
+    const pSourceFile* source() const { return source_; }
+    const pFileNameString& fileName() const { return source_->fileName(); }
+    const char* encoding(void) const { return source_->encoding().c_str(); }
 
-    const pFilenameString& filename() { return filename_; }
-
+    // GENERATION
+    AST::statementList& getAST() { return ast_; }
     void applyVisitor(AST::baseVisitor* v);
     bool lowerToIR(pCompileTarget* target);
-    bool writeBitcode(pFilenameString filename);
+    bool writeBitcode(pFileNameString fileName);
     void setLLVMModuleOwnership(bool v) { llvmModuleOwner_ = v; }
+    llvm::Module* getLLVMModule() { return llvmModule_; }
 
-    // during parse
-    bool defaultUnicode(void) const { return defaultUnicode_; }
-    // XXX this is temporary. called from the parser for now, so
-    // that it's not hard coded
-    const char* encoding(void) const { return "UTF-16"; }
-
+    // PARSING
     pUInt currentLineNum() const { return currentLineNum_; }
     void incLineNum(void) { currentLineNum_++; }
     void incLineNum(pUInt i) { currentLineNum_ +=i; }
@@ -88,6 +87,7 @@ public:
 
     void parseError(pSourceRange* r);
 
+    // DEBUG
     void dumpAST();
     void dumpIR();
 

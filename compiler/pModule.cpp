@@ -31,17 +31,19 @@
 
 namespace rphp {
 
-pModule::pModule(pFilenameString name, bool dUnicode):
-    filename_(name),
+pModule::pModule(pFileNameString name, std::string encoding):
+    source_(NULL),
+    ast_(),
     llvmModule_(NULL),
     llvmModuleOwner_(true),
-    defaultUnicode_(dUnicode),
     currentLineNum_(0),
     lastNewline_(),
     lastToken_()
 {
 
-    parser::parseSourceFile(filename_, this);
+    // TODO: error handling
+    source_ = new pSourceFile(name, encoding);
+    parser::parseSourceFile(this);
 
 }
 
@@ -54,6 +56,7 @@ pModule::~pModule() {
     // we aren't the owner if the llvmModule was executed in the JIT, for example
     if (llvmModuleOwner_)
         delete llvmModule_;
+    delete source_;
 }
 
 void pModule::applyVisitor(AST::baseVisitor* v) {
@@ -71,7 +74,7 @@ void pModule::dumpAST() {
 
 void pModule::dumpIR() {
 
-    pCompileTarget* target = new pCompileTarget(filename_, "/");
+    pCompileTarget* target = new pCompileTarget(source_->fileName(), "/");
     if (lowerToIR(target))
         llvmModule_->dump();
     delete target;
@@ -84,7 +87,7 @@ bool pModule::lowerToIR(pCompileTarget* target) {
     assert(target != NULL);
     assert(llvmModule_ == NULL);
 
-    llvmModule_ = new llvm::Module(filename_);
+    llvmModule_ = new llvm::Module(source_->fileName());
     pGenerator codeGen(llvmModule_, target);
     applyVisitor(&codeGen);
     codeGen.finalize();
@@ -94,14 +97,14 @@ bool pModule::lowerToIR(pCompileTarget* target) {
 
 }
 
-bool pModule::writeBitcode(pFilenameString filename) {
+bool pModule::writeBitcode(pFileNameString fileName) {
 
-    return pGenSupport::writeBitcode(llvmModule_, filename);
+    return pGenSupport::writeBitcode(llvmModule_, source_->fileName());
 
 }
 
 std::string pModule::getEntryFunctionName() {
-    return pGenSupport::mangleModuleName(filename_);
+    return pGenSupport::mangleModuleName(source_->fileName());
 }
 
 void pModule::parseError(pSourceRange* r) {
@@ -128,16 +131,16 @@ void pModule::parseError(pSourceRange* r) {
 
     // error line with arrow    
     if (!errorLine.empty()) {
-        std::cerr << errorLine << std::endl;
-        std::cerr << pSourceString((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
+        std::wcerr << errorLine << std::endl;
+        std::wcerr << pSourceString((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
     }
 
     // message
-    std::cerr << "parse error: unexpected '"
+    std::wcerr << L"parse error: unexpected '"
                 << problem
-                << "' in "
-                << filename()
-                << " on line "
+                << L"' in ";
+    std::cerr << source_->fileName();
+    std::wcerr  << L" on line "
                 << currentLineNum()
                 <<  std::endl;
 

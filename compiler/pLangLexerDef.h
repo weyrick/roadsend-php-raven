@@ -25,7 +25,6 @@
 //#define BOOST_SPIRIT_LEXERTL_DEBUG
 //#define BOOST_SPIRIT_DEBUG
 
-#include <boost/range/iterator_range.hpp>
 #include <boost/spirit/include/lex_lexer_lexertl.hpp>
 #include <string>
 
@@ -40,6 +39,8 @@ template <typename Lexer>
 struct rphpLangTokens : lexer_def<Lexer>
 {
 
+    typedef token_def<pSourceString, pSourceString::value_type> token_def;
+
     template <typename Self>
     void def (Self& self)
     {
@@ -49,33 +50,33 @@ struct rphpLangTokens : lexer_def<Lexer>
 
         // HTML (default) state tokens
         self
-            = token_def<>("<\\?|<\\?PHP|<\\?php", T_OPEN_TAG)
-            | token_def<>(".+|\\n+", T_INLINE_HTML)
+            = token_def(L"<\\?|<\\?PHP|<\\?php", T_OPEN_TAG)
+            | token_def(L".+|\\n+", T_INLINE_HTML)
             ;
 
         // PHP state tokens
-        self("PHP")
-            = token_def<>('(', T_LEFTPAREN)
-            | token_def<>(')', T_RIGHTPAREN)
-            | token_def<>('{', T_LEFTCURLY)
-            | token_def<>('}', T_RIGHTCURLY)
-            | token_def<>('=', T_ASSIGN)
-            | token_def<>(';', T_SEMI)
-            | token_def<>(',', T_COMMA)
-            | token_def<>("\\?>", T_CLOSE_TAG)
-            | token_def<>("if", T_IF)
-            | token_def<>("while", T_WHILE)
-            | token_def<>("else", T_ELSE)
-            | token_def<>("echo", T_ECHO)
-            | token_def<>("[a-zA-Z_][a-zA-Z0-9_]*", T_IDENTIFIER)
-            | token_def<>("\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE)
-            | token_def<>("[0-9]+", T_LNUMBER)
-            | token_def<>("([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)", T_DNUMBER)
-            | token_def<>("[ \\t\\n]+", T_WHITESPACE)
-            | token_def<>("\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_MULTILINE_COMMENT)
-            | token_def<>("\\/\\/.*$", T_SINGLELINE_COMMENT)
-            | token_def<>("[bu]*[\"][^\"]*[\"]", T_DQ_STRING)
-            | token_def<>("[bu]*[\'][^\']*[\']", T_SQ_STRING)
+        self(L"PHP")
+            = token_def(L'(', T_LEFTPAREN)
+            | token_def(L')', T_RIGHTPAREN)
+            | token_def(L'{', T_LEFTCURLY)
+            | token_def(L'}', T_RIGHTCURLY)
+            | token_def(L'=', T_ASSIGN)
+            | token_def(L';', T_SEMI)
+            | token_def(L',', T_COMMA)
+            | token_def(L"\\?>", T_CLOSE_TAG)
+            | token_def(L"if", T_IF)
+            | token_def(L"while", T_WHILE)
+            | token_def(L"else", T_ELSE)
+            | token_def(L"echo", T_ECHO)
+            | token_def(L"[a-zA-Z_][a-zA-Z0-9_]*", T_IDENTIFIER)
+            | token_def(L"\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE)
+            | token_def(L"[0-9]+", T_LNUMBER)
+            | token_def(L"([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)", T_DNUMBER)
+            | token_def(L"[ \\t\\n]+", T_WHITESPACE)
+            | token_def(L"\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_MULTILINE_COMMENT)
+            | token_def(L"\\/\\/.*$", T_SINGLELINE_COMMENT)
+            | token_def(L"b*[\"][^\"]*[\"]", T_DQ_STRING)
+            | token_def(L"b*[\'][^\']*[\']", T_SQ_STRING)
             ;
 
     }
@@ -91,16 +92,18 @@ template <typename Lexer>
 struct rphpDQTokens : lexer_def<Lexer>
 {
 
+    typedef token_def<pSourceString, pSourceString::value_type> token_def;
+
     template <typename Self>
     void def (Self& self)
     {
 
 
         self
-            = token_def<>("\\\\n", T_DQ_NEWLINE)
-            | token_def<>('"', T_DQ_DQ)
+            = token_def(L"\\\\n", T_DQ_NEWLINE)
+            | token_def(L'"', T_DQ_DQ)
             // FIXME: this is inefficient. does lexertl have an "unmatched"?
-            | token_def<>(".{1}", T_DQ_PASSTHROUGH)
+            | token_def(L".{1}", T_DQ_PASSTHROUGH)
             ;
 
     }

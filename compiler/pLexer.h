@@ -22,6 +22,7 @@
 #ifndef RPHP_PLEXER_H_
 #define RPHP_PLEXER_H_
 
+#include "pSourceFile.h"
 #include "pLangLexerDef.h"
 
 namespace rphp { namespace lexer {
@@ -32,7 +33,7 @@ private:
     pLangTokens tokens_;
     pLangLexer lexer_;
 
-    pFilenameString fileName_;
+    const pSourceFile* source_;
     pSourceString contents_;
 
     pSourceCharIterator sourceBegin_;
@@ -42,7 +43,7 @@ public:
 
     typedef pTokenIterator iterator_type;
 
-    pLexer(pFilenameString);
+    pLexer(const pSourceFile* s);
 
     bool preprocess(void);
 

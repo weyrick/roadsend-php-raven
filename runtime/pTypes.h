@@ -122,13 +122,13 @@ typedef boost::uint_fast32_t pUInt;
 typedef pBString pIdentString;
 
 // string type used for filenames
-typedef pBString pFilenameString;
+typedef pBString pFileNameString;
 
 // source locations: filename/linenum
-typedef boost::tuple<const pFilenameString, const pUInt> pSourceLocation;
+typedef boost::tuple<const pFileNameString, const pUInt> pSourceLocation;
 
 // source locations: filename/startlinenum/endlinenum
-typedef boost::tuple<const pFilenameString, const pUInt, const pUInt> pSourceStartEndLocation;
+typedef boost::tuple<const pFileNameString, const pUInt, const pUInt> pSourceStartEndLocation;
 
 // php function signatures
 typedef boost::function<pVar (pVar)> pFunPointer1;

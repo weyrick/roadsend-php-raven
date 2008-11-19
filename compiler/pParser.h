@@ -22,7 +22,7 @@
 #ifndef RPHP_PPARSER_H_
 #define RPHP_PPARSER_H_
 
-#include <string>
+#include "pSourceFile.h"
 
 namespace rphp {
 
@@ -30,7 +30,7 @@ class pModule;
 
 namespace parser {
 
-void parseSourceFile(std::string fileName, pModule* pMod);
+void parseSourceFile(pModule* pMod);
 
 } } // namespace
 

@@ -24,8 +24,6 @@
 
 #include <string>
 #include <boost/range/iterator_range.hpp>
-#include <unicode/unistr.h>
-#include <unicode/schriter.h>
 
 // import runtime types
 #include "pTypes.h"
@@ -34,15 +32,11 @@ namespace rphp {
 
 // string and iterator types used to expose the
 // underlying source input streams
-typedef std::string pSourceString;
-typedef UnicodeString pUSourceString;
-
-typedef std::string::iterator pSourceCharIterator;
-typedef StringCharacterIterator pUSourceCharIterator;
+typedef std::wstring pSourceString;
+typedef std::wstring::iterator pSourceCharIterator;
 
 // iterator pair used as value for matched tokens
 typedef boost::iterator_range<pSourceCharIterator> pSourceRange;
-typedef boost::iterator_range<pUSourceCharIterator> pUSourceRange;
 
 } // namespace
 

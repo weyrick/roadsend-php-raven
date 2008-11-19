@@ -33,9 +33,9 @@ void  rphpParseTrace(FILE *, char *);
 
 namespace rphp { namespace parser {
 
-void parseSourceFile(std::string fileName, pModule* pMod) {
+void parseSourceFile(pModule* pMod) {
 
-    lexer::pLexer lexer(fileName);
+    lexer::pLexer lexer(pMod->source());
 
     // prepare source buffer for main parse
     lexer.preprocess();

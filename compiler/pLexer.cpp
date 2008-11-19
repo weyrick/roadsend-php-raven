@@ -29,20 +29,15 @@
 
 namespace rphp { namespace lexer {
 
-
-pLexer::pLexer(pFilenameString fName): tokens_(), lexer_(tokens_), fileName_(fName) {
-
-    std::ifstream instream(fileName_.c_str());
-    if (!instream.is_open()) {
-        std::cerr << "Couldn't open file: " << fileName_ << std::endl;
-        exit(-1);
-    }
-    instream.unsetf(std::ios::skipws);
-    contents_ =  pSourceString(std::istreambuf_iterator<pSourceString::value_type>(instream.rdbuf()),
-                               std::istreambuf_iterator<pSourceString::value_type>());
-
-    sourceBegin_ = contents_.begin();
-    sourceEnd_ = contents_.end();
+pLexer::pLexer(const pSourceFile* s):
+    tokens_(),
+    lexer_(tokens_),
+    source_(s),
+    // TODO: does this copy, or do copy on write? source_ is const
+    contents_(source_->contents()),
+    sourceBegin_(contents_.begin()),
+    sourceEnd_ (contents_.end())
+{
     
 }
 

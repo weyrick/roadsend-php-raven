@@ -68,35 +68,41 @@ void dumpVisitor::visit_echoStmt(echoStmt* n) {
 void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
     showindent();
     std::cout << "inline HTML ";
-    if (n->isUnicode()) {
-        std::cout << "[unicode]: " << n->getUStringVal();
+    if (n->isBinary()) {
+        std::cout << "[binary]: \"";
     }
     else {
-        std::cout << "[binary]: " << n->getStringVal();
+        std::cout << "[unicode]: \"";
     }
+    std::wcout << n->getStringVal();
     std::cout << std::endl;
 }
 
 void dumpVisitor::visit_literalString(literalString* n)  {
     showindent();
     std::cout << "literal string ";
-    if (n->isUnicode()) {
-        std::cout << "[unicode]: \"" << n->getUStringVal();
+    if (n->isBinary()) {
+        std::cout << "[binary]: \"";
     }
     else {
-        std::cout << "[binary]: \"" << n->getStringVal();
+        std::cout << "[unicode]: \"";
     }
+    std::wcout << n->getStringVal();
     std::cout << "\"" << std::endl;
 }
 
 void dumpVisitor::visit_literalInt(literalInt* n)  {
     showindent();
-    std::cout << "literal int: " << n->getStringVal() << std::endl;
+    std::cout << "literal int: ";
+    std::wcout << n->getStringVal();
+    std::cout << std::endl;
 }
 
 void dumpVisitor::visit_literalFloat(literalFloat* n)  {
     showindent();
-    std::cout << "literal float: " << n->getStringVal() << std::endl;
+    std::cout << "literal float: ";
+    std::wcout << n->getStringVal();
+    std::cout << std::endl;
 }
 
 void dumpVisitor::visit_literalBool(literalBool* n)  {
@@ -142,13 +148,16 @@ void dumpVisitor::visit_assignment(assignment* n)  {
 
 void dumpVisitor::visit_var(var* n)  {
     showindent();
-    std::cout << "var: $" << n->name() << std::endl;
+    std::cout << "var: $";
+    std::cout << n->name();
+    std::cout << std::endl;
 }
 
 void dumpVisitor::visit_functionInvoke(functionInvoke* n)  {
 
     showindent();
-    std::cout << "(function invoke: " << n->name() << std::endl;
+    std::cout << "(function invoke: ";
+    std::cout << n->name() << std::endl;
 
     indent();
     showindent();

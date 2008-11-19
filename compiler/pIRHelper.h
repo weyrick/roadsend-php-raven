@@ -22,6 +22,8 @@
 #ifndef RPHP_PIRHELPER_H_
 #define RPHP_PIRHELPER_H_
 
+#include <string>
+
 namespace llvm {
     class FunctionType;
     class Type;
@@ -50,7 +52,8 @@ public:
     const llvm::Type* pVarType();
     llvm::Type* pVarPointerType();
 
-    llvm::Constant* stringConstant(const std::string& s);
+    llvm::Constant* stringConstant(const std::string& s, int32_t& finalLen);
+    llvm::Constant* stringConstant(const std::wstring& s, int32_t& finalLen);
 
 };
 

@@ -41,10 +41,10 @@ public:
     bool executeBC(std::string fileName);
     bool executeModule(pModule* pMod);
 
-    void dumpTokens(std::string fileName);
+    void dumpTokens(std::string fileName, std::string encoding="US-ASCII");
     void dumpAST(std::string fileName);
     void dumpIR(std::string fileName);
-    void dumpPre(std::string fileName);
+    void dumpPre(std::string fileName, std::string encoding="US-ASCII");
 
 };
 
