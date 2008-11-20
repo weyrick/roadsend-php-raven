@@ -23,6 +23,7 @@
 #define RPHP_PDRIVER_H_
 
 #include <string>
+#include "pCompilerTypes.h"
 
 namespace llvm {
     class ModuleProvider;
@@ -41,10 +42,10 @@ public:
     bool executeBC(std::string fileName);
     bool executeModule(pModule* pMod);
 
-    void dumpTokens(std::string fileName, std::string encoding="US-ASCII");
-    void dumpAST(std::string fileName);
-    void dumpIR(std::string fileName);
-    void dumpPre(std::string fileName, std::string encoding="US-ASCII");
+    void dumpTokens(pSourceFileDesc file);
+    void dumpAST(pSourceFileDesc file);
+    void dumpIR(pSourceFileDesc file);
+    void dumpPre(pSourceFileDesc file);
 
 };
 

@@ -57,7 +57,7 @@ private:
     pSourceRange lastToken_;
 
 public:
-    pModule(pFileNameString name, std::string encoding = "US-ASCII");
+    pModule(pSourceFileDesc file);
     ~pModule();
 
     // INSPECTION

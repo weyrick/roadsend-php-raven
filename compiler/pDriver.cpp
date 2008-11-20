@@ -145,9 +145,9 @@ bool pDriver::JITmodule(llvm::ModuleProvider* MP, std::string entryFunction) {
 }
 
 // lex and then dump tokens from the given source file
-void pDriver::dumpTokens(string fileName, string encoding) {
+void pDriver::dumpTokens(pSourceFileDesc file) {
 
-    pSourceFile* source = new pSourceFile(fileName, encoding);
+    pSourceFile* source = new pSourceFile(file);
     lexer::pLexer l(source);
     l.dumpTokens();
     delete source;
@@ -155,9 +155,9 @@ void pDriver::dumpTokens(string fileName, string encoding) {
 }
 
 // preprocess the source file, dump to stdout
-void pDriver::dumpPre(string fileName, string encoding) {
+void pDriver::dumpPre(pSourceFileDesc file) {
 
-    pSourceFile* source = new pSourceFile(fileName, encoding);
+    pSourceFile* source = new pSourceFile(file);
     lexer::pLexer l(source);
     bool success = l.preprocess();
     std::wcout << l.contents();
@@ -169,17 +169,17 @@ void pDriver::dumpPre(string fileName, string encoding) {
 }
 
 // dump the parse tree from the given source file
-void pDriver::dumpAST(string fileName) {
+void pDriver::dumpAST(pSourceFileDesc file) {
 
-    pModule m(fileName);
+    pModule m(file);
     m.dumpAST();
 
 }
 
 // dump the generated IR code from the given source file
-void pDriver::dumpIR(string fileName) {
+void pDriver::dumpIR(pSourceFileDesc file) {
 
-    pModule m(fileName);
+    pModule m(file);
     m.dumpIR();
 
 }

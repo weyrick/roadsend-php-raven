@@ -33,14 +33,13 @@
 
 namespace rphp { 
 
-pSourceFile::pSourceFile(pFileNameString fName, std::string encoding):
-    fileName_(fName),
-    encoding_(encoding)
+pSourceFile::pSourceFile(pSourceFileDesc file):
+    file_(file)
 {
 
-    std::ifstream instream(fileName_.c_str());
+    std::ifstream instream(file_.get<0>().c_str());
     if (!instream.is_open()) {
-        std::cerr << "Couldn't open file: " << fileName_ << std::endl;
+        std::cerr << "Couldn't open file: " << file_.get<0>() << std::endl;
         exit(-1);
     }
     instream.unsetf(std::ios::skipws);
@@ -53,9 +52,9 @@ pSourceFile::pSourceFile(pFileNameString fName, std::string encoding):
 
     // charset conversion we leave to UnicodeString
     // note this "pivots" through a 16 bit UChar, but so does the C ucnv_ interface
-    UnicodeString ubuffer(rawBuffer.data(), rawBuffer.length(), encoding.c_str());
+    UnicodeString ubuffer(rawBuffer.data(), rawBuffer.length(), file_.get<1>().c_str());
     if (ubuffer.isBogus()) {
-        std::cerr << "Could not perform character conversion in file: " << fileName_ << " from charset: " << encoding << std::endl;
+        std::cerr << "Could not perform character conversion in file: " << file_.get<0>() << " from charset: " << file_.get<1>() << std::endl;
         exit(-1);
     }
 

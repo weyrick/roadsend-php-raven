@@ -30,21 +30,16 @@ namespace rphp {
 class pSourceFile {
 
 private:
-    pFileNameString fileName_;
+    pSourceFileDesc file_;
     pSourceString contents_;
-    std::string encoding_;
 
 public:
 
-    pSourceFile(pFileNameString f, std::string encoding);
+    pSourceFile(pSourceFileDesc file);
 
-    //const pSourceCharIterator begin(void) const { return contents_.begin(); }
-    //const pSourceCharIterator end(void) const { return contents_.end(); }
-
-    const pFileNameString& fileName(void) const { return fileName_; }
-
+    const pFileNameString& fileName(void) const { return file_.get<0>(); }
+    const std::string& encoding(void) const { return file_.get<1>(); }
     const pSourceString& contents(void) const { return contents_; }
-    const std::string& encoding(void) const { return encoding_; }
 
     // mutator for e.g. the preprocessor
     pSourceString& contents(void) { return contents_; }

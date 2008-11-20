@@ -118,11 +118,14 @@ typedef enum {
 // note, pUInt is not a base PHP type (all PHP numbers are signed)
 typedef boost::uint_fast32_t pUInt;
 
-// string type used for identifiers
-typedef pBString pIdentString;
+// string type used for identifiers (classes, functions, variable names)
+typedef std::string pIdentString;
 
 // string type used for filenames
-typedef pBString pFileNameString;
+typedef std::string pFileNameString;
+
+// source file description: filename/encoding
+typedef boost::tuple<const pFileNameString, const std::string> pSourceFileDesc;
 
 // source locations: filename/linenum
 typedef boost::tuple<const pFileNameString, const pUInt> pSourceLocation;

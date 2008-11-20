@@ -31,7 +31,7 @@
 
 namespace rphp {
 
-pModule::pModule(pFileNameString name, std::string encoding):
+pModule::pModule(pSourceFileDesc file):
     source_(NULL),
     ast_(),
     llvmModule_(NULL),
@@ -42,7 +42,7 @@ pModule::pModule(pFileNameString name, std::string encoding):
 {
 
     // TODO: error handling
-    source_ = new pSourceFile(name, encoding);
+    source_ = new pSourceFile(file);
     parser::parseSourceFile(this);
 
 }

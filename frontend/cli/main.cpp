@@ -33,7 +33,7 @@ int main( int argc, char* argv[] )
 
     cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
     cl::opt<std::string> mainFile ("main-file",cl::desc("Main entry script for stand alone programs"));
-    cl::opt<std::string> encoding ("encoding",cl::desc("Character encoding of the source script"));
+    cl::opt<std::string> encoding ("encoding",cl::desc("Character encoding of the source file"));
 
     cl::opt<std::string> libSearchPath ("L",cl::desc("Add directory to linker search path"));
 
@@ -42,6 +42,10 @@ int main( int argc, char* argv[] )
 
     cl::SetVersionPrinter(&rphpVersion);
     cl::ParseCommandLineOptions(argc, argv, "Roadsend PHP");
+
+    // default encoding
+    if (encoding.empty())
+        encoding = "ASCII";
 
     pDriver driver;
     pTarget* target = NULL;
@@ -67,22 +71,16 @@ int main( int argc, char* argv[] )
         target = saTarget;
     }
     else if (dumpToks) {
-        if (encoding.length())
-            driver.dumpTokens(inputFile, encoding);
-        else
-            driver.dumpTokens(inputFile);
+        driver.dumpTokens(boost::make_tuple(inputFile, encoding));
     }
     else if (dumpAST) {
-        driver.dumpAST(inputFile);
+        driver.dumpAST(boost::make_tuple(inputFile, encoding));
     }
     else if (dumpIR) {
-        driver.dumpIR(inputFile);
+        driver.dumpIR(boost::make_tuple(inputFile, encoding));
     }
     else if (dumpPre) {
-        if (encoding.length())
-            driver.dumpPre(inputFile, encoding);
-        else
-            driver.dumpPre(inputFile);
+        driver.dumpPre(boost::make_tuple(inputFile, encoding));
     }
     else {
         // default: compile and link single php script to native binary
