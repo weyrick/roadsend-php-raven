@@ -44,36 +44,48 @@ pSourceFile::pSourceFile(pSourceFileDesc file):
     }
     instream.unsetf(std::ios::skipws);
 
-    // TODO: this makes 4 separate buffers during read and conversion. surely there's a faster way.
-
     // first we get a raw bytewise buffer
     std::string rawBuffer =  std::string(std::istreambuf_iterator<std::string::value_type>(instream.rdbuf()),
                                          std::istreambuf_iterator<std::string::value_type>());
 
-    // charset conversion we leave to UnicodeString
-    // note this "pivots" through a 16 bit UChar, but so does the C ucnv_ interface
-    UnicodeString ubuffer(rawBuffer.data(), rawBuffer.length(), file_.get<1>().c_str());
-    if (ubuffer.isBogus()) {
-        std::cerr << "Could not perform character conversion in file: " << file_.get<0>() << " from charset: " << file_.get<1>() << std::endl;
-        exit(-1);
+    if (file_.get<1>() == "ASCII") {
+
+        // in the basic case we can go directly to wchar which should just zero extend
+        contents_.assign(rawBuffer.begin(), rawBuffer.end());
+
     }
+    else {    
 
-    // finally to wchar_t for lexer
-    int32_t bsize = ubuffer.countChar32();
+        // charset conversion
 
-    wchar_t* buffer = new wchar_t[bsize];
-    int32_t newLength;
-    UErrorCode errorCode(U_ZERO_ERROR);
-    u_strToWCS(buffer,
-                 ubuffer.countChar32(),
-                 &newLength,
-                 ubuffer.getBuffer(),
-                 ubuffer.length(),
-                 &errorCode);
-    assert(U_SUCCESS(errorCode));
+        // TODO: this makes 4 separate buffers during read and conversion. surely there's a faster way.
 
-    contents_.assign(buffer, newLength);
-    delete buffer;
+        // charset conversion we leave to UnicodeString
+        // note this "pivots" through a 16 bit UChar, but so does the C ucnv_ interface
+        UnicodeString ubuffer(rawBuffer.data(), rawBuffer.length(), file_.get<1>().c_str());
+        if (ubuffer.isBogus()) {
+            std::cerr << "Could not perform character conversion in file: " << file_.get<0>() << " from charset: " << file_.get<1>() << std::endl;
+            exit(-1);
+        }
+
+        // finally to wchar_t for lexer
+        int32_t bsize = ubuffer.countChar32();
+
+        wchar_t* buffer = new wchar_t[bsize];
+        int32_t newLength;
+        UErrorCode errorCode(U_ZERO_ERROR);
+        u_strToWCS(buffer,
+                    ubuffer.countChar32(),
+                    &newLength,
+                    ubuffer.getBuffer(),
+                    ubuffer.length(),
+                    &errorCode);
+        assert(U_SUCCESS(errorCode));
+
+        contents_.assign(buffer, newLength);
+        delete buffer;
+        
+    }
     
 }
 
