@@ -1,21 +1,22 @@
 
-set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../cmake/modules )
 
-cmake_minimum_required(VERSION 2.6)
 
-FIND_PACKAGE(ICU)
+IF(CPPUNIT_FOUND)
+  MESSAGE(STATUS "cppunit found: configuring for tests")
 
-# XXX fixme
-link_directories (${CMAKE_SOURCE_DIR}/../../build/runtime/)
-include_directories (${CMAKE_SOURCE_DIR} ${CMAKE_SOURCE_DIR}/..)
+  include_directories(${CPPUNIT_INCLUDE_DIR})
 
-# test apps
-add_executable( rphp-runtime-suite
+  # test apps
+  add_executable( rphp-runtime-suite
                 main.cpp
                 phashTestCase.cpp
                 pvarTestCase.cpp
                 functionTestCase.cpp
                 runtimeTestCase.cpp
                )
-add_executable( rphp-sizes rphp-sizes.cpp )
-target_link_libraries( rphp-runtime-suite cppunit rphp-runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES})
+
+
+  add_executable( rphp-sizes rphp-sizes.cpp )
+  target_link_libraries( rphp-runtime-suite ${CPPUNIT_LIBRARY} rphp-runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES})
+
+ENDIF(CPPUNIT_FOUND)

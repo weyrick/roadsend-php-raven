@@ -86,7 +86,7 @@ llvm::Module* pGenSupport::readBitcode(std::string fileName) {
 llvm::Module* pGenSupport::getRuntimeIR() {
 
     // TODO: ouch!
-    return readBitcode("/home/weyrick/rphp/runtime-ir/irRuntime.ir");
+    return readBitcode("../runtime-ir/irRuntime.ir");
 
 }
 

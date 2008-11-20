@@ -25,5 +25,6 @@ set(RUNTIME_SRC_FILES
   standard/pStandardExt.cpp
 )
 
+add_subdirectory(test)
 add_library( rphp-runtime SHARED ${RUNTIME_SRC_FILES} )
 target_link_libraries( rphp-runtime ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES} )
