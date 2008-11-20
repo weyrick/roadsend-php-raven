@@ -33,6 +33,7 @@ int main( int argc, char* argv[] )
 
     cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
     cl::opt<std::string> mainFile ("main-file",cl::desc("Main entry script for stand alone programs"));
+    cl::opt<std::string> encoding ("encoding",cl::desc("Character encoding of the source script"));
 
     cl::opt<std::string> libSearchPath ("L",cl::desc("Add directory to linker search path"));
 
@@ -66,7 +67,10 @@ int main( int argc, char* argv[] )
         target = saTarget;
     }
     else if (dumpToks) {
-        driver.dumpTokens(inputFile);
+        if (encoding.length())
+            driver.dumpTokens(inputFile, encoding);
+        else
+            driver.dumpTokens(inputFile);
     }
     else if (dumpAST) {
         driver.dumpAST(inputFile);
@@ -75,7 +79,10 @@ int main( int argc, char* argv[] )
         driver.dumpIR(inputFile);
     }
     else if (dumpPre) {
-        driver.dumpPre(inputFile);
+        if (encoding.length())
+            driver.dumpPre(inputFile, encoding);
+        else
+            driver.dumpPre(inputFile);
     }
     else {
         // default: compile and link single php script to native binary

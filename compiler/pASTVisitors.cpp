@@ -75,7 +75,7 @@ void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
         std::cout << "[unicode]: \"";
     }
     std::wcout << n->getStringVal();
-    std::cout << std::endl;
+    std::cout << "\"" << std::endl;
 }
 
 void dumpVisitor::visit_literalString(literalString* n)  {

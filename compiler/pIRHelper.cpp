@@ -108,19 +108,15 @@ llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLe
 
 llvm::Constant* pIRHelper::stringConstant(const std::wstring& s, int32_t& finalLen) {
 
-    // NOTE: icu defines U_SIZEOF_WCHAR_T, U_WCHAR_IS_UTF16 and U_WCHAR_IS_UTF32 for more portability in the future
-    // also U_IS_BIG_ENDIAN
-    // first we convert wstring to unicodestring, then get the byte representation
     UnicodeString ucnv;
-    UChar* dest = ucnv.getBuffer(s.length());
     int32_t newLength;
     UErrorCode errorCode(U_ZERO_ERROR);
-    u_strFromUTF32(dest,
-                   ucnv.getCapacity(),
-                   &newLength,
-                   static_cast<const UChar32*>((void*)s.data()),
-                   s.length(),
-                   &errorCode);
+    u_strFromWCS(ucnv.getBuffer(s.length()),
+                 ucnv.getCapacity(),
+                 &newLength,
+                 s.data(),
+                 s.length(),
+                 &errorCode);
     assert(U_SUCCESS(errorCode));
     ucnv.releaseBuffer(newLength);
 

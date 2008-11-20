@@ -27,6 +27,7 @@
 
 #include <unicode/unistr.h>
 #include <unicode/schriter.h>
+#include <stdio.h>
 
 #include "pSourceFile.h"
 
@@ -44,6 +45,8 @@ pSourceFile::pSourceFile(pFileNameString fName, std::string encoding):
     }
     instream.unsetf(std::ios::skipws);
 
+    // TODO: this makes 4 separate buffers during read and conversion. surely there's a faster way.
+
     // first we get a raw bytewise buffer
     std::string rawBuffer =  std::string(std::istreambuf_iterator<std::string::value_type>(instream.rdbuf()),
                                          std::istreambuf_iterator<std::string::value_type>());
@@ -56,15 +59,22 @@ pSourceFile::pSourceFile(pFileNameString fName, std::string encoding):
         exit(-1);
     }
 
-    // finally to UTF-32 for wstring (gnu g++!)
-    // NOTE: icu defines U_SIZEOF_WCHAR_T, U_WCHAR_IS_UTF16 and U_WCHAR_IS_UTF32 for more portability in the future
-    // also U_IS_BIG_ENDIAN
-    contents_.reserve(ubuffer.countChar32());
-    
-    StringCharacterIterator it(ubuffer);
-    while (it.hasNext()) {
-         contents_.push_back(it.next32PostInc());
-    }
+    // finally to wchar_t for lexer
+    int32_t bsize = ubuffer.countChar32();
+
+    wchar_t* buffer = new wchar_t[bsize];
+    int32_t newLength;
+    UErrorCode errorCode(U_ZERO_ERROR);
+    u_strToWCS(buffer,
+                 ubuffer.countChar32(),
+                 &newLength,
+                 ubuffer.getBuffer(),
+                 ubuffer.length(),
+                 &errorCode);
+    assert(U_SUCCESS(errorCode));
+
+    contents_.assign(buffer, newLength);
+    delete buffer;
     
 }
 

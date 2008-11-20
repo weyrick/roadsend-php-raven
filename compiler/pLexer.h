@@ -54,7 +54,7 @@ public:
     const pSourceCharIterator sourceEnd(void) const;
 
     void dumpTokens(void);
-    const char* getTokenDescription(const std::size_t t) const;
+    const wchar_t* getTokenDescription(const std::size_t t) const;
 
     const pSourceString& contents(void) const { return contents_; }
 

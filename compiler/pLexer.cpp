@@ -158,9 +158,8 @@ const pSourceCharIterator pLexer::sourceEnd(void) const {
 
 void pLexer::dumpTokens(void) {
 
-    // TODO: unicode
-    std::string tokID;
-    std::stringstream val;
+    std::wstring tokID;
+    std::wstringstream val;
 
     for (pTokenIterator iter = tokBegin(); iter != tokEnd(); ++iter)
     {
@@ -171,15 +170,15 @@ void pLexer::dumpTokens(void) {
         else {
             // matched
             // skip plain newlines in html state
-            val.str("");
+            val.str(L"");
             if ((*iter).id() != T_WHITESPACE)
                 val << (*iter).value();
-            if (((*iter).state() == 0) && (val.str() == "\n"))
+            if (((*iter).state() == 0) && (val.str() == L"\n"))
                 continue;
             tokID = getTokenDescription((*iter).id());
             if (tokID.size() == 0)
                 tokID = val.str();
-            std::cout << val.str() << " " << tokID << std::endl;
+            std::wcout << val.str() << L" " << tokID << std::endl;
 
             if ((*iter).id() == T_OPEN_TAG) {
                 // go to php
@@ -196,41 +195,41 @@ void pLexer::dumpTokens(void) {
 }
 
 // note, these are designed to line up with zend token names
-const char* pLexer::getTokenDescription(const std::size_t t) const {
+const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
 
     switch (t) {
         case T_VARIABLE:
-            return "T_VARIABLE";
+            return L"T_VARIABLE";
         case T_WHITESPACE:
-            return "T_WHITESPACE";
+            return L"T_WHITESPACE";
         case T_INLINE_HTML:
-            return "T_INLINE_HTML";
+            return L"T_INLINE_HTML";
         case T_ECHO:
-            return "T_ECHO";
+            return L"T_ECHO";
         case T_OPEN_TAG:
-            return "T_OPEN_TAG";
+            return L"T_OPEN_TAG";
         case T_CLOSE_TAG:
-            return "T_CLOSE_TAG";
+            return L"T_CLOSE_TAG";
         case T_LNUMBER:
-            return "T_LNUMBER";
+            return L"T_LNUMBER";
         case T_DNUMBER:
-            return "T_DNUMBER";
+            return L"T_DNUMBER";
         case T_IF:
-            return "T_IF";
+            return L"T_IF";
         case T_ELSE:
-            return "T_ELSE";
+            return L"T_ELSE";
         case T_WHILE:
-            return "T_WHILE";
+            return L"T_WHILE";
         case T_IDENTIFIER:
-            return "T_STRING";
+            return L"T_STRING";
         case T_DQ_STRING:
         case T_SQ_STRING:
-            return "T_CONSTANT_ENCAPSED_STRING";
+            return L"T_CONSTANT_ENCAPSED_STRING";
         case T_SINGLELINE_COMMENT:
         case T_MULTILINE_COMMENT:
-            return "T_COMMENT";
+            return L"T_COMMENT";
     }
-    return "";
+    return L"";
 
 }
 
