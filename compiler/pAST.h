@@ -81,14 +81,14 @@ typedef std::vector<expr*> expressionList;
 // literal expression base class
 class literalExpr: public expr {
 
-    const pSourceRange stringVal_;
+    pSourceString stringVal_;
 
 public:
     literalExpr(nodeKind k): expr(k), stringVal_() { }
-    literalExpr(nodeKind k, const pSourceRange& v): expr(k), stringVal_(v) { }
+    literalExpr(nodeKind k, const pSourceRange& v): expr(k), stringVal_(v.begin(), v.end()) { }
     
-    pSourceString getStringVal(void) const {
-        return pSourceString(stringVal_.begin(), stringVal_.end());
+    const pSourceString& getStringVal(void) const {
+        return stringVal_;
     }
 
 };

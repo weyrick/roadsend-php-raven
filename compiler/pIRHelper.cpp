@@ -108,17 +108,15 @@ llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLe
 
 llvm::Constant* pIRHelper::stringConstant(const std::wstring& s, int32_t& finalLen) {
 
-    UnicodeString ucnv;
-    int32_t newLength;
     UErrorCode errorCode(U_ZERO_ERROR);
-    u_strFromWCS(ucnv.getBuffer(s.length()),
-                 ucnv.getCapacity(),
-                 &newLength,
-                 s.data(),
-                 s.length(),
-                 &errorCode);
-    assert(U_SUCCESS(errorCode));
-    ucnv.releaseBuffer(newLength);
+    int32_t destLength=0;
+    u_strFromWCS(0, 0, &destLength, s.data(), s.length(), &errorCode);
+    assert(!(U_FAILURE(errorCode) && errorCode != U_BUFFER_OVERFLOW_ERROR));
+    errorCode = U_ZERO_ERROR;
+    std::vector<UChar> buffer(destLength);
+    u_strFromWCS(&buffer[0], buffer.size(), &destLength, s.data(), s.length(), &errorCode);
+    assert(!U_FAILURE(errorCode));
+    UnicodeString ucnv(&buffer[0], buffer.size());
 
     // byte representation
     std::string ustr;

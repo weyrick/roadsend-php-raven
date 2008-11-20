@@ -146,8 +146,7 @@ void pGenerator::visit_literalString(AST::literalString* n) {
     }
     else {
         // strip unicodeyness
-        std::string strLiteral(n->getStringVal().begin(), n->getStringVal().end());
-        strPtr = IRHelper_->stringConstant(strLiteral, finalLen);
+        strPtr = IRHelper_->stringConstant(std::string(n->getStringVal().begin(), n->getStringVal().end()), finalLen);
     }
  
     // allocate tmp pVar for return value
