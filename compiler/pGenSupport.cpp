@@ -27,6 +27,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "pCompileError.h"
 #include "pGenSupport.h"
 
 namespace rphp {
@@ -38,19 +39,17 @@ std::string pGenSupport::mangleModuleName(std::string inName) {
 
 }
 
-bool pGenSupport::writeBitcode(llvm::Module* m, std::string outFile) {
+void pGenSupport::writeBitcode(llvm::Module* m, std::string outFile) {
 
     assert(m != NULL);
     assert(outFile.length() > 0);
 
-    // TODO: real error handling
     std::ofstream OS(outFile.c_str(), std::ios_base::out|std::ios::trunc|std::ios::binary);
     if (!OS.fail()) {
         llvm::WriteBitcodeToFile(m, OS);
-        return true;
     }
     else {
-        return false;
+        throw pCompileError("unable to write bitcode file ["+outFile+"]");
     }
 
 }
@@ -61,16 +60,12 @@ llvm::Module* pGenSupport::readBitcode(std::string fileName) {
     std::string errMsg;
     llvm::MemoryBuffer* mb = llvm::MemoryBuffer::getFile(fileName.c_str(), &errMsg);
     if (errMsg.length()) {
-        // TODO: errors
-        std::cerr << "error loading runtime IR file [" << fileName << "]: " << errMsg << std::endl;
-        exit(1);
+        throw pCompileError("error loading runtime IR file [" + fileName + "]: " + errMsg);
     }
 
     llvm::ModuleProvider* mp = llvm::getBitcodeModuleProvider(mb, &errMsg);
     if (errMsg.length()) {
-        // TODO: errors
-        std::cerr << "error parsing bitcode file [" << fileName << "]: " << errMsg << std::endl;
-        exit(1);
+        throw pCompileError("error parsing bitcode file [" + fileName + "]: " + errMsg);
     }
 
     llvm::Module* mod =  mp->getModule();
@@ -85,7 +80,7 @@ llvm::Module* pGenSupport::readBitcode(std::string fileName) {
 
 llvm::Module* pGenSupport::getRuntimeIR() {
 
-    // TODO: ouch!
+    // TODO: needs to be a command line option with a good default
     return readBitcode("../runtime-ir/irRuntime.ir");
 
 }

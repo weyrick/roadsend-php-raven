@@ -39,6 +39,7 @@ namespace llvm {
 
 namespace rphp {
 
+// TODO: llvm has structures for this. use those?
 typedef boost::unordered_map<pIdentString, llvm::Value*> symbolTableType;
 
 class pCompileTarget;

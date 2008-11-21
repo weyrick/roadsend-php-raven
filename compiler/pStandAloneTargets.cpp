@@ -33,6 +33,7 @@
 #include <llvm/Support/SystemUtils.h>
 #include <llvm/System/Program.h>
 
+#include "pCompileError.h"
 #include "pGenSupport.h"
 #include "pStandAloneTargets.h"
 
@@ -122,9 +123,7 @@ void pStandAloneTarget::execute(void) {
     // link to native using llvm-ld
     sys::Path ld = sys::Program::FindProgramByName("llvm-ld");
     if (ld.isEmpty()) {
-        // TODO: error handling
-        std::cerr << "unable to link: llvm-ld not found" << std::endl;
-        return;
+        throw pCompileError("unable to link: llvm-ld not found");
     }
 
     std::vector<std::string> args;
@@ -162,9 +161,7 @@ void pStandAloneTarget::execute(void) {
         ld, &Args[0], 0, 0, 0, 0, &errMsg);
 
     if (R != 0) {
-        // TODO: error handling
-        std::cerr << errMsg << std::endl;
-        return;
+        throw pCompileError(errMsg);
     }
 
 }

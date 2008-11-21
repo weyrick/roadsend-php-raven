@@ -34,7 +34,7 @@ class pGenSupport {
 
 public:
     static std::string mangleModuleName(std::string moduleName);
-    static bool writeBitcode(llvm::Module* m, std::string outFile);
+    static void writeBitcode(llvm::Module* m, std::string outFile);
     static llvm::Module* readBitcode(std::string fileName);
     static llvm::Module* getRuntimeIR();
 

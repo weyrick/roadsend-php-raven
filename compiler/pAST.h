@@ -167,13 +167,13 @@ public:
 // NODE: var
 class var: public expr {
 
-    const pSourceRange name_;
+    pIdentString name_;
 
 public:
-    var(const pSourceRange& name): expr(varKind), name_(name) { }
+    var(const pSourceRange& name): expr(varKind), name_(name.begin(), name.end()) { }
 
     pIdentString name(void) const {
-        return pIdentString(name_.begin(), name_.end());
+        return name_;
     }
 
 };
@@ -199,13 +199,13 @@ public:
 // NODE: function invoke
 class functionInvoke: public expr {
 
-    const pSourceRange name_;
+    pIdentString name_;
     expressionList argList_;
 
 public:
     functionInvoke(const pSourceRange& name, expressionList* argList):
         expr(functionInvokeKind),
-        name_(name),
+        name_(name.begin(), name.end()),
         argList_(*argList)
     {
         // free parser's version, which we've copied
@@ -219,7 +219,7 @@ public:
     }
 
     pIdentString name(void) const {
-        return pIdentString(name_.begin(), name_.end());
+        return name_;
     }
     expressionList& argList(void) { return argList_; }
     const expressionList& argList(void) const { return argList_; }

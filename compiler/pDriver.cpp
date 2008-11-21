@@ -151,7 +151,7 @@ void pDriver::dumpTokens(pSourceFileDesc file) {
     lexer::pLexer l(source);
     l.dumpTokens();
     delete source;
-    
+
 }
 
 // preprocess the source file, dump to stdout

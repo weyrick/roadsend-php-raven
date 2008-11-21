@@ -71,16 +71,44 @@ int main( int argc, char* argv[] )
         target = saTarget;
     }
     else if (dumpToks) {
-        driver.dumpTokens(boost::make_tuple(inputFile, encoding));
+        try {
+            driver.dumpTokens(boost::make_tuple(inputFile, encoding));
+        }
+        catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
+        return 0;
     }
     else if (dumpAST) {
-        driver.dumpAST(boost::make_tuple(inputFile, encoding));
+        try {
+            driver.dumpAST(boost::make_tuple(inputFile, encoding));
+        }
+        catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
+        return 0;
     }
     else if (dumpIR) {
-        driver.dumpIR(boost::make_tuple(inputFile, encoding));
+        try {
+            driver.dumpIR(boost::make_tuple(inputFile, encoding));
+        }
+        catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
+        return 0;
     }
     else if (dumpPre) {
-        driver.dumpPre(boost::make_tuple(inputFile, encoding));
+        try {
+            driver.dumpPre(boost::make_tuple(inputFile, encoding));
+        }
+        catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            return 1;
+        }
+        return 0;
     }
     else {
         // default: compile and link single php script to native binary

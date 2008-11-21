@@ -70,7 +70,7 @@ public:
     AST::statementList& getAST() { return ast_; }
     void applyVisitor(AST::baseVisitor* v);
     bool lowerToIR(pCompileTarget* target);
-    bool writeBitcode(pFileNameString fileName);
+    void writeBitcode(pFileNameString fileName);
     void setLLVMModuleOwnership(bool v) { llvmModuleOwner_ = v; }
     llvm::Module* getLLVMModule() { return llvmModule_; }
 

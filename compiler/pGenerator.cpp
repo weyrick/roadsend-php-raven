@@ -30,6 +30,7 @@
 
 #include <llvm/Linker.h>
 
+#include "pCompileError.h"
 #include "pGenerator.h"
 #include "pCompileTarget.h"
 #include "pIRHelper.h"
@@ -64,9 +65,7 @@ void pGenerator::loadAndLinkRuntimeIR(void) {
     Linker l(llvmModule_->getModuleIdentifier()+"_link", llvmModule_);
     l.LinkInModule(irMod, &errMsg);
     if (errMsg.length()) {
-        // TODO: errors
-        std::cerr << "error linking in runtime ir: " << errMsg << std::endl;
-        exit(1);
+        throw pCompileError("error linking in runtime IR [" + errMsg + "]");
     }
 
     // take ownership of module so it's not freed
@@ -260,6 +259,11 @@ void pGenerator::visit_assignment(AST::assignment* n) {
     valueStack_.pop();
 
     // gen lval
+    pIdentString name("lVal");
+    if (n->lVal()->getKind() == AST::varKind) {
+        AST::var* l = static_cast<AST::var*>(n->lVal());
+        name = l->name();
+    }
     visit(n->lVal());
     Value* lVal = valueStack_.back();
     valueStack_.pop();
@@ -267,7 +271,7 @@ void pGenerator::visit_assignment(AST::assignment* n) {
     Function* f = llvmModule_->getFunction("_ZN4rphp4pVaraSERKS0_");
     assert(f != NULL);
 
-    currentBlock_.CreateCall2(f, lVal, rVal);
+    currentBlock_.CreateCall2(f, lVal, rVal, name.c_str());
 
 }
 

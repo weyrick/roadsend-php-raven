@@ -29,6 +29,7 @@
 #include <unicode/schriter.h>
 #include <stdio.h>
 
+#include "pCompileError.h"
 #include "pSourceFile.h"
 
 namespace rphp { 
@@ -39,8 +40,7 @@ pSourceFile::pSourceFile(pSourceFileDesc file):
 
     std::ifstream instream(file_.get<0>().c_str());
     if (!instream.is_open()) {
-        std::cerr << "Couldn't open file: " << file_.get<0>() << std::endl;
-        exit(-1);
+        throw pCompileError("couldn't open file [" + file_.get<0>() + "]");
     }
     instream.unsetf(std::ios::skipws);
 
@@ -65,8 +65,7 @@ pSourceFile::pSourceFile(pSourceFileDesc file):
         // note this "pivots" through a 16 bit UChar, but so does the C ucnv_ interface
         UnicodeString ubuffer(rawBuffer.data(), rawBuffer.length(), file_.get<1>().c_str());
         if (ubuffer.isBogus()) {
-            std::cerr << "Could not perform character conversion in file: " << file_.get<0>() << " from charset: " << file_.get<1>() << std::endl;
-            exit(-1);
+            throw pCompileError("could not perform character conversion in file [" + file_.get<0>() + "] from charset [" + file_.get<1>() + "]");
         }
 
         // finally to wchar_t for lexer

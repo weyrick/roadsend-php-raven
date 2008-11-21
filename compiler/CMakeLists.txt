@@ -80,6 +80,7 @@ set(EVAL_SRC_FILES
   pCompileAndLinkTarget.cpp
   pLinkTarget.cpp
   pLibTargets.cpp
+  pCompileError.cpp
   ${RPHP_LLVM_DEP_FILES}
   ${LLVM_LIBS_INTERPRETER_OBJECTS}
   ${LLVM_LIBS_NATIVE_OBJECTS}

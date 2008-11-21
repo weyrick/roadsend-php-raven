@@ -42,7 +42,6 @@ pModule::pModule(pSourceFileDesc file):
     lastToken_()
 {
 
-    // TODO: error handling
     source_ = new pSourceFile(file);
     parser::parseSourceFile(this);
 
@@ -114,9 +113,9 @@ bool pModule::lowerToIR(pCompileTarget* target) {
 
 }
 
-bool pModule::writeBitcode(pFileNameString fileName) {
+void pModule::writeBitcode(pFileNameString fileName) {
 
-    return pGenSupport::writeBitcode(llvmModule_, source_->fileName());
+    pGenSupport::writeBitcode(llvmModule_, source_->fileName());
 
 }
 
