@@ -20,6 +20,7 @@
 */
 
 #include <llvm/Module.h>
+#include <llvm/ValueSymbolTable.h>
 #include <iostream>
 
 #include "pModule.h"
@@ -75,8 +76,24 @@ void pModule::dumpAST() {
 void pModule::dumpIR() {
 
     pCompileTarget* target = new pCompileTarget(source_->fileName(), "/");
-    if (lowerToIR(target))
-        llvmModule_->dump();
+    if (lowerToIR(target)) {
+        // dump all generated symbols (globals and functions). this skips all of the
+        // imported runtime jazz
+        const llvm::ValueSymbolTable& sTable = llvmModule_->getValueSymbolTable();
+
+        std::string name;
+        for(llvm::ValueSymbolTable::const_iterator s = sTable.begin(); s != sTable.end(); ++s) {
+            name.assign(s->getKeyData());
+            if (// functions start with the module identifier name (mangled script file name) 
+                name.substr(0, llvmModule_->getModuleIdentifier().length()) == llvmModule_->getModuleIdentifier() ||
+                // global literal strings
+                name.substr(0, 5) == ".bstr" ||
+                name.substr(0, 5) == ".ustr" 
+               ) {
+                s->getValue()->dump();
+            }
+        }
+    }
     delete target;
 
 }

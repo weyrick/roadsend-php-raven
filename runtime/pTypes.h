@@ -142,7 +142,8 @@ typedef boost::function<pVar (pVar, pVar, pVar, pVar, pVar)> pFunPointer5;
 typedef boost::function<pVar (std::vector<pVar&>)> pFunPointerN;
 
 // platform specific
-#define RPHP_NEWLINE    '\n'
+#define RPHP_NEWLINE     '\n'
+#define RPHP_WNEWLINE    L'\n'
 
 } /* namespace rphp */
 

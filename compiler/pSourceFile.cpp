@@ -58,7 +58,8 @@ pSourceFile::pSourceFile(pSourceFileDesc file):
 
         // charset conversion
 
-        // TODO: this makes 4 separate buffers during read and conversion. surely there's a faster way.
+        // TODO: this uses 4 total buffers during read and conversion. surely there's a faster way.
+        // icu has a file api for reading uchars directly in a given codepage
 
         // charset conversion we leave to UnicodeString
         // note this "pivots" through a 16 bit UChar, but so does the C ucnv_ interface

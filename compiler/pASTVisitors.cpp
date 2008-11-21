@@ -66,6 +66,10 @@ void dumpVisitor::visit_echoStmt(echoStmt* n) {
 }
 
 void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
+    // NOTE: newlines are lexed separately, don't dump them here
+    if (n->getStringVal().length() == 1 &&
+        n->getStringVal().at(0) == RPHP_WNEWLINE)
+        return;
     showindent();
     std::cout << "inline HTML ";
     if (n->isBinary()) {
