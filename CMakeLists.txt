@@ -24,7 +24,8 @@ ENDIF( Boost_VERSION LESS "103600" )
 
 Find_Package(ICU REQUIRED)
 Find_Package(LLVM REQUIRED)
-FIND_PACKAGE(CppUnit)
+FIND_PACKAGE(CppUnit) # optional
+Find_PACKAGE(Doxygen) # optional
 
 add_subdirectory(runtime)
 add_subdirectory(runtime-ir)
@@ -38,3 +39,9 @@ IF(CPPUNIT_FOUND)
   ADD_TEST(rphp-runtime-suite runtime/test/rphp-runtime-suite)
   ADD_TEST(rphp-sizes runtime/test/rphp-sizes)
 ENDIF(CPPUNIT_FOUND)
+
+
+IF(DOXYGEN_FOUND)
+  SET(DOXYFILE Doxyfile.rphp)
+  ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${DOXYFILE} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+ENDIF(DOXYGEN_FOUND)
