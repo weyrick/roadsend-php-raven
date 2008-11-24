@@ -115,8 +115,12 @@ void pStandAloneTarget::execute(void) {
 
     Module* M = createStubModule();
     // TODO: outfile nameing
-    pGenSupport::writeBitcode(M, outputFile_+".bc");
+    std::string stubOutFile(outputFile_+"-driver.bc");
+    log(logInfo, "writing stand alone binary stub bitcode ["+stubOutFile+"]");
+    pGenSupport::writeBitcode(M, stubOutFile);
     delete M;
+
+    log(logInfo, "linking stand alone executable ["+outputFile_+"]");
 
     // the following is based on code from llvm/tools/llvm-ld.cpp
 
@@ -132,15 +136,16 @@ void pStandAloneTarget::execute(void) {
         args.push_back("-L"+(*i));
     }
     args.push_back("-native");
-    // TODO: opt flags -- full debug for now
-    args.push_back("-disable-opt");
-    args.push_back("-verify-each");
-    args.push_back("-v");
+    // TODO: opt flags
+    //args.push_back("-disable-opt");
+    //args.push_back("-verify-each");
+    if (verbosity() > logInfo)
+        args.push_back("-v");
     //
     args.push_back("-lrphp-runtime");
     args.push_back("-o");
     args.push_back(outputFile_);
-    args.push_back(outputFile_+".bc");
+    args.push_back(stubOutFile);
     for (std::vector<std::string>::iterator i = inputFiles_.begin(); i != inputFiles_.end(); ++i) {
         args.push_back(*i);
     }
@@ -151,11 +156,20 @@ void pStandAloneTarget::execute(void) {
     Args.push_back(0);
 
     std::vector<const char*>::const_iterator I = Args.begin(), E = Args.end();
-    for (; I != E; ++I)
-        if (*I)
-        std::cout << "'" << *I << "'" << " ";
-    std::cout << "\n" << std::flush;
 
+    if (verbosity() >= logFull) {
+        std::string cline;
+        for (; I != E; ++I) {
+            if (*I) {
+                //cline.push_back('\'');
+                cline.append(*I);
+                //cline.push_back('\'');
+                cline.push_back(' ');
+            }
+        }
+        log(logFull, cline);
+    }
+    
     std::string errMsg;
     int R = sys::Program::ExecuteAndWait(
         ld, &Args[0], 0, 0, 0, 0, &errMsg);

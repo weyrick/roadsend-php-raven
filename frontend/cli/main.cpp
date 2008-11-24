@@ -30,6 +30,7 @@ int main( int argc, char* argv[] )
     cl::opt<bool> dumpPre ("dump-pre", cl::desc("Preprocess the source file and dump it to stdout"));
     cl::opt<bool> iBC ("i", cl::desc("Interpret bytecode"));
     cl::opt<bool> iSF ("f", cl::desc("Execute source file immediately"));
+    cl::opt<int> verbosity ("v", cl::desc("Verbosity level (0=Silent/1=Info/2=Full/3+=Debug)"));
 
     cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
     cl::opt<std::string> mainFile ("main-file",cl::desc("Main entry script for stand alone programs"));
@@ -133,6 +134,8 @@ int main( int argc, char* argv[] )
     }
 
     try {
+        if (verbosity >= 0)
+            target->setVerbosity(verbosity);
         target->execute();
     }
     catch (std::exception& e) {

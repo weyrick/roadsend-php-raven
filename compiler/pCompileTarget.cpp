@@ -32,6 +32,8 @@ void pCompileTarget::execute(void) {
     // TODO: check stringOptions for outputFile
     outputFile = inputFile_+".bc";
 
+    log(logInfo, "compiling module ["+inputFile_+"] to ["+outputFile+"]");
+
     pModule  m(inputFile_);
     m.lowerToIR(this);
     m.writeBitcode(outputFile);

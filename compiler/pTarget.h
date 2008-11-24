@@ -24,11 +24,14 @@
 
 #include <boost/unordered_map.hpp>
 #include <string>
+#include <iostream>
 
 namespace rphp {
 
-// A target is a configurable purpose created in the frontend
-// it conveys the users wishes to the driver
+/**
+    A target is a configurable purpose created in the frontend
+    it conveys the user's wishes to the driver
+ */
 class pTarget {
 
 protected:
@@ -36,9 +39,23 @@ protected:
     boost::unordered_map<std::string, std::string> stringOptions_;
     boost::unordered_map<std::string, int> intOptions_;
 
+    int verbosity_;
+
 public:
 
+    static const int logQuiet = 0;
+    static const int logInfo  = 1;
+    static const int logFull  = 2;
+    static const int logDebug = 3;
+
+    pTarget(void): stringOptions_(),
+                   intOptions_(),
+                   verbosity_(0) { }
+
     virtual void execute(void) = 0;
+
+    int verbosity(void) { return verbosity_; }
+    void setVerbosity(int v) { verbosity_ = v; }
 
     void setOption(std::string k, std::string v) {
         stringOptions_[k] = v;
@@ -46,6 +63,15 @@ public:
 
     void setOption(std::string k, int v) {
         intOptions_[k] = v;
+    }
+
+    /**
+        log a message at the given verbosity level
+     */
+    void log(int level, std::string msg) {
+        if (verbosity_ >= level) {
+            std::cerr << ">> " << msg << std::endl << std::flush;
+        }
     }
 
 };

@@ -115,7 +115,7 @@ bool pModule::lowerToIR(pCompileTarget* target) {
 
 void pModule::writeBitcode(pFileNameString fileName) {
 
-    pGenSupport::writeBitcode(llvmModule_, source_->fileName());
+    pGenSupport::writeBitcode(llvmModule_, fileName);
 
 }
 
