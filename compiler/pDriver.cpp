@@ -28,7 +28,6 @@
 #include <llvm/ModuleProvider.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/ExecutionEngine/JIT.h>
-#include <llvm/ExecutionEngine/Interpreter.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 
 #include "pDriver.h"
@@ -63,6 +62,7 @@ bool pDriver::executeModule(pModule* pMod) {
     pMod->setLLVMModuleOwnership(false);
 
     llvm::Function* main = MP->getModule()->getFunction(pMod->getEntryFunctionName());
+    
     if (!main) {
         cerr << "error: entry symbol not found: " << pMod->getEntryFunctionName() << endl;
         delete EE;
@@ -73,6 +73,7 @@ bool pDriver::executeModule(pModule* pMod) {
     pRuntimeEngine* r = new pRuntimeEngine();
     void *mainPtr = EE->getPointerToFunction(main);
     // cast to entry function type (returns void, takes one parameter of runtime engine instance)
+    // see pGenerator::createEntryPoint, pIRHelper::moduleEntryFunType
     void (*mainFunc)(pRuntimeEngine*) = (void (*)(pRuntimeEngine*))mainPtr;
     mainFunc(r);
 
