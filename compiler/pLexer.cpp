@@ -132,9 +132,10 @@ bool pLexer::preprocess(void) {
     // save changes
     if (rewrote) {
         contents_.swap(buffer);
-        sourceBegin_ = contents_.begin();
-        sourceEnd_ = contents_.end();
     }
+    
+    sourceBegin_ = contents_.begin();
+    sourceEnd_ = contents_.end();
 
     return true;
     
