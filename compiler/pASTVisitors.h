@@ -44,6 +44,7 @@ public:
     virtual void visit_assignment(assignment*) { }
     virtual void visit_var(var*) { }
     virtual void visit_functionInvoke(functionInvoke*) { }
+    virtual void visit_constructorInvoke(constructorInvoke*) { }
 
 };
 
@@ -65,6 +66,7 @@ public:
     void visit_assignment(assignment*);
     void visit_var(var*);
     void visit_functionInvoke(functionInvoke*);
+    void visit_constructorInvoke(constructorInvoke*);
 
 };
 

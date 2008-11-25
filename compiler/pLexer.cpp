@@ -221,6 +221,8 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_ELSE";
         case T_WHILE:
             return L"T_WHILE";
+        case T_NEW:
+            return L"T_NEW";
         case T_IDENTIFIER:
             return L"T_STRING";
         case T_DQ_STRING:

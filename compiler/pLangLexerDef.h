@@ -68,6 +68,7 @@ struct rphpLangTokens : lexer_def<Lexer>
             | token_def(L"while", T_WHILE)
             | token_def(L"else", T_ELSE)
             | token_def(L"echo", T_ECHO)
+            | token_def(L"new", T_NEW)
             | token_def(L"[a-zA-Z_][a-zA-Z0-9_]*", T_IDENTIFIER)
             | token_def(L"\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE)
             | token_def(L"[0-9]+", T_LNUMBER)

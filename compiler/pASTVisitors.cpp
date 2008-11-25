@@ -36,7 +36,8 @@ baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalBool),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_assignment),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_var),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionInvoke)
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionInvoke),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_constructorInvoke)
 };
 
 
@@ -176,6 +177,30 @@ void dumpVisitor::visit_functionInvoke(functionInvoke* n)  {
     showindent();
     std::cout << ")" << std::endl;
     unindent();    
+    showindent();
+    std::cout << ")" << std::endl;
+
+}
+
+void dumpVisitor::visit_constructorInvoke(constructorInvoke* n)  {
+
+    showindent();
+    std::cout << "(constructor invoke: ";
+    std::cout << n->name() << std::endl;
+
+    indent();
+    showindent();
+    std::cout << "(arguments: " << std::endl;
+    indent();
+    for (int i = 0; i < n->argList().size(); i++) {
+        showindent();
+        std::cout << i+1 << ": " << std::endl;
+        visit(n->argList()[i]);
+    }
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+    unindent();
     showindent();
     std::cout << ")" << std::endl;
 

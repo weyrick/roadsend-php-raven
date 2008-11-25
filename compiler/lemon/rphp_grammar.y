@@ -101,6 +101,7 @@ expr(A) ::= literal(B). { A = B; }
 expr(A) ::= assignment(B). { A = B; }
 expr(A) ::= lval(B). { A = B; }
 expr(A) ::= functionInvoke(B). { A = B; }
+expr(A) ::= constructorInvoke(B). { A = B; }
 
 /** LITERALS **/
 %type literal {AST::literalExpr*}
@@ -198,5 +199,14 @@ functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
     A = new AST::functionInvoke(*B, // f name
                                  C  // expression list: arguments
                                 );
+}
+
+/** CONSTRUCTOR INVOKE **/
+%type constructorInvoke {AST::constructorInvoke*}
+constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
+{
+    A = new AST::constructorInvoke(*B, // f name
+                                    C  // expression list: arguments
+                                   );
 }
 

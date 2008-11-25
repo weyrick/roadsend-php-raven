@@ -39,7 +39,8 @@ enum nodeKind {
     literalBoolKind,
     assignmentKind,
     varKind,
-    functionInvokeKind
+    functionInvokeKind,
+    constructorInvokeKind
 };
 
 // statement base class
@@ -203,8 +204,8 @@ class functionInvoke: public expr {
     expressionList argList_;
 
 public:
-    functionInvoke(const pSourceRange& name, expressionList* argList):
-        expr(functionInvokeKind),
+    functionInvoke(const pSourceRange& name, expressionList* argList, nodeKind kind = functionInvokeKind):
+        expr(kind),
         name_(name.begin(), name.end()),
         argList_(*argList)
     {
@@ -223,6 +224,19 @@ public:
     }
     expressionList& argList(void) { return argList_; }
     const expressionList& argList(void) const { return argList_; }
+
+};
+
+// NODE: constructor invoke
+class constructorInvoke: public functionInvoke {
+
+public:
+    constructorInvoke(const pSourceRange& name, expressionList* argList):
+        functionInvoke(name, argList, constructorInvokeKind)
+    {
+
+    }
+
 
 };
 
