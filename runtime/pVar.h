@@ -31,25 +31,49 @@
 
 namespace rphp {
 
+/**
+ @brief pVar is the basic container for a runtime variable
+
+ It is implemented with a boost::variant, which is a type-safe, discriminated union.
+ pVar can hold all of the basic runtime types
+
+ - pNull
+ - pBool
+ - pInt
+ - pFloat
+ - pBString
+ - pUString
+ - pHash
+ - pObject
+ - pResource
+ - pVarP (shared ptr to a pVar)
+
+ Space for each type is stored on the stack
+ 
+*/
 class pVar {
 
-    // variant
+    /**
+        variant data
+     */
     pVarDataType pVarData_;
-    // ref count (lower 31) and ref flag (high bit)
+    /**
+        reference count (lower 31 bits) and reference flag (high bit)
+     */
     boost::int32_t refData_;
 
 public:
 
     /* constructors */
 
-    // default null
+    /// default constructor holds a pNull
     pVar(void): pVarData_(pNull), refData_(0) {
 #ifdef RPHP_PVAR_DEBUG
         std::cout << "pVar [" << this << "]: default construct (pNull)" << std::endl;
 #endif
     }
 
-    // generic
+    /// generic constructor will accept any type that is valid for the pVar variant (see pVarDataType)
     template <typename T>
     pVar(const T &v): pVarData_(v), refData_(0) {
 #ifdef RPHP_PVAR_DEBUG
@@ -59,31 +83,21 @@ public:
 
     // some specializations to avoid ambiguity
 
-    // default to binary strings
+    /// construction from char* defaults to a binary strings
     pVar(const char* str): pVarData_(pBString(str)), refData_(0) {
 #ifdef RPHP_PVAR_DEBUG
         std::cout << "pVar [" << this << "]: binary string construct" << std::endl;
 #endif
     }
-    // specify type of string to make from literal
-    pVar(const char* str, pVarType t): refData_(0) {
-        if (t == pVarUStringType) {
-            pVarData_ = pUString(str);
-        }
-        else {
-            pVarData_ = pBString(str);
-        }
-#ifdef RPHP_PVAR_DEBUG
-        std::cout << "pVar [" << this << "]: string construct with type specification: " << t << std::endl;
-#endif
-    }
+
+    /// construction from int creates pInt
     pVar(int i): pVarData_(pInt(i)), refData_(0) {
 #ifdef RPHP_PVAR_DEBUG
         std::cout << "pVar [" << this << "]: int construct: " << i << std::endl;
 #endif
     }
 
-    // convenience function for creating a new empty hash
+    /// convenience function for creating a new empty hash
     void newEmptyHash(void);
 
     /* default copy constructor */
@@ -102,85 +116,116 @@ public:
     }
 #endif    
 
-    /* assignment */
+    /// generic assignment works for any type pVarDataType supports
     template <typename T>
     void operator=(T val) { pVarData_ = val; }
 
     // some specializations to avoid ambiguity
-    // default to binary strings
+    /// default assignment from char* to binary strings
     void operator=(const char* str) { pVarData_ = pBString(str); }
+    /// default assignment from int to pInt
     void operator=(int i) { pVarData_ = pInt(i); }
 
     /* reference counting counting */
+    /// reference counting is handled automatically upon construction, destruction and
+    /// assignment so this shouldn't normally be called in userland
+    /// only useful when type is NOT pVarP
+    /// in other words, we only count reference when we are the boxed pVar
+
+    /// return current reference count.
     inline boost::int32_t getRefCount(void) {
         // note, refcount only makes sense if variant type is NOT pVarP
         return refData_ & PVAR_RCNT_BITS;
     }
 
+    /// increment the reference count
     inline boost::int32_t incRefCount(void) {
         // TODO: overflow?
         refData_ += 1;
     }
+    /// decrement the reference count
     inline boost::int32_t decRefCount(void) {
         refData_ -= 1;
     }
 
-    /* php reference variable flag */
+    /* reference variable flag */
+    /// note that all reference variables are pVarP, but not all pVarP are
+    /// reference variables. this happens because a pVar can live on the
+    /// heap but not have multiple runtime symbols pointing to it
+
+    /// return true if this pVar is a "reference" variable
     inline bool isRef(void) {
         return refData_ & PVAR_RFLAG_BIT;
     }
-    // this only make sense when the variant type is pVarP,
+    /// flag this pVar as a reference variable
+    /// this only make sense when the variant type is pVarP
     inline void makeRef(void) {
         if (pVarData_.which() == pVarPtrType_)
             refData_ |= PVAR_RFLAG_BIT;
     }
+    /// unflag this pVar as a reference variable
     inline void unmakeRef(void) {
         refData_ ^= PVAR_RFLAG_BIT;
     }
 
     /* custom visitors */
+    /// apply a boost static visitor to the variant
     template <typename T>
     typename T::result_type applyVisitor() {
         return boost::apply_visitor( T(), pVarData_ );
     }
 
     /* type checks */
+    /// return the current type represented by this pVar
     const pVarType getType() const;
+    /// return true if pVar is currently a pNull. no type conversion.
     bool isNull() const {
         return ((pVarData_.which() == pVarTriStateType_) && pNull(boost::get<pTriState>(pVarData_)));
     }
+    /// return true if pVar is currently a pBool. no type conversion.
     bool isBool() const {
         return ((pVarData_.which() == pVarTriStateType_) && !pNull(boost::get<pTriState>(pVarData_)));
     }
+    /// return true if pVar is currently a pInt. no type conversion.
     bool isInt() const {
         return (pVarData_.which() == pVarIntType_);
     }
+    /// return true if pVar is currently a pFloat. no type conversion.
     bool isFloat() const {
         return (pVarData_.which() == pVarFloatType_);
     }
+    /// return true if pVar is currently a pBString. no type conversion.
     bool isBString() const {
         return (pVarData_.which() == pVarBStringType_);
     }
+    /// return true if pVar is currently a pUString. no type conversion.
     bool isUString() const {
         return (pVarData_.which() == pVarUStringType_);
     }
+    /// return true if pVar is currently a pHash. no type conversion.
     bool isHash() const {
         return (pVarData_.which() == pVarHashType_);
     }
+    /// return true if pVar is currently a pObject. no type conversion.
     bool isObject() const {
         return (pVarData_.which() == pVarObjectType_);
     }
+    /// return true if pVar is currently a pResource. no type conversion.
     bool isResource() const {
         return (pVarData_.which() == pVarResourceType_);
     }
+    /// return true if pVar is currently a boxed pVar. no type conversion.
     bool isBoxed() const {
         return (pVarData_.which() == pVarPtrType_);
     }
 
-    // stream interface
+    /// stream interface
     friend std::ostream& operator << (std::ostream& os, const rphp::pVar& v);
 
-    // evaluation
+    /**
+        evaluate the current value of this pVar as a boolean, according to
+        the language semantics for bool conversion. however, does not mutate
+     */
     bool evalAsBool() const;
     
     /* in place type conversion */

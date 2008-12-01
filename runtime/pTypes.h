@@ -37,43 +37,46 @@
 
 namespace rphp {
 
-// a boost::tribool represents php true, false and null values
-// pTrue, pFalse and pNull are defined
+/// a boost::tribool represents php true, false and null values
+/// pTrue, pFalse and pNull are defined
 typedef boost::logic::tribool pTriState;
+
 // convenience accesors
 BOOST_TRIBOOL_THIRD_STATE(pNull)
 #define pTrue  pTriState(true)
 #define pFalse pTriState(false)
 
-// numeric types
+/// runtime integer type
 typedef signed long pInt;
+/// runtime float type
 typedef double pFloat;
 
-// string types: binary and unicode flavor
-// "binary" strings
+/// runtime "binary" string type
+/// these are simple byte-wide character arrays
 typedef std::string pBString;
 
-// unicode strings, using the ICU library
-// defined in pUString.h
+/// auto shared pointer to a unicode string, using the ICU library
 typedef boost::shared_ptr<pUString> pUStringP;
 
-// php hash tables
 class pHash;
+/// copy-on-write auto shared hash table type
 typedef CowPtr<pHash> pHashP;
 
-// php objects
 class pObject;
+/// auto shared pointer to an instantiated runtime object
 typedef boost::shared_ptr<pObject> pObjectP;
 
-// php resources
 class pResource;
+/// auto shared pointer to an runtime resource
 typedef boost::shared_ptr<pResource> pResourceP;
 
-// a shared container for pvar variables: php reference variables
 class pVar;
+/// auto shared pointer to a pVar
+/// used for a pVar that needs to live on the heap,
+/// in particular: reference variables
 typedef boost::intrusive_ptr<pVar> pVarP;
 
-// main pVar variant type
+/// main pVar variant type
 typedef boost::variant< pTriState,
                         pInt,
                         pFloat,
@@ -85,10 +88,10 @@ typedef boost::variant< pTriState,
                         pVarP
                         > pVarDataType;
 
-// these should match the order of the actual types listed in the variant type
-// it is only used by the pVar type checker, which returns pVarType
-// this is only because pVarNullType and pVarBoolType are both handled
-// by pTriState
+/// these should match the order of the actual types listed in the variant type
+/// it is only used by the pVar type checker, which returns pVarType
+/// this is only because pVarNullType and pVarBoolType are both handled
+/// by pTriState
 typedef enum {
     pVarTriStateType_ = 0,
     pVarIntType_      = 1,
@@ -101,7 +104,7 @@ typedef enum {
     pVarPtrType_      = 8
 } pVarWhichType_;
 
-// this should be used by user code
+/// an enum for determining the type of data stored in a pVar
 typedef enum {
     pVarNullType,
     pVarBoolType,
@@ -115,30 +118,35 @@ typedef enum {
     pVarPtrType
 } pVarType;
     
-// note, pUInt is not a base PHP type (all PHP numbers are signed)
+/// note, pUInt is not a base PHP type (all PHP numbers are signed)
 typedef boost::uint_fast32_t pUInt;
 
-// string type used for identifiers (classes, functions, variable names)
+/// string type used for identifiers (classes, functions, variable names)
 typedef std::string pIdentString;
 
-// string type used for filenames
+/// string type used for filenames
 typedef std::string pFileNameString;
 
-// source file description: filename/encoding
+/// source file description: filename/encoding
 typedef boost::tuple<const pFileNameString, const std::string> pSourceFileDesc;
 
-// source locations: filename/linenum
+/// source locations: filename/linenum
 typedef boost::tuple<const pFileNameString, const pUInt> pSourceLocation;
 
-// source locations: filename/startlinenum/endlinenum
+/// source locations: filename/startlinenum/endlinenum
 typedef boost::tuple<const pFileNameString, const pUInt, const pUInt> pSourceStartEndLocation;
 
-// php function signatures
+/// php function signature: one argument
 typedef boost::function<pVar (pVar)> pFunPointer1;
+/// php function signature: two arguments
 typedef boost::function<pVar (pVar, pVar)> pFunPointer2;
+/// php function signature: three arguments
 typedef boost::function<pVar (pVar, pVar, pVar)> pFunPointer3;
+/// php function signature: four arguments
 typedef boost::function<pVar (pVar, pVar, pVar, pVar)> pFunPointer4;
+/// php function signature: five arguments
 typedef boost::function<pVar (pVar, pVar, pVar, pVar, pVar)> pFunPointer5;
+/// php function signature: n arguments
 typedef boost::function<pVar (std::vector<pVar&>)> pFunPointerN;
 
 // platform specific
