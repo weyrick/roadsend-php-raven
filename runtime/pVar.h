@@ -149,9 +149,9 @@ public:
     }
 
     /* reference variable flag */
-    /// note that all reference variables are pVarP, but not all pVarP are
-    /// reference variables. this happens because a pVar can live on the
-    /// heap but not have multiple runtime symbols pointing to it
+    // note that all reference variables are pVarP, but not all pVarP are
+    // reference variables. this happens because a pVar can live on the
+    // heap but not have multiple runtime symbols pointing to it
 
     /// return true if this pVar is a "reference" variable
     inline bool isRef(void) {
@@ -222,18 +222,29 @@ public:
     /// stream interface
     friend std::ostream& operator << (std::ostream& os, const rphp::pVar& v);
 
-    /**
-        evaluate the current value of this pVar as a boolean, according to
-        the language semantics for bool conversion. however, does not mutate
+    /** @brief evaluate as boolean
+
+        evaluates according to the language semantics for bool conversion.
+        does not mutate.
+        
      */
     bool evalAsBool() const;
     
     /* in place type conversion */
+    /// free current value and represent a pNull instead
     void convertToNull();
+    /// convert current value to a boolean. returns converted value.
     pTriState& convertToBool();
+    /// convert current value to an integer. return converted value.
     pInt& convertToInt();
     // float
+    /** @brief convert to binary or unicode string
+    
+       it may convert to a binary or unicode string, depending on runtime settings
+       or it's current value, so you must check which it converted to after the conversion
+     */
     void convertToString();
+    /// force convertion to a binary string. if it was a unicode string, the conversion is lossy
     pBString& convertToBString();
     // ustring
     // hash
@@ -243,8 +254,10 @@ public:
     /* return type casted copy */
     // null
     // bool
+    /// cast to pInt, does not mutate
     pInt copyAsInt() const;
     // float
+    /// cast to pBString, does not mutate
     pBString copyAsBString() const;
     // ustring
     // hash
@@ -252,78 +265,97 @@ public:
     // resource
 
     /* these do no conversions, and throw exception if the wrong type is accessed */
+    /// bool accessor. throws exception if pVar is wrong type
     pTriState& getBool() {
         return boost::get<pTriState&>(pVarData_);
     }
 
+    /// const bool accessor. throws exception if pVar is wrong type
     const pTriState& getBool() const {
         return boost::get<const pTriState&>(pVarData_);
     }
     
+    /// pInt accessor. throws exception if pVar is wrong type
     pInt& getInt() {
         return boost::get<pInt&>(pVarData_);
     }
-    
+
+    /// const pInt accessor. throws exception if pVar is wrong type
     const pInt& getInt() const {
         return boost::get<const pInt&>(pVarData_);
     }
 
+    /// pFloat accessor. throws exception if pVar is wrong type
     pFloat& getFloat() {
         return boost::get<pFloat&>(pVarData_);
     }
-    
+
+    /// const pFloat accessor. throws exception if pVar is wrong type
     const pFloat& getFloat() const {
         return boost::get<const pFloat&>(pVarData_);
     }
 
+    /// pBString accessor. throws exception if pVar is wrong type
     pBString& getBString() {
         return boost::get<pBString&>(pVarData_);
     }
-    
+
+    /// const pBString accessor. throws exception if pVar is wrong type
     const pBString& getBString() const {
         return boost::get<const pBString&>(pVarData_);
     }
 
+    /// pUString accessor. throws exception if pVar is wrong type
     pUString& getUString() {
         return boost::get<pUString&>(pVarData_);
     }
-    
+
+    /// const pBString accessor. throws exception if pVar is wrong type
     const pUString& getUString() const {
         return boost::get<const pUString&>(pVarData_);
     }
 
+    /// pHash accessor. throws exception if pVar is wrong type
     pHashP& getHash() {
         return boost::get<pHashP&>(pVarData_);
     }
-    
+
+    /// const pHash accessor. throws exception if pVar is wrong type
     const pHashP& getHash() const {
         return boost::get<const pHashP&>(pVarData_);
     }
 
+    /// read only hash access
     const pHashP& getConstHash() const {
         return boost::get<const pHashP&>(pVarData_);
     }
 
+    /// pObject accessor. throws exception if pVar is wrong type
     pObjectP& getObject() {
         return boost::get<pObjectP&>(pVarData_);
     }
     
+    /// const pObject accessor. throws exception if pVar is wrong type
     const pObjectP& getObject() const {
         return boost::get<const pObjectP&>(pVarData_);
     }
 
+    /// pResource accessor. throws exception if pVar is wrong type
     pResourceP& getResource() {
         return boost::get<pResourceP&>(pVarData_);
     }
     
+    /// const pResource accessor. throws exception if pVar is wrong type
     const pResourceP& getResource() const {
         return boost::get<const pResourceP&>(pVarData_);
     }
-    
+
+    /// boxed pVar accessor. throws exception if pVar is wrong type
     pVarP& getPtr() {
         return boost::get<pVarP&>(pVarData_);
     }
     
+    /// boxed pVar accessor (const). throws exception if pVar is wrong type
     const pVarP& getPtr() const {
         return boost::get<const pVarP&>(pVarData_);
     }
