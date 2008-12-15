@@ -19,8 +19,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pRuntime.h"
-#include "pExtManager.h"
+#include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pExtManager.h"
 
 namespace rphp {
 

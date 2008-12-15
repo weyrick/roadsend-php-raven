@@ -9,7 +9,7 @@ driver for testing functions
 #include <iostream>
 
 #include "functionTestCase.h"
-#include "pFunctionManager.h"
+#include "rphp/runtime/pFunctionManager.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( functionTestCase );
 

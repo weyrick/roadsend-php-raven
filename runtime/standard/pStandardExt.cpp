@@ -21,8 +21,8 @@
 
 #include <iostream>
 
-#include "pFunction.h"
-#include "pStandardExt.h"
+#include "rphp/runtime/pFunction.h"
+#include "rphp/runtime/standard/pStandardExt.h"
 
 using namespace boost;
 using namespace boost::algorithm;

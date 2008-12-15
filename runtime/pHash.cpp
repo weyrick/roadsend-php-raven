@@ -20,7 +20,7 @@
 
 #include <iostream>
 #include <unicode/ustream.h>
-#include "pHash.h"
+#include "rphp/runtime/pHash.h"
 
 
 namespace boost {

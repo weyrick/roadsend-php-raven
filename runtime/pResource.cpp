@@ -19,7 +19,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pResource.h"
+#include "rphp/runtime/pResource.h"
 
 namespace rphp {
 

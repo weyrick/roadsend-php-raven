@@ -19,7 +19,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <boost/algorithm/string/case_conv.hpp>
-#include "pSupport.h"
+#include "rphp/runtime/pSupport.h"
 
 namespace rphp {
 

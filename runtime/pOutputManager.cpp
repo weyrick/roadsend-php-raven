@@ -21,7 +21,7 @@
 #include <unicode/ustream.h>
 #include <iostream>
 
-#include "pOutputManager.h"
+#include "rphp/runtime/pOutputManager.h"
 
 namespace rphp {
 

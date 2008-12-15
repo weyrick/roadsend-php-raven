@@ -19,9 +19,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pSupport.h"
-#include "pFunction.h"
-#include "pFunctionManager.h"
+#include "rphp/runtime/pSupport.h"
+#include "rphp/runtime/pFunction.h"
+#include "rphp/runtime/pFunctionManager.h"
 
 namespace rphp {
 

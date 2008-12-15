@@ -19,8 +19,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 
-#include "pVar.h"
-#include "pTypeOperators.h"
+#include "rphp/runtime/pVar.h"
+#include "rphp/runtime/pTypeOperators.h"
 
 namespace rphp {
 

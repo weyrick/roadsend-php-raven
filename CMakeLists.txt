@@ -1,6 +1,6 @@
 # root
 
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 2.6)
 
 # this policy warning is due to lib command lines arg output from llvm-config
 if(COMMAND cmake_policy)
@@ -10,11 +10,14 @@ endif(COMMAND cmake_policy)
 project (rphp)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules )
+set(RPHP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
+set(RPHP_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 MESSAGE( STATUS "PROJECT_SOURCE_DIR: " ${PROJECT_SOURCE_DIR} )
 MESSAGE( STATUS "CMAKE_MODULE_PATH: " ${CMAKE_MODULE_PATH} )
 
-set(RPHP_RUNTIME_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/runtime)
-set(RPHP_COMPILER_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/compiler)
+MESSAGE( STATUS "RPHP_INCLUDE_DIR: " ${RPHP_INCLUDE_DIR} )
+MESSAGE( STATUS "RPHP_LIB_DIR: " ${RPHP_LIB_DIR} )
+
 
 Find_Package(Boost REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
@@ -28,10 +31,9 @@ FIND_PACKAGE(CppUnit) # optional
 Find_PACKAGE(Doxygen) # optional
 
 add_subdirectory(runtime)
-add_subdirectory(runtime-ir)
+add_subdirectory(c-runtime)
 add_subdirectory(compiler)
 add_subdirectory(frontend/cli)
-
 
 
 IF(CPPUNIT_FOUND)
@@ -42,6 +44,6 @@ ENDIF(CPPUNIT_FOUND)
 
 
 IF(DOXYGEN_FOUND)
-  SET(DOXYFILE Doxyfile.rphp)
+  SET(DOXYFILE doc/Doxyfile.rphp)
   ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${DOXYFILE} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 ENDIF(DOXYGEN_FOUND)

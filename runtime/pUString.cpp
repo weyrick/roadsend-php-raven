@@ -19,7 +19,7 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pUString.h"
+#include "rphp/runtime/pUString.h"
 
 namespace rphp {
 

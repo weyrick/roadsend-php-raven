@@ -19,9 +19,9 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pObject.h"
-#include "pClassManager.h"
-#include "pSupport.h"
+#include "rphp/runtime/pObject.h"
+#include "rphp/runtime/pClassManager.h"
+#include "rphp/runtime/pSupport.h"
 
 namespace rphp {
 

@@ -8,7 +8,7 @@ driver for testing functions
 #include <cppunit/config/SourcePrefix.h>
 #include <iostream>
 
-#include "pOutputBuffer.h"
+#include "rphp/runtime/pOutputBuffer.h"
 #include "runtimeTestCase.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( runtimeTestCase );

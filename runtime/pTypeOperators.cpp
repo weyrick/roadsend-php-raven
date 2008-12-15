@@ -20,7 +20,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "pTypeOperators.h"
+#include "rphp/runtime/pTypeOperators.h"
 
 namespace rphp {
 

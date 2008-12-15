@@ -19,10 +19,10 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pExtManager.h"
-#include "pSupport.h"
+#include "rphp/runtime/pExtManager.h"
+#include "rphp/runtime/pSupport.h"
 
-#include "standard/pStandardExt.h"
+#include "rphp/runtime/standard/pStandardExt.h"
 
 namespace rphp {
 

@@ -2,7 +2,7 @@
 
 MESSAGE( STATUS "runtime check" )
 
-include_directories (${Boost_INCLUDE_DIRS} ${RPHP_RUNTIME_INCLUDE_DIR})
+include_directories (${Boost_INCLUDE_DIRS} ${RPHP_INCLUDE_DIR})
 
 set(RUNTIME_SRC_FILES
   pUString.cpp

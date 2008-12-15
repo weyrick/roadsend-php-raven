@@ -9,7 +9,7 @@ driver for testing pVars
 #include <iostream>
 #include <unicode/ustream.h>
 
-#include "pRuntime.h"
+#include "rphp/runtime/pRuntime.h"
 #include "pvarTestCase.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION( pvarTestCase );

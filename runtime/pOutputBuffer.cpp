@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include "pOutputBuffer.h"
+#include "rphp/runtime/pOutputBuffer.h"
 
 namespace rphp {
 

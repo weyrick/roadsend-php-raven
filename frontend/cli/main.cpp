@@ -5,11 +5,11 @@
 #include <string>
 #include <llvm/Support/CommandLine.h>
 
-#include "pDriver.h"
-#include "pInterpretTarget.h"
-#include "pCompileTarget.h"
-#include "pStandAloneTargets.h"
-#include "pCompileAndLinkTarget.h"
+#include "rphp/driver/pDumpTarget.h"
+#include "rphp/driver/pInterpretTarget.h"
+#include "rphp/driver/pCompileTarget.h"
+#include "rphp/driver/pStandAloneTargets.h"
+#include "rphp/driver/pCompileAndLinkTarget.h"
 
 using namespace llvm;
 using namespace rphp;
@@ -48,7 +48,6 @@ int main( int argc, char* argv[] )
     if (encoding.empty())
         encoding = "ASCII";
 
-    pDriver driver;
     pTarget* target = NULL;
     if (compileModule) {
         target = new pCompileTarget(inputFile, "/");
@@ -72,44 +71,16 @@ int main( int argc, char* argv[] )
         target = saTarget;
     }
     else if (dumpToks) {
-        try {
-            driver.dumpTokens(boost::make_tuple(inputFile, encoding));
-        }
-        catch (std::exception& e) {
-            std::cerr << e.what() << std::endl;
-            return 1;
-        }
-        return 0;
+        target = new pDumpTarget(boost::make_tuple(inputFile, encoding), pDumpTarget::Tokens);
     }
     else if (dumpAST) {
-        try {
-            driver.dumpAST(boost::make_tuple(inputFile, encoding));
-        }
-        catch (std::exception& e) {
-            std::cerr << e.what() << std::endl;
-            return 1;
-        }
-        return 0;
+        target = new pDumpTarget(boost::make_tuple(inputFile, encoding), pDumpTarget::AST);
     }
     else if (dumpIR) {
-        try {
-            driver.dumpIR(boost::make_tuple(inputFile, encoding));
-        }
-        catch (std::exception& e) {
-            std::cerr << e.what() << std::endl;
-            return 1;
-        }
-        return 0;
+        target = new pDumpTarget(boost::make_tuple(inputFile, encoding), pDumpTarget::IR);
     }
     else if (dumpPre) {
-        try {
-            driver.dumpPre(boost::make_tuple(inputFile, encoding));
-        }
-        catch (std::exception& e) {
-            std::cerr << e.what() << std::endl;
-            return 1;
-        }
-        return 0;
+        target = new pDumpTarget(boost::make_tuple(inputFile, encoding), pDumpTarget::Preprocessor);
     }
     else {
         // default: compile and link single php script to native binary

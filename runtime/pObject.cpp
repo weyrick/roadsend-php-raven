@@ -20,8 +20,8 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include <iostream>
-#include "pObject.h"
-#include "pRuntime.h"
+#include "rphp/runtime/pObject.h"
+#include "rphp/runtime/pRuntime.h"
 
 namespace rphp {
 
