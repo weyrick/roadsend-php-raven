@@ -33,6 +33,8 @@ void pInterpretTarget::execute(void) {
     m.applyVisitor(&codeGen);
     llvm::Module* ir = codeGen.getIR();
 
+    log(logInfo, "JIT module at entry point ["+codeGen.entryFunctionName()+"]");
+
     // JIT frees ir
     pJIT engine;
     engine.executeWithRuntime(ir, codeGen.entryFunctionName());

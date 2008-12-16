@@ -37,9 +37,6 @@ using namespace llvm;
 
 namespace rphp {
 
-// run an llvm Module in the JIT
-// takes ownership of ModuleProvider
-// will call the given entryFunction with no arguments
 bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
 
     ExistingModuleProvider* MP = new ExistingModuleProvider(M);
@@ -65,6 +62,7 @@ bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
     // JIT magic
     pRuntimeEngine* r = new pRuntimeEngine();
     void *mainPtr = EE->getPointerToFunction(main);
+//    std::cerr << "found main function at: " << mainPtr << std::endl;
     // cast to entry function type (returns void, takes one parameter of runtime engine instance)
     // see pGenerator::createEntryPoint, pIRHelper::moduleEntryFunType
     void (*mainFunc)(pRuntimeEngine*) = (void (*)(pRuntimeEngine*))mainPtr;

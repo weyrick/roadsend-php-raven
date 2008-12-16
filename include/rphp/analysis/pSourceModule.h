@@ -42,10 +42,6 @@ private:
 
     // code generation
     AST::statementList ast_;
-    /*
-    llvm::Module* llvmModule_;
-    bool llvmModuleOwner_;
-    */
 
     // error reporting. move to parseContext struct/class/tuple?
     pUInt currentLineNum_;
@@ -64,13 +60,6 @@ public:
     // AST TRAVERSAL
     AST::statementList& getAST() { return ast_; }
     void applyVisitor(AST::baseVisitor* v);
-    /*
-    std::string getEntryFunctionName();
-    bool lowerToIR(pCompileTarget* target);
-    void writeBitcode(pFileNameString fileName);
-    void setLLVMModuleOwnership(bool v) { llvmModuleOwner_ = v; }
-    llvm::Module* getLLVMModule() { return llvmModule_; }
-    */
 
     // PARSING
     pUInt currentLineNum() const { return currentLineNum_; }
@@ -87,7 +76,6 @@ public:
 
     // DEBUG
     void dumpAST();
-    //void dumpIR();
 
 };
 

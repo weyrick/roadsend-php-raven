@@ -64,6 +64,8 @@ private:
 
     symbolTableType globalSymbols_;
 
+    bool finalized_;
+
 private:
     void loadAndLinkRuntimeIR(void);
     void createEntryPoint(void);
@@ -77,7 +79,11 @@ public:
 
     void finalize(void);
 
-    llvm::Module* getIR(void) { return llvmModule_; }
+    llvm::Module* getIR(void) {
+        if (!finalized_)
+            finalize();
+        return llvmModule_;
+    }
     const std::string& entryFunctionName(void) const { return entryFunctionName_; }
 
     // nodes

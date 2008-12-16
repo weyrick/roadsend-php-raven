@@ -23,7 +23,6 @@
 
 #include <llvm/Module.h>
 #include <llvm/GlobalVariable.h>
-#include <llvm/Analysis/Verifier.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
 #include <llvm/Instructions.h>
@@ -48,7 +47,8 @@ pGenerator::pGenerator(const std::string& moduleName):
     currentFunction_(NULL),
     valueStack_(),
     destructList_(),
-    globalSymbols_()
+    globalSymbols_(),
+    finalized_(false)
 {
 
     loadAndLinkRuntimeIR();
@@ -120,8 +120,7 @@ void pGenerator::finalize(void) {
     destructList_.pop();
     // create return
     initFun->getEntryBlock().getInstList().push_back(ReturnInst::Create());
-    // DEBUG
-    verifyModule(*llvmModule_);
+    finalized_ = true;
 }
 
 // create a pVar on the stack. this handles construction

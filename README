@@ -1,9 +1,9 @@
 
-Roadsend PHP
-------------
+Roadsend PHP (raven)
+--------------------
 
 This source tree is a C++ rewrite of the original Roadsend PHP written in Bigloo scheme.
 
 To compile, it requires a recent C++ compiler, Boost, and LLVM. For more information, see
-http://code.roadsend.com/pcc/
+http://code.roadsend.com/rphp/
 

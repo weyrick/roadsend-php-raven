@@ -30,10 +30,6 @@ namespace rphp {
 pSourceModule::pSourceModule(pSourceFileDesc file):
     source_(NULL),
     ast_(),
-    /*
-    llvmModule_(NULL),
-    llvmModuleOwner_(true),
-    */
     currentLineNum_(0),
     lastNewline_(),
     lastToken_()
@@ -49,12 +45,6 @@ pSourceModule::~pSourceModule() {
     for(AST::statementList::iterator s = ast_.begin(); s != ast_.end(); ++s) {
         delete *s;
     }
-    /*
-    // only if codegen was performed, and we are still the owner
-    // we aren't the owner if the llvmModule was executed in the JIT, for example
-    if (llvmModuleOwner_)
-        delete llvmModule_;
-    */
     delete source_;
 }
 
@@ -70,58 +60,7 @@ void pSourceModule::dumpAST() {
     applyVisitor(&v);
 
 }
-/*
-void pSourceModule::dumpIR() {
 
-    pCompileTarget* target = new pCompileTarget(source_->fileName(), "/");
-    if (lowerToIR(target)) {
-        // dump all generated symbols (globals and functions). this skips all of the
-        // imported runtime jazz
-        const llvm::ValueSymbolTable& sTable = llvmModule_->getValueSymbolTable();
-
-        std::string name;
-        for(llvm::ValueSymbolTable::const_iterator s = sTable.begin(); s != sTable.end(); ++s) {
-            name.assign(s->getKeyData());
-            if (// functions start with the module identifier name (mangled script file name) 
-                name.substr(0, llvmModule_->getModuleIdentifier().length()) == llvmModule_->getModuleIdentifier() ||
-                // global literal strings
-                name.substr(0, 5) == ".bstr" ||
-                name.substr(0, 5) == ".ustr" 
-               ) {
-                s->getValue()->dump();
-            }
-        }
-    }
-    delete target;
-
-}
-
-
-bool pSourceModule::lowerToIR(pCompileTarget* target) {
-
-    assert(target != NULL);
-    assert(llvmModule_ == NULL);
-
-    llvmModule_ = new llvm::Module(source_->fileName());
-    pGenerator codeGen(llvmModule_, target);
-    applyVisitor(&codeGen);
-    codeGen.finalize();
-
-    //bool broken = verifyModule(llvmModule_, ReturnStatusAction);
-    return true;
-
-}
-
-void pSourceModule::writeBitcode(pFileNameString fileName) {
-
-    pGenSupport::writeBitcode(llvmModule_, fileName);
-
-}
-
-std::string pSourceModule::getEntryFunctionName() {
-    return pGenSupport::mangleModuleName(source_->fileName());
-}
-*/
 void pSourceModule::parseError(pSourceRange* r) {
 
     // show the line the error occured on

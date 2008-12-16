@@ -20,6 +20,7 @@
 */
 
 #include <llvm/Module.h>
+#include <llvm/Analysis/Verifier.h>
 
 #include "rphp/driver/pDumpTarget.h"
 #include "rphp/analysis/pSourceModule.h"
@@ -88,6 +89,10 @@ void pDumpTarget::dumpIR(void) {
     m.applyVisitor(&codeGen);
     llvm::Module* ir = codeGen.getIR();
     pGenSupport::dumpIR(ir);
+    std::string errMsg;
+//    if (llvm::verifyModule(*ir, llvm::ReturnStatusAction, &errMsg)) {
+//        std::cout << "IR verify failed: " << errMsg << std::endl;
+//    }
     delete ir;
 
 }
