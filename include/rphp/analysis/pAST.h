@@ -31,6 +31,7 @@ namespace rphp { namespace AST {
 
 // NOTE: if you change this, check static dispatch table in pASTVisitors.cpp!
 enum nodeKind {
+    blockKind,
     echoStmtKind,
     inlineHtmlKind,
     literalStringKind,
@@ -61,6 +62,21 @@ public:
 };
 
 typedef std::vector<stmt*> statementList;
+
+// a block of statements
+class block: public stmt {
+public:
+    statementList statements;
+
+    block(void): stmt(blockKind) { }
+    ~block(void) {
+        for (int i=0; i < statements.size(); i++) {
+            delete statements[i];
+        }
+    }
+    
+};
+
 
 // declaration base class
 class decl: public stmt {

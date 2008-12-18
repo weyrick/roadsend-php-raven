@@ -71,18 +71,27 @@ using namespace rphp;
 }   
 
 %type module {int}
-module ::= statement_list.
+module ::= statement_list(LIST). { pMod->setAST(LIST); delete LIST; }
 
-%type statement_list {int}
-statement_list ::= .
-statement_list ::= statement_list statement(A). { pMod->getAST().push_back(A); }
+%type statement_list {AST::statementList*}
+statement_list(A) ::= . { A = new AST::statementList(); }
+statement_list(A) ::= statement_list(B) statement(C). { B->push_back(C); A = B; }
 
 /******** STATEMENTS ********/
 %type statement {AST::stmt*}
+statement(A) ::= statementBlock(B). { A = B; }
 statement(A) ::= inlineHTML(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement ::= T_SEMI.
+
+// statement block
+%type statementBlock{AST::block*}
+statementBlock(A) ::= T_LEFTCURLY statement_list(B) T_RIGHTCURLY. {
+    A = new AST::block();
+    A->statements.assign(B->begin(), B->end());
+    delete B;
+}
 
 // echo
 %type echo {AST::echoStmt*}

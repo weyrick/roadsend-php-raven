@@ -59,6 +59,7 @@ public:
 
     // AST TRAVERSAL
     AST::statementList& getAST() { return ast_; }
+    void setAST(const AST::statementList* list) { ast_.assign(list->begin(), list->end()); }
     void applyVisitor(AST::baseVisitor* v);
 
     // PARSING

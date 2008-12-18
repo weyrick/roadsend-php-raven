@@ -34,6 +34,7 @@ private:
 public:
     virtual void visit(stmt*);
 
+    void visit_block(block*);
     virtual void visit_echoStmt(echoStmt*) { }
     virtual void visit_inlineHtml(inlineHtml*) { }
     virtual void visit_literalString(literalString*) { }
