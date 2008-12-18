@@ -24,7 +24,6 @@
 
 #include <llvm/Module.h>
 #include <llvm/System/DynamicLibrary.h>
-#include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/ModuleProvider.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/ExecutionEngine/JIT.h>
@@ -36,6 +35,39 @@
 using namespace llvm;
 
 namespace rphp {
+
+bool pJIT::executeMain(llvm::Module* M) {
+
+//M->dump();
+    ExistingModuleProvider* MP = new ExistingModuleProvider(M);
+
+    std::string errMsg;
+    ExecutionEngine* EE = ExecutionEngine::createJIT(MP, &errMsg);
+    if (!EE) {
+        std::cerr << errMsg << std::endl;
+        return false;
+    }
+
+    Function* main = MP->getModule()->getFunction("main");
+    if (!main) {
+        std::cerr << "error: 'main' entry symbol not found" << std::endl;
+        delete EE;
+        return false;
+    }
+
+    EE->runStaticConstructorsDestructors(false);
+
+    std::vector<GenericValue> noargs;
+    EE->runFunction(main, noargs);
+
+    EE->runStaticConstructorsDestructors(true);
+
+    delete EE;
+
+    return true;
+
+}
+
 
 bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
 

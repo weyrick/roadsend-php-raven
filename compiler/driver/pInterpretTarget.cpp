@@ -19,9 +19,13 @@
    ***** END LICENSE BLOCK *****
 */
 
+#include <llvm/Linker.h>
+
+#include "rphp/driver/pTargetError.h"
 #include "rphp/driver/pInterpretTarget.h"
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/IR/pGenerator.h"
+#include "rphp/IR/pGenSupport.h"
 #include "rphp/JIT/pJIT.h"
 
 namespace rphp {
@@ -31,13 +35,23 @@ void pInterpretTarget::execute(void) {
     pSourceModule  m(inputFile_);
     pGenerator codeGen(inputFile_);
     m.applyVisitor(&codeGen);
-    llvm::Module* ir = codeGen.getIR();
 
-    log(logInfo, "JIT module at entry point ["+codeGen.entryFunctionName()+"]");
+    llvm::Module* ir = codeGen.getIR();
+    llvm::Module* stub = pGenSupport::createStandAloneStubModule("stub", codeGen.entryFunctionName());
+
+    std::string errMsg;
+    llvm::Linker l("stub_link", stub);
+    l.LinkInModule(ir, &errMsg);
+    if (errMsg.length()) {
+        throw pTargetError("error linking in runtime IR [" + errMsg + "]");
+    }
+
+    // take ownership of module so it's not freed
+    l.releaseModule();
 
     // JIT frees ir
     pJIT engine;
-    engine.executeWithRuntime(ir, codeGen.entryFunctionName());
+    engine.executeMain(stub);
 
 }
 

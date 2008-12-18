@@ -34,6 +34,7 @@ class pJIT {
 
 public:
     bool executeWithRuntime(llvm::Module* M, std::string entryFunction);
+    bool executeMain(llvm::Module* M);
 
 };
 
