@@ -15,7 +15,7 @@ include_directories (
 # lexer, parser generation
 # http://www.cmake.org/pipermail/cmake/2002-September/003028.html
 
-add_executable( lemon
+add_executable( lemon-pg
                 lemon/lemon.c )
 
 # Create target for the parser
@@ -43,7 +43,7 @@ ADD_CUSTOM_COMMAND(
    ARGS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/rphp_grammar.y ${CMAKE_CURRENT_BINARY_DIR}
    COMMAND cp
    ARGS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/lempar.c ${CMAKE_CURRENT_BINARY_DIR}
-   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/lemon
+   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/lemon-pg
    ARGS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.y
    TARGET rphp-parser
    DEPENDS lemon
