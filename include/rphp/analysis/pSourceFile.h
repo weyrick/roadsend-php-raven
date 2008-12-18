@@ -36,7 +36,7 @@ private:
 
 public:
 
-    pSourceFile(pSourceFileDesc file);
+    pSourceFile(const pSourceFileDesc& file);
 
     const pFileNameString& fileName(void) const { return file_.get<0>(); }
     const std::string& encoding(void) const { return file_.get<1>(); }

@@ -22,6 +22,7 @@
 #ifndef RPHP_PCOMPILETARGET_H_
 #define RPHP_PCOMPILETARGET_H_
 
+#include "rphp/runtime/pTypes.h"
 #include "pTarget.h"
 
 namespace rphp {
@@ -30,7 +31,7 @@ namespace rphp {
 class pCompileTarget: public pTarget {
 
 protected:
-    std::string inputFile_;
+    pSourceFileDesc inputFile_;
     std::string projectRoot_;
 
     // INT options:
@@ -38,11 +39,11 @@ protected:
     // verbosityLevel           - informational verbosity level
 
 public:
-    pCompileTarget(const std::string& fileName, const std::string& root): inputFile_(fileName), projectRoot_(root) { }
+    pCompileTarget(const pSourceFileDesc& fileName, const std::string& root): inputFile_(fileName), projectRoot_(root) { }
 
     virtual void execute(void);
 
-    const std::string& getInputFileName(void) const { return inputFile_; }
+    const std::string& getInputFileName(void) const { return inputFile_.get<0>(); }
     const std::string& getProjectRoot(void) const { return projectRoot_; }
 
 };

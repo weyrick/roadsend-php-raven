@@ -33,12 +33,12 @@ void pCompileTarget::execute(void) {
     std::string outputFile;
 
     // TODO: check stringOptions for outputFile
-    outputFile = inputFile_+".bc";
+    outputFile = inputFile_.get<0>()+".bc";
 
-    log(logInfo, "compiling module ["+inputFile_+"] to ["+outputFile+"]");
+    log(logInfo, "compiling module ["+inputFile_.get<0>()+"] to ["+outputFile+"]");
 
     pSourceModule  m(inputFile_);
-    pGenerator codeGen(inputFile_);
+    pGenerator codeGen(inputFile_.get<0>());
     m.applyVisitor(&codeGen);
     llvm::Module* ir = codeGen.getIR();
     pGenSupport::writeBitcode(ir, outputFile);

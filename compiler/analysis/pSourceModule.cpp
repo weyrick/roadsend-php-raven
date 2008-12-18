@@ -27,7 +27,7 @@
 
 namespace rphp {
 
-pSourceModule::pSourceModule(pSourceFileDesc file):
+pSourceModule::pSourceModule(const pSourceFileDesc& file):
     source_(NULL),
     ast_(),
     currentLineNum_(0),

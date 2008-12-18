@@ -49,7 +49,7 @@ private:
     pSourceRange lastToken_;
 
 public:
-    pSourceModule(pSourceFileDesc file);
+    pSourceModule(const pSourceFileDesc& file);
     ~pSourceModule();
 
     // INSPECTION

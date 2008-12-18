@@ -22,6 +22,7 @@
 #ifndef RPHP_PCOMPILEANDLINKTARGET_H_
 #define RPHP_PCOMPILEANDLINKTARGET_H_
 
+#include "rphp/runtime/pTypes.h"
 #include "rphp/driver/pCompileTarget.h"
 #include "rphp/driver/pStandAloneTargets.h"
 
@@ -32,9 +33,9 @@ class pCompileAndLinkTarget : public pStandAloneTarget {
     pCompileTarget* cTarget_;
 
 public:
-    pCompileAndLinkTarget(const std::string& fileName,
+    pCompileAndLinkTarget(const pSourceFileDesc& fileName,
                           const std::string& root,
-                          const std::string& outName): pStandAloneTarget(outName, fileName), cTarget_(new pCompileTarget(fileName, root)) { }
+                          const std::string& outName): pStandAloneTarget(outName, fileName.get<0>()), cTarget_(new pCompileTarget(fileName, root)) { }
 
     ~pCompileAndLinkTarget(void) { delete cTarget_; }
 

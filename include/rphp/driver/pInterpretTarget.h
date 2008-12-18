@@ -29,7 +29,7 @@ namespace rphp {
 class pInterpretTarget: public pCompileTarget {
 
 public:
-    pInterpretTarget(const std::string& fileName, const std::string& root): pCompileTarget(fileName,root) { }
+    pInterpretTarget(const pSourceFileDesc& fileName, const std::string& root): pCompileTarget(fileName,root) { }
 
     virtual void execute(void);
 

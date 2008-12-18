@@ -48,12 +48,14 @@ int main( int argc, char* argv[] )
     if (encoding.empty())
         encoding = "ASCII";
 
+    pSourceFileDesc inFile = boost::make_tuple(inputFile, encoding);
+
     pTarget* target = NULL;
     if (compileModule) {
-        target = new pCompileTarget(inputFile, "/");
+        target = new pCompileTarget(inFile, "/");
     }
     else if (iSF) {
-        target = new pInterpretTarget(inputFile, "/");
+        target = new pInterpretTarget(inFile, "/");
     }
     else if (linkSA) {
         if (outputFile.empty()) {
@@ -71,29 +73,29 @@ int main( int argc, char* argv[] )
         target = saTarget;
     }
     else if (dumpToks) {
-        target = new pDumpTarget(boost::make_tuple(inputFile, encoding), pDumpTarget::Tokens);
+        target = new pDumpTarget(inFile, pDumpTarget::Tokens);
     }
     else if (dumpAST) {
-        target = new pDumpTarget(boost::make_tuple(inputFile, encoding), pDumpTarget::AST);
+        target = new pDumpTarget(inFile, pDumpTarget::AST);
     }
     else if (dumpIR) {
-        target = new pDumpTarget(boost::make_tuple(inputFile, encoding), pDumpTarget::IR);
+        target = new pDumpTarget(inFile, pDumpTarget::IR);
     }
     else if (dumpPre) {
-        target = new pDumpTarget(boost::make_tuple(inputFile, encoding), pDumpTarget::Preprocessor);
+        target = new pDumpTarget(inFile, pDumpTarget::Preprocessor);
     }
     else {
         // default: compile and link single php script to native binary
-        std::string oFile = outputFile;
-        if (oFile.empty()) {
+        std::string oFileName = outputFile;
+        if (oFileName.empty()) {
             if (inputFile.find_first_of('.')) {
-                oFile = inputFile.substr(0, inputFile.find_first_of('.'));
+                oFileName = inputFile.substr(0, inputFile.find_first_of('.'));
             }
             else {
-                oFile = inputFile+".exe";
+                oFileName = inputFile+".exe";
             }
         }
-        pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inputFile, "/", oFile);
+        pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inFile, "/", oFileName);
         if (!libSearchPath.empty())
             saTarget->addLibSearchPath(libSearchPath);
         target = saTarget;

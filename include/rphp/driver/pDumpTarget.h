@@ -45,7 +45,7 @@ protected:
     void dumpIR();
 
 public:
-    pDumpTarget(pSourceFileDesc file, int t): sourceFile_(file), type_(t) { }
+    pDumpTarget(const pSourceFileDesc& file, int t): sourceFile_(file), type_(t) { }
 
     virtual void execute(void);
 

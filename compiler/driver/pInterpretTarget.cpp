@@ -33,7 +33,7 @@ namespace rphp {
 void pInterpretTarget::execute(void) {
 
     pSourceModule  m(inputFile_);
-    pGenerator codeGen(inputFile_);
+    pGenerator codeGen(inputFile_.get<0>());
     m.applyVisitor(&codeGen);
 
     llvm::Module* ir = codeGen.getIR();

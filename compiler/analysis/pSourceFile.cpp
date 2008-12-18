@@ -34,7 +34,7 @@
 
 namespace rphp { 
 
-pSourceFile::pSourceFile(pSourceFileDesc file):
+pSourceFile::pSourceFile(const pSourceFileDesc& file):
     file_(file)
 {
 
