@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <llvm/Support/CommandLine.h>
+#include <llvm/System/Path.h>
 
 #include "rphp/driver/pDumpTarget.h"
 #include "rphp/driver/pInterpretTarget.h"
@@ -88,12 +89,13 @@ int main( int argc, char* argv[] )
         // default: compile and link single php script to native binary
         std::string oFileName = outputFile;
         if (oFileName.empty()) {
-            if (inputFile.find_first_of('.')) {
-                oFileName = inputFile.substr(0, inputFile.find_first_of('.'));
-            }
-            else {
-                oFileName = inputFile+".exe";
-            }
+            // try to whip something up
+            sys::Path oFileP(inputFile);
+            oFileP.eraseSuffix();
+            if (oFileP.isValid())
+                oFileName = oFileP.toString();
+            else
+                oFileName = "a.out";
         }
         pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inFile, "/", oFileName);
         if (!libSearchPath.empty())
