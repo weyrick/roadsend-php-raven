@@ -32,6 +32,7 @@ namespace rphp { namespace AST {
 // NOTE: if you change this, check static dispatch table in pASTVisitors.cpp!
 enum nodeKind {
     blockKind,
+    ifStmtKind,    
     echoStmtKind,
     inlineHtmlKind,
     literalStringKind,
@@ -95,6 +96,24 @@ public:
 };
 
 typedef std::vector<expr*> expressionList;
+
+// if statement
+class ifStmt: public stmt {
+
+    expr* condition_;
+    block* trueBlock_;
+
+public:
+    ifStmt(expr* cond, block* trueBlock): condition_(cond), trueBlock_(trueBlock), stmt(ifStmtKind) { }
+    ~ifStmt(void) {
+        delete condition_;
+        delete trueBlock_;
+    }
+
+    expr* condition(void) { return condition_; }
+    block* trueBlock(void) { return trueBlock_; }
+
+};
 
 // literal expression base class
 class literalExpr: public expr {

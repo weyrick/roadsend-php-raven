@@ -28,6 +28,7 @@ namespace rphp { namespace AST {
 baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
     // NOTE: requires same order as nodeKind enum in pAST.h
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_block),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_ifStmt),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_echoStmt),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_inlineHtml),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalString),
@@ -61,6 +62,22 @@ void baseVisitor::visit_block(block* b) {
 void dumpVisitor::showindent() {
     if (indentLevel_)
         std::cout << std::string(indentLevel_, ' ');
+}
+
+void dumpVisitor::visit_ifStmt(ifStmt* n) {
+    showindent();
+    std::cout << "(if:" << std::endl;
+    std::cout << " cond:" << std::endl;
+    indent();
+    visit(n->condition());
+    unindent();
+    showindent();
+    std::cout << " true:" << std::endl;
+    indent();
+    visit(n->trueBlock());
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
 }
 
 void dumpVisitor::visit_echoStmt(echoStmt* n) {

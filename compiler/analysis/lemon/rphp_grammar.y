@@ -83,6 +83,7 @@ statement(A) ::= statementBlock(B). { A = B; }
 statement(A) ::= inlineHTML(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
+statement(A) ::= ifBlock(B). { A = B; }
 statement ::= T_SEMI.
 
 // statement block
@@ -102,6 +103,13 @@ echo(A) ::= T_ECHO expr(B). { A = new AST::echoStmt(B); }
 inlineHTML(A) ::= T_INLINE_HTML(B).
 {
     A = new AST::inlineHtml(*B);
+}
+
+// conditionals
+%type ifBlock {AST::ifStmt*}
+ifBlock(A) ::= T_IF T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY).
+{
+    A = new AST::ifStmt(COND, TRUEBODY);
 }
 
 /****** EXPRESSIONS *********/
