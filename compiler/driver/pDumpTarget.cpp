@@ -65,9 +65,11 @@ void pDumpTarget::dumpPre(void) {
     pSourceFile* source = new pSourceFile(sourceFile_);
     lexer::pLexer l(source);
     bool success = l.preprocess();
-    std::wcout << l.contents();
     if (!success) {
-        std::cout << "preprocess failed due to lex error" << std::endl;
+        std::cout << "preprocess failed due to lexer error" << std::endl;
+    }
+    else {
+        std::wcout << l.contents();
     }
     delete source;
 

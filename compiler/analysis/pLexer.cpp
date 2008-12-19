@@ -46,6 +46,7 @@ bool pLexer::preprocess(void) {
     pPreprocessTokens preTokens;
     pPreprocessLexer preLexer(preTokens);
     bool rewrote = false;
+    bool success = true;
 
     pSourceString buffer;
     buffer.reserve(contents_.capacity());
@@ -66,9 +67,9 @@ bool pLexer::preprocess(void) {
         if (curID == 0) {
             // lex error. stop preprocessor and let the main parser
             // show a nice error
-            sourceBegin_ = contents_.begin();
-            sourceEnd_ = contents_.end();
-            return false;
+            success = false;
+            rewrote = true;
+            break;
         }
         else if (curID == T_OPEN_TAG) {
             // go to php
@@ -137,7 +138,7 @@ bool pLexer::preprocess(void) {
     sourceBegin_ = contents_.begin();
     sourceEnd_ = contents_.end();
 
-    return true;
+    return success;
     
 }
 
