@@ -59,8 +59,7 @@ using namespace rphp;
 %type T_ELSE {int}
 %type T_ASSIGN {int}
 %type T_DQ_STRING {int}
-
-// xxx temp, these are real nodes
+%type T_NOT {int}
 %type T_IDENTIFIER {int}
 
 %syntax_error {  
@@ -119,6 +118,7 @@ expr(A) ::= assignment(B). { A = B; }
 expr(A) ::= lval(B). { A = B; }
 expr(A) ::= functionInvoke(B). { A = B; }
 expr(A) ::= constructorInvoke(B). { A = B; }
+expr(A) ::= logicalNot(B). { A = B; }
 
 /** LITERALS **/
 %type literal {AST::literalExpr*}
@@ -175,6 +175,10 @@ literal(A) ::= T_IDENTIFIER(B).
         A = new AST::literalString(*B);
     }
 }
+
+/** LOGICAL OPERATORS **/
+%type logicalNot {AST::logicalNot*}
+logicalNot(A) ::= T_NOT expr(R). { A = new AST::logicalNot(R); }
 
 /** ASSIGNMENT **/
 %type assignment {AST::assignment*}

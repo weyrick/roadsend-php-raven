@@ -43,6 +43,7 @@ public:
     virtual void visit_literalFloat(literalFloat*) { }
     virtual void visit_literalBool(literalBool*) { }
     virtual void visit_literalNull(literalNull*) { }
+    virtual void visit_logicalNot(logicalNot*) { }
     virtual void visit_assignment(assignment*) { }
     virtual void visit_var(var*) { }
     virtual void visit_functionInvoke(functionInvoke*) { }
@@ -66,6 +67,7 @@ public:
     void visit_literalFloat(literalFloat*);
     void visit_literalBool(literalBool*);
     void visit_literalNull(literalNull*);
+    void visit_logicalNot(logicalNot*);
     void visit_assignment(assignment*);
     void visit_var(var*);
     void visit_functionInvoke(functionInvoke*);

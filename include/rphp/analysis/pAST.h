@@ -40,6 +40,7 @@ enum nodeKind {
     literalFloatKind,
     literalNullKind,
     literalBoolKind,
+    logicalNotKind,
     assignmentKind,
     varKind,
     functionInvokeKind,
@@ -179,6 +180,22 @@ public:
     literalNull(void): literalExpr(literalNullKind) { }
 
 };
+
+// NODE: logical not
+class logicalNot: public expr {
+
+    expr* rVal_;
+
+public:
+    logicalNot(expr* rVal): expr(logicalNotKind), rVal_(rVal) { }
+    ~logicalNot(void) {
+        delete rVal_;
+    }
+
+    expr* rVal(void) { return rVal_; }
+
+};
+
 
 // NODE: inline html
 class inlineHtml: public literalString {

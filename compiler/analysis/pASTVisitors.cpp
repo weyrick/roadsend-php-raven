@@ -36,6 +36,7 @@ baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalFloat),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalNull),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalBool),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_logicalNot),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_assignment),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_var),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionInvoke),
@@ -148,6 +149,25 @@ void dumpVisitor::visit_literalNull(literalNull* n)  {
     showindent();
     std::cout << "literal NULL" << std::endl;
 }
+
+void dumpVisitor::visit_logicalNot(logicalNot* n)  {
+    showindent();
+    std::cout << "(logical NOT:" << std::endl;
+    indent();
+
+    showindent();
+    std::cout << "(rval: " << std::endl;
+    indent();
+    visit(n->rVal());
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+}
+
 
 void dumpVisitor::visit_assignment(assignment* n)  {
     showindent();

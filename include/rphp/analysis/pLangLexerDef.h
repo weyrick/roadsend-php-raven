@@ -63,6 +63,7 @@ struct rphpLangTokens : lexer_def<Lexer>
             | token_def(L'=', T_ASSIGN)
             | token_def(L';', T_SEMI)
             | token_def(L',', T_COMMA)
+            | token_def(L'!', T_NOT)
             | token_def(L"\\?>", T_CLOSE_TAG)
             | token_def(L"if", T_IF)
             | token_def(L"while", T_WHILE)
