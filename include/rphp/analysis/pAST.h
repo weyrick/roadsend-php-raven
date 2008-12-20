@@ -56,10 +56,16 @@ class stmt {
     pUInt endLineNum_;
 
 public:
-    stmt(nodeKind k): kind_(k) { }
+    stmt(nodeKind k): kind_(k), startLineNum_(0), endLineNum_(0) { }
     virtual ~stmt(void) { }
 
     nodeKind getKind(void) const { return kind_; }
+
+    pUInt setLine(pUInt start) { startLineNum_ = start; endLineNum_ = start; }
+    pUInt setLine(pUInt start, pUInt end) { startLineNum_ = start; endLineNum_ = end; }
+
+    pUInt startLineNum(void) const { return startLineNum_; }
+    pUInt endLineNum(void) const { return endLineNum_; }
 
 };
 

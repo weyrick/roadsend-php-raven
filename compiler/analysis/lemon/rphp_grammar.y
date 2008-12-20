@@ -87,21 +87,28 @@ statement ::= T_SEMI.
 
 // statement block
 %type statementBlock{AST::block*}
-statementBlock(A) ::= T_LEFTCURLY statement_list(B) T_RIGHTCURLY. {
+statementBlock(A) ::= T_LEFTCURLY statement_list(B) T_RIGHTCURLY.
+{
     A = new AST::block();
     A->statements.assign(B->begin(), B->end());
+    A->setLine(pMod->currentLineNum());
     delete B;
 }
 
 // echo
 %type echo {AST::echoStmt*}
-echo(A) ::= T_ECHO expr(B). { A = new AST::echoStmt(B); }
+echo(A) ::= T_ECHO expr(B).
+{
+    A = new AST::echoStmt(B);
+    A->setLine(pMod->currentLineNum());
+}
 
 // inline html
 %type inlineHTML {AST::inlineHtml*}
 inlineHTML(A) ::= T_INLINE_HTML(B).
 {
     A = new AST::inlineHtml(*B);
+    A->setLine(pMod->currentLineNum());
 }
 
 // conditionals
@@ -109,6 +116,7 @@ inlineHTML(A) ::= T_INLINE_HTML(B).
 ifBlock(A) ::= T_IF T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY).
 {
     A = new AST::ifStmt(COND, TRUEBODY);
+    A->setLine(pMod->currentLineNum());
 }
 
 /****** EXPRESSIONS *********/
@@ -147,13 +155,22 @@ literal(A) ::= T_SQ_STRING(B).
   else {
     A = new AST::literalString(pSourceRange(start, --(*B).end()), binaryString);
   }
+  A->setLine(pMod->currentLineNum());
 }
 
 // literal integers (decimal)
-literal(A) ::= T_LNUMBER(B). { A = new AST::literalInt(*B); }
+literal(A) ::= T_LNUMBER(B).
+{
+    A = new AST::literalInt(*B);
+    A->setLine(pMod->currentLineNum());
+}
 
 // literal integers (float)
-literal(A) ::= T_DNUMBER(B). { A = new AST::literalFloat(*B); }
+literal(A) ::= T_DNUMBER(B).
+{
+    A = new AST::literalFloat(*B);
+    A->setLine(pMod->currentLineNum());    
+}
 
 // literal identifier: null, true, false or string
 literal(A) ::= T_IDENTIFIER(B).
@@ -174,17 +191,23 @@ literal(A) ::= T_IDENTIFIER(B).
         // default to normal string
         A = new AST::literalString(*B);
     }
+    A->setLine(pMod->currentLineNum());
 }
 
 /** LOGICAL OPERATORS **/
 %type logicalNot {AST::logicalNot*}
-logicalNot(A) ::= T_NOT expr(R). { A = new AST::logicalNot(R); }
+logicalNot(A) ::= T_NOT expr(R).
+{
+    A = new AST::logicalNot(R);
+    A->setLine(pMod->currentLineNum());
+}
 
 /** ASSIGNMENT **/
 %type assignment {AST::assignment*}
 assignment(A) ::= lval(L) T_ASSIGN expr(R).
 {
     A = new AST::assignment(L, R);
+    A->setLine(pMod->currentLineNum());
 }
 
 /** LVALS **/
@@ -196,11 +219,13 @@ variable_lVal(A) ::= T_VARIABLE(B).
 {
     // strip $
     A = new AST::var(pSourceRange(++(*B).begin(), (*B).end()));
+    A->setLine(pMod->currentLineNum());
 }
 
 /** ARGLIST **/
 %type argList {AST::expressionList*}
-argList(A) ::= expr(B). {
+argList(A) ::= expr(B).
+{
     A = new AST::expressionList();
     A->push_back(B);
 }
@@ -209,7 +234,8 @@ argList(A) ::= expr(B) T_COMMA argList(C).
     C->push_back(B);
     A = C;
 }
-argList(A) ::= . {
+argList(A) ::= .
+{
     A = new AST::expressionList();
 }
 
@@ -220,6 +246,7 @@ functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
     A = new AST::functionInvoke(*B, // f name
                                  C  // expression list: arguments
                                 );
+    A->setLine(pMod->currentLineNum());
 }
 
 /** CONSTRUCTOR INVOKE **/
@@ -229,5 +256,6 @@ constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAR
     A = new AST::constructorInvoke(*B, // f name
                                     C  // expression list: arguments
                                    );
+    A->setLine(pMod->currentLineNum());
 }
 

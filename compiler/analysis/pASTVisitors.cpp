@@ -67,6 +67,8 @@ void dumpVisitor::showindent() {
 
 void dumpVisitor::visit_ifStmt(ifStmt* n) {
     showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
     std::cout << "(if:" << std::endl;
     std::cout << " cond:" << std::endl;
     indent();
@@ -83,6 +85,8 @@ void dumpVisitor::visit_ifStmt(ifStmt* n) {
 
 void dumpVisitor::visit_echoStmt(echoStmt* n) {
     showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
     std::cout << "(echoStmt:" << std::endl;
     indent();
     visit(n->rVal());
@@ -97,6 +101,8 @@ void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
         n->getStringVal().at(0) == RPHP_WNEWLINE)
         return;
     showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
     std::cout << "inline HTML ";
     if (n->isBinary()) {
         std::cout << "[binary]: \"";
@@ -109,6 +115,8 @@ void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
 }
 
 void dumpVisitor::visit_literalString(literalString* n)  {
+    showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "literal string ";
     if (n->isBinary()) {
@@ -123,6 +131,8 @@ void dumpVisitor::visit_literalString(literalString* n)  {
 
 void dumpVisitor::visit_literalInt(literalInt* n)  {
     showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
     std::cout << "literal int: ";
     std::wcout << n->getStringVal();
     std::cout << std::endl;
@@ -130,12 +140,16 @@ void dumpVisitor::visit_literalInt(literalInt* n)  {
 
 void dumpVisitor::visit_literalFloat(literalFloat* n)  {
     showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
     std::cout << "literal float: ";
     std::wcout << n->getStringVal();
     std::cout << std::endl;
 }
 
 void dumpVisitor::visit_literalBool(literalBool* n)  {
+    showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "literal bool: ";
     if (n->getBoolVal())
@@ -147,10 +161,14 @@ void dumpVisitor::visit_literalBool(literalBool* n)  {
 
 void dumpVisitor::visit_literalNull(literalNull* n)  {
     showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
     std::cout << "literal NULL" << std::endl;
 }
 
 void dumpVisitor::visit_logicalNot(logicalNot* n)  {
+    showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "(logical NOT:" << std::endl;
     indent();
@@ -170,6 +188,8 @@ void dumpVisitor::visit_logicalNot(logicalNot* n)  {
 
 
 void dumpVisitor::visit_assignment(assignment* n)  {
+    showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "(assignment:" << std::endl;
     indent();
@@ -197,6 +217,8 @@ void dumpVisitor::visit_assignment(assignment* n)  {
 
 void dumpVisitor::visit_var(var* n)  {
     showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
     std::cout << "var: $";
     std::cout << n->name();
     std::cout << std::endl;
@@ -204,6 +226,8 @@ void dumpVisitor::visit_var(var* n)  {
 
 void dumpVisitor::visit_functionInvoke(functionInvoke* n)  {
 
+    showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "(function invoke: ";
     std::cout << n->name() << std::endl;
@@ -228,6 +252,8 @@ void dumpVisitor::visit_functionInvoke(functionInvoke* n)  {
 
 void dumpVisitor::visit_constructorInvoke(constructorInvoke* n)  {
 
+    showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "(constructor invoke: ";
     std::cout << n->name() << std::endl;
