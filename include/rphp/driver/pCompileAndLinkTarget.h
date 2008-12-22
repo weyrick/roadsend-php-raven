@@ -35,7 +35,13 @@ class pCompileAndLinkTarget : public pStandAloneTarget {
 public:
     pCompileAndLinkTarget(const pSourceFileDesc& fileName,
                           const std::string& root,
-                          const std::string& outName): pStandAloneTarget(outName, fileName.get<0>()), cTarget_(new pCompileTarget(fileName, root)) { }
+                          const std::string& outName):
+                            pStandAloneTarget(outName, fileName.get<0>()),
+                            cTarget_(new pCompileTarget(fileName, root))
+    {
+        assert(cTarget_ && "compile target was empty");
+        assert(!cTarget_->getInputFileName().empty() && "input file was empty");
+    }
 
     ~pCompileAndLinkTarget(void) { delete cTarget_; }
 

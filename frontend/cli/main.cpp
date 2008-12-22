@@ -49,6 +49,9 @@ int main( int argc, char* argv[] )
     if (encoding.empty())
         encoding = "ASCII";
 
+
+    assert(!inputFile.empty() && "empty input file");
+    
     pSourceFileDesc inFile = boost::make_tuple(inputFile, encoding);
 
     pTarget* target = NULL;
@@ -97,6 +100,9 @@ int main( int argc, char* argv[] )
             else
                 oFileName = "a.out";
         }
+
+        assert(!oFileName.empty() && "empty output file");
+        
         pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inFile, "/", oFileName);
         if (!libSearchPath.empty())
             saTarget->addLibSearchPath(libSearchPath);
