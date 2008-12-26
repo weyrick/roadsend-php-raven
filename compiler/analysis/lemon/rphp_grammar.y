@@ -33,6 +33,8 @@
 
 using namespace rphp;
 
+#define TOKEN_LINE(T) pMod->getTokenLine(T->begin())
+
 }  
 
 %name rphpParse
@@ -54,7 +56,6 @@ using namespace rphp;
 
 // tokens
 %type T_INLINE_HTML {int}
-%type T_IF {int}
 %type T_WHILE {int}
 %type T_ELSE {int}
 %type T_ASSIGN {int}
@@ -87,11 +88,11 @@ statement ::= T_SEMI.
 
 // statement block
 %type statementBlock{AST::block*}
-statementBlock(A) ::= T_LEFTCURLY statement_list(B) T_RIGHTCURLY.
+statementBlock(A) ::= T_LEFTCURLY(LC) statement_list(B) T_RIGHTCURLY(RC).
 {
     A = new AST::block();
     A->statements.assign(B->begin(), B->end());
-    A->setLine(pMod->currentLineNum());
+    A->setLine(TOKEN_LINE(LC), TOKEN_LINE(RC));
     delete B;
 }
 
@@ -113,10 +114,10 @@ inlineHTML(A) ::= T_INLINE_HTML(B).
 
 // conditionals
 %type ifBlock {AST::ifStmt*}
-ifBlock(A) ::= T_IF T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY).
+ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY).
 {
     A = new AST::ifStmt(COND, TRUEBODY);
-    A->setLine(pMod->currentLineNum());
+    A->setLine(TOKEN_LINE(IF));
 }
 
 /****** EXPRESSIONS *********/

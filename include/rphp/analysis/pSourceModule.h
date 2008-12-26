@@ -23,6 +23,7 @@
 #define RPHP_PSOURCEMODULE_H_
 
 #include <vector>
+#include <boost/unordered_map.hpp>
 
 #include "rphp/analysis/pSourceTypes.h"
 #include "rphp/analysis/pSourceFile.h"
@@ -43,10 +44,11 @@ private:
     // code generation
     AST::statementList ast_;
 
-    // error reporting. move to parseContext struct/class/tuple?
+    // parsing context
     pUInt currentLineNum_;
     pSourceCharIterator lastNewline_;
     pSourceRange lastToken_;
+    boost::unordered_map<pSourceCharIterator::pointer, pUInt> tokenLineInfo_;
 
 public:
     pSourceModule(const pSourceFileDesc& file);
@@ -72,6 +74,23 @@ public:
 
     void setLastToken(pSourceRange i) { lastToken_ = i; }
     const pSourceRange& lastToken(void) const { return lastToken_; }
+
+    void setTokenLine(const pSourceCharIterator& t) {
+        tokenLineInfo_[&(*t)] = currentLineNum_;
+    }
+    
+    pUInt getTokenLine(const pSourceCharIterator& t) {
+        boost::unordered_map<pSourceCharIterator::pointer, pUInt>::const_iterator i = tokenLineInfo_.find(&(*t));
+        if (i == tokenLineInfo_.end())
+            return 0;
+        else
+            return (*i).second;
+    }
+
+    void finishParse(void) {
+        currentLineNum_ = 0;
+        tokenLineInfo_.clear();
+    }
 
     void parseError(pSourceRange* r);
 
