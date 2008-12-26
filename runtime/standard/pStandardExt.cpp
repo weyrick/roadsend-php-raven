@@ -56,10 +56,16 @@ void pStandardExt::extensionShutdown() {
 /* Library Implementation */
 
 pInt pStandardExt::strlen(pVar v) {
-    return (pInt)v.convertToBString().length();
+    v.convertToString();
+    if (v.isBString())
+        return (pInt)v.getBString().length();
+    else
+        return (pInt)v.getUString().length();
 }
 
 pVar pStandardExt::strpos(pVar haystackV, pVar needleV, pVar offsetV) {
+
+    // TODO: unicode 
 
     pBString haystack = haystackV.convertToBString();
     pBString needle = needleV.convertToBString();
