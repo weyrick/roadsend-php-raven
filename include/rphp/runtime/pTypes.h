@@ -21,6 +21,10 @@
 #ifndef RPHP_PTYPES_H_
 #define RPHP_PTYPES_H_
 
+// llvm JIT doesn't do inline asm, which is used by the atomic locking mechanism
+// in shared_ptr. this forces generic pthreads version instead to avoid it for now.
+#define BOOST_SP_USE_PTHREADS
+
 #include <boost/cstdint.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/variant.hpp>
