@@ -102,7 +102,8 @@ bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
 
     EE->runStaticConstructorsDestructors(true);
 
-    delete EE;
+    // FIXME: leak? 
+    //delete EE;
     delete r;
 
     return true;
