@@ -22,10 +22,10 @@
 #include <llvm/Linker.h>
 
 #include "rphp/driver/pTargetError.h"
-#include "rphp/driver/pInterpretTarget.h"
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/IR/pGenerator.h"
 #include "rphp/IR/pGenSupport.h"
+#include "rphp/JIT/pInterpretTarget.h"
 #include "rphp/JIT/pJIT.h"
 
 namespace rphp {
@@ -37,6 +37,7 @@ void pInterpretTarget::execute(void) {
     m.applyVisitor(&codeGen);
 
     llvm::Module* ir = codeGen.getIR();
+    /*
     llvm::Module* stub = pGenSupport::createStandAloneStubModule("stub", codeGen.entryFunctionName());
 
     std::string errMsg;
@@ -48,10 +49,12 @@ void pInterpretTarget::execute(void) {
 
     // take ownership of module so it's not freed
     l.releaseModule();
-
+    */
+    
     // JIT frees ir
     pJIT engine;
-    engine.executeMain(stub);
+    //engine.executeMain(stub);
+    engine.executeWithRuntime(ir, codeGen.entryFunctionName());
 
 }
 

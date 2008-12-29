@@ -7,7 +7,6 @@
 #include <llvm/System/Path.h>
 
 #include "rphp/driver/pDumpTarget.h"
-#include "rphp/driver/pInterpretTarget.h"
 #include "rphp/driver/pCompileTarget.h"
 #include "rphp/driver/pStandAloneTargets.h"
 #include "rphp/driver/pCompileAndLinkTarget.h"
@@ -29,8 +28,6 @@ int main( int argc, char* argv[] )
     cl::opt<bool> dumpIR ("dump-ir", cl::desc("Dump IR "));
     cl::opt<bool> dumpAST ("dump-ast", cl::desc("Dump AST"));
     cl::opt<bool> dumpPre ("dump-pre", cl::desc("Preprocess the source file and dump it to stdout"));
-    cl::opt<bool> iBC ("i", cl::desc("Interpret bytecode"));
-    cl::opt<bool> iSF ("f", cl::desc("Execute source file immediately"));
     cl::opt<int> verbosity ("v", cl::desc("Verbosity level (0=Silent/1=Info/2=Full/3+=Debug)"));
 
     cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
@@ -57,9 +54,6 @@ int main( int argc, char* argv[] )
     pTarget* target = NULL;
     if (compileModule) {
         target = new pCompileTarget(inFile, "/");
-    }
-    else if (iSF) {
-        target = new pInterpretTarget(inFile, "/");
     }
     else if (linkSA) {
         if (outputFile.empty()) {

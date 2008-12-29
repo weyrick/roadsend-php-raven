@@ -102,8 +102,8 @@ bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
 
     EE->runStaticConstructorsDestructors(true);
 
-    delete r;
     delete EE;
+    delete r;
 
     return true;
 

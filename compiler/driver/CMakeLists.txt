@@ -12,7 +12,6 @@ include_directories (
 set(DRIVER_LLVM_SRC_FILES
     pStandAloneTargets.cpp
     pCompileTarget.cpp
-    pInterpretTarget.cpp
     pDumpTarget.cpp
 )
 
@@ -31,15 +30,15 @@ set_source_files_properties( ${DRIVER_LLVM_SRC_FILES}
                              COMPILE_FLAGS ${LLVM_COMPILE_FLAGS}
                            )
 
-target_link_libraries( rphp-driver
-                       rphp-analysis
-                       rphp-llvm-ir
-                       rphp-llvm-jit
-                       )
+#target_link_libraries( rphp-driver
+#                       rphp-analysis
+#                       rphp-llvm-ir
+#                       rphp-llvm-jit
+#                       )
 
-set_target_properties( rphp-driver
-                       PROPERTIES
-                       LINK_FLAGS ${LLVM_LDFLAGS}
-                       # this tells cmake not to link the llvm libs into targets that link to rphp-driver
-                       #LINK_INTERFACE_LIBRARIES ""
-                       )
+#set_target_properties( rphp-driver
+#                       PROPERTIES
+#                       LINK_FLAGS ${LLVM_LDFLAGS}
+#                       # this tells cmake not to link the llvm libs into targets that link to rphp-driver
+#                       #LINK_INTERFACE_LIBRARIES ""
+#                       )

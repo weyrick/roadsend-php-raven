@@ -24,7 +24,7 @@ set_source_files_properties( ${GENERATOR_SRC_FILES}
                            )
 
 target_link_libraries( rphp-llvm-ir
-                       rphp-analysis
+#                       rphp-analysis
                        ${LLVM_LIBS_CORE}
                        )
 

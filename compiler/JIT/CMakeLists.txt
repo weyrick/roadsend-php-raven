@@ -12,7 +12,8 @@ include_directories (
 # source files that depend on llvm
 set(RJIT_SRC_FILES
     pJIT.cpp
-  ${LLVM_LIBS_JIT_OBJECTS}
+    pInterpretTarget.cpp    
+#  ${LLVM_LIBS_JIT_OBJECTS}
 )
 
 add_library( rphp-llvm-jit SHARED ${RJIT_SRC_FILES} )
@@ -21,10 +22,11 @@ add_library( rphp-llvm-jit SHARED ${RJIT_SRC_FILES} )
 set_source_files_properties( ${RJIT_SRC_FILES}
                              PROPERTIES COMPILE_FLAGS ${LLVM_COMPILE_FLAGS}
                            )
+                           
 target_link_libraries( rphp-llvm-jit
                        rphp-runtime
-                       rphp-llvm-ir
-                       ${LLVM_LIBS_JIT}
+#                       rphp-llvm-ir
+#                       ${LLVM_LIBS_JIT}
                       )
 
 set_target_properties( rphp-llvm-jit
