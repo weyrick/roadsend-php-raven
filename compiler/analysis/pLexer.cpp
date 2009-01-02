@@ -97,6 +97,10 @@ bool pLexer::preprocess(void) {
                 switch((*dqIter).id()) {
                     case T_DQ_DONE:
                         goto endOfDQ; // omg!
+                    case T_DQ_ESCAPE:
+                        // replace with non escaped dq
+                        buffer.push_back('"');
+                        break;
                     case T_DQ_DQ:
                         // replace with single
                         buffer.push_back('\'');

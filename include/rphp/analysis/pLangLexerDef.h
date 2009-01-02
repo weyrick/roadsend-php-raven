@@ -127,6 +127,7 @@ struct rphpLangTokens : lexer_def<Lexer>
 #define T_DQ_DQ          1
 #define T_DQ_NEWLINE     2
 #define T_DQ_PASSTHROUGH 3
+#define T_DQ_ESCAPE      4
 
 template <typename Lexer>
 struct rphpDQTokens : lexer_def<Lexer>
@@ -142,6 +143,7 @@ struct rphpDQTokens : lexer_def<Lexer>
         self
             = token_def(L"\\\\n", T_DQ_NEWLINE)
             | token_def(L'"', T_DQ_DQ)
+            | token_def(L"\\\\\\\"", T_DQ_ESCAPE)
             // FIXME: this is inefficient. does lexertl have an "unmatched"?
             | token_def(L".{1}", T_DQ_PASSTHROUGH)
             ;
