@@ -269,8 +269,12 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_CLASS";
         case T_CLASSDEREF:
             return L"T_OBJECT_OPERATOR";
+        case T_INSTANCEOF:
+            return L"T_INSTANCEOF";
         case T_FOREACH:
             return L"T_FOREACH";
+        case T_FOR:
+            return L"T_FOR";
         case T_AS:
             return L"T_AS";
         case T_RETURN:
@@ -299,6 +303,52 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_REQUIRE_ONCE";
         case T_IDENTICAL:
             return L"T_IS_IDENTICAL";
+        case T_NOT_IDENTICAL:
+            return L"T_IS_NOT_IDENTICAL";
+        case T_DBL_COLON:
+            return L"T_DOUBLE_COLON";
+        case T_INC:
+            return L"T_INC";
+        case T_DEC:
+            return L"T_DEC";
+        case T_EXIT:
+            return L"T_EXIT";
+        case T_SWITCH:
+            return L"T_SWITCH";
+        case T_CASE:
+            return L"T_CASE";
+        case T_BREAK:
+            return L"T_BREAK";
+        case T_CONTINUE:
+            return L"T_CONTINUE";
+        case T_DEFAULT:
+            return L"T_DEFAULT";
+        case T_CLONE:
+            return L"T_CLONE";
+        case T_TRY:
+            return L"T_TRY";
+        case T_CATCH:
+            return L"T_CATCH";
+        case T_THROW:
+            return L"T_THROW";
+        case T_STATIC:
+            return L"T_STATIC";
+        case T_CONST:
+            return L"T_CONST";
+        case T_GREATER_THAN_OR_EQUAL:
+            return L"T_IS_GREATER_OR_EQUAL";
+        case T_LESS_THAN_OR_EQUAL:
+            return L"T_IS_SMALLER_OR_EQUAL";
+        case T_LOGICAL_OR:
+            return L"T_LOGICAL_OR";
+        case T_LOGICAL_XOR:
+            return L"T_LOGICAL_XOR";
+        case T_LOGICAL_AND:
+            return L"T_LOGICAL_AND";
+        case T_PLUS_EQUAL:
+            return L"T_PLUS_EQUAL";
+        case T_MINUS_EQUAL:
+            return L"T_MINUS_EQUAL";
     }
     return L"";
 

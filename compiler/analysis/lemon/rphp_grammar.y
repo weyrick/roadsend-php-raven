@@ -80,12 +80,15 @@ using namespace rphp;
 %type T_CLASS {int}
 %type T_CLASSDEREF {int}
 %type T_FOREACH {int}
+%type T_FOR {int}
 %type T_AS {int}
 %type T_RETURN {int}
 %type T_DOT {int}
 %type T_DOTEQUAL {int}
 %type T_GREATER_THAN {int}
 %type T_LESS_THAN {int}
+%type T_GREATER_THAN_OR_EQUAL {int}
+%type T_LESS_THAN_OR_EQUAL {int}
 %type T_LIST {int}
 %type T_EXTENDS {int}
 %type T_PUBLIC {int}
@@ -97,8 +100,36 @@ using namespace rphp;
 %type T_REQUIRE {int}
 %type T_REQUIRE_ONCE {int}
 %type T_IDENTICAL {int}
+%type T_NOT_IDENTICAL {int}
 %type T_QUESTION {int}
 %type T_COLON {int}
+%type T_DBL_COLON {int}
+%type T_INC {int}
+%type T_DEC {int}
+%type T_EXIT {int}
+%type T_MINUS {int}
+%type T_PLUS {int}
+%type T_DIV {int}
+%type T_MOD {int}
+%type T_MULT {int}
+%type T_SWITCH {int}
+%type T_CASE {int}
+%type T_BREAK {int}
+%type T_CONTINUE {int}
+%type T_DEFAULT {int}
+%type T_CLONE {int}
+%type T_TRY {int}
+%type T_CATCH {int}
+%type T_THROW {int}
+%type T_STATIC {int}
+%type T_CONST {int}
+%type T_AT {int}
+%type T_INSTANCEOF {int}
+%type T_LOGICAL_OR {int}
+%type T_LOGICAL_AND {int}
+%type T_LOGICAL_XOR {int}
+%type T_PLUS_EQUAL {int}
+%type T_MINUS_EQUAL {int}
 
 %syntax_error {  
   pMod->parseError(TOKEN);
