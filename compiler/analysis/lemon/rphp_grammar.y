@@ -42,7 +42,8 @@ using namespace rphp;
 %default_type {pSourceRange*}
 %extra_argument {pSourceModule* pMod}
 
-// these don't exist in the parser, just in the lexer
+
+// tokens that don't need parse info or AST nodes
 %type T_WHITESPACE {int}
 %type T_OPEN_TAG {int}
 %type T_CLOSE_TAG {int}
@@ -53,11 +54,12 @@ using namespace rphp;
 %type T_COMMA {int}
 %type T_SINGLELINE_COMMENT {int}
 %type T_MULTILINE_COMMENT {int}
-
-// tokens
 %type T_INLINE_HTML {int}
 %type T_WHILE {int}
 %type T_ELSE {int}
+%type T_ARRAY {int}
+%type T_ARROWKEY {int}
+%type T_REF {int}
 %type T_ASSIGN {int}
 %type T_DQ_STRING {int}
 %type T_NOT {int}
@@ -195,6 +197,51 @@ literal(A) ::= T_IDENTIFIER(B).
     A->setLine(pMod->currentLineNum());
 }
 
+/** LITERAL ARRAY ITEMS **/
+%type arrayItemList {AST::arrayList*}
+arrayItemList(A) ::= arrayItem(B).
+{
+    A = new AST::arrayList();
+    A->push_back(*B); // copy item into vector
+    delete B;
+}
+arrayItemList(A) ::= arrayItem(B) T_COMMA arrayItemList(C).
+{
+    C->push_back(*B); // copy item into vector
+    A = C;
+    delete B;
+}
+arrayItemList(A) ::= .
+{
+    A = new AST::arrayList();
+}
+
+%type arrayItem {AST::arrayItem*}
+arrayItem(A) ::= expr(B).
+{
+    A = new AST::arrayItem(NULL, B, false);
+}
+arrayItem(A) ::= T_REF expr(B).
+{
+    A = new AST::arrayItem(NULL, B, true);
+}
+arrayItem(A) ::= expr(KEY) T_ARROWKEY expr(VAL).
+{
+    A = new AST::arrayItem(KEY, VAL, false);
+}
+arrayItem(A) ::= expr(KEY) T_ARROWKEY T_REF expr(VAL).
+{
+    A = new AST::arrayItem(KEY, VAL, true);
+}
+
+// literal array
+literal(A) ::= T_ARRAY(ARY) T_LEFTPAREN arrayItemList(B) T_RIGHTPAREN.
+{
+    A = new AST::literalArray(B);
+    A->setLine(TOKEN_LINE(ARY));
+    delete B; // deletes the vector, NOT the exprs in it!
+}
+
 /** LOGICAL OPERATORS **/
 %type logicalNot {AST::logicalNot*}
 logicalNot(A) ::= T_NOT expr(R).
@@ -245,9 +292,12 @@ argList(A) ::= .
 functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
     A = new AST::functionInvoke(*B, // f name
-                                 C  // expression list: arguments
+                                 C  // expression list: arguments, copied
                                 );
     A->setLine(pMod->currentLineNum());
+// NOTE: i'm not sure why we don't need to delete C here
+//       it segfaults when we do, and doesn't leak when we don't...
+//    delete C; // deletes the vector, NOT the exprs in it!
 }
 
 /** CONSTRUCTOR INVOKE **/
@@ -255,8 +305,11 @@ functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
     A = new AST::constructorInvoke(*B, // f name
-                                    C  // expression list: arguments
+                                    C  // expression list: arguments, copied
                                    );
     A->setLine(pMod->currentLineNum());
+// NOTE: i'm not sure why we don't need to delete C here
+//       it segfaults when we do, and doesn't leak when we don't...
+//    delete C; // deletes the vector, NOT the exprs in it!
 }
 

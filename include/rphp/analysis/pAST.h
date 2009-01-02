@@ -40,6 +40,7 @@ enum nodeKind {
     literalFloatKind,
     literalNullKind,
     literalBoolKind,
+    literalArrayKind,
     logicalNotKind,
     assignmentKind,
     varKind,
@@ -179,6 +180,44 @@ public:
 
 };
 
+// array items
+struct arrayItem {
+    expr* key;
+    expr* val;
+    bool isRef;
+    arrayItem(expr* k, expr* v, bool r):
+     key(k),
+     val(v),
+     isRef(r) { }
+};
+
+typedef std::vector<arrayItem> arrayList;
+
+// NODE: literal array
+class literalArray: public literalExpr {
+
+    arrayList itemList_;
+
+public:
+    literalArray(arrayList* items):
+        literalExpr(literalArrayKind),
+        itemList_(*items) // copy
+        { }
+
+    ~literalArray(void) {
+        for (arrayList::iterator i = itemList_.begin(); i != itemList_.end(); ++i) {
+            if ((*i).key)
+                delete (*i).key;
+            delete (*i).val;
+        }
+    }
+
+    arrayList& itemList(void) { return itemList_; }
+    const arrayList& itemList(void) const { return itemList_; }
+
+};
+
+
 // NODE: literal null
 class literalNull: public literalExpr {
 
@@ -266,7 +305,7 @@ public:
     functionInvoke(const pSourceRange& name, expressionList* argList, nodeKind kind = functionInvokeKind):
         expr(kind),
         name_(name.begin(), name.end()),
-        argList_(*argList)
+        argList_(*argList) // copy
     {
         // free parser's version, which we've copied
         delete argList;

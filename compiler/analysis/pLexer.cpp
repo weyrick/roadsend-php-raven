@@ -208,6 +208,8 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_INLINE_HTML";
         case T_ECHO:
             return L"T_ECHO";
+        case T_ARROWKEY:
+            return L"T_DOUBLE_ARROW";
         case T_OPEN_TAG:
             return L"T_OPEN_TAG";
         case T_CLOSE_TAG:
@@ -224,6 +226,8 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_WHILE";
         case T_NEW:
             return L"T_NEW";
+        case T_ARRAY:
+            return L"T_ARRAY";
         case T_IDENTIFIER:
             return L"T_STRING";
         case T_DQ_STRING:

@@ -36,6 +36,7 @@ baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalFloat),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalNull),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalBool),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalArray),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_logicalNot),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_assignment),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_var),
@@ -158,6 +159,50 @@ void dumpVisitor::visit_literalBool(literalBool* n)  {
         std::cout << "FALSE";
     std::cout << std::endl;
 }
+
+void dumpVisitor::visit_literalArray(literalArray* n)  {
+
+    showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
+    std::cout << "(literal array: " << std::endl;
+
+    indent();
+    showindent();
+    std::cout << "(contents: " << std::endl;
+    indent();
+    for (arrayList::const_reverse_iterator i = n->itemList().rbegin();
+        i != n->itemList().rend();
+        ++i)
+    {
+        showindent();
+        std::cout << "is ref? " << (*i).isRef << std::endl;
+        showindent();
+        std::cout << "key: " << std::endl;
+        indent();
+        if ((*i).key) {
+            visit((*i).key);
+        }
+        else {
+            showindent();
+            std::cout << "<NEXT>" << std::endl;
+        }
+        unindent();
+        showindent();
+        std::cout << "val: " << std::endl;
+        indent();
+        visit((*i).val);
+        unindent();
+    }
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+
+}
+
 
 void dumpVisitor::visit_literalNull(literalNull* n)  {
     showindent();
