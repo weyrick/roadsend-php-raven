@@ -75,6 +75,7 @@ void parseSourceFile(pSourceModule* pMod) {
                 break;
             case T_WHITESPACE:
             case T_INLINE_HTML:
+            case T_DOC_COMMENT:
             case T_MULTILINE_COMMENT:
             case T_SINGLELINE_COMMENT:
                 // handle newlines

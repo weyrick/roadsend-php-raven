@@ -119,7 +119,10 @@ bool pLexer::preprocess(void) {
             // exit processing DQ string
 
         }
-        else if (curID == T_SINGLELINE_COMMENT || curID == T_MULTILINE_COMMENT) {
+        else if (curID == T_SINGLELINE_COMMENT ||
+                 curID == T_MULTILINE_COMMENT ||
+                 curID == T_DOC_COMMENT
+                 ) {
             // strip
             rewrote = true;
         }
@@ -222,6 +225,8 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_IF";
         case T_ELSE:
             return L"T_ELSE";
+        case T_ELSEIF:
+            return L"T_ELSEIF";
         case T_WHILE:
             return L"T_WHILE";
         case T_NEW:
@@ -236,6 +241,60 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
         case T_SINGLELINE_COMMENT:
         case T_MULTILINE_COMMENT:
             return L"T_COMMENT";
+        case T_DOC_COMMENT:
+            return L"T_DOC_COMMENT";
+        case T_GLOBAL:
+            return L"T_GLOBAL";
+        case T_FUNCTION:
+            return L"T_FUNCTION";
+        case T_EMPTY:
+            return L"T_EMPTY";
+        case T_BOOLEAN_AND:
+            return L"T_BOOLEAN_AND";
+        case T_BOOLEAN_OR:
+            return L"T_BOOLEAN_OR";
+        case T_EQUAL:
+            return L"T_IS_EQUAL";
+        case T_ISSET:
+            return L"T_ISSET";
+        case T_UNSET:
+            return L"T_UNSET";
+        case T_VAR:
+            return L"T_VAR";
+        case T_CLASS:
+            return L"T_CLASS";
+        case T_CLASSDEREF:
+            return L"T_OBJECT_OPERATOR";
+        case T_FOREACH:
+            return L"T_FOREACH";
+        case T_AS:
+            return L"T_AS";
+        case T_RETURN:
+            return L"T_RETURN";
+        case T_DOTEQUAL:
+            return L"T_CONCAT_EQUAL";
+        case T_LIST:
+            return L"T_LIST";
+        case T_EXTENDS:
+            return L"T_EXTENDS";
+        case T_PUBLIC:
+            return L"T_PUBLIC";
+        case T_PRIVATE:
+            return L"T_PRIVATE";
+        case T_PROTECTED:
+            return L"T_PROTECTED";
+        case T_NOTEQUAL:
+            return L"T_IS_NOT_EQUAL";
+        case T_INCLUDE:
+            return L"T_INCLUDE";
+        case T_INCLUDE_ONCE:
+            return L"T_INCLUDE_ONCE";
+        case T_REQUIRE:
+            return L"T_REQUIRE";
+        case T_REQUIRE_ONCE:
+            return L"T_REQUIRE_ONCE";
+        case T_IDENTICAL:
+            return L"T_IS_IDENTICAL";
     }
     return L"";
 
