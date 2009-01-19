@@ -29,28 +29,135 @@
 
 namespace rphp { namespace lexer {
 
+enum e_URLToken {eEOF, eFile, eQuestion, eParam, eEquals, eValue, eSeparator};
+
 pLexer::pLexer(const pSourceFile* s):
-    tokens_(),
-    lexer_(tokens_),
+    langRules_(boost::lexer::icase),
+    langState_(),
+    lexInput_(NULL),
     source_(s),
     // TODO: does this copy, or do copy on write? source_ is const
     contents_(source_->contents()),
     sourceBegin_(contents_.begin()),
     sourceEnd_ (contents_.end())
 {
-    
+
+    langRules_.add_state(L"PHP");
+
+    langRules_.add(L"INITIAL", L"<\\?|<\\?PHP|<\\?php", T_OPEN_TAG, L"PHP"); // go to PHP state
+    langRules_.add(L"INITIAL", L".+|\\n+", T_INLINE_HTML, L".");
+
+    langRules_.add(L"PHP", L"\\(", T_LEFTPAREN, L".");
+    langRules_.add(L"PHP", L"\\)", T_RIGHTPAREN, L".");
+    langRules_.add(L"PHP", L"\\{", T_LEFTCURLY, L".");
+    langRules_.add(L"PHP", L"\\}", T_RIGHTCURLY, L".");
+    langRules_.add(L"PHP", L"\\[", T_LEFTSQUARE, L".");
+    langRules_.add(L"PHP", L"\\]", T_RIGHTSQUARE, L".");
+    langRules_.add(L"PHP", L"\\>", T_GREATER_THAN, L".");
+    langRules_.add(L"PHP", L"\\<", T_LESS_THAN, L".");
+    langRules_.add(L"PHP", L"\\=", T_ASSIGN, L".");
+    langRules_.add(L"PHP", L"\\-", T_MINUS, L".");
+    langRules_.add(L"PHP", L"\\+", T_PLUS, L".");
+    langRules_.add(L"PHP", L"\\/", T_DIV, L".");
+    langRules_.add(L"PHP", L"\\%", T_MOD, L".");
+    langRules_.add(L"PHP", L"\\*", T_MULT, L".");
+    langRules_.add(L"PHP", L"\\;", T_SEMI, L".");
+    langRules_.add(L"PHP", L"\\,", T_COMMA, L".");
+    langRules_.add(L"PHP", L"\\.", T_DOT, L".");
+    langRules_.add(L"PHP", L"\\!", T_NOT, L".");
+    langRules_.add(L"PHP", L"\\&", T_REF, L".");
+    langRules_.add(L"PHP", L"\\@", T_AT, L".");
+    langRules_.add(L"PHP", L"\\?", T_QUESTION, L".");
+    langRules_.add(L"PHP", L"\\:", T_COLON, L".");
+    langRules_.add(L"PHP", L">=", T_GREATER_THAN_OR_EQUAL, L".");
+    langRules_.add(L"PHP", L"<=", T_LESS_THAN_OR_EQUAL, L".");
+    langRules_.add(L"PHP", L"::", T_DBL_COLON, L".");
+    langRules_.add(L"PHP", L"\\+\\+", T_INC, L".");
+    langRules_.add(L"PHP", L"\\-\\-", T_DEC, L".");
+    langRules_.add(L"PHP", L"\\+\\=", T_PLUS_EQUAL, L".");
+    langRules_.add(L"PHP", L"\\-\\=", T_MINUS_EQUAL, L".");
+    langRules_.add(L"PHP", L"\\!\\=", T_NOTEQUAL, L".");
+    langRules_.add(L"PHP", L"\\.\\=", T_DOTEQUAL, L".");
+    langRules_.add(L"PHP", L"==", T_EQUAL, L".");
+    langRules_.add(L"PHP", L"\\!==", T_NOT_IDENTICAL, L".");
+    langRules_.add(L"PHP", L"===", T_IDENTICAL, L".");
+    langRules_.add(L"PHP", L"\\&\\&", T_BOOLEAN_AND, L".");
+    langRules_.add(L"PHP", L"\\|\\|", T_BOOLEAN_OR, L".");
+    langRules_.add(L"PHP", L"\\?>", T_CLOSE_TAG, L".");
+    langRules_.add(L"PHP", L"=>", T_ARROWKEY, L".");
+    langRules_.add(L"PHP", L"->", T_CLASSDEREF, L".");
+    langRules_.add(L"PHP", L"list", T_LIST, L".");
+    langRules_.add(L"PHP", L"or", T_LOGICAL_OR, L".");
+    langRules_.add(L"PHP", L"and", T_LOGICAL_AND, L".");
+    langRules_.add(L"PHP", L"xor", T_LOGICAL_XOR, L".");
+    langRules_.add(L"PHP", L"if", T_IF, L".");
+    langRules_.add(L"PHP", L"for", T_FOR, L".");
+    langRules_.add(L"PHP", L"foreach", T_FOREACH, L".");
+    langRules_.add(L"PHP", L"as", T_AS, L".");
+    langRules_.add(L"PHP", L"exit", T_EXIT, L".");
+    langRules_.add(L"PHP", L"public", T_PUBLIC, L".");
+    langRules_.add(L"PHP", L"private", T_PRIVATE, L".");
+    langRules_.add(L"PHP", L"protected", T_PROTECTED, L".");
+    langRules_.add(L"PHP", L"extends", T_EXTENDS, L".");
+    langRules_.add(L"PHP", L"return", T_RETURN, L".");
+    langRules_.add(L"PHP", L"global", T_GLOBAL, L".");
+    langRules_.add(L"PHP", L"function", T_FUNCTION, L".");
+    langRules_.add(L"PHP", L"isset", T_ISSET, L".");
+    langRules_.add(L"PHP", L"unset", T_UNSET, L".");
+    langRules_.add(L"PHP", L"empty", T_EMPTY, L".");
+    langRules_.add(L"PHP", L"array", T_ARRAY, L".");
+    langRules_.add(L"PHP", L"while", T_WHILE, L".");
+    langRules_.add(L"PHP", L"else", T_ELSE, L".");
+    langRules_.add(L"PHP", L"elseif", T_ELSEIF, L".");
+    langRules_.add(L"PHP", L"echo", T_ECHO, L".");
+    langRules_.add(L"PHP", L"new", T_NEW, L".");
+    langRules_.add(L"PHP", L"var", T_VAR, L".");
+    langRules_.add(L"PHP", L"switch", T_SWITCH, L".");
+    langRules_.add(L"PHP", L"case", T_CASE, L".");
+    langRules_.add(L"PHP", L"break", T_BREAK, L".");
+    langRules_.add(L"PHP", L"continue", T_CONTINUE, L".");
+    langRules_.add(L"PHP", L"default", T_DEFAULT, L".");
+    langRules_.add(L"PHP", L"instanceof", T_INSTANCEOF, L".");
+    langRules_.add(L"PHP", L"class", T_CLASS, L".");
+    langRules_.add(L"PHP", L"clone", T_CLONE, L".");
+    langRules_.add(L"PHP", L"throw", T_THROW, L".");
+    langRules_.add(L"PHP", L"try", T_TRY, L".");
+    langRules_.add(L"PHP", L"catch", T_CATCH, L".");
+    langRules_.add(L"PHP", L"const", T_CONST, L".");
+    langRules_.add(L"PHP", L"static", T_STATIC, L".");
+    langRules_.add(L"PHP", L"include", T_INCLUDE, L".");
+    langRules_.add(L"PHP", L"include_once", T_INCLUDE_ONCE, L".");
+    langRules_.add(L"PHP", L"require", T_REQUIRE, L".");
+    langRules_.add(L"PHP", L"require_once", T_REQUIRE_ONCE, L".");
+    langRules_.add(L"PHP", L"[a-zA-Z_][a-zA-Z0-9_]*", T_IDENTIFIER, L".");
+    langRules_.add(L"PHP", L"\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE, L".");
+    langRules_.add(L"PHP", L"[0-9]+", T_LNUMBER, L".");
+    langRules_.add(L"PHP", L"([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)", T_DNUMBER, L".");
+    langRules_.add(L"PHP", L"[ \\t\\n]+", T_WHITESPACE, L".");
+    langRules_.add(L"PHP", L"\\/\\*\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_DOC_COMMENT, L".");
+    langRules_.add(L"PHP", L"\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_MULTILINE_COMMENT, L".");
+    langRules_.add(L"PHP", L"\\/\\/.*$", T_SINGLELINE_COMMENT, L".");
+    langRules_.add(L"PHP", L"b*[\"](\\\\\\\"|[^\"])*[\"]", T_DQ_STRING, L".");
+    langRules_.add(L"PHP", L"b*[\'](\\\\\\.|[^\'])*[\']", T_SQ_STRING, L"."); 
+    langRules_.add(L"PHP", L"\\?>", T_CLOSE_TAG, L"INITIAL"); // go to HTML state
+
+    boost::lexer::wgenerator::build (langRules_, langState_);
+    lexInput_ = new boost::lexer::iter_winput(&langState_, sourceBegin_, sourceEnd_);
+    // Dump the state machine
+    boost::lexer::wdebug::dump (langState_, std::wcout);
+
 }
 
 bool pLexer::preprocess(void) {
 
-    pPreprocessTokens preTokens;
+/*    pPreprocessTokens preTokens;
     pPreprocessLexer preLexer(preTokens);
     bool rewrote = false;
     bool success = true;
 
     pSourceString buffer;
     buffer.reserve(contents_.capacity());
-
+*/
     /*
 
         The idea of the preprocessor is to prepare the underlying source buffer
@@ -60,7 +167,7 @@ bool pLexer::preprocess(void) {
         sequences with their literal equivalents
         
     */
-    pUInt curID = 0;
+/*    pUInt curID = 0;
     for (pTokenIterator iter = tokBegin(); iter != tokEnd(); ++iter) {
 
         curID = (*iter).id();
@@ -145,16 +252,18 @@ bool pLexer::preprocess(void) {
     sourceBegin_ = contents_.begin();
     sourceEnd_ = contents_.end();
 
-    return success;
-    
+    return success;*/
+
+    return true;
+
 }
 
 pTokenIterator pLexer::tokBegin(void) {
-    return lexer_.begin(sourceBegin_, sourceEnd_);
+    return lexInput_->begin();
 }
 
 pTokenIterator pLexer::tokEnd(void) {
-    return lexer_.end();
+    return lexInput_->end();
 }
 
 const pSourceCharIterator pLexer::sourceBegin(void) const {
@@ -172,24 +281,25 @@ void pLexer::dumpTokens(void) {
 
     for (pTokenIterator iter = tokBegin(); iter != tokEnd(); ++iter)
     {
-        if ((*iter).id() == 0) {
-            // no match
+        if ( (iter->id == boost::lexer::npos) ||
+             (iter->id == 0) ) {
+            // no match or eoi
             break;
         }
         else {
             // matched
             // skip plain newlines in html state
             val.str(L"");
-            if ((*iter).id() != T_WHITESPACE)
-                val << (*iter).value();
-            if (((*iter).state() == 0) && (val.str() == L"\n"))
+            if (iter->id != T_WHITESPACE)
+                val << pSourceString(iter->start, iter->end);
+            if ((iter->state == 0) && (val.str() == L"\n"))
                 continue;
-            tokID = getTokenDescription((*iter).id());
+            tokID = getTokenDescription(iter->id);
             if (tokID.size() == 0)
                 tokID = val.str();
             std::wcout << val.str() << L" " << tokID << std::endl;
-
-            if ((*iter).id() == T_OPEN_TAG) {
+/*
+            if (iter->id == T_OPEN_TAG) {
                 // go to php
                 iter.set_state(1);
             }
@@ -197,6 +307,7 @@ void pLexer::dumpTokens(void) {
                 // go to html
                 iter.set_state(0);
             }
+            */
         }
     }
 

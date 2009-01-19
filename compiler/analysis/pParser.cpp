@@ -56,7 +56,7 @@ void parseSourceFile(pSourceModule* pMod) {
     pUInt curID(0);
     pSourceCharIterator lastNL;
     pUInt nlCnt(0);
-
+/*
     for (lexer::pLexer::iterator_type iter = lexer.tokBegin(); iter != lexer.tokEnd(); ++iter)
     {
         nlCnt = 0;
@@ -107,7 +107,7 @@ void parseSourceFile(pSourceModule* pMod) {
                 break;
         }
     }
-
+*/
     // finish parse
     pMod->finishParse();
     rphpParse(pParser, 0, 0, pMod);

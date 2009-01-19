@@ -22,16 +22,32 @@
 #ifndef RPHP_PLEXER_H_
 #define RPHP_PLEXER_H_
 
+#include "rphp_grammar.h"
+
+#include "rphp/analysis/lexer/debug.hpp"
+
+#include "rphp/analysis/lexer/generator.hpp"
+#include "rphp/analysis/lexer/input.hpp"
+#include "rphp/analysis/lexer/state_machine.hpp"
+
 #include "rphp/analysis/pSourceFile.h"
-#include "rphp/analysis/pLangLexerDef.h"
+//#include "rphp/analysis/pLangLexerDef.h"
+
+// this is the iterator type exposed by the lexer, which dereferences to
+// a token
+typedef boost::lexer::iter_winput::iterator pTokenIterator;
 
 namespace rphp { namespace lexer {
 
 class pLexer {
 
 private:
-    pLangTokens tokens_;
-    pLangLexer lexer_;
+//    pLangTokens tokens_;
+//    pLangLexer lexer_;
+
+    boost::lexer::wrules langRules_;
+    boost::lexer::wstate_machine langState_;
+    boost::lexer::iter_winput* lexInput_;
 
     const pSourceFile* source_;
     pSourceString contents_;
@@ -44,6 +60,9 @@ public:
     typedef pTokenIterator iterator_type;
 
     pLexer(const pSourceFile* s);
+    ~pLexer(void) {
+        delete lexInput_;
+    }
 
     bool preprocess(void);
 
@@ -58,9 +77,9 @@ public:
 
     const pSourceString& contents(void) const { return contents_; }
 
-    pLangTokens& getTokens(void) {
-        return tokens_;
-    }
+//    pLangTokens& getTokens(void) {
+//        return tokens_;
+//    }
 
 };
 
