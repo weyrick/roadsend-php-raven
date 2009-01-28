@@ -29,12 +29,12 @@
 
 namespace rphp { namespace lexer {
 
-enum e_URLToken {eEOF, eFile, eQuestion, eParam, eEquals, eValue, eSeparator};
-
 pLexer::pLexer(const pSourceFile* s):
-    langRules_(boost::lexer::icase),
+    langRules_((boost::lexer::regex_flags)(boost::lexer::icase | boost::lexer::dot_not_newline)),
     langState_(),
     lexInput_(NULL),
+    dqRules_(),
+    dqState_(),
     source_(s),
     // TODO: does this copy, or do copy on write? source_ is const
     contents_(source_->contents()),
@@ -42,9 +42,16 @@ pLexer::pLexer(const pSourceFile* s):
     sourceEnd_ (contents_.end())
 {
 
+    dqRules_.add(L"INITIAL", L"\\\\n", T_DQ_NEWLINE, L".");
+    dqRules_.add(L"INITIAL", L"\\\"", T_DQ_DQ, L".");
+    dqRules_.add(L"INITIAL", L"\\\\\\\"", T_DQ_ESCAPE, L".");
+    // FIXME: this is inefficient. does lexertl have an "unmatched"?
+    dqRules_.add(L"INITIAL", L".{1}", T_DQ_PASSTHROUGH, L".");
+    boost::lexer::wgenerator::build (dqRules_, dqState_);
+
     langRules_.add_state(L"PHP");
 
-    langRules_.add(L"INITIAL", L"<\\?|<\\?PHP|<\\?php", T_OPEN_TAG, L"PHP"); // go to PHP state
+    langRules_.add(L"INITIAL", L"<\\?|<\\?PHP", T_OPEN_TAG, L"PHP"); // go to PHP state
     langRules_.add(L"INITIAL", L".+|\\n+", T_INLINE_HTML, L".");
 
     langRules_.add(L"PHP", L"\\(", T_LEFTPAREN, L".");
@@ -138,26 +145,25 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add(L"PHP", L"\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_MULTILINE_COMMENT, L".");
     langRules_.add(L"PHP", L"\\/\\/.*$", T_SINGLELINE_COMMENT, L".");
     langRules_.add(L"PHP", L"b*[\"](\\\\\\\"|[^\"])*[\"]", T_DQ_STRING, L".");
-    langRules_.add(L"PHP", L"b*[\'](\\\\\\.|[^\'])*[\']", T_SQ_STRING, L"."); 
+    langRules_.add(L"PHP", L"b*[\'](\\\\\\.|[^\'])*[\']", T_SQ_STRING, L".");
     langRules_.add(L"PHP", L"\\?>", T_CLOSE_TAG, L"INITIAL"); // go to HTML state
 
     boost::lexer::wgenerator::build (langRules_, langState_);
     lexInput_ = new boost::lexer::iter_winput(&langState_, sourceBegin_, sourceEnd_);
-    // Dump the state machine
-    boost::lexer::wdebug::dump (langState_, std::wcout);
+
+    // dump the state machine
+    //boost::lexer::wdebug::dump (langState_, std::wcout);
 
 }
 
 bool pLexer::preprocess(void) {
 
-/*    pPreprocessTokens preTokens;
-    pPreprocessLexer preLexer(preTokens);
     bool rewrote = false;
     bool success = true;
 
     pSourceString buffer;
     buffer.reserve(contents_.capacity());
-*/
+
     /*
 
         The idea of the preprocessor is to prepare the underlying source buffer
@@ -165,28 +171,23 @@ bool pLexer::preprocess(void) {
         interpolated double quoted strings to their non-interpolated single quoted
         string counterparts, by using concatenation and replacing escape
         sequences with their literal equivalents
-        
+
     */
-/*    pUInt curID = 0;
+    pUInt curID = 0;
     for (pTokenIterator iter = tokBegin(); iter != tokEnd(); ++iter) {
 
-        curID = (*iter).id();
-        if (curID == 0) {
-            // lex error. stop preprocessor and let the main parser
-            // show a nice error
-            success = false;
+        curID = iter->id;
+        if ( (curID == boost::lexer::npos) ||
+             (curID == 0) ) {
+            // eoi or lex error. stop preprocessor and let the main parser
+            // show a nice error if necessary
+            success = (curID == 0);
             rewrote = true;
             break;
         }
-        else if (curID == T_OPEN_TAG) {
-            // go to php
-            iter.set_state(1);
-            buffer.append((*iter).value().begin(), (*iter).value().end());
-        }
-        else if (curID == T_CLOSE_TAG) {
-            // go to html
-            iter.set_state(0);
-            buffer.append((*iter).value().begin(), (*iter).value().end());
+        else if ( (curID == T_OPEN_TAG) ||
+                  (curID == T_CLOSE_TAG) ) {
+            buffer.append(iter->start, iter->end);
         }
         else if (curID == T_DQ_STRING) {
 
@@ -194,14 +195,13 @@ bool pLexer::preprocess(void) {
 
             // we now use the preprocessor lexer to find the tokens within
             // this double quoted string
-            pSourceCharIterator dqStart((*iter).value().begin()),
-                                dqEnd((*iter).value().end());
-            for (pTokenIterator dqIter = preLexer.begin(dqStart, dqEnd);
-                                dqIter != preLexer.end();
+            boost::lexer::iter_winput* preInput = new boost::lexer::iter_winput(&dqState_, iter->start, iter->end);
+            for (pTokenIterator dqIter = preInput->begin();
+                                dqIter != preInput->end();
                                 ++dqIter)
             {
                 // iterate over DQ tokens
-                switch((*dqIter).id()) {
+                switch(dqIter->id) {
                     case T_DQ_DONE:
                         goto endOfDQ; // omg!
                     case T_DQ_ESCAPE:
@@ -219,10 +219,10 @@ bool pLexer::preprocess(void) {
                     case T_DQ_PASSTHROUGH:
                     default:
                         // passthrough
-                        buffer.append((*dqIter).value().begin(), (*dqIter).value().end());
+                        buffer.append(dqIter->start, dqIter->end);
                         break;
                 }
-            
+
             }
 
             endOfDQ:
@@ -239,22 +239,20 @@ bool pLexer::preprocess(void) {
         }
         else {
             // pass through
-            buffer.append((*iter).value().begin(), (*iter).value().end());
+            buffer.append(iter->start, iter->end);
         }
-    
+
     }
 
     // save changes
     if (rewrote) {
         contents_.swap(buffer);
     }
-    
+
     sourceBegin_ = contents_.begin();
     sourceEnd_ = contents_.end();
 
-    return success;*/
-
-    return true;
+    return success;
 
 }
 
@@ -298,16 +296,6 @@ void pLexer::dumpTokens(void) {
             if (tokID.size() == 0)
                 tokID = val.str();
             std::wcout << val.str() << L" " << tokID << std::endl;
-/*
-            if (iter->id == T_OPEN_TAG) {
-                // go to php
-                iter.set_state(1);
-            }
-            else if ((*iter).id() == T_CLOSE_TAG) {
-                // go to html
-                iter.set_state(0);
-            }
-            */
         }
     }
 

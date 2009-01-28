@@ -31,7 +31,6 @@
 #include "rphp/analysis/lexer/state_machine.hpp"
 
 #include "rphp/analysis/pSourceFile.h"
-//#include "rphp/analysis/pLangLexerDef.h"
 
 // this is the iterator type exposed by the lexer, which dereferences to
 // a token
@@ -39,15 +38,22 @@ typedef boost::lexer::iter_winput::iterator pTokenIterator;
 
 namespace rphp { namespace lexer {
 
+#define T_DQ_DONE        0
+#define T_DQ_DQ          1
+#define T_DQ_NEWLINE     2
+#define T_DQ_PASSTHROUGH 3
+#define T_DQ_ESCAPE      4
+
 class pLexer {
 
 private:
-//    pLangTokens tokens_;
-//    pLangLexer lexer_;
 
     boost::lexer::wrules langRules_;
     boost::lexer::wstate_machine langState_;
     boost::lexer::iter_winput* lexInput_;
+
+    boost::lexer::wrules dqRules_;
+    boost::lexer::wstate_machine dqState_;
 
     const pSourceFile* source_;
     pSourceString contents_;
@@ -76,10 +82,6 @@ public:
     const wchar_t* getTokenDescription(const std::size_t t) const;
 
     const pSourceString& contents(void) const { return contents_; }
-
-//    pLangTokens& getTokens(void) {
-//        return tokens_;
-//    }
 
 };
 

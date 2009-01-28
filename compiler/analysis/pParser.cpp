@@ -49,29 +49,30 @@ void parseSourceFile(pSourceModule* pMod) {
     // start at begining of source file
     pMod->incLineNum(); // line 1
     pMod->setLastToken(pSourceRange(lexer.sourceBegin(),lexer.sourceBegin()));
-    pMod->setLastNewline(lexer.sourceBegin()); 
+    pMod->setLastNewline(lexer.sourceBegin());
 
     pSourceRange* curRange;
     boost::object_pool<pSourceRange> tokenPool;
     pUInt curID(0);
     pSourceCharIterator lastNL;
     pUInt nlCnt(0);
-/*
-    for (lexer::pLexer::iterator_type iter = lexer.tokBegin(); iter != lexer.tokEnd(); ++iter)
+
+    for (pTokenIterator iter = lexer.tokBegin(); iter != lexer.tokEnd(); ++iter)
     {
         nlCnt = 0;
-        curID = (*iter).id();
+        curID = iter->id;
         switch (curID) {
             case 0:
-                pMod->parseError(NULL);
+                // end of input (success)
+                iter = lexer.tokEnd();
                 break;
             case T_OPEN_TAG:
-                // go to php
-                iter.set_state(1);
-                break;
             case T_CLOSE_TAG:
-                // go to html
-                iter.set_state(0);
+                // state change (no parse)
+                break;
+            case boost::lexer::npos:
+                // unmatched token: error
+                pMod->parseError(NULL);
                 break;
             case T_WHITESPACE:
             case T_INLINE_HTML:
@@ -80,11 +81,11 @@ void parseSourceFile(pSourceModule* pMod) {
             case T_SINGLELINE_COMMENT:
                 // handle newlines
                 // O(n)
-                for (pSourceCharIterator i = (*iter).value().begin(); i != (*iter).value().end(); ++i) {
+                for (pSourceCharIterator i = iter->start; i != iter->end; ++i) {
                     if (*i == '\n') {
                         nlCnt++;
                         lastNL = i;
-                    }                    
+                    }
                 }
                 if (nlCnt) {
                     pMod->incLineNum(nlCnt);
@@ -92,25 +93,24 @@ void parseSourceFile(pSourceModule* pMod) {
                 }
                 // only actually parse T_INLINE_HTML, not whitespace
                 if (curID == T_INLINE_HTML) {
-                    curRange = tokenPool.construct((*iter).value());
+                    curRange = tokenPool.construct(pSourceRange(iter->start, iter->end));
                     pMod->setTokenLine(curRange->begin());
                     rphpParse(pParser, curID, curRange, pMod);
                 }
-                pMod->setLastToken((*iter).value());
+                pMod->setLastToken(pSourceRange(iter->start, iter->end));
                 break;
             default:
                 // parse
-                curRange = tokenPool.construct((*iter).value());
+                curRange = tokenPool.construct(pSourceRange(iter->start, iter->end));
                 pMod->setTokenLine(curRange->begin());
                 rphpParse(pParser, curID, curRange, pMod);
-                pMod->setLastToken((*iter).value());
+                pMod->setLastToken(pSourceRange(iter->start, iter->end));
                 break;
         }
     }
-*/
+
     // finish parse
     pMod->finishParse();
-    rphpParse(pParser, 0, 0, pMod);
     rphpParseFree(pParser, free);
 
 }
