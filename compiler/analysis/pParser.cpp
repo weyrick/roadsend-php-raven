@@ -111,6 +111,7 @@ void parseSourceFile(pSourceModule* pMod) {
 
     // finish parse
     pMod->finishParse();
+    rphpParse(pParser, 0, 0, pMod);
     rphpParseFree(pParser, free);
 
 }
