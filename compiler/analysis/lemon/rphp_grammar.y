@@ -163,6 +163,8 @@ using namespace rphp;
 %type T_MAGIC_CLASS {int}
 %type T_MAGIC_FUNCTION {int}
 %type T_MAGIC_METHOD {int}
+%type T_TICK {int}
+%type T_TILDE {int}
 
 %syntax_error {  
   pMod->parseError(TOKEN);

@@ -45,6 +45,7 @@ pLexer::pLexer(const pSourceFile* s):
     dqRules_.add(L"INITIAL", L"\\\\n", T_DQ_NEWLINE, L".");
     dqRules_.add(L"INITIAL", L"\\\"", T_DQ_DQ, L".");
     dqRules_.add(L"INITIAL", L"\\\\\\\"", T_DQ_ESCAPE, L".");
+    dqRules_.add(L"INITIAL", L"\\$[a-zA-Z_][a-zA-Z0-9_]*", T_DQ_VARIABLE, L".");
     boost::lexer::wgenerator::build (dqRules_, dqState_);
 
     langRules_.add_state(L"PHP");
@@ -54,6 +55,8 @@ pLexer::pLexer(const pSourceFile* s):
 
     langRules_.add(L"PHP", L"\\?>", T_CLOSE_TAG, L"INITIAL"); // go to HTML state
 
+    langRules_.add(L"PHP", L"\\`", T_TICK, L".");
+    langRules_.add(L"PHP", L"\\~", T_TILDE, L".");
     langRules_.add(L"PHP", L"\\(", T_LEFTPAREN, L".");
     langRules_.add(L"PHP", L"\\)", T_RIGHTPAREN, L".");
     langRules_.add(L"PHP", L"\\{", T_LEFTCURLY, L".");
@@ -247,6 +250,12 @@ bool pLexer::preprocess(void) {
                     case T_DQ_NEWLINE:
                         // replace newline escape sequence with literal newline
                         buffer.push_back(RPHP_NEWLINE);
+                        break;
+                    case T_DQ_VARIABLE:
+                        // replace with concatination
+                        buffer.append(L"'.");
+                        buffer.append(dqIter->start, dqIter->end);
+                        buffer.append(L".'");
                         break;
                     case boost::lexer::npos:
                     default:

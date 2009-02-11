@@ -43,7 +43,7 @@ namespace rphp { namespace lexer {
 #define T_DQ_DONE        0
 #define T_DQ_DQ          1
 #define T_DQ_NEWLINE     2
-#define T_DQ_PASSTHROUGH 3
+#define T_DQ_VARIABLE    3
 #define T_DQ_ESCAPE      4
 
 class pLexer {
