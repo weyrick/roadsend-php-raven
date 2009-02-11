@@ -59,6 +59,7 @@ using namespace rphp;
 %type T_DOC_COMMENT {int}
 %type T_INLINE_HTML {int}
 %type T_WHILE {int}
+%type T_ENDWHILE {int}
 %type T_ELSE {int}
 %type T_ELSEIF {int}
 %type T_ARRAY {int}
@@ -80,7 +81,9 @@ using namespace rphp;
 %type T_CLASS {int}
 %type T_CLASSDEREF {int}
 %type T_FOREACH {int}
+%type T_ENDFOREACH {int}
 %type T_FOR {int}
+%type T_ENDFOR {int}
 %type T_AS {int}
 %type T_RETURN {int}
 %type T_DOT {int}
@@ -113,6 +116,7 @@ using namespace rphp;
 %type T_MOD {int}
 %type T_MULT {int}
 %type T_SWITCH {int}
+%type T_ENDSWITCH {int}
 %type T_CASE {int}
 %type T_BREAK {int}
 %type T_CONTINUE {int}
@@ -130,6 +134,35 @@ using namespace rphp;
 %type T_LOGICAL_XOR {int}
 %type T_PLUS_EQUAL {int}
 %type T_MINUS_EQUAL {int}
+%type T_EVAL {int}
+%type T_SR_EQUAL {int}
+%type T_SL_EQUAL {int}
+%type T_XOR_EQUAL {int}
+%type T_OR_EQUAL {int}
+%type T_AND_EQUAL {int}
+%type T_MOD_EQUAL {int}
+%type T_CONCAT_EQUAL {int}
+%type T_DIV_EQUAL {int}
+%type T_MUL_EQUAL {int}
+%type T_SR {int}
+%type T_SL {int}
+%type T_NAMESPACE {int}
+%type T_INT_CAST {int}
+%type T_FLOAT_CAST {int}
+%type T_STRING_CAST {int}
+%type T_UNICODE_CAST {int}
+%type T_BINARY_CAST {int}
+%type T_ARRAY_CAST {int}
+%type T_OBJECT_CAST {int}
+%type T_UNSET_CAST {int}
+%type T_BOOL_CAST {int}
+%type T_GOTO {int}
+%type T_MAGIC_FILE {int}
+%type T_MAGIC_LINE {int}
+%type T_MAGIC_NS {int}
+%type T_MAGIC_CLASS {int}
+%type T_MAGIC_FUNCTION {int}
+%type T_MAGIC_METHOD {int}
 
 %syntax_error {  
   pMod->parseError(TOKEN);

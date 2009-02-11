@@ -78,9 +78,20 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add(L"PHP", L"\\:", T_COLON, L".");
     langRules_.add(L"PHP", L">=", T_GREATER_THAN_OR_EQUAL, L".");
     langRules_.add(L"PHP", L"<=", T_LESS_THAN_OR_EQUAL, L".");
+    langRules_.add(L"PHP", L"<<", T_SL, L".");
+    langRules_.add(L"PHP", L">>", T_SR, L".");
+    langRules_.add(L"PHP", L"<<=", T_SL_EQUAL, L".");
+    langRules_.add(L"PHP", L">>=", T_SR_EQUAL, L".");
     langRules_.add(L"PHP", L"::", T_DBL_COLON, L".");
     langRules_.add(L"PHP", L"\\+\\+", T_INC, L".");
     langRules_.add(L"PHP", L"\\-\\-", T_DEC, L".");
+    langRules_.add(L"PHP", L"\\^\\=", T_XOR_EQUAL, L".");
+    langRules_.add(L"PHP", L"\\|\\=", T_OR_EQUAL, L".");
+    langRules_.add(L"PHP", L"\\&\\=", T_AND_EQUAL, L".");
+    langRules_.add(L"PHP", L"\\%\\=", T_MOD_EQUAL, L".");
+    langRules_.add(L"PHP", L"\\.\\=", T_CONCAT_EQUAL, L".");
+    langRules_.add(L"PHP", L"\\/\\=", T_DIV_EQUAL, L".");
+    langRules_.add(L"PHP", L"\\*\\=", T_MUL_EQUAL, L".");
     langRules_.add(L"PHP", L"\\+\\=", T_PLUS_EQUAL, L".");
     langRules_.add(L"PHP", L"\\-\\=", T_MINUS_EQUAL, L".");
     langRules_.add(L"PHP", L"\\!\\=", T_NOTEQUAL, L".");
@@ -99,9 +110,12 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add(L"PHP", L"xor", T_LOGICAL_XOR, L".");
     langRules_.add(L"PHP", L"if", T_IF, L".");
     langRules_.add(L"PHP", L"for", T_FOR, L".");
+    langRules_.add(L"PHP", L"endfor", T_ENDFOR, L".");
     langRules_.add(L"PHP", L"foreach", T_FOREACH, L".");
+    langRules_.add(L"PHP", L"endforeach", T_ENDFOREACH, L".");
     langRules_.add(L"PHP", L"as", T_AS, L".");
     langRules_.add(L"PHP", L"exit", T_EXIT, L".");
+    langRules_.add(L"PHP", L"eval", T_EXIT, L".");
     langRules_.add(L"PHP", L"public", T_PUBLIC, L".");
     langRules_.add(L"PHP", L"private", T_PRIVATE, L".");
     langRules_.add(L"PHP", L"protected", T_PROTECTED, L".");
@@ -109,11 +123,13 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add(L"PHP", L"return", T_RETURN, L".");
     langRules_.add(L"PHP", L"global", T_GLOBAL, L".");
     langRules_.add(L"PHP", L"function", T_FUNCTION, L".");
+    langRules_.add(L"PHP", L"namespace", T_NAMESPACE, L".");
     langRules_.add(L"PHP", L"isset", T_ISSET, L".");
     langRules_.add(L"PHP", L"unset", T_UNSET, L".");
     langRules_.add(L"PHP", L"empty", T_EMPTY, L".");
     langRules_.add(L"PHP", L"array", T_ARRAY, L".");
     langRules_.add(L"PHP", L"while", T_WHILE, L".");
+    langRules_.add(L"PHP", L"endwhile", T_ENDWHILE, L".");
     langRules_.add(L"PHP", L"else", T_ELSE, L".");
     langRules_.add(L"PHP", L"elseif", T_ELSEIF, L".");
     langRules_.add(L"PHP", L"echo", T_ECHO, L".");
@@ -130,12 +146,28 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add(L"PHP", L"throw", T_THROW, L".");
     langRules_.add(L"PHP", L"try", T_TRY, L".");
     langRules_.add(L"PHP", L"catch", T_CATCH, L".");
+    langRules_.add(L"PHP", L"goto", T_GOTO, L".");
     langRules_.add(L"PHP", L"const", T_CONST, L".");
     langRules_.add(L"PHP", L"static", T_STATIC, L".");
     langRules_.add(L"PHP", L"include", T_INCLUDE, L".");
     langRules_.add(L"PHP", L"include_once", T_INCLUDE_ONCE, L".");
     langRules_.add(L"PHP", L"require", T_REQUIRE, L".");
     langRules_.add(L"PHP", L"require_once", T_REQUIRE_ONCE, L".");
+    langRules_.add(L"PHP", L"__FILE__", T_MAGIC_FILE, L".");
+    langRules_.add(L"PHP", L"__LINE__", T_MAGIC_LINE, L".");
+    langRules_.add(L"PHP", L"__CLASS__", T_MAGIC_CLASS, L".");
+    langRules_.add(L"PHP", L"__METHOD__", T_MAGIC_METHOD, L".");
+    langRules_.add(L"PHP", L"__FUNCTION__", T_MAGIC_FUNCTION, L".");
+    langRules_.add(L"PHP", L"__NAMESPACE__", T_MAGIC_NS, L".");
+    langRules_.add(L"PHP", L"\\((int|integer)\\)", T_INT_CAST, L".");
+    langRules_.add(L"PHP", L"\\((real|double|float)\\)", T_FLOAT_CAST, L".");
+    langRules_.add(L"PHP", L"\\(string\\)", T_STRING_CAST, L".");
+    langRules_.add(L"PHP", L"\\(binary\\)", T_BINARY_CAST, L".");
+    langRules_.add(L"PHP", L"\\(unicode\\)", T_UNICODE_CAST, L".");
+    langRules_.add(L"PHP", L"\\(array\\)", T_ARRAY_CAST, L".");
+    langRules_.add(L"PHP", L"\\(object\\)", T_OBJECT_CAST, L".");
+    langRules_.add(L"PHP", L"\\((bool|boolean)\\)", T_BOOL_CAST, L".");
+    langRules_.add(L"PHP", L"\\(unset\\)", T_UNSET_CAST, L".");
     langRules_.add(L"PHP", L"[a-zA-Z_][a-zA-Z0-9_]*", T_IDENTIFIER, L".");
     langRules_.add(L"PHP", L"\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE, L".");
     langRules_.add(L"PHP", L"[0-9]+", T_LNUMBER, L".");
@@ -334,6 +366,8 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_ELSEIF";
         case T_WHILE:
             return L"T_WHILE";
+        case T_ENDWHILE:
+            return L"T_ENDWHILE";
         case T_NEW:
             return L"T_NEW";
         case T_ARRAY:
@@ -376,6 +410,10 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_FOREACH";
         case T_FOR:
             return L"T_FOR";
+        case T_ENDFOREACH:
+            return L"T_ENDFOREACH";
+        case T_ENDFOR:
+            return L"T_ENDFOR";
         case T_AS:
             return L"T_AS";
         case T_RETURN:
@@ -416,6 +454,8 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_EXIT";
         case T_SWITCH:
             return L"T_SWITCH";
+        case T_ENDSWITCH:
+            return L"T_ENDSWITCH";
         case T_CASE:
             return L"T_CASE";
         case T_BREAK:
@@ -450,6 +490,63 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_PLUS_EQUAL";
         case T_MINUS_EQUAL:
             return L"T_MINUS_EQUAL";
+        case T_SR:
+            return L"T_SR";
+        case T_SL:
+            return L"T_SL";
+        case T_SR_EQUAL:
+            return L"T_SR_EQUAL";
+        case T_SL_EQUAL:
+            return L"T_SL_EQUAL";
+        case T_EVAL:
+            return L"T_EVAL";
+        case T_XOR_EQUAL:
+            return L"T_XOR_EQUAL";
+        case T_OR_EQUAL:
+            return L"T_OR_EQUAL";
+        case T_AND_EQUAL:
+            return L"T_AND_EQUAL";
+        case T_MOD_EQUAL:
+            return L"T_MOD_EQUAL";
+        case T_CONCAT_EQUAL:
+            return L"T_CONCAT_EQUAL";
+        case T_DIV_EQUAL:
+            return L"T_DIV_EQUAL";
+        case T_MUL_EQUAL:
+            return L"T_MUL_EQUAL";
+        case T_NAMESPACE:
+            return L"T_NAMESPACE";
+        case T_INT_CAST:
+            return L"T_INT_CAST";
+        case T_FLOAT_CAST:
+            return L"T_DOUBLE_CAST";
+        case T_STRING_CAST:
+            return L"T_STRING_CAST";
+        case T_UNICODE_CAST:
+            return L"T_UNICODE_CAST";
+        case T_BINARY_CAST:
+            return L"T_BINARY_CAST";
+        case T_ARRAY_CAST:
+            return L"T_ARRAY_CAST";
+        case T_OBJECT_CAST:
+            return L"T_OBJECT_CAST";
+        case T_UNSET_CAST:
+            return L"T_UNSET_CAST";
+        case T_BOOL_CAST:
+            return L"T_BOOL_CAST";
+        case T_MAGIC_FILE:
+            return L"T_FILE";
+        case T_MAGIC_LINE:
+            return L"T_LINE";
+        case T_MAGIC_CLASS:
+            return L"T_CLASS_C";
+        case T_MAGIC_FUNCTION:
+            return L"T_FUNCTION_C";
+        case T_MAGIC_METHOD:
+            return L"T_METHOD_C";
+        case T_MAGIC_NS:
+            return L"T_NS_C";
+
     }
     return L"";
 
