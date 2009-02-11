@@ -45,8 +45,6 @@ pLexer::pLexer(const pSourceFile* s):
     dqRules_.add(L"INITIAL", L"\\\\n", T_DQ_NEWLINE, L".");
     dqRules_.add(L"INITIAL", L"\\\"", T_DQ_DQ, L".");
     dqRules_.add(L"INITIAL", L"\\\\\\\"", T_DQ_ESCAPE, L".");
-    // FIXME: this is inefficient. does lexertl have an "unmatched"?
-    dqRules_.add(L"INITIAL", L".{1}", T_DQ_PASSTHROUGH, L".");
     boost::lexer::wgenerator::build (dqRules_, dqState_);
 
     langRules_.add_state(L"PHP");
@@ -218,7 +216,7 @@ bool pLexer::preprocess(void) {
                         // replace newline escape sequence with literal newline
                         buffer.push_back(RPHP_NEWLINE);
                         break;
-                    case T_DQ_PASSTHROUGH:
+                    case boost::lexer::npos:
                     default:
                         // passthrough
                         buffer.append(dqIter->start, dqIter->end);
