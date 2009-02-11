@@ -64,7 +64,7 @@ using namespace rphp;
 %type T_ELSEIF {int}
 %type T_ARRAY {int}
 %type T_ARROWKEY {int}
-%type T_REF {int}
+%type T_AND {int}
 %type T_ASSIGN {int}
 %type T_DQ_STRING {int}
 %type T_NOT {int}
@@ -165,6 +165,9 @@ using namespace rphp;
 %type T_MAGIC_METHOD {int}
 %type T_TICK {int}
 %type T_TILDE {int}
+%type T_PIPE {int}
+%type T_PRINT {int}
+%type T_INTERFACE {int}
 
 %syntax_error {  
   pMod->parseError(TOKEN);

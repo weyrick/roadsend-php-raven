@@ -73,9 +73,10 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add(L"PHP", L"\\*", T_MULT, L".");
     langRules_.add(L"PHP", L"\\;", T_SEMI, L".");
     langRules_.add(L"PHP", L"\\,", T_COMMA, L".");
+    langRules_.add(L"PHP", L"\\|", T_PIPE, L".");
     langRules_.add(L"PHP", L"\\.", T_DOT, L".");
     langRules_.add(L"PHP", L"\\!", T_NOT, L".");
-    langRules_.add(L"PHP", L"\\&", T_REF, L".");
+    langRules_.add(L"PHP", L"\\&", T_AND, L".");
     langRules_.add(L"PHP", L"\\@", T_AT, L".");
     langRules_.add(L"PHP", L"\\?", T_QUESTION, L".");
     langRules_.add(L"PHP", L"\\:", T_COLON, L".");
@@ -116,8 +117,10 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add(L"PHP", L"endfor", T_ENDFOR, L".");
     langRules_.add(L"PHP", L"foreach", T_FOREACH, L".");
     langRules_.add(L"PHP", L"endforeach", T_ENDFOREACH, L".");
+    langRules_.add(L"PHP", L"interface", T_INTERFACE, L".");
     langRules_.add(L"PHP", L"as", T_AS, L".");
     langRules_.add(L"PHP", L"exit", T_EXIT, L".");
+    langRules_.add(L"PHP", L"print", T_PRINT, L".");
     langRules_.add(L"PHP", L"eval", T_EXIT, L".");
     langRules_.add(L"PHP", L"public", T_PUBLIC, L".");
     langRules_.add(L"PHP", L"private", T_PRIVATE, L".");
@@ -555,6 +558,10 @@ const wchar_t* pLexer::getTokenDescription(const std::size_t t) const {
             return L"T_METHOD_C";
         case T_MAGIC_NS:
             return L"T_NS_C";
+        case T_PRINT:
+            return L"T_PRINT";
+        case T_INTERFACE:
+            return L"T_INTERFACE";
 
     }
     return L"";
