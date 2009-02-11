@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -53,6 +53,8 @@ pLexer::pLexer(const pSourceFile* s):
 
     langRules_.add(L"INITIAL", L"<\\?|<\\?PHP", T_OPEN_TAG, L"PHP"); // go to PHP state
     langRules_.add(L"INITIAL", L".+|\\n+", T_INLINE_HTML, L".");
+
+    langRules_.add(L"PHP", L"\\?>", T_CLOSE_TAG, L"INITIAL"); // go to HTML state
 
     langRules_.add(L"PHP", L"\\(", T_LEFTPAREN, L".");
     langRules_.add(L"PHP", L"\\)", T_RIGHTPAREN, L".");
@@ -146,13 +148,13 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add(L"PHP", L"\\/\\/.*$", T_SINGLELINE_COMMENT, L".");
     langRules_.add(L"PHP", L"b*[\"](\\\\\\\"|[^\"])*[\"]", T_DQ_STRING, L".");
     langRules_.add(L"PHP", L"b*[\'](\\\\\\.|[^\'])*[\']", T_SQ_STRING, L".");
-    langRules_.add(L"PHP", L"\\?>", T_CLOSE_TAG, L"INITIAL"); // go to HTML state
 
     boost::lexer::wgenerator::build (langRules_, langState_);
     lexInput_ = new boost::lexer::iter_winput(&langState_, sourceBegin_, sourceEnd_);
 
     // dump the state machine
-    //boost::lexer::wdebug::dump (langState_, std::wcout);
+    //boost::lexer::wgenerator::minimise(langState_);
+    //boost::lexer::wdebug::dump(langState_, std::wcout);
 
 }
 
@@ -251,6 +253,8 @@ bool pLexer::preprocess(void) {
 
     sourceBegin_ = contents_.begin();
     sourceEnd_ = contents_.end();
+    delete lexInput_;
+    lexInput_ = new boost::lexer::iter_winput(&langState_, sourceBegin_, sourceEnd_);
 
     return success;
 

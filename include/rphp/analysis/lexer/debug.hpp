@@ -123,7 +123,7 @@ public:
             dfa_ < dfas_; ++dfa_)
         {
             const std::size_t states_ = iter_->states;
-
+            stream_ << "Dump of DFA #" << dfa_ << " which has " << states_ << " states:" << std::endl;
             for (std::size_t i_ = 0; i_ < states_; ++i_)
             {
                 state (stream_);
