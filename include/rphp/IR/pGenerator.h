@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -71,7 +71,7 @@ private:
     void createEntryPoint(void);
 
     llvm::Value* newVarOnStack(const char*);
-    
+
 public:
 
     pGenerator(const std::string& moduleName);
@@ -94,6 +94,7 @@ public:
     void visit_literalFloat(AST::literalFloat*);
     void visit_literalBool(AST::literalBool*);
     void visit_literalNull(AST::literalNull*);
+    void visit_literalArray(AST::literalArray*);
     void visit_assignment(AST::assignment*);
     void visit_var(AST::var*);
     void visit_functionInvoke(AST::functionInvoke*);

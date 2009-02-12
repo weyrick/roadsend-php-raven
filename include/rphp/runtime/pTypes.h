@@ -38,6 +38,7 @@
 
 #include "rphp/runtime/pUString.h"
 #include "rphp/runtime/CowPtr.h"
+#include "rphp/runtime/pRuntimeError.h"
 
 namespace rphp {
 
@@ -121,7 +122,7 @@ typedef enum {
     pVarResourceType,
     pVarPtrType
 } pVarType;
-    
+
 /// note, pUInt is not a base PHP type (all PHP numbers are signed)
 typedef boost::uint_fast32_t pUInt;
 

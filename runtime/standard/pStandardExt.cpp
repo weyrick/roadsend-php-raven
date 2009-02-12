@@ -21,6 +21,7 @@
 
 #include <iostream>
 
+#include "rphp/runtime/pRuntime.h"
 #include "rphp/runtime/pFunction.h"
 #include "rphp/runtime/standard/pStandardExt.h"
 
@@ -35,9 +36,12 @@ void pStandardExt::extensionStartup() {
 
     pFunction* f;
 
+    f = registerBuiltin("var_dump", (pFunPointer1)bind(&pStandardExt::var_dump, this, _1));
+    f->param(0)->setName("var");
+
     f = registerBuiltin("strlen", (pFunPointer1)bind(&pStandardExt::strlen, this, _1));
     f->param(0)->setName("string");
-    
+
     f = registerBuiltin("strpos", (pFunPointer3)bind(&pStandardExt::strpos, this, _1, _2, _3));
     f->setRequiredArity(2);
     f->param(0)->setName("haystack");
@@ -55,6 +59,66 @@ void pStandardExt::extensionShutdown() {
 
 /* Library Implementation */
 
+class var_dump_visitor : public boost::static_visitor<void>
+{
+private:
+    pRuntimeEngine* runtime_;
+public:
+    var_dump_visitor(pRuntimeEngine *r): runtime_(r) { }
+
+    void operator()(const pTriState &v) const {
+        if (v == pNull) {
+            runtime_->outputManager->print(pBString("NULL\n"));
+        }
+        else {
+            runtime_->outputManager->print(pBString("bool("));
+            if (v == pTrue)
+                runtime_->outputManager->print(pBString("true"));
+            else
+                runtime_->outputManager->print(pBString("false"));
+            runtime_->outputManager->print(pBString(")\n"));
+        }
+    }
+
+    void operator()(const pInt &v) const {
+        runtime_->outputManager->print(pBString("int"));
+    }
+
+    void operator()(const pFloat &v) const {
+        runtime_->outputManager->print(pBString("float"));
+    }
+
+    void operator()(const pBString &v) const {
+        runtime_->outputManager->print(pBString("bstring"));
+    }
+
+    void operator()(const pUString &v) const {
+        runtime_->outputManager->print(pBString("ustring"));
+    }
+
+    void operator()(const pHashP &v) const {
+        runtime_->outputManager->print(pBString("array"));
+    }
+
+    void operator()(const pObjectP &v) const {
+        runtime_->outputManager->print(pBString("object"));
+    }
+
+    void operator()(const pResourceP &v) const {
+        runtime_->outputManager->print(pBString("resource"));
+    }
+
+    void operator()(const pVarP &v) const {
+        runtime_->outputManager->print(pBString("ref"));
+    }
+};
+
+
+pVar pStandardExt::var_dump(pVar v) {
+    v.applyVisitor<var_dump_visitor>(runtime_);
+    return pNull;
+}
+
 pInt pStandardExt::strlen(pVar v) {
     v.convertToString();
     if (v.isBString())
@@ -65,7 +129,7 @@ pInt pStandardExt::strlen(pVar v) {
 
 pVar pStandardExt::strpos(pVar haystackV, pVar needleV, pVar offsetV) {
 
-    // TODO: unicode 
+    // TODO: unicode
 
     pBString haystack = haystackV.convertToBString();
     pBString needle = needleV.convertToBString();

@@ -356,10 +356,10 @@ logicalNot(A) ::= T_NOT expr(R).
 
 /** ASSIGNMENT **/
 %type assignment {AST::assignment*}
-assignment(A) ::= lval(L) T_ASSIGN expr(R).
+assignment(A) ::= lval(L) T_ASSIGN(EQ_SIGN) expr(R).
 {
     A = new AST::assignment(L, R);
-    A->setLine(pMod->currentLineNum());
+    A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 
 /** LVALS **/

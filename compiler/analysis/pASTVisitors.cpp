@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -246,7 +246,7 @@ void dumpVisitor::visit_assignment(assignment* n)  {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
-    
+
     showindent();
     std::cout << "(rval: " << std::endl;
     indent();
@@ -254,7 +254,7 @@ void dumpVisitor::visit_assignment(assignment* n)  {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
-    
+
     unindent();
     showindent();
     std::cout << ")" << std::endl;
@@ -289,7 +289,7 @@ void dumpVisitor::visit_functionInvoke(functionInvoke* n)  {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
-    unindent();    
+    unindent();
     showindent();
     std::cout << ")" << std::endl;
 

@@ -43,12 +43,12 @@ pFunction* pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pI
 
 pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1) {
     functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
-    // TODO this needs to throw a runtime error if the function wasn't found
     if (function != functionRegistry_.end()) {
         return (*function).second->invoke(arg1);
     }
     else {
-        return pNull;
+        throw pRuntimeError("undefined function: "+funName);
+        //return pNull;
     }
 }
 
@@ -59,7 +59,8 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2,
         return (*function).second->invoke(arg1,arg2,arg3);
     }
     else {
-        return pNull;
+        throw pRuntimeError("undefined function: "+funName);
+        //return pNull;
     }
 }
 

@@ -1,8 +1,8 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
- *                    Thomas Moenicke <tm@php-qt.org>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+ *                         Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -56,7 +56,7 @@ extern "C" {
     rphp::pVar rphp_make_pVar_pBString(const char* str) {
         return rphp::pVar(rphp::pBString(str));
     }
-    
+
     // create a new unicode string
     rphp::pVar rphp_make_pVar_pUString(const char* str, size_t len) {
         // our code generator always generates UTF-16BE
@@ -72,7 +72,7 @@ extern "C" {
     rphp::pVar rphp_make_pVar_pFloat(rphp::pFloat v) {
         return rphp::pVar(v);
     }
-    
+
     // create a new bool pVar
     rphp::pVar rphp_make_pVar_pBool(int v) {
         return (v) ? rphp::pVar(rphp::pTrue) : rphp::pVar(rphp::pFalse);
@@ -80,6 +80,10 @@ extern "C" {
 
     rphp::pVar rphp_make_pVar_pObject(const char *className) {
         return rphp::pObjectP( new rphp::pObject(className) );
+    }
+
+    rphp::pVar rphp_make_pVar_pHash() {
+        return rphp::pHashP(new rphp::pHash());
     }
 
     /*
@@ -95,7 +99,7 @@ extern "C" {
     rphp::pVar rphp_funCall3(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3) {
         return r->functionManager->invoke(name, arg1, arg2, arg3);
     }
-    
+
     rphp::pVar rphp_newCall(rphp::pRuntimeEngine* r, const char* className, rphp::pVar arg1) {
       rphp::pVar result = rphp_make_pVar_pObject( className );
       // invoke method call "__construct" on result

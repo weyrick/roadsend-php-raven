@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -55,7 +55,7 @@ pGenerator::pGenerator(const std::string& moduleName):
     createEntryPoint();
 
 }
-    
+
 pGenerator::~pGenerator(void) {
 
     // won't free llvmModule!
@@ -127,13 +127,13 @@ void pGenerator::finalize(void) {
 // at the start of the current function, and destruction at it's end
 llvm::Value* pGenerator::newVarOnStack(const char* name) {
 
-    
+
     AllocaInst* pVarTmp = new AllocaInst(IRHelper_->pVarType(), 0, name);
     currentFunction_->getEntryBlock().getInstList().push_front(pVarTmp);
 
     Function* constructor = llvmModule_->getFunction("_ZN4rphp4pVarC1Ev");
     assert(constructor != NULL);
-    
+
     CallInst* con = CallInst::Create(constructor, pVarTmp);
     currentFunction_->getEntryBlock().getInstList().push_back(con);
 
@@ -147,7 +147,7 @@ void pGenerator::visit_literalString(AST::literalString* n) {
 
     bool isUnicode = !n->isBinary();
     int32_t finalLen(0);
-    
+
     Constant* strPtr;
     if (isUnicode) {
         strPtr = IRHelper_->stringConstant(n->getStringVal(), finalLen);
@@ -156,10 +156,10 @@ void pGenerator::visit_literalString(AST::literalString* n) {
         // strip unicodeyness
         strPtr = IRHelper_->stringConstant(std::string(n->getStringVal().begin(), n->getStringVal().end()), finalLen);
     }
- 
+
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack((isUnicode)?"pUStrTmp":"pBStrTmp");
-    
+
     // convert cstr to pbstring
     Function* f = llvmModule_->getFunction((isUnicode)?"rphp_make_pVar_pUString":"rphp_make_pVar_pBString");
     assert(f != NULL);
@@ -229,8 +229,21 @@ void pGenerator::visit_literalBool(AST::literalBool* n) {
 }
 
 void pGenerator::visit_literalNull(AST::literalNull* n) {
-    
+
     Value* pVarTmp = newVarOnStack("pNullTmp");
+
+    // push to stack
+    valueStack_.push(pVarTmp);
+
+}
+
+void pGenerator::visit_literalArray(AST::literalArray* n) {
+
+    Value* pVarTmp = newVarOnStack("pHashTmp");
+
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_pHash");
+    assert(f != NULL);
+    currentBlock_.CreateCall(f, pVarTmp);
 
     // push to stack
     valueStack_.push(pVarTmp);
@@ -264,6 +277,7 @@ void pGenerator::visit_assignment(AST::assignment* n) {
 
     // gen rval
     visit(n->rVal());
+    assert(valueStack_.size() && "rVal didn't push a value!");
     Value* rVal = valueStack_.back();
     valueStack_.pop();
 
@@ -295,7 +309,7 @@ void pGenerator::visit_var(AST::var* n) {
     else {
         valueStack_.push((*sym).second);
     }
-    
+
 
 }
 
@@ -333,14 +347,14 @@ void pGenerator::visit_functionInvoke(AST::functionInvoke* n) {
     callArgList.push_back(runtimeEngine_);
     int32_t len(0);
     callArgList.push_back(IRHelper_->stringConstant(n->name(),len));
-    
+
     // visit arguments in reverse order, add to call arg list as we go
     for (AST::expressionList::reverse_iterator i = n->argList().rbegin(); i != n->argList().rend(); ++i) {
         visit(*i);
         callArgList.push_back(valueStack_.back());
         valueStack_.pop();
     }
-    
+
     Value *result = currentBlock_.CreateCall(f, callArgList.begin(), callArgList.end());
 
     valueStack_.push(retval);

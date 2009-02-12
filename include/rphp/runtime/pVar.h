@@ -174,6 +174,10 @@ public:
     typename T::result_type applyVisitor() {
         return boost::apply_visitor( T(), pVarData_ );
     }
+    template <typename T, typename T2>
+    typename T::result_type applyVisitor(T2 param1) {
+        return boost::apply_visitor( T(param1), pVarData_ );
+    }
 
     /* type checks */
     /// return the current type represented by this pVar
