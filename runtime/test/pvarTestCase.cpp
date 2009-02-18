@@ -16,10 +16,10 @@ CPPUNIT_TEST_SUITE_REGISTRATION( pvarTestCase );
 
 using namespace rphp;
 
-// ** NULL ** 
+// ** NULL **
 void pvarTestCase::test_pNull()
 {
-    
+
     // default null
     pVar a;
     CPPUNIT_ASSERT( a.isNull() );
@@ -27,11 +27,11 @@ void pvarTestCase::test_pNull()
     // null construct
     pVar a1(pNull);
     CPPUNIT_ASSERT( a1.isNull() );
-    
+
     // null assignment
     a = pNull;
     CPPUNIT_ASSERT( a.isNull() );
-    
+
     // null evaluates to false
     CPPUNIT_ASSERT( a.evalAsBool() == false );
 
@@ -94,7 +94,7 @@ void pvarTestCase::test_pBool() {
     b5.convertToBool();
     CPPUNIT_ASSERT( b5.isBool() );
     CPPUNIT_ASSERT( !b5.evalAsBool() );
-    
+
 
 }
 
@@ -209,7 +209,7 @@ pVar changeRef(pVar r) {
     *r2 = 10;
 
     return pVar(r2);
-    
+
 }
 
 void pvarTestCase::test_pVarRef() {
@@ -251,13 +251,16 @@ void pvarTestCase::test_pVarRef() {
     CPPUNIT_ASSERT( r.isBoxed() );
     CPPUNIT_ASSERT( r.getPtr() == r2.getPtr() );
 
-    
+
 }
 
 // ** VISITOR **
 class tvisitor : public boost::static_visitor<void>
 {
+    const pVar& p_;
 public:
+
+    tvisitor(const pVar& p):p_(p) { }
 
     void operator()(const pTriState &v) const {
         /* ? */

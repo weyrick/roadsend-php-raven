@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -46,9 +46,9 @@ public:
     typedef boost::shared_array<UChar> arrayType;
 
 private:
-    arrayType data_;
     int32_t strLen_;
     int32_t bufSize_;
+    arrayType data_;
 
     void detach() {
         UChar* tmp = data_.get();
@@ -64,7 +64,7 @@ public:
                     bufSize_(defaultBufferSize),
                     data_(new UChar[bufSize_])
     {
-        
+
     }
 
     pUString(const char * s): strLen_(0), bufSize_(0), data_(0) {
@@ -99,7 +99,7 @@ public:
         if (strLen_) {
             data_.reset(new UChar[bufSize_]);
             memcpy(data_.get(), s.getBuffer(), bufSize_ * U_SIZEOF_UCHAR);
-        }        
+        }
     }
 
     // size
@@ -128,12 +128,12 @@ public:
     // if you checkout however, you _must_ check in to gurantee that the buffer
     // is updated properly
     UnicodeString checkoutICUString(void);
-    
+
     // use after checking out a unicode string
     void checkinICUString(const UnicodeString& s);
-    
+
 };
-    
+
 } /* namespace rphp */
 
 

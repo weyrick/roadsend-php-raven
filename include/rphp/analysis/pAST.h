@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -32,7 +32,7 @@ namespace rphp { namespace AST {
 // NOTE: if you change this, check static dispatch table in pASTVisitors.cpp!
 enum nodeKind {
     blockKind,
-    ifStmtKind,    
+    ifStmtKind,
     echoStmtKind,
     inlineHtmlKind,
     literalStringKind,
@@ -62,8 +62,8 @@ public:
 
     nodeKind getKind(void) const { return kind_; }
 
-    pUInt setLine(pUInt start) { startLineNum_ = start; endLineNum_ = start; }
-    pUInt setLine(pUInt start, pUInt end) { startLineNum_ = start; endLineNum_ = end; }
+    void setLine(pUInt start) { startLineNum_ = start; endLineNum_ = start; }
+    void setLine(pUInt start, pUInt end) { startLineNum_ = start; endLineNum_ = end; }
 
     pUInt startLineNum(void) const { return startLineNum_; }
     pUInt endLineNum(void) const { return endLineNum_; }
@@ -79,11 +79,11 @@ public:
 
     block(void): stmt(blockKind) { }
     ~block(void) {
-        for (int i=0; i < statements.size(); i++) {
+        for (statementList::size_type i=0; i < statements.size(); i++) {
             delete statements[i];
         }
     }
-    
+
 };
 
 
@@ -112,7 +112,7 @@ class ifStmt: public stmt {
     block* trueBlock_;
 
 public:
-    ifStmt(expr* cond, block* trueBlock): condition_(cond), trueBlock_(trueBlock), stmt(ifStmtKind) { }
+    ifStmt(expr* cond, block* trueBlock): stmt(ifStmtKind), condition_(cond), trueBlock_(trueBlock) { }
     ~ifStmt(void) {
         delete condition_;
         delete trueBlock_;
@@ -131,7 +131,7 @@ class literalExpr: public expr {
 public:
     literalExpr(nodeKind k): expr(k), stringVal_() { }
     literalExpr(nodeKind k, const pSourceRange& v): expr(k), stringVal_(v.begin(), v.end()) { }
-    
+
     const pSourceString& getStringVal(void) const {
         return stringVal_;
     }
@@ -310,7 +310,7 @@ public:
         // free parser's version, which we've copied
         delete argList;
     }
-    
+
     ~functionInvoke(void) {
         for (expressionList::iterator i = argList_.begin(); i != argList_.end(); ++i) {
             delete *i;

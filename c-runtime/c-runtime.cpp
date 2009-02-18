@@ -40,16 +40,12 @@ extern "C" {
 
     // print a c string to the current output buffer in the given runtime
     void rphp_print_cstr(rphp::pRuntimeEngine* e, const char* str) {
-        e->outputManager->print(rphp::pBString(str));
+        e->output << str;
     }
 
     // print a pVar, coercing to string
     void rphp_print_pVar(rphp::pRuntimeEngine* e, rphp::pVar v) {
-        v.convertToString();
-        if (v.isUString())
-            e->outputManager->print(v.getUString());
-        else
-            e->outputManager->print(v.getBString());
+        e->output << v;
     }
 
     // create a new binary string

@@ -94,8 +94,8 @@ typedef nth_index<stableHash,1>::type seq_index;
 */
 class pHash {
 
-    stableHash hashData_;
     pInt maxIntKey_;
+    stableHash hashData_;
 
 public:
 

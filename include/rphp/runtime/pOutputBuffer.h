@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -33,8 +33,8 @@ public:
 
 private:
 
-    UnicodeString *uBuffer_;
     pBString *bBuffer_;
+    UnicodeString *uBuffer_;
     bufTypeT bType_;
 
 public:
@@ -68,6 +68,8 @@ public:
             case bufTypeUnicode:
                 return uBuffer_->length();
         }
+        // unreachable?
+        return 0;
     }
 
     bufTypeT getBufferType() const {
@@ -88,6 +90,17 @@ public:
                 return bBuffer_->c_str();
             case bufTypeUnicode:
                 return (const char*)uBuffer_->getTerminatedBuffer();
+        }
+    }
+
+    void newline() {
+        switch (bType_) {
+            case bufTypeBinary:
+                bBuffer_->push_back(RPHP_NEWLINE);
+                break;
+            case bufTypeUnicode:
+                uBuffer_->append(RPHP_NEWLINE);
+                break;
         }
     }
 

@@ -355,7 +355,7 @@ void pGenerator::visit_functionInvoke(AST::functionInvoke* n) {
         valueStack_.pop();
     }
 
-    Value *result = currentBlock_.CreateCall(f, callArgList.begin(), callArgList.end());
+    currentBlock_.CreateCall(f, callArgList.begin(), callArgList.end());
 
     valueStack_.push(retval);
 

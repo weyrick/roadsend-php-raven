@@ -8,6 +8,7 @@ driver for testing functions
 #include <cppunit/config/SourcePrefix.h>
 #include <iostream>
 
+#include "rphp/runtime/pRuntime.h"
 #include "rphp/runtime/pOutputBuffer.h"
 #include "runtimeTestCase.h"
 
@@ -28,5 +29,20 @@ void runtimeTestCase::outputBuffer()
     CPPUNIT_ASSERT( uBuffer.length() == 10 );
 
     CPPUNIT_ASSERT( *uBuffer.getUBuffer() == UnicodeString("1234512345") );
+
+}
+
+void runtimeTestCase::outputManager()
+{
+
+    pRuntimeEngine runtime;
+
+    runtime.output << "testing 123";
+    if (runtime.output.topBuffer()->getBufferType() == pOutputBuffer::bufTypeBinary)
+        CPPUNIT_ASSERT( runtime.output.topBuffer()->getBBuffer()->compare("testing 123") == 0 );
+    else
+        CPPUNIT_ASSERT( runtime.output.topBuffer()->getUBuffer()->compare("testing 123") == 0 );
+
+    runtime.output.freeAll();
 
 }

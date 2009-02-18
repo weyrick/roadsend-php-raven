@@ -30,4 +30,6 @@ void functionTestCase::basic()
     CPPUNIT_ASSERT( posTest.isInt() );
     CPPUNIT_ASSERT( posTest.getInt() == 6 );
 
+    //runtime.functionManager->invoke("var_dump", testString);
+
 }

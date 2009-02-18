@@ -54,7 +54,7 @@ void baseVisitor::visit(stmt* s) {
 }
 
 void baseVisitor::visit_block(block* b) {
-    for (int i=0; i < b->statements.size(); i++) {
+    for (statementList::size_type i=0; i < b->statements.size(); i++) {
         (this->*dispatchTable_[b->statements[i]->getKind()])(b->statements[i]);
     }
 }
@@ -281,7 +281,7 @@ void dumpVisitor::visit_functionInvoke(functionInvoke* n)  {
     showindent();
     std::cout << "(arguments: " << std::endl;
     indent();
-    for (int i = 0; i < n->argList().size(); i++) {
+    for (expressionList::size_type i = 0; i < n->argList().size(); i++) {
         showindent();
         std::cout << i+1 << ": " << std::endl;
         visit(n->argList()[i]);
@@ -307,7 +307,7 @@ void dumpVisitor::visit_constructorInvoke(constructorInvoke* n)  {
     showindent();
     std::cout << "(arguments: " << std::endl;
     indent();
-    for (int i = 0; i < n->argList().size(); i++) {
+    for (expressionList::size_type i = 0; i < n->argList().size(); i++) {
         showindent();
         std::cout << i+1 << ": " << std::endl;
         visit(n->argList()[i]);

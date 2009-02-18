@@ -38,6 +38,33 @@ void pOutputManager::flushAndFreeAll() {
     }
 }
 
+void pOutputManager::freeAll() {
+    while( !bufferStack_.empty() ) {
+        delete bufferStack_.top();
+        bufferStack_.pop();
+    }
+}
+
+
+pOutputManager& operator<< (pOutputManager& om, const char* str) {
+    om.print(str);
+    return om;
+}
+
+pOutputManager& operator<< (pOutputManager& om, const int i) {
+    om.print(i);
+    return om;
+}
+
+pOutputManager& operator<< (pOutputManager& om, const pVar& var) {
+    om.print(var.copyAsBString());
+    return om;
+}
+
+pOutputManager& operator<< (pOutputManager& om, const pBString& str) {
+    om.print(str);
+    return om;
+}
 
 }
 

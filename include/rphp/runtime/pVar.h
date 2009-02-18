@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -49,7 +49,7 @@ namespace rphp {
  - pVarP (shared ptr to a pVar)
 
  Space for each type is stored on the stack
- 
+
 */
 class pVar {
 
@@ -103,9 +103,12 @@ public:
     /* default copy constructor */
 #ifdef RPHP_PVAR_DEBUG
     pVar(pVar const& v) {
-        std::cout << "pVar [" << this << "]: copy construct from type: " << v.getType() << std::endl;
+        std::cout << "pVar [" << this << "]: copy construct from [" << &v << "] type: " << v.getType() << std::endl;
         pVarData_ = v.pVarData_;
         refData_ = v.refData_;
+        if (pVarData_.which() == pVarIntType_) {
+            std::cout << " ... was pInt, value [" << getInt() << "]" << std::endl;
+        }
     }
 #endif
 
@@ -114,7 +117,7 @@ public:
     ~pVar(void) {
         std::cout << "pVar [" << this << "]: destruct" << std::endl;
     }
-#endif    
+#endif
 
     /// generic assignment works for any type pVarDataType supports
     template <typename T>
@@ -139,12 +142,12 @@ public:
     }
 
     /// increment the reference count
-    inline boost::int32_t incRefCount(void) {
+    inline void incRefCount(void) {
         // TODO: overflow?
         refData_ += 1;
     }
     /// decrement the reference count
-    inline boost::int32_t decRefCount(void) {
+    inline void decRefCount(void) {
         refData_ -= 1;
     }
 
@@ -172,11 +175,15 @@ public:
     /// apply a boost static visitor to the variant
     template <typename T>
     typename T::result_type applyVisitor() {
-        return boost::apply_visitor( T(), pVarData_ );
+        return boost::apply_visitor( T(pVarData_), pVarData_ );
     }
     template <typename T, typename T2>
     typename T::result_type applyVisitor(T2 param1) {
-        return boost::apply_visitor( T(param1), pVarData_ );
+        return boost::apply_visitor( T(pVarData_, param1), pVarData_ );
+    }
+    template <typename T, typename T2, typename T3>
+    typename T::result_type applyVisitor(T2 param1, T3 param2) {
+        return boost::apply_visitor( T(pVarData_, param1, param2), pVarData_ );
     }
 
     /* type checks */
@@ -230,10 +237,10 @@ public:
 
         evaluates according to the language semantics for bool conversion.
         does not mutate.
-        
+
      */
     bool evalAsBool() const;
-    
+
     /* in place type conversion */
     /// free current value and represent a pNull instead
     void convertToNull();
@@ -243,7 +250,7 @@ public:
     pInt& convertToInt();
     // float
     /** @brief convert to binary or unicode string
-    
+
        it may convert to a binary or unicode string, depending on runtime settings
        or it's current value, so you must check which it converted to after the conversion
      */
@@ -278,7 +285,7 @@ public:
     const pTriState& getBool() const {
         return boost::get<const pTriState&>(pVarData_);
     }
-    
+
     /// pInt accessor. throws exception if pVar is wrong type
     pInt& getInt() {
         return boost::get<pInt&>(pVarData_);
@@ -338,7 +345,7 @@ public:
     pObjectP& getObject() {
         return boost::get<pObjectP&>(pVarData_);
     }
-    
+
     /// const pObject accessor. throws exception if pVar is wrong type
     const pObjectP& getObject() const {
         return boost::get<const pObjectP&>(pVarData_);
@@ -348,7 +355,7 @@ public:
     pResourceP& getResource() {
         return boost::get<pResourceP&>(pVarData_);
     }
-    
+
     /// const pResource accessor. throws exception if pVar is wrong type
     const pResourceP& getResource() const {
         return boost::get<const pResourceP&>(pVarData_);
@@ -358,7 +365,7 @@ public:
     pVarP& getPtr() {
         return boost::get<pVarP&>(pVarData_);
     }
-    
+
     /// boxed pVar accessor (const). throws exception if pVar is wrong type
     const pVarP& getPtr() const {
         return boost::get<const pVarP&>(pVarData_);

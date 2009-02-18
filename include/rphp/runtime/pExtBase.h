@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -33,12 +33,12 @@ class pFunction;
 class pExtBase {
 
 protected:
-    pIdentString extName_;
     pRuntimeEngine* runtime_;
+    pIdentString extName_;
 
     template <typename fPointerType>
     pFunction* registerBuiltin(const pIdentString& name, const fPointerType& f);
-    
+
 public:
     pExtBase(pRuntimeEngine *r, pIdentString eName) : runtime_(r), extName_(eName) { }
 

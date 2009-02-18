@@ -1,6 +1,8 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
+ * Copyright (c) 2009 Shannon Weyrick (weyrick@roadsend.com)
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
  * as published by the Free Software Foundation; either version 2.1
@@ -63,53 +65,54 @@ class var_dump_visitor : public boost::static_visitor<void>
 {
 private:
     pRuntimeEngine* runtime_;
+    const pVar& var_;
 public:
-    var_dump_visitor(pRuntimeEngine *r): runtime_(r) { }
+    var_dump_visitor(const pVar& v, pRuntimeEngine *r): runtime_(r), var_(v) { }
 
     void operator()(const pTriState &v) const {
-        if (v == pNull) {
-            runtime_->outputManager->print(pBString("NULL\n"));
+        if (pNull(v)) {
+            runtime_->output << "NULL";
         }
         else {
-            runtime_->outputManager->print(pBString("bool("));
+            runtime_->output << "bool(";
             if (v == pTrue)
-                runtime_->outputManager->print(pBString("true"));
+                runtime_->output << "true";
             else
-                runtime_->outputManager->print(pBString("false"));
-            runtime_->outputManager->print(pBString(")\n"));
+                runtime_->output << "false";
+            runtime_->output << ")\n";
         }
     }
 
     void operator()(const pInt &v) const {
-        runtime_->outputManager->print(pBString("int"));
+        runtime_->output << "int(" << var_ << ")\n";
     }
 
     void operator()(const pFloat &v) const {
-        runtime_->outputManager->print(pBString("float"));
+        runtime_->output << "float(" << var_ << ")\n";
     }
 
     void operator()(const pBString &v) const {
-        runtime_->outputManager->print(pBString("bstring"));
+        runtime_->output << "string(" << pInt(v.length()) << ") \"" << v << "\"\n";
     }
 
     void operator()(const pUString &v) const {
-        runtime_->outputManager->print(pBString("ustring"));
+        runtime_->output << "ustring(" << pInt(v.length()) << ") \"" << v << "\"\n";
     }
 
     void operator()(const pHashP &v) const {
-        runtime_->outputManager->print(pBString("array"));
+        //runtime_->outputManager->print("array");
     }
 
     void operator()(const pObjectP &v) const {
-        runtime_->outputManager->print(pBString("object"));
+        //runtime_->outputManager->print("object");
     }
 
     void operator()(const pResourceP &v) const {
-        runtime_->outputManager->print(pBString("resource"));
+        //runtime_->outputManager->print("resource");
     }
 
     void operator()(const pVarP &v) const {
-        runtime_->outputManager->print(pBString("ref"));
+        //runtime_->outputManager->print("ref");
     }
 };
 

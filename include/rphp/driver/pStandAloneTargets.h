@@ -35,7 +35,7 @@ protected:
     std::string mainFile_;
 
 public:
-    pStandAloneTarget(const std::string& outName, const std::string& mainName): mainFile_(mainName), pLinkTarget(outName) {
+    pStandAloneTarget(const std::string& outName, const std::string& mainName): pLinkTarget(outName), mainFile_(mainName)  {
 
     }
 

@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *               2008 Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
@@ -63,6 +63,9 @@ public:
     pRuntimeEngine();
     ~pRuntimeEngine();
 
+    // output buffering management
+    pOutputManager output;
+
     // function manager
     // --> store list of available functions, including builtins (from extension manager) which stay on page reset,
     //     and the currently defined via php code, which are reset each page
@@ -78,8 +81,6 @@ public:
     // --> for loading and registering dynamic extensions (pcre, mysql, etc) and their associated functions, classes
     pExtManager* extManager;
 
-    // output buffering management
-    pOutputManager* outputManager;
 
 };
 
