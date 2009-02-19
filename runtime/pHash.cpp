@@ -20,8 +20,8 @@
 
 #include <iostream>
 #include <unicode/ustream.h>
-#include "rphp/runtime/pHash.h"
 
+#include "rphp/runtime/pHash.h"
 
 namespace boost {
 std::size_t hash_value(rphp::hKeyVar const& k) {
@@ -89,21 +89,21 @@ std::ostream& operator << (std::ostream& os, const rphp::pHash& h)
     return os << "php_hash:" << std::endl;
 }
 
-void pHash::varDump() const {
+void pHash::varDump(pOutputBuffer* buf) const {
 
-
-    std::cout << "array(" << hashData_.size() << ") {" << std::endl;
+    *buf << "array(" << hashData_.size() << ") {\n";
 
     const seq_index& ot = get<1>(hashData_);
 
     for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
         if ((*it).key.which() == hKeyInt)
-            std::cout << "   [" << (*it).key << "] => " << (*it).pData << std::endl;
+            *buf << "   [" << (*it).key << "] => " << (*it).pData << "\n";
         else
-            std::cout << "   ['" << (*it).key << "'] => " << (*it).pData << std::endl;
+            *buf << "   ['" << (*it).key << "'] => " << (*it).pData << "\n";
     }
 
-    std::cout << "}" << std::endl;
+    *buf << "}\n";
+
 
 }
 

@@ -53,6 +53,7 @@ public:
     void freeAll();
 
     // get top buffer object
+    pOutputBuffer* topBuffer() { return bufferStack_.top(); }
     const pOutputBuffer* topBuffer() const { return bufferStack_.top(); }
 
     // printing to the current buffer
@@ -74,13 +75,13 @@ public:
     void print(const pBString& str) {
         if (bufferStack_.empty())
             return;
-        *bufferStack_.top() << str;
+        bufferStack_.top()->print(str);
     }
 
     void print(const pUString& str) {
         if (bufferStack_.empty())
             return;
-        *bufferStack_.top() << str.readonlyICUString();
+        bufferStack_.top()->print(str.readonlyICUString());
     }
 
 

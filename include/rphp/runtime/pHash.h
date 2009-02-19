@@ -29,6 +29,7 @@
 #include <iostream>
 
 #include "rphp/runtime/pVar.h"
+#include "rphp/runtime/pOutputBuffer.h"
 
 using boost::multi_index_container;
 using namespace boost::multi_index;
@@ -137,7 +138,7 @@ public:
     bool keyExists(const pInt &key) const;
 
     // dump of contents
-    void varDump() const;
+    void varDump(pOutputBuffer*) const;
 
     // lookup
     pVar operator[] (const pIdentString &key) const;

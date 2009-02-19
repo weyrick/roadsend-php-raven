@@ -100,19 +100,22 @@ public:
     }
 
     void operator()(const pHashP &v) const {
-        //runtime_->outputManager->print("array");
+        v->varDump(runtime_->output.topBuffer());
     }
 
     void operator()(const pObjectP &v) const {
-        //runtime_->outputManager->print("object");
+        // TODO
+        runtime_->output << "object";
     }
 
     void operator()(const pResourceP &v) const {
-        //runtime_->outputManager->print("resource");
+        // TODO
+        runtime_->output << "resource";
     }
 
     void operator()(const pVarP &v) const {
-        //runtime_->outputManager->print("ref");
+        // TODO
+        runtime_->output << "&ref";
     }
 };
 

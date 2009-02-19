@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
- * Roadsend PHP Compiler Runtime Libraries
+ * Roadsend PHP Cobpiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.cob>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -18,9 +18,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
+#include "rphp/runtime/pVar.h"
 #include "rphp/runtime/pOutputBuffer.h"
 
 namespace rphp {
+
+pOutputBuffer& operator<< (pOutputBuffer& ob, const char* str) {
+    ob.print(pBString(str));
+    return ob;
+}
+
+pOutputBuffer& operator<< (pOutputBuffer& ob, const pInt i) {
+    ob << pVar(i);
+    return ob;
+}
+
+pOutputBuffer& operator<< (pOutputBuffer& ob, const pVar& var) {
+    ob.print(var.copyAsBString());
+    return ob;
+}
+
+pOutputBuffer& operator<< (pOutputBuffer& ob, const pBString& str) {
+    ob.print(str);
+    return ob;
+}
+
+pOutputBuffer& operator<< (pOutputBuffer& ob, const pUString& str) {
+    ob.print(str);
+    return ob;
+}
 
 
 }

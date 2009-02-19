@@ -104,7 +104,7 @@ public:
         }
     }
 
-    void operator<< (const pBString& str) {
+    void print(const pBString& str) {
         switch (bType_) {
             case bufTypeBinary:
                 bBuffer_->append(str);
@@ -116,7 +116,7 @@ public:
         }
     }
 
-    void operator<< (const pUString& str) {
+    void print(const pUString& str) {
         if (bType_ == bufTypeBinary) {
             // convert to unicode buffer
             uBuffer_ = new UnicodeString(str.readonlyICUString());
@@ -126,6 +126,13 @@ public:
     }
 
 };
+
+// iostream like interface
+pOutputBuffer& operator<< (pOutputBuffer& ob, const char* str);
+pOutputBuffer& operator<< (pOutputBuffer& ob, const pInt i);
+pOutputBuffer& operator<< (pOutputBuffer& ob, const pVar& var);
+pOutputBuffer& operator<< (pOutputBuffer& ob, const pBString& str);
+pOutputBuffer& operator<< (pOutputBuffer& ob, const pUString& str);
 
 }
 
