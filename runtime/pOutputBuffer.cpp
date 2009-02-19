@@ -1,5 +1,5 @@
 /* ***** BEGIN LICENSE BLOCK *****
- * Roadsend PHP Cobpiler Runtime Libraries
+ * Roadsend PHP Compiler Runtime Libraries
  *
  * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.cob>
  *
