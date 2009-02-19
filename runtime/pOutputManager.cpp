@@ -51,7 +51,7 @@ pOutputManager& operator<< (pOutputManager& om, const char* str) {
     return om;
 }
 
-pOutputManager& operator<< (pOutputManager& om, const int i) {
+pOutputManager& operator<< (pOutputManager& om, const pInt i) {
     om.print(i);
     return om;
 }
@@ -62,6 +62,11 @@ pOutputManager& operator<< (pOutputManager& om, const pVar& var) {
 }
 
 pOutputManager& operator<< (pOutputManager& om, const pBString& str) {
+    om.print(str);
+    return om;
+}
+
+pOutputManager& operator<< (pOutputManager& om, const pUString& str) {
     om.print(str);
     return om;
 }

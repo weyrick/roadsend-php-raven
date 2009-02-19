@@ -66,7 +66,7 @@ public:
         print(v.copyAsBString());
     }
 
-    void print(int i) {
+    void print(pInt i) {
         pVar p(i);
         print(p.copyAsBString());
     }
@@ -88,8 +88,10 @@ public:
 
 // iostream like interface
 pOutputManager& operator<< (pOutputManager& om, const char* str);
+pOutputManager& operator<< (pOutputManager& om, const pInt i);
 pOutputManager& operator<< (pOutputManager& om, const pVar& var);
 pOutputManager& operator<< (pOutputManager& om, const pBString& str);
+pOutputManager& operator<< (pOutputManager& om, const pUString& str);
 
 }
 
