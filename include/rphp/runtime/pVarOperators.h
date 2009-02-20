@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -31,15 +31,16 @@ class pVar_var_dump : public boost::static_visitor<void>
 private:
     pOutputBuffer* buf_;
     const pVar& var_;
+    const pBString& indent_;
 public:
-    pVar_var_dump(const pVar& v, pOutputBuffer *buf): buf_(buf), var_(v) { }
+    pVar_var_dump(const pVar& v, pOutputBuffer *buf, const pBString& indent=""): buf_(buf), var_(v), indent_(indent) { }
 
     void operator()(const pTriState &v) const {
         if (pNull(v)) {
-            *buf_ << "NULL";
+            *buf_ << indent_ << "NULL";
         }
         else {
-            *buf_ << "bool(";
+            *buf_ << indent_ << "bool(";
             if (v == pTrue)
                 *buf_ << "true";
             else
@@ -49,38 +50,38 @@ public:
     }
 
     void operator()(const pInt &v) const {
-        *buf_ << "int(" << var_ << ")\n";
+        *buf_ << indent_ << "int(" << var_ << ")\n";
     }
 
     void operator()(const pFloat &v) const {
-        *buf_ << "float(" << var_ << ")\n";
+        *buf_ << indent_ << "float(" << var_ << ")\n";
     }
 
     void operator()(const pBString &v) const {
-        *buf_ << "string(" << pInt(v.length()) << ") \"" << v << "\"\n";
+        *buf_ << indent_ << "string(" << pInt(v.length()) << ") \"" << v << "\"\n";
     }
 
     void operator()(const pUString &v) const {
-        *buf_ << "ustring(" << pInt(v.length()) << ") \"" << v << "\"\n";
+        *buf_ << indent_ << "ustring(" << pInt(v.length()) << ") \"" << v << "\"\n";
     }
 
     void operator()(const pHashP &v) const {
-        v->varDump(buf_);
+        v->varDump(buf_, indent_);
     }
 
     void operator()(const pObjectP &v) const {
         // TODO
-        *buf_ << "object";
+        *buf_ << indent_ << "object";
     }
 
     void operator()(const pResourceP &v) const {
         // TODO
-        *buf_ << "resource";
+        *buf_ << indent_ << "resource";
     }
 
     void operator()(const pVarP &v) const {
         // TODO
-        *buf_ << "&ref";
+        *buf_ << indent_ << "&ref";
     }
 };
 

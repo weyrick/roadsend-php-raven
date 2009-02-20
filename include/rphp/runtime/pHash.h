@@ -140,7 +140,7 @@ public:
     bool keyExists(const pInt &key) const;
 
     // dump of contents
-    void varDump(pOutputBuffer*) const;
+    void varDump(pOutputBuffer*, const pBString& indent) const;
 
     // lookup
     pVar operator[] (const pIdentString &key) const;

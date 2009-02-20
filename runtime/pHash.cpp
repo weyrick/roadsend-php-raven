@@ -95,23 +95,25 @@ std::ostream& operator << (std::ostream& os, const rphp::pHash& h)
     return os << "php_hash:" << std::endl;
 }
 
-void pHash::varDump(pOutputBuffer* buf) const {
+void pHash::varDump(pOutputBuffer* buf, const pBString& indent) const {
 
-    *buf << "array(" << hashData_.size() << ") {\n";
+    *buf << indent << "array(" << hashData_.size() << ") {\n";
 
     const seq_index& ot = get<1>(hashData_);
 
+    pBString newIndent(indent+"  ");
+
     for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
         if ((*it).key.which() == hKeyInt) {
-            *buf << "   [" << (*it).key << "]=>\n";
+            *buf << newIndent << "[" << (*it).key << "]=>\n";
         }
         else {
-            *buf << "   ['" << (*it).key << "']=>\n";
+            *buf << newIndent << "['" << (*it).key << "']=>\n";
         }
-        (*it).pData.applyVisitor<pVar_var_dump>(buf);
+        (*it).pData.applyVisitor<pVar_var_dump>(buf, newIndent);
     }
 
-    *buf << "}\n";
+    *buf << indent << "}\n";
 
 }
 
