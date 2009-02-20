@@ -239,14 +239,56 @@ void pGenerator::visit_literalNull(AST::literalNull* n) {
 
 void pGenerator::visit_literalArray(AST::literalArray* n) {
 
-    Value* pVarTmp = newVarOnStack("pHashTmp");
+    Value* pHashTmp = newVarOnStack("pHashTmp");
 
     Function* f = llvmModule_->getFunction("rphp_make_pVar_pHash");
     assert(f != NULL);
-    currentBlock_.CreateCall(f, pVarTmp);
+    currentBlock_.CreateCall(f, pHashTmp);
+
+    Function* hash_insertNext = llvmModule_->getFunction("rphp_pHash_insertNext");
+    assert(hash_insertNext != NULL);
+    Function* hash_insert = llvmModule_->getFunction("rphp_pHash_insert");
+    assert(hash_insert != NULL);
+
+    // TODO: references?
+    // TODO: optimize: if it's a big array, insert more than one at a time
+
+    Value* key;
+    Value* val;
+
+    for (AST::arrayList::const_reverse_iterator i = n->itemList().rbegin();
+        i != n->itemList().rend();
+        ++i)
+    {
+
+        // gen key (if necessary) and value
+        if ((*i).key) {
+            visit((*i).key);
+            assert(valueStack_.size() && "array key didn't push a value!");
+            key = valueStack_.back();
+            valueStack_.pop();
+        }
+        else {
+            key = NULL;
+        }
+
+        visit((*i).val);
+        assert(valueStack_.size() && "array value didn't push a value!");
+        val = valueStack_.back();
+        valueStack_.pop();
+
+        // insert
+        if (key) {
+            currentBlock_.CreateCall3(hash_insert, pHashTmp, key, val);
+        }
+        else {
+            currentBlock_.CreateCall2(hash_insertNext, pHashTmp, val);
+        }
+
+    }
 
     // push to stack
-    valueStack_.push(pVarTmp);
+    valueStack_.push(pHashTmp);
 
 }
 

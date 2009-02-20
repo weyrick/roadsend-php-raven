@@ -35,7 +35,7 @@ void phashTestCase::basic()
 
     // ** LOOKUP **
     pVar lu;
-    
+
     // string key
     lu = testHash["var-test"];
     CPPUNIT_ASSERT( int1.getInt() == lu.getInt() );
@@ -56,13 +56,13 @@ void phashTestCase::basic()
     pHash::size_type rc = testHash.remove("var-test");
     CPPUNIT_ASSERT( rc == 1 );
     CPPUNIT_ASSERT( testHash.size() == 3 );
-    
+
     rc = testHash.remove("doesn't exist");
     CPPUNIT_ASSERT( rc == 0 );
     CPPUNIT_ASSERT( testHash.size() == 3 );
-    
+
     //testHash.varDump();
-    
+
 }
 
 /*

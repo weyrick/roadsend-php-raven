@@ -22,8 +22,69 @@
 #define RPHP_PVAROPERATORS_H_
 
 #include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pOutputBuffer.h"
 
 namespace rphp {
+
+class pVar_var_dump : public boost::static_visitor<void>
+{
+private:
+    pOutputBuffer* buf_;
+    const pVar& var_;
+public:
+    pVar_var_dump(const pVar& v, pOutputBuffer *buf): buf_(buf), var_(v) { }
+
+    void operator()(const pTriState &v) const {
+        if (pNull(v)) {
+            *buf_ << "NULL";
+        }
+        else {
+            *buf_ << "bool(";
+            if (v == pTrue)
+                *buf_ << "true";
+            else
+                *buf_ << "false";
+            *buf_ << ")\n";
+        }
+    }
+
+    void operator()(const pInt &v) const {
+        *buf_ << "int(" << var_ << ")\n";
+    }
+
+    void operator()(const pFloat &v) const {
+        *buf_ << "float(" << var_ << ")\n";
+    }
+
+    void operator()(const pBString &v) const {
+        *buf_ << "string(" << pInt(v.length()) << ") \"" << v << "\"\n";
+    }
+
+    void operator()(const pUString &v) const {
+        *buf_ << "ustring(" << pInt(v.length()) << ") \"" << v << "\"\n";
+    }
+
+    void operator()(const pHashP &v) const {
+        v->varDump(buf_);
+    }
+
+    void operator()(const pObjectP &v) const {
+        // TODO
+        *buf_ << "object";
+    }
+
+    void operator()(const pResourceP &v) const {
+        // TODO
+        *buf_ << "resource";
+    }
+
+    void operator()(const pVarP &v) const {
+        // TODO
+        *buf_ << "&ref";
+    }
+};
+
+
 
 pVar pVar_add(const pVar &lhs, const pVar &rhs);
 

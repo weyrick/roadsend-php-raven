@@ -174,15 +174,15 @@ public:
     /* custom visitors */
     /// apply a boost static visitor to the variant
     template <typename T>
-    typename T::result_type applyVisitor() {
+    typename T::result_type applyVisitor() const {
         return boost::apply_visitor( T(pVarData_), pVarData_ );
     }
     template <typename T, typename T2>
-    typename T::result_type applyVisitor(T2 param1) {
+    typename T::result_type applyVisitor(T2 param1) const {
         return boost::apply_visitor( T(pVarData_, param1), pVarData_ );
     }
     template <typename T, typename T2, typename T3>
-    typename T::result_type applyVisitor(T2 param1, T3 param2) {
+    typename T::result_type applyVisitor(T2 param1, T3 param2) const {
         return boost::apply_visitor( T(pVarData_, param1, param2), pVarData_ );
     }
 

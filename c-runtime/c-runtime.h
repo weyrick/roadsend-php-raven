@@ -35,7 +35,7 @@ extern "C" {
     // debug
     // print to runtime output buffer
     void rphp_print_cstr(rphp::pRuntimeEngine*, const char* str);
-    
+
     void rphp_print_pVar(rphp::pRuntimeEngine* e, rphp::pVar v);
     //
 
@@ -50,6 +50,11 @@ extern "C" {
 
     rphp::pVar rphp_make_pVar_pBool(int v);
 
+    rphp::pVar rphp_make_pVar_pHash();
+
+    void rphp_pHash_insertNext(rphp::pVar h, rphp::pVar v);
+    void rphp_pHash_insert(rphp::pVar h, rphp::pVar k, rphp::pVar v);
+
     rphp::pVar rphp_make_pVar_pObject(const char* name );
     //
 
@@ -62,10 +67,10 @@ extern "C" {
     //rphp::pVar rphp_funCall5(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
     rphp::pVar rphp_newCall(rphp::pRuntimeEngine* r, const char* className, rphp::pVar arg1);
     //
-    
+
     void _make_pVar(void);
     void _assign_pVar(void);
-                                        
+
 }
 
 #endif /* RPHP_IRRUNTIME_H_ */

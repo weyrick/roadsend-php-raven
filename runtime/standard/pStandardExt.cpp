@@ -61,67 +61,10 @@ void pStandardExt::extensionShutdown() {
 
 /* Library Implementation */
 
-class var_dump_visitor : public boost::static_visitor<void>
-{
-private:
-    pRuntimeEngine* runtime_;
-    const pVar& var_;
-public:
-    var_dump_visitor(const pVar& v, pRuntimeEngine *r): runtime_(r), var_(v) { }
-
-    void operator()(const pTriState &v) const {
-        if (pNull(v)) {
-            runtime_->output << "NULL";
-        }
-        else {
-            runtime_->output << "bool(";
-            if (v == pTrue)
-                runtime_->output << "true";
-            else
-                runtime_->output << "false";
-            runtime_->output << ")\n";
-        }
-    }
-
-    void operator()(const pInt &v) const {
-        runtime_->output << "int(" << var_ << ")\n";
-    }
-
-    void operator()(const pFloat &v) const {
-        runtime_->output << "float(" << var_ << ")\n";
-    }
-
-    void operator()(const pBString &v) const {
-        runtime_->output << "string(" << pInt(v.length()) << ") \"" << v << "\"\n";
-    }
-
-    void operator()(const pUString &v) const {
-        runtime_->output << "ustring(" << pInt(v.length()) << ") \"" << v << "\"\n";
-    }
-
-    void operator()(const pHashP &v) const {
-        v->varDump(runtime_->output.topBuffer());
-    }
-
-    void operator()(const pObjectP &v) const {
-        // TODO
-        runtime_->output << "object";
-    }
-
-    void operator()(const pResourceP &v) const {
-        // TODO
-        runtime_->output << "resource";
-    }
-
-    void operator()(const pVarP &v) const {
-        // TODO
-        runtime_->output << "&ref";
-    }
-};
 
 
 pVar pStandardExt::var_dump(pVar v) {
-    v.applyVisitor<var_dump_visitor>(runtime_);
+    v.applyVisitor<pVar_var_dump>(runtime_->output.topBuffer());
     return pNull;
 }
 

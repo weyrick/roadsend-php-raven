@@ -26,7 +26,7 @@ namespace rphp {
 pVar pVar_add(const pVar &lhs, const pVar &rhs)
 {
     pVar result;
-    
+
     if ( (lhs.getType() == pVarHashType) && (rhs.getType() == pVarHashType) ) {
         // TODO: array concat
         result = 0l;

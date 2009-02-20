@@ -22,6 +22,7 @@
 #include <unicode/ustream.h>
 
 #include "rphp/runtime/pHash.h"
+#include "rphp/runtime/pVarOperators.h"
 
 namespace boost {
 std::size_t hash_value(rphp::hKeyVar const& k) {
@@ -30,6 +31,11 @@ std::size_t hash_value(rphp::hKeyVar const& k) {
 }
 
 namespace rphp {
+
+void pHash::insert(const pVar& key, const pVar& data) {
+    // TODO proper semantics for key conversion
+    hashData_.insert(h_container(key.copyAsBString(), data));
+}
 
 void pHash::insert(const pIdentString &key, const pVar& data) {
     // TODO check numeric string, set maxIntKey accordingly
@@ -96,14 +102,16 @@ void pHash::varDump(pOutputBuffer* buf) const {
     const seq_index& ot = get<1>(hashData_);
 
     for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
-        if ((*it).key.which() == hKeyInt)
-            *buf << "   [" << (*it).key << "] => " << (*it).pData << "\n";
-        else
-            *buf << "   ['" << (*it).key << "'] => " << (*it).pData << "\n";
+        if ((*it).key.which() == hKeyInt) {
+            *buf << "   [" << (*it).key << "]=>\n";
+        }
+        else {
+            *buf << "   ['" << (*it).key << "']=>\n";
+        }
+        (*it).pData.applyVisitor<pVar_var_dump>(buf);
     }
 
     *buf << "}\n";
-
 
 }
 

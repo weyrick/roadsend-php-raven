@@ -125,8 +125,10 @@ public:
 #endif
 
     // modifiers
+    void insert(const pVar& key, const pVar& data);
     void insert(const pIdentString &key, const pVar& data);
     void insert(const pInt &key, const pVar& data);
+    void insert(const char* key, const pVar& data) { insert(pIdentString(key), data); }
     void insertNext(const pVar& data);
 
     size_type remove(const pIdentString &key);

@@ -82,6 +82,15 @@ extern "C" {
         return rphp::pHashP(new rphp::pHash());
     }
 
+    void rphp_pHash_insertNext(rphp::pVar h, rphp::pVar v) {
+        h.getHash()->insertNext(v);
+    }
+
+    void rphp_pHash_insert(rphp::pVar h, rphp::pVar k, rphp::pVar v) {
+        h.getHash()->insert(k, v);
+    }
+
+
     /*
     rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name) {
         return r->functionManager->invoke(name);
