@@ -27,8 +27,8 @@
 #include <algorithm>
 #include <unicode/unistr.h>
 
-#include "rphp/analysis/pSourceTypes.h"
 #include "rphp/analysis/pAST.h"
+#include "rphp/analysis/pSourceTypes.h"
 #include "rphp/analysis/pSourceModule.h"
 
 using namespace rphp;
@@ -187,6 +187,7 @@ statement_list(A) ::= statement_list(B) statement(C). { B->push_back(C); A = B; 
 %type statement {AST::stmt*}
 statement(A) ::= statementBlock(B). { A = B; }
 statement(A) ::= inlineHTML(B). { A = B; }
+statement(A) ::= functionDecl(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement(A) ::= ifBlock(B). { A = B; }
@@ -225,6 +226,40 @@ ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEB
     A = new AST::ifStmt(COND, TRUEBODY);
     A->setLine(TOKEN_LINE(IF));
 }
+
+/** DECLARATIONS **/
+
+/** DECLARATION ARGLIST **/
+%type decl_argList {pFunction::paramListType*}
+decl_argList(A) ::= T_VARIABLE(NAMED_PARAM).
+{
+	A = new pFunction::paramListType();
+	pFunctionParam*p = new pFunctionParam();
+	p->setName(pIdentString(++(*NAMED_PARAM).begin(), (*NAMED_PARAM).end()));
+	A->push_back(p);
+}
+decl_argList(A) ::= T_VARIABLE(NAMED_PARAM) T_COMMA decl_argList(C).
+{
+	pFunctionParam*p = new pFunctionParam();
+	p->setName(pIdentString(++(*NAMED_PARAM).begin(), (*NAMED_PARAM).end()));
+	C->push_back(p);
+	A = C;
+}
+decl_argList(A) ::= .
+{
+	A = new pFunction::paramListType();
+}
+
+// function declaration
+%type functionDecl {AST::functionDecl*}
+functionDecl(A) ::= T_FUNCTION T_IDENTIFIER(NAME) T_LEFTPAREN decl_argList(ARGS) T_RIGHTPAREN statementBlock(BODY).
+{
+	pFunction* funDef = new pFunction(pIdentString((*NAME).begin(), (*NAME).end()));
+	funDef->setParamList(*ARGS); // takes ownership of pFunctionParam objs
+	delete ARGS; // free container from parse
+	A = new AST::functionDecl(funDef, BODY, false/* ref? */);
+	A->setLine(TOKEN_LINE(NAME));
+}                    
 
 /****** EXPRESSIONS *********/
 %type expr {AST::expr*}
@@ -373,6 +408,7 @@ variable_lVal(A) ::= T_VARIABLE(B).
     A = new AST::var(pSourceRange(++(*B).begin(), (*B).end()));
     A->setLine(pMod->currentLineNum());
 }
+
 
 /** ARGLIST **/
 %type argList {AST::expressionList*}

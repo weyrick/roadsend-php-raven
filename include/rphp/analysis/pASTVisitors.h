@@ -35,6 +35,7 @@ public:
     virtual void visit(stmt*);
 
     void visit_block(block*);
+    virtual void visit_functionDecl(functionDecl*) { }
     virtual void visit_ifStmt(ifStmt*) { }
     virtual void visit_echoStmt(echoStmt*) { }
     virtual void visit_inlineHtml(inlineHtml*) { }
@@ -60,6 +61,7 @@ class dumpVisitor: public baseVisitor {
 public:
     dumpVisitor(void): indentLevel_(0) { }
 
+    void visit_functionDecl(functionDecl*);
     void visit_ifStmt(ifStmt*);
     void visit_echoStmt(echoStmt*);
     void visit_inlineHtml(inlineHtml*);

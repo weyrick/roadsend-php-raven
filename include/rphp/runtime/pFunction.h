@@ -69,7 +69,7 @@ public:
 
     bool isByRef(void) const { return isByRef_; }
     void setIsByRef(bool v) { isByRef_ = v; }
-    
+
     bool isArray(void) const { return isArray_; }
     void setIsArray(bool v) { isArray_ = v; }
 
@@ -110,7 +110,7 @@ private:
 public:
 
     // standard builtin function: one argument
-    pFunction(const pExtBase* e, const pIdentString& f, const pFunPointer1& fun) :        
+    pFunction(const pExtBase* e, const pIdentString& f, const pFunPointer1& fun) :
         parentExtension_(e),
         name_(f),
         funType_(pBuiltinFunType),
@@ -139,6 +139,17 @@ public:
         paramList_.push_back(new pFunctionParam());
     }
 
+    pFunction(const pIdentString& f):
+        parentExtension_(NULL),
+        name_(f),
+        funType_(pUserFunType),
+        requiredArity_(0),
+        maxArity_(0),
+        isVarArity_(false),
+        paramList_() {
+
+    }
+
     ~pFunction(void) {
         foreach (paramListType::value_type i, paramList_) {
             delete i;
@@ -157,8 +168,21 @@ public:
     const pUInt& maxArity(void) const { return maxArity_; }
     bool isVarArity(void) const { return isVarArity_; }
 
+    // takes ownership
+    void setParamList(const paramListType& p) { paramList_ = p; }
+
+    paramListType::size_type numParams() const { return paramList_.size(); }
+
     // param access
     pFunctionParam* param(pUInt i) {
+        if (i < paramList_.size()) {
+            return paramList_[i];
+        }
+        else {
+            return NULL;
+        }
+    }
+    const pFunctionParam* param(pUInt i) const {
         if (i < paramList_.size()) {
             return paramList_[i];
         }

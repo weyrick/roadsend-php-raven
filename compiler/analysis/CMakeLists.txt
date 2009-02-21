@@ -69,6 +69,7 @@ set(PARSER_SRC_FILES
 add_library( rphp-analysis SHARED ${PARSER_SRC_FILES} )
 
 target_link_libraries( rphp-analysis
+					   rphp-runtime
                        ${ICU_LIBRARIES}
                        ${ICU_I18_LIBRARIES}
                        )

@@ -28,6 +28,7 @@ namespace rphp { namespace AST {
 baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
     // NOTE: requires same order as nodeKind enum in pAST.h
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_block),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionDecl),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_ifStmt),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_echoStmt),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_inlineHtml),
@@ -64,6 +65,30 @@ void baseVisitor::visit_block(block* b) {
 void dumpVisitor::showindent() {
     if (indentLevel_)
         std::cout << std::string(indentLevel_, ' ');
+}
+
+void dumpVisitor::visit_functionDecl(functionDecl* n) {
+    showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
+    std::cout << "(function declare: " << n->functionDef()->name() << std::endl;
+
+    indent();
+    showindent();
+    std::cout << "(arguments: " << std::endl;
+    indent();
+    for (pFunction::paramListType::size_type i = 0; i < n->functionDef()->numParams(); i++) {
+        showindent();
+        std::cout << i+1 << ": " << n->functionDef()->param(i)->name() << std::endl;
+        // TODO more info on params
+    }
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+    unindent();
+
+    showindent();
+    std::cout << ")" << std::endl;
 }
 
 void dumpVisitor::visit_ifStmt(ifStmt* n) {

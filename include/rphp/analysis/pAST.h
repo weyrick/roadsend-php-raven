@@ -26,12 +26,14 @@
 
 #include "rphp/analysis/pSourceTypes.h"
 #include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pFunction.h"
 
 namespace rphp { namespace AST {
 
 // NOTE: if you change this, check static dispatch table in pASTVisitors.cpp!
 enum nodeKind {
     blockKind,
+    functionDeclKind,
     ifStmtKind,
     echoStmtKind,
     inlineHtmlKind,
@@ -91,7 +93,7 @@ public:
 class decl: public stmt {
 
 public:
-
+    decl(nodeKind k): stmt(k) { }
 
 };
 
@@ -104,6 +106,32 @@ public:
 };
 
 typedef std::vector<expr*> expressionList;
+
+// function declaration
+class functionDecl: public decl {
+
+    pFunction* functionDef_;
+    block* body_;
+    bool returnRef_;
+
+public:
+
+    functionDecl(pFunction* def, block* body, bool ref):
+        decl(functionDeclKind),
+        functionDef_(def),
+        body_(body),
+        returnRef_(ref) { }
+
+    ~functionDecl(void) {
+        delete functionDef_;
+        delete body_;
+    }
+
+    const pFunction* functionDef(void) const { return functionDef_; }
+    block* body(void) { return body_; }
+
+
+};
 
 // if statement
 class ifStmt: public stmt {
