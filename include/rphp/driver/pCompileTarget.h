@@ -23,7 +23,7 @@
 #define RPHP_PCOMPILETARGET_H_
 
 #include "rphp/runtime/pTypes.h"
-#include "pTarget.h"
+#include "rphp/driver/pTarget.h"
 
 namespace rphp {
 

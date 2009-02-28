@@ -21,6 +21,10 @@ set(RPHPI_SRC_FILES
 add_executable( rphp ${RPHP_SRC_FILES} )
 add_executable( rphpi ${RPHPI_SRC_FILES} )
 
+set_target_properties( rphpi
+                       PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
+                     )
+
 target_link_libraries( rphp
                        rphp-analysis
                        rphp-driver

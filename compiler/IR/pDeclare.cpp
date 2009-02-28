@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -19,29 +19,41 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PGENSUPPORT_H_
-#define RPHP_PGENSUPPORT_H_
+#include <iostream>
 
-#include <string>
+#include <llvm/Module.h>
+#include <llvm/GlobalVariable.h>
+#include <llvm/DerivedTypes.h>
+#include <llvm/Constants.h>
+#include <llvm/Instructions.h>
 
-namespace llvm {
-    class Module;
-}
+#include "rphp/IR/pCompileError.h"
+#include "rphp/IR/pDeclare.h"
+
+using namespace llvm;
 
 namespace rphp { namespace IR {
 
-class pGenSupport {
 
-public:
-    static std::string mangleModuleName(std::string moduleName);
-    static void writeBitcode(llvm::Module* m, std::string outFile);
-    static llvm::Module* readBitcode(std::string fileName);
-    static llvm::Module* getRuntimeIR();
-    static llvm::Module* createStandAloneStubModule(const std::string& name, const std::string& mainModuleName);
-    static void dumpIR(llvm::Module* llvmModule);
+void pDeclare::visit_functionDecl(AST::functionDecl* n) {
 
-};
+    // TODO declare pVar parameters as required in functionDecl
+    
+    // entry function
+    Function *fun = Function::Create(IRHelper_.moduleEntryFunType(),
+                                     Function::ExternalLinkage,
+                                     n->functionDef()->name(),
+                                     llvmModule_);
+
+    fun->arg_begin()->setName("rEngine");
+
+    // entry block
+    //BasicBlock::Create("entry", fun);
+    
+    // TODO exit block?
+
+}
+
 
 } } // namespace
 
-#endif /* RPHP_PGENSUPPORT_H_ */

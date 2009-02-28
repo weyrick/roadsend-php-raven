@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -19,10 +19,11 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PGENSUPPORT_H_
-#define RPHP_PGENSUPPORT_H_
+#ifndef RPHP_PDECLARE_H_
+#define RPHP_PDECLARE_H_
 
-#include <string>
+#include "rphp/analysis/pASTVisitors.h"
+#include "rphp/IR/pIRHelper.h"
 
 namespace llvm {
     class Module;
@@ -30,18 +31,21 @@ namespace llvm {
 
 namespace rphp { namespace IR {
 
-class pGenSupport {
+class pDeclare: public AST::baseVisitor {
+
+private:
+    llvm::Module* llvmModule_; // won't free
+    pIRHelper IRHelper_;
 
 public:
-    static std::string mangleModuleName(std::string moduleName);
-    static void writeBitcode(llvm::Module* m, std::string outFile);
-    static llvm::Module* readBitcode(std::string fileName);
-    static llvm::Module* getRuntimeIR();
-    static llvm::Module* createStandAloneStubModule(const std::string& name, const std::string& mainModuleName);
-    static void dumpIR(llvm::Module* llvmModule);
+
+    pDeclare(llvm::Module* mod): llvmModule_(mod), IRHelper_(mod) { }
+
+    // nodes
+    void visit_functionDecl(AST::functionDecl* n);
 
 };
 
 } } // namespace
 
-#endif /* RPHP_PGENSUPPORT_H_ */
+#endif /* RPHP_PDECLARE_H_ */

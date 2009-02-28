@@ -36,7 +36,7 @@
 
 using namespace llvm;
 
-namespace rphp {
+namespace rphp { namespace IR {
 
 std::string pGenSupport::mangleModuleName(std::string inName) {
 
@@ -185,5 +185,5 @@ void pGenSupport::dumpIR(Module* llvmModule) {
 }
 
 
-} // namespace
+} } // namespace
 

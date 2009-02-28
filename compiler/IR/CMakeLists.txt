@@ -14,6 +14,8 @@ set(GENERATOR_SRC_FILES
     pGenerator.cpp
     pGenSupport.cpp
     pIRHelper.cpp
+    pCodeGen.cpp
+    pDeclare.cpp
 )
 
 add_library( rphp-llvm-ir SHARED ${GENERATOR_SRC_FILES} )

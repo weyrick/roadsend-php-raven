@@ -31,7 +31,7 @@ namespace llvm {
     class Constant;
 }
 
-namespace rphp {
+namespace rphp { namespace IR {
 
 /**
 
@@ -64,6 +64,6 @@ public:
 };
 
 
-} // namespace
+} } // namespace
 
 #endif /* RPHP_PIRHELPER_H_ */

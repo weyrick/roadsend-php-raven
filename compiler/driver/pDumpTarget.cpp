@@ -87,10 +87,9 @@ void pDumpTarget::dumpAST(void) {
 void pDumpTarget::dumpIR(void) {
 
     pSourceModule  m(sourceFile_);
-    pGenerator codeGen(sourceFile_.get<0>());
-    m.applyVisitor(&codeGen);
+    IR::pGenerator codeGen(m);
     llvm::Module* ir = codeGen.getIR();
-    pGenSupport::dumpIR(ir);
+    IR::pGenSupport::dumpIR(ir);
     std::string errMsg;
 //    if (llvm::verifyModule(*ir, llvm::ReturnStatusAction, &errMsg)) {
 //        std::cout << "IR verify failed: " << errMsg << std::endl;

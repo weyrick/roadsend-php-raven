@@ -22,85 +22,38 @@
 #ifndef RPHP_PGENERATOR_H_
 #define RPHP_PGENERATOR_H_
 
-#include <queue>
 #include <string>
-
-#include <boost/unordered_map.hpp>
-
-#include <llvm/Support/IRBuilder.h>
-
+#include "rphp/analysis/pSourceModule.h"
 #include "rphp/analysis/pASTVisitors.h"
+#include "rphp/IR/pIRHelper.h"
 
 namespace llvm {
     class Module;
-    class Value;
 }
 
-namespace rphp {
-
-// TODO: llvm has structures for this. use those?
-typedef boost::unordered_map<pIdentString, llvm::Value*> symbolTableType;
-
-class pIRHelper;
+namespace rphp { namespace IR {
 
 class pGenerator: public AST::baseVisitor {
 
-public:
-    typedef std::vector<llvm::Value*> valueVectorType;
-
 private:
     llvm::Module* llvmModule_; // won't free
-    pIRHelper* IRHelper_; // own
-
-    std::string entryFunctionName_;
-
-    llvm::IRBuilder<> currentBlock_;
-    llvm::Value* runtimeEngine_; // don't own
-
-    llvm::Function* currentFunction_;
-
-    std::queue<llvm::Value*> valueStack_;
-    std::queue<valueVectorType> destructList_;
-
-    symbolTableType globalSymbols_;
-
-    bool finalized_;
-
-private:
-    void loadAndLinkRuntimeIR(void);
-    void createEntryPoint(void);
-
-    llvm::Value* newVarOnStack(const char*);
-
+    pSourceModule& sourceModule_;
+    pIdentString entryFunctionName_;
+    pIRHelper IRHelper_;
+    
 public:
 
-    pGenerator(const std::string& moduleName);
-    ~pGenerator(void);
+    pGenerator(pSourceModule& mod);
+    void loadAndLinkRuntimeIR(void);
+    void createEntryPoint(void);
+    void runPasses();
 
-    void finalize(void);
-
-    llvm::Module* getIR(void) {
-        if (!finalized_)
-            finalize();
-        return llvmModule_;
-    }
-    const std::string& entryFunctionName(void) const { return entryFunctionName_; }
-
-    // nodes
-    void visit_echoStmt(AST::echoStmt*);
-    void visit_inlineHtml(AST::inlineHtml*);
-    void visit_literalString(AST::literalString*);
-    void visit_literalInt(AST::literalInt*);
-    void visit_literalFloat(AST::literalFloat*);
-    void visit_literalBool(AST::literalBool*);
-    void visit_literalNull(AST::literalNull*);
-    void visit_literalArray(AST::literalArray*);
-    void visit_assignment(AST::assignment*);
-    void visit_var(AST::var*);
-    void visit_functionInvoke(AST::functionInvoke*);
+    llvm::Module* getIR(void) {  return llvmModule_; }
+    
+    const pIdentString& entryFunctionName(void) const { return entryFunctionName_; }
 
 };
 
-} // namespace
+} } // namespace
 
 #endif /* RPHP_PGENERATOR_H_ */

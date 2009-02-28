@@ -79,10 +79,23 @@ void dumpVisitor::visit_functionDecl(functionDecl* n) {
     indent();
     for (pFunction::paramListType::size_type i = 0; i < n->functionDef()->numParams(); i++) {
         showindent();
-        std::cout << i+1 << ": " << n->functionDef()->param(i)->name() << std::endl;
+        std::cout << i+1 << ": $" << n->functionDef()->param(i)->name() << std::endl;
         // TODO more info on params
     }
     unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+    unindent();
+
+
+    indent();
+    showindent();
+    std::cout << "(body: " << std::endl;
+
+    indent();
+    visit(n->body());
+    unindent();
+
     showindent();
     std::cout << ")" << std::endl;
     unindent();

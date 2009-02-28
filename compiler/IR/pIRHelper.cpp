@@ -33,7 +33,7 @@
 
 using namespace llvm;
 
-namespace rphp {
+namespace rphp { namespace IR {
 
 Type* pIRHelper::runtimeEngineType() {
     return PointerType::get(mod_->getTypeByName("struct.rphp::pRuntimeEngine"), 0);
@@ -58,7 +58,7 @@ FunctionType* pIRHelper::pVarBaseFunType() {
     /*isVarArg=*/false);
 
     return FuncTy_52;
-  
+
 }
 
 FunctionType* pIRHelper::moduleEntryFunType() {
@@ -81,7 +81,7 @@ llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLe
 
     finalLen = s.length()+1;
 
-    // global value creation    
+    // global value creation
     ArrayType* byteArrayType = ArrayType::get(IntegerType::get(8), finalLen);
     GlobalVariable* gVarStr = new GlobalVariable(
                                     /*Type=*/byteArrayType,
@@ -154,5 +154,5 @@ llvm::Constant* pIRHelper::stringConstant(const std::wstring& s, int32_t& finalL
 }
 
 
-} // namespace
+} }  // namespace
 

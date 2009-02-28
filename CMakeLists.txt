@@ -20,7 +20,7 @@ MESSAGE( STATUS "RPHP_LIB_DIR: " ${RPHP_LIB_DIR} )
 
 
 Find_Package(Boost REQUIRED)
-include_directories(${Boost_INCLUDE_DIR})
+include_directories(${RPHP_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
 IF( Boost_VERSION LESS "103600" )
   MESSAGE(FATAL_ERROR "Boost version ${Boost_VERSION} too old, please install 1.36 or greater!")
 ENDIF( Boost_VERSION LESS "103600" )

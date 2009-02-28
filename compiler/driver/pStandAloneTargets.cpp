@@ -34,11 +34,11 @@ namespace rphp {
 
 void pStandAloneTarget::execute(void) {
 
-    llvm::Module* M = pGenSupport::createStandAloneStubModule(outputFile_, mainFile_);
+    llvm::Module* M = IR::pGenSupport::createStandAloneStubModule(outputFile_, mainFile_);
     // TODO: outfile nameing
     std::string stubOutFile(outputFile_+"-driver.bc");
     log(logInfo, "writing stand alone binary stub bitcode ["+stubOutFile+"]");
-    pGenSupport::writeBitcode(M, stubOutFile);
+    IR::pGenSupport::writeBitcode(M, stubOutFile);
     delete M;
 
     log(logInfo, "linking stand alone executable ["+outputFile_+"]");

@@ -38,10 +38,9 @@ void pCompileTarget::execute(void) {
     log(logInfo, "compiling module ["+inputFile_.get<0>()+"] to ["+outputFile+"]");
 
     pSourceModule  m(inputFile_);
-    pGenerator codeGen(inputFile_.get<0>());
-    m.applyVisitor(&codeGen);
+    IR::pGenerator codeGen(m);
     llvm::Module* ir = codeGen.getIR();
-    pGenSupport::writeBitcode(ir, outputFile);
+    IR::pGenSupport::writeBitcode(ir, outputFile);
     delete ir;
 
 }
