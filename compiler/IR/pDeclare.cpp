@@ -29,6 +29,7 @@
 
 #include "rphp/IR/pCompileError.h"
 #include "rphp/IR/pDeclare.h"
+#include "rphp/IR/pGenSupport.h"
 
 using namespace llvm;
 
@@ -42,7 +43,8 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     // entry function
     Function *fun = Function::Create(IRHelper_.moduleEntryFunType(),
                                      Function::ExternalLinkage,
-                                     n->functionDef()->name(),
+                                     pGenSupport::mangleFunctionName(llvmModule_->getModuleIdentifier(),
+                                                                     n->functionDef()->name()),
                                      llvmModule_);
 
     fun->arg_begin()->setName("rEngine");

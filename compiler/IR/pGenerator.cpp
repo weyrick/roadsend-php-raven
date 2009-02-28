@@ -61,8 +61,10 @@ void pGenerator::runPasses() {
          ++i) {
         if ((*i)->getKind() == AST::functionDeclKind) {
             AST::functionDecl* f = static_cast<AST::functionDecl*>(*i);
-            codeGenPass = new pCodeGen(llvmModule_, f->functionDef()->name());
-            codeGenPass->visit(f);
+            codeGenPass = new pCodeGen(llvmModule_, 
+                                       pGenSupport::mangleFunctionName(llvmModule_->getModuleIdentifier(),
+                                                                       f->functionDef()->name()));
+            codeGenPass->visit(f->body());
             delete codeGenPass;
         }
     }

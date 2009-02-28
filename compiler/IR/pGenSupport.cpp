@@ -45,6 +45,13 @@ std::string pGenSupport::mangleModuleName(std::string inName) {
 
 }
 
+std::string pGenSupport::mangleFunctionName(std::string moduleName, std::string inName) {
+
+    // TODO: mangle
+    return moduleName+"_"+inName;
+
+}
+
 void pGenSupport::writeBitcode(Module* m, std::string outFile) {
 
     assert(m != NULL);
