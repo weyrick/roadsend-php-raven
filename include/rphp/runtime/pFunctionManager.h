@@ -23,6 +23,8 @@
 
 #include <boost/unordered_map.hpp>
 
+#include "rphp/runtime/pTypes.h"
+
 namespace rphp {
 
 typedef boost::unordered_map<pIdentString, pFunction*> functionRegistryType;
@@ -43,8 +45,12 @@ public:
     ~pFunctionManager();
 
     template <typename fPointerType>
-    pFunction* registerBuiltin(const pExtBase*, const pIdentString&, const fPointerType&);
+    pFunction* registerBuiltin(const pExtBase*, const pIdentString&, fPointerType);
 
+    template <typename fPointerType>
+    pFunction* registerUser(const pIdentString&, fPointerType);
+    
+    pVar invoke(const pIdentString& funName);
     pVar invoke(const pIdentString& funName, pVar arg1);
     pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3);
     

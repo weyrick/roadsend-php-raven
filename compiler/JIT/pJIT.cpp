@@ -97,8 +97,9 @@ bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
 //    std::cerr << "found main function at: " << mainPtr << std::endl;
     // cast to entry function type (returns void, takes one parameter of runtime engine instance)
     // see pGenerator::createEntryPoint, pIRHelper::moduleEntryFunType
-    void (*mainFunc)(pRuntimeEngine*) = (void (*)(pRuntimeEngine*))mainPtr;
-    mainFunc(r);
+    void (*mainFunc)(pVar*,pRuntimeEngine*) = (void (*)(pVar*,pRuntimeEngine*))mainPtr;
+    pVar retVal;
+    mainFunc(&retVal, r);
 
     EE->runStaticConstructorsDestructors(true);
 

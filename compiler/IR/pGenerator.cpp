@@ -69,6 +69,22 @@ void pGenerator::runPasses() {
         }
     }
 
+    // entry block
+    IRBuilder<> block;
+    Function* ef = llvmModule_->getFunction(entryFunctionName_);
+    assert(ef != NULL);
+    block.SetInsertPoint(&ef->getEntryBlock());
+
+    // TODO module initialization: register classes, functions
+    Function* f = llvmModule_->getFunction("rphp_registerUserFun0");
+    assert(f != NULL);
+    Function* f2 = llvmModule_->getFunction(pGenSupport::mangleFunctionName(llvmModule_->getModuleIdentifier(),"dohi"));
+    assert(f2 != NULL);
+    int len;
+    Function::arg_iterator a = ef->arg_begin();
+    a++;
+    block.CreateCall3(f, &(*a)/* runtime */, IRHelper_.stringConstant("dohi",len), f2);
+
     // now global
     codeGenPass = new pCodeGen(llvmModule_, entryFunctionName_);
     sourceModule_.applyVisitor(codeGenPass);
@@ -107,14 +123,14 @@ void pGenerator::createEntryPoint(void) {
                                          entryFunctionName_,
                                          llvmModule_);
 
-    initFun->arg_begin()->setName("rEngine");
+    Function::arg_iterator a = initFun->arg_begin();
+    (*a).setName("funRetVal");
+    a++;
+    (*a).setName("rEngine");
 
     // entry block
-    //IRBuilder<> block;
-    //block.SetInsertPoint(BasicBlock::Create("entry", initFun));
-
-    // TODO module initialization: register classes, functions
-    
+    IRBuilder<> block;
+    block.SetInsertPoint(BasicBlock::Create("entry", initFun));
 
 }
 

@@ -41,19 +41,20 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     // TODO declare pVar parameters as required in functionDecl
     
     // entry function
-    Function *fun = Function::Create(IRHelper_.moduleEntryFunType(),
+    Function *fun = Function::Create(IRHelper_.pUserFunction0(),
                                      Function::ExternalLinkage,
                                      pGenSupport::mangleFunctionName(llvmModule_->getModuleIdentifier(),
                                                                      n->functionDef()->name()),
                                      llvmModule_);
 
-    fun->arg_begin()->setName("rEngine");
+    Function::arg_iterator a = fun->arg_begin();
+    (*a).setName("funRetVal");
+    a++;
+    (*a).setName("rEngine");
 
     // entry block
-    //BasicBlock::Create("entry", fun);
+    BasicBlock::Create("entry", fun);
     
-    // TODO exit block?
-
 }
 
 

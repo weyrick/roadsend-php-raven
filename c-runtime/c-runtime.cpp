@@ -90,12 +90,13 @@ extern "C" {
         h.getHash()->insert(k, v);
     }
 
+    void rphp_registerUserFun0(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer0 p) {
+        r->functionManager->registerUser<rphp::pFunPointer0>(name, p);
+    }
 
-    /*
-    rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name) {
+    rphp::pVar rphp_funCall0(rphp::pRuntimeEngine* r, const char* name) {
         return r->functionManager->invoke(name);
     }
-    */
 
     rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1) {
         return r->functionManager->invoke(name, arg1);

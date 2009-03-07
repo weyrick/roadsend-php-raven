@@ -254,7 +254,7 @@ decl_argList(A) ::= .
 %type functionDecl {AST::functionDecl*}
 functionDecl(A) ::= T_FUNCTION T_IDENTIFIER(NAME) T_LEFTPAREN decl_argList(ARGS) T_RIGHTPAREN statementBlock(BODY).
 {
-	pFunction* funDef = new pFunction(pIdentString((*NAME).begin(), (*NAME).end()));
+	pFunction* funDef = new pFunction(pIdentString((*NAME).begin(), (*NAME).end()), pFunction::pUserFunType);
 	funDef->setParamList(*ARGS); // takes ownership of pFunctionParam objs
 	delete ARGS; // free container from parse
 	A = new AST::functionDecl(funDef, BODY, false/* ref? */);

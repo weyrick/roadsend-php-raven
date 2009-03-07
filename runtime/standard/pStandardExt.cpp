@@ -31,6 +31,8 @@ using namespace boost;
 using namespace boost::algorithm;
 
 namespace rphp {
+ namespace ext {
+   namespace standard {
 
 void pStandardExt::extensionStartup() {
 
@@ -38,13 +40,14 @@ void pStandardExt::extensionStartup() {
 
     pFunction* f;
 
-    f = registerBuiltin("var_dump", (pFunPointer1)bind(&pStandardExt::var_dump, this, _1));
+    // TODO: static initialization?
+    f = registerBuiltin("var_dump", &var_dump);
     f->param(0)->setName("var");
 
-    f = registerBuiltin("strlen", (pFunPointer1)bind(&pStandardExt::strlen, this, _1));
+    f = registerBuiltin("strlen", &strlen);
     f->param(0)->setName("string");
 
-    f = registerBuiltin("strpos", (pFunPointer3)bind(&pStandardExt::strpos, this, _1, _2, _3));
+    f = registerBuiltin("strpos", &strpos);
     f->setRequiredArity(2);
     f->param(0)->setName("haystack");
     f->param(1)->setName("needle");
@@ -61,22 +64,20 @@ void pStandardExt::extensionShutdown() {
 
 /* Library Implementation */
 
-
-
-pVar pStandardExt::var_dump(pVar v) {
-    v.applyVisitor<pVar_var_dump>(runtime_->output.topBuffer());
-    return pNull;
+void var_dump(RPHP_STDFUNC_ARGS, pVar v) {
+    v.applyVisitor<pVar_var_dump>(runtime->output.topBuffer());
+    *retVal = pNull;
 }
 
-pInt pStandardExt::strlen(pVar v) {
+void strlen(RPHP_STDFUNC_ARGS, pVar v) {
     v.convertToString();
     if (v.isBString())
-        return (pInt)v.getBString().length();
+        *retVal = (pInt)v.getBString().length();
     else
-        return (pInt)v.getUString().length();
+        *retVal = (pInt)v.getUString().length();
 }
 
-pVar pStandardExt::strpos(pVar haystackV, pVar needleV, pVar offsetV) {
+void strpos(RPHP_STDFUNC_ARGS, pVar haystackV, pVar needleV, pVar offsetV) {
 
     // TODO: unicode
 
@@ -88,13 +89,14 @@ pVar pStandardExt::strpos(pVar haystackV, pVar needleV, pVar offsetV) {
 
     iterator_range<pBString::iterator> result = find_first(haystack, needle);
     if (result.begin() == haystack.end()) {
-        return pNull;
+        *retVal = pNull;
     }
     else {
-        return (pInt)(result.begin() - haystack.begin());
+        *retVal = (pInt)(result.begin() - haystack.begin());
     }
 
 }
 
-
-}
+  } // ns standard
+ } // ns ext
+} // ns rphp

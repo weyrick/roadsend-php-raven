@@ -1,8 +1,8 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
- *                    Thomas Moenicke <tm@php-qt.org>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+ *                         Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -23,9 +23,10 @@
 #define RPHP_IRRUNTIME_H_
 
 #include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pTypes.h"
 
 extern "C" {
-
+    
     // create a new runtime engine
     rphp::pRuntimeEngine* rphp_newRuntimeEngine();
 
@@ -57,6 +58,9 @@ extern "C" {
 
     rphp::pVar rphp_make_pVar_pObject(const char* name );
     //
+
+    // function registration
+    void rphp_registerUserFun0(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer0 p);
 
     // function invocation
     rphp::pVar rphp_funCall0(rphp::pRuntimeEngine* r, const char* name);

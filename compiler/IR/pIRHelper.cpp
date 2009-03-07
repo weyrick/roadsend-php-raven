@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -50,17 +50,35 @@ const Type* pIRHelper::pVarType() {
 // void (*)(pVar*)
 FunctionType* pIRHelper::pVarBaseFunType() {
 
-    std::vector<const Type*>FuncTy_52_args;
-    FuncTy_52_args.push_back(pVarPointerType());
-    FunctionType* FuncTy_52 = FunctionType::get(
+    std::vector<const Type*>args;
+    args.push_back(pVarPointerType());
+    FunctionType* funType = FunctionType::get(
     /*Result=*/Type::VoidTy,
-    /*Params=*/FuncTy_52_args,
+    /*Params=*/args,
     /*isVarArg=*/false);
 
-    return FuncTy_52;
+    return funType;
 
 }
 
+// pVar* (*)(void)
+FunctionType* pIRHelper::pUserFunction0() {
+
+    std::vector<const Type*>args;
+    args.push_back(pVarPointerType()); // retval
+    args.push_back(runtimeEngineType());
+    FunctionType* funType = FunctionType::get(
+    /*Result=*///pVarPointerType(),
+    Type::VoidTy,
+    /*Params=*/args,
+    /*isVarArg=*/false);
+
+    return funType;
+
+}
+
+// funsig is same as pUserFunction0
+// TODO: extra params for env, args?
 FunctionType* pIRHelper::moduleEntryFunType() {
 
     if (moduleEntryFunTypeC_)
@@ -68,6 +86,7 @@ FunctionType* pIRHelper::moduleEntryFunType() {
 
     // entry function type: void (*)(pRuntimeEngine*)
     std::vector<const Type*> efArgs;
+    efArgs.push_back(pVarPointerType()); // retval
     efArgs.push_back(runtimeEngineType());
     moduleEntryFunTypeC_ = FunctionType::get(Type::VoidTy, /* return type */
                                            efArgs, /* arguments */

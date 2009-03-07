@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -26,6 +26,7 @@
 #include <llvm/DerivedTypes.h>
 #include <llvm/Instructions.h>
 #include <llvm/ValueSymbolTable.h>
+#include <llvm/Instructions.h>
 
 #include <iostream>
 #include <fstream>
@@ -123,13 +124,21 @@ Module* pGenSupport::createStandAloneStubModule(const std::string& stubName, con
     Instruction *runtimeStartInstr = CallInst::Create(runtimeStartupFunc, "runtime");
 
     // ** entry function call **
-    std::vector<const Type*> printSig;
-    printSig.push_back(irHelper.runtimeEngineType());
     Function *entryFunc = Function::Create(irHelper.moduleEntryFunType(),
                                         Function::ExternalLinkage,
                                         mangleModuleName(mainModuleName),
                                         M);
+                                        
+    AllocaInst* pVarTmp = new AllocaInst(irHelper.pVarType(), 0, "mainRetVal");
+    entryFunc->getEntryBlock().getInstList().push_front(pVarTmp);
+
+    //Function* constructor = llvmModule_->getFunction("_ZN4rphp4pVarC1Ev");
+    //assert(constructor != NULL);
+
+    //CallInst* con = CallInst::Create(constructor, pVarTmp);                                        
+                                        
     std::vector<Value*> entryArgs;
+    entryArgs.push_back(pVarTmp);
     entryArgs.push_back(runtimeStartInstr);
     Instruction* entryInstr = CallInst::Create(entryFunc, entryArgs.begin(), entryArgs.end());
 

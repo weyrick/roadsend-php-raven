@@ -29,8 +29,7 @@ namespace rphp {
 
 class pClass;
 class pExtBase;
-
-typedef enum { pBuiltinFunType, pUserFunType } pFunType;
+class pRuntimeEngine;
 
 struct pFunctionParam {
 
@@ -83,6 +82,13 @@ class pFunction {
 
 public:
     typedef std::vector<pFunctionParam*> paramListType;
+    
+    typedef enum { 
+        pBuiltinFunType, 
+        pUserFunType, 
+        pBuiltinMethodType, 
+        pUserMethodType 
+    } pFunType;
 
 private:
 
@@ -96,21 +102,50 @@ private:
     pFunType funType_;
     pUInt requiredArity_;
     pUInt maxArity_;
+    
+    // TODO compact flags
     bool isVarArity_;
-
+    
     paramListType paramList_;
 
-    const pFunPointer1 funPointer1_;
-    const pFunPointer2 funPointer2_;
-    const pFunPointer3 funPointer3_;
-    const pFunPointer4 funPointer4_;
-    const pFunPointer5 funPointer5_;
-    const pFunPointerN funPointerN_;
+    typedef union pFunPointerT {    
+        pFunPointer0 funPointer0;
+        pFunPointer1 funPointer1;
+        pFunPointer2 funPointer2;
+        pFunPointer3 funPointer3;
+        pFunPointer4 funPointer4;
+        pFunPointer5 funPointer5;
+        pFunPointerN funPointerN;
+        pMethodPointer0 methodPointer0;
+        pMethodPointer1 methodPointer1;
+        pMethodPointer2 methodPointer2;
+        pMethodPointer3 methodPointer3;
+        pMethodPointer4 methodPointer4;
+        pMethodPointer5 methodPointer5;
+        pMethodPointerN methodPointerN;
+        pFunPointerT(void): funPointer0(NULL) { }
+        pFunPointerT(pFunPointer0 p): funPointer0(p) { }
+        pFunPointerT(pFunPointer1 p): funPointer1(p) { }
+        pFunPointerT(pFunPointer2 p): funPointer2(p) { }
+        pFunPointerT(pFunPointer3 p): funPointer3(p) { }
+        pFunPointerT(pFunPointer4 p): funPointer4(p) { }
+        pFunPointerT(pFunPointer5 p): funPointer5(p) { }
+        pFunPointerT(pFunPointerN p): funPointerN(p) { }
+        pFunPointerT(pMethodPointer0 p): methodPointer0(p) { }
+        pFunPointerT(pMethodPointer1 p): methodPointer1(p) { }
+        pFunPointerT(pMethodPointer2 p): methodPointer2(p) { }
+        pFunPointerT(pMethodPointer3 p): methodPointer3(p) { }
+        pFunPointerT(pMethodPointer4 p): methodPointer4(p) { }
+        pFunPointerT(pMethodPointer5 p): methodPointer5(p) { }
+        pFunPointerT(pMethodPointerN p): methodPointerN(p) { }
+    };
+    
+    pFunPointerT funPointer_;
 
 public:
 
     // standard builtin function: one argument
-    pFunction(const pExtBase* e, const pIdentString& f, const pFunPointer1& fun) :
+    pFunction(const pExtBase* e, const pIdentString& f, pFunPointer1 fun) :
         parentExtension_(e),
         name_(f),
         funType_(pBuiltinFunType),
@@ -118,13 +153,13 @@ public:
         maxArity_(1),
         isVarArity_(false),
         paramList_(),
-        funPointer1_(fun)
+        funPointer_(fun)
     {
-        // initalize parameters for arity len 1
+        // arity 1
         paramList_.push_back(new pFunctionParam());
     }
 
-    pFunction(const pExtBase* e, const pIdentString& f, const pFunPointer3& fun) :
+    pFunction(const pExtBase* e, const pIdentString& f, pFunPointer3 fun) :
         parentExtension_(e),
         name_(f),
         funType_(pBuiltinFunType),
@@ -132,21 +167,38 @@ public:
         maxArity_(3),
         isVarArity_(false),
         paramList_(),
-        funPointer3_(fun)    {
-        // initalize parameters for arity len 2
+        funPointer_(fun)    
+    {
+        // arity 3
         paramList_.push_back(new pFunctionParam());
         paramList_.push_back(new pFunctionParam());
         paramList_.push_back(new pFunctionParam());
     }
 
-    pFunction(const pIdentString& f):
+    /// used in analysis phase
+    pFunction(const pIdentString& f, pFunType t):
+        parentExtension_(NULL),
+        name_(f),
+        funType_(t),
+        requiredArity_(0),
+        maxArity_(0),
+        isVarArity_(false),
+        paramList_(),
+        funPointer_()
+    {
+
+    }
+
+    pFunction(const pIdentString& f, pFunPointer0 fun):
         parentExtension_(NULL),
         name_(f),
         funType_(pUserFunType),
         requiredArity_(0),
         maxArity_(0),
         isVarArity_(false),
-        paramList_() {
+        paramList_(),
+        funPointer_(fun)    
+    {
 
     }
 
@@ -193,11 +245,24 @@ public:
 
     // invocation
     // FIXME: this is too simplistic, it has to setup default values
-    pVar invoke(pVar arg1) { return funPointer1_(arg1); }
-    pVar invoke(pVar arg1, pVar arg2) { return funPointer2_(arg1, arg2); }
-    pVar invoke(pVar arg1, pVar arg2, pVar arg3) { return funPointer3_(arg1,arg2,arg3); }
-    pVar invoke(pVar arg1, pVar arg2, pVar arg3, pVar arg4) { return funPointer4_(arg1,arg2,arg3,arg4); }
-    pVar invoke(pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5) { return funPointer5_(arg1,arg2,arg3,arg4,arg5); }
+    pVar invoke(pRuntimeEngine* runtime) { 
+        pVar ret;
+        funPointer_.funPointer0(&ret, runtime);
+        return ret;
+    }
+    pVar invoke(pRuntimeEngine* runtime, pVar arg1) { 
+        pVar ret;
+        funPointer_.funPointer1(&ret, runtime, arg1);
+        return ret;
+    }
+    //pVar invoke(pVar arg1, pVar arg2) { return funPointer2_(arg1, arg2); }
+    pVar invoke(pRuntimeEngine* runtime, pVar arg1, pVar arg2, pVar arg3) { 
+        pVar ret;
+        funPointer_.funPointer3(&ret, runtime, arg1, arg2, arg3);
+        return ret;
+    }
+    //pVar invoke(pVar arg1, pVar arg2, pVar arg3, pVar arg4) { return funPointer4_(arg1,arg2,arg3,arg4); }
+    //pVar invoke(pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5) { return funPointer5_(arg1,arg2,arg3,arg4,arg5); }
     //pVar invokeN(pVar arg1) { /* fixme */ }
 
 };

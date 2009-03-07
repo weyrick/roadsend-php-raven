@@ -1,6 +1,8 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
+ * Copyright (c) 2009 Shannon Weyrick (weyrick@roadsend.com)
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
  * as published by the Free Software Foundation; either version 2.1
@@ -24,7 +26,9 @@
 
 #define STD_EXT_NAME "standard"
 
-namespace rphp {
+namespace rphp { 
+ namespace ext { 
+  namespace standard {
 
     class pStandardExt : public pExtBase {
 
@@ -35,12 +39,15 @@ namespace rphp {
         void extensionStartup();
         void extensionShutdown();
 
-        pVar var_dump(pVar v);
-        pInt strlen(pVar str);
-        pVar strpos(pVar haystack, pVar needle, pVar offset);
-
     };
 
+    // standard functions
+    void var_dump(RPHP_STDFUNC_ARGS, pVar v);
+    void strlen(RPHP_STDFUNC_ARGS, pVar str);
+    void strpos(RPHP_STDFUNC_ARGS, pVar haystack, pVar needle, pVar offset);            
+            
+    }
+  }
 }
 
 #endif /* PSTANDARDEXT_H_ */

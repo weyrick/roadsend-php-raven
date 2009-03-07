@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -58,6 +58,8 @@ public:
     const llvm::Type* pVarType();
     llvm::Type* pVarPointerType();
 
+    llvm::FunctionType* pUserFunction0();
+    
     llvm::Constant* stringConstant(const std::string& s, int32_t& finalLen);
     llvm::Constant* stringConstant(const std::wstring& s, int32_t& finalLen);
 

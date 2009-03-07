@@ -141,18 +141,42 @@ typedef boost::tuple<const pFileNameString, const pUInt> pSourceLocation;
 /// source locations: filename/startlinenum/endlinenum
 typedef boost::tuple<const pFileNameString, const pUInt, const pUInt> pSourceStartEndLocation;
 
+/// php function signature: no arguments
+class pRuntimeEngine;
+
+#define RPHP_STDFUNC_ARGS   pVar* retVal, pRuntimeEngine* runtime
+#define RPHP_STDMETHOD_ARGS pVar* retVal, pRuntimeEngine* runtime, pObjectP pThis
+
+/// php function signature: no arguments
+typedef void (*pFunPointer0)(RPHP_STDFUNC_ARGS);
 /// php function signature: one argument
-typedef boost::function<pVar (pVar)> pFunPointer1;
+typedef void (*pFunPointer1)(RPHP_STDFUNC_ARGS, pVar);
 /// php function signature: two arguments
-typedef boost::function<pVar (pVar, pVar)> pFunPointer2;
+typedef void (*pFunPointer2)(RPHP_STDFUNC_ARGS, pVar, pVar);
 /// php function signature: three arguments
-typedef boost::function<pVar (pVar, pVar, pVar)> pFunPointer3;
+typedef void (*pFunPointer3)(RPHP_STDFUNC_ARGS, pVar, pVar, pVar);
 /// php function signature: four arguments
-typedef boost::function<pVar (pVar, pVar, pVar, pVar)> pFunPointer4;
+typedef void (*pFunPointer4)(RPHP_STDFUNC_ARGS, pVar, pVar, pVar, pVar);
 /// php function signature: five arguments
-typedef boost::function<pVar (pVar, pVar, pVar, pVar, pVar)> pFunPointer5;
+typedef void (*pFunPointer5)(RPHP_STDFUNC_ARGS, pVar, pVar, pVar, pVar, pVar);
 /// php function signature: n arguments
-typedef boost::function<pVar (std::vector<pVar&>)> pFunPointerN;
+typedef void (*pFunPointerN)(RPHP_STDFUNC_ARGS, std::vector<pVar>);
+
+/// php method signature: no arguments
+typedef void (*pMethodPointer0)(RPHP_STDMETHOD_ARGS);
+/// php method signature: one argument
+typedef void (*pMethodPointer1)(RPHP_STDMETHOD_ARGS, pVar);
+/// php method signature: two arguments
+typedef void (*pMethodPointer2)(RPHP_STDMETHOD_ARGS, pVar, pVar);
+/// php method signature: three arguments
+typedef void (*pMethodPointer3)(RPHP_STDMETHOD_ARGS, pVar, pVar, pVar);
+/// php method signature: four arguments
+typedef void (*pMethodPointer4)(RPHP_STDMETHOD_ARGS, pVar, pVar, pVar, pVar);
+/// php method signature: five arguments
+typedef void (*pMethodPointer5)(RPHP_STDMETHOD_ARGS, pVar, pVar, pVar, pVar, pVar);
+/// php method signature: n arguments
+typedef void (*pMethodPointerN)(RPHP_STDMETHOD_ARGS, std::vector<pVar>);
+
 
 // platform specific
 #define RPHP_NEWLINE     '\n'

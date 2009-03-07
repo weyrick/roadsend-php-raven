@@ -33,7 +33,7 @@ pFunctionManager::~pFunctionManager() {
 }
 
 template <typename fPointerType>
-pFunction* pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pIdentString& funName, const fPointerType& fP) {
+pFunction* pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pIdentString& funName, fPointerType fP) {
 
     pFunction *f = new pFunction(sourceExt, funName, fP);
     functionRegistry_[toLowerCopy(funName)] = f;
@@ -41,10 +41,29 @@ pFunction* pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pI
 
 }
 
+template <typename fPointerType>
+pFunction* pFunctionManager::registerUser(const pIdentString& funName, fPointerType fP) {
+    pFunction *f = new pFunction(funName, fP);
+    functionRegistry_[toLowerCopy(funName)] = f;
+    return f;
+    
+}
+
+pVar pFunctionManager::invoke(const pIdentString& funName) {
+    functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
+    if (function != functionRegistry_.end()) {
+        return (*function).second->invoke(runtime_);
+    }
+    else {
+        throw pRuntimeError("undefined function: "+funName);
+        //return pNull;
+    }
+}
+
 pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1) {
     functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
     if (function != functionRegistry_.end()) {
-        return (*function).second->invoke(arg1);
+        return (*function).second->invoke(runtime_, arg1);
     }
     else {
         throw pRuntimeError("undefined function: "+funName);
@@ -56,7 +75,7 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2,
     functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
     // TODO this needs to throw a runtime error if the function wasn't found
     if (function != functionRegistry_.end()) {
-        return (*function).second->invoke(arg1,arg2,arg3);
+        return (*function).second->invoke(runtime_, arg1,arg2,arg3);
     }
     else {
         throw pRuntimeError("undefined function: "+funName);
@@ -66,8 +85,12 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2,
 
 
 // template defines
-template pFunction* pFunctionManager::registerBuiltin<pFunPointer1>(const pExtBase* sourceExt, const pIdentString& funName, const pFunPointer1& fP);
-template pFunction* pFunctionManager::registerBuiltin<pFunPointer3>(const pExtBase* sourceExt, const pIdentString& funName, const pFunPointer3& fP);
+//template pFunction* pFunctionManager::registerBuiltin<pFunPointer0>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer0 fP);
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer1>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer1 fP);
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer3>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer3 fP);
+
+template pFunction* pFunctionManager::registerUser<pFunPointer0>(const pIdentString& funName, pFunPointer0 fP);
+
 
 }
 

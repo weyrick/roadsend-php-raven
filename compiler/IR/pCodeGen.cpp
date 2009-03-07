@@ -53,9 +53,12 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     thisFunction_ = llvmModule_->getFunction(functionSymbol_);
     assert(thisFunction_ && "declare pass didn't initialize this function");
 
-    runtimeEngine_ = thisFunction_->arg_begin();
+    Function::arg_iterator a = thisFunction_->arg_begin();
+    a++;
+    runtimeEngine_ = &(*a);
 
-    currentBlock_.SetInsertPoint(BasicBlock::Create("entry", thisFunction_));
+    // entry block created in declare
+    currentBlock_.SetInsertPoint(&thisFunction_->getEntryBlock());
 
     destructList_.push(valueVectorType());
 

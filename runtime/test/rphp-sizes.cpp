@@ -1,5 +1,6 @@
 
 #include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pFunction.h"
 
 using namespace rphp;
 
@@ -18,6 +19,7 @@ int main(void) {
     std::cout << "pObjectP: " << sizeof(pObjectP) << std::endl;
     std::cout << "pResource: " << sizeof(pResource) << std::endl;
     std::cout << "pResourceP: " << sizeof(pResourceP) << std::endl;
+    std::cout << "pFunction: " << sizeof(pFunction) << std::endl;
     std::cout << "pVarP: " << sizeof(pVarP) << std::endl;
     std::cout << "pVar: " << sizeof(pVar) << std::endl;
 

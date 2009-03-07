@@ -36,7 +36,7 @@ pExtManager::pExtManager(pRuntimeEngine *r) : runtime(r) {
 void pExtManager::startUp() {
 
     // initialize standard library
-    pStandardExt* sext = new pStandardExt(runtime_);
+    ext::standard::pStandardExt* sext = new ext::standard::pStandardExt(runtime_);
     sext->extensionStartup();
     extRegistry_.push_back(sext);
 
