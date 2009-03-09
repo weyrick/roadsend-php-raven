@@ -144,38 +144,39 @@ private:
 
 public:
 
-    // standard builtin function: one argument
-    pFunction(const pExtBase* e, const pIdentString& f, pFunPointer1 fun) :
+    /// for builtin functions of arity 1-5
+    template <typename funPointerType>
+    pFunction(const pExtBase* e, const pIdentString& f, funPointerType fun, pUInt arity) :
         parentExtension_(e),
         name_(f),
         funType_(pBuiltinFunType),
-        requiredArity_(1),
-        maxArity_(1),
+        requiredArity_(arity),
+        maxArity_(arity),
         isVarArity_(false),
         paramList_(),
         funPointer_(fun)
     {
-        // arity 1
-        paramList_.push_back(new pFunctionParam());
+        for (pUInt i=0; i < arity; i++)
+            paramList_.push_back(new pFunctionParam());
     }
 
-    pFunction(const pExtBase* e, const pIdentString& f, pFunPointer3 fun) :
-        parentExtension_(e),
+    /// for user functions of arity 1-5
+    template <typename funPointerType>
+    pFunction(const pIdentString& f, funPointerType fun, pUInt arity):
+        parentExtension_(NULL),
         name_(f),
-        funType_(pBuiltinFunType),
-        requiredArity_(3),
-        maxArity_(3),
+        funType_(pUserFunType),
+        requiredArity_(arity),
+        maxArity_(arity),
         isVarArity_(false),
         paramList_(),
         funPointer_(fun)    
     {
-        // arity 3
-        paramList_.push_back(new pFunctionParam());
-        paramList_.push_back(new pFunctionParam());
-        paramList_.push_back(new pFunctionParam());
+        for (pUInt i=0; i < arity; i++)
+            paramList_.push_back(new pFunctionParam());
     }
 
-    /// used in analysis phase
+    /// used in analysis phase as data structure only, no function pointer and won't be called
     pFunction(const pIdentString& f, pFunType t):
         parentExtension_(NULL),
         name_(f),
@@ -185,19 +186,6 @@ public:
         isVarArity_(false),
         paramList_(),
         funPointer_()
-    {
-
-    }
-
-    pFunction(const pIdentString& f, pFunPointer0 fun):
-        parentExtension_(NULL),
-        name_(f),
-        funType_(pUserFunType),
-        requiredArity_(0),
-        maxArity_(0),
-        isVarArity_(false),
-        paramList_(),
-        funPointer_(fun)    
     {
 
     }
@@ -221,7 +209,10 @@ public:
     bool isVarArity(void) const { return isVarArity_; }
 
     // takes ownership
-    void setParamList(const paramListType& p) { paramList_ = p; }
+    void setParamList(const paramListType& p) { 
+        maxArity_ = requiredArity_ = p.size();
+        paramList_ = p; 
+    }
 
     paramListType::size_type numParams() const { return paramList_.size(); }
 
@@ -255,14 +246,26 @@ public:
         funPointer_.funPointer1(&ret, runtime, arg1);
         return ret;
     }
-    //pVar invoke(pVar arg1, pVar arg2) { return funPointer2_(arg1, arg2); }
+    pVar invoke(pRuntimeEngine* runtime, pVar arg1, pVar arg2) { 
+        pVar ret;
+        funPointer_.funPointer2(&ret, runtime, arg1, arg2);
+        return ret;
+    }
     pVar invoke(pRuntimeEngine* runtime, pVar arg1, pVar arg2, pVar arg3) { 
         pVar ret;
         funPointer_.funPointer3(&ret, runtime, arg1, arg2, arg3);
         return ret;
     }
-    //pVar invoke(pVar arg1, pVar arg2, pVar arg3, pVar arg4) { return funPointer4_(arg1,arg2,arg3,arg4); }
-    //pVar invoke(pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5) { return funPointer5_(arg1,arg2,arg3,arg4,arg5); }
+    pVar invoke(pRuntimeEngine* runtime, pVar arg1, pVar arg2, pVar arg3, pVar arg4) { 
+        pVar ret;
+        funPointer_.funPointer4(&ret, runtime, arg1, arg2, arg3, arg4);
+        return ret;
+    }
+    pVar invoke(pRuntimeEngine* runtime, pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5) { 
+        pVar ret;
+        funPointer_.funPointer5(&ret, runtime, arg1, arg2, arg3, arg4, arg5);
+        return ret;
+    }
     //pVar invokeN(pVar arg1) { /* fixme */ }
 
 };

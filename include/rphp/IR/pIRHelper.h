@@ -58,6 +58,11 @@ public:
     llvm::Type* pVarPointerType();
 
     llvm::FunctionType* pUserFunction0();
+    llvm::FunctionType* pUserFunction1();
+    llvm::FunctionType* pUserFunction2();
+    llvm::FunctionType* pUserFunction3();
+    llvm::FunctionType* pUserFunction4();
+    llvm::FunctionType* pUserFunction5();
     
     llvm::Constant* stringConstant(const std::string& s, int32_t& finalLen);
     llvm::Constant* stringConstant(const std::wstring& s, int32_t& finalLen);

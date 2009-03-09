@@ -39,20 +39,40 @@ namespace rphp { namespace IR {
 
 void pDeclare::visit_functionDecl(AST::functionDecl* n) {
 
-    // TODO declare pVar parameters as required in functionDecl
-    
-    // entry function
-    Function *userFun = Function::Create(IRHelper_.pUserFunction0(),
-                                        Function::ExternalLinkage,
-                                        pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),
-                                                                            n->functionDef()->name()),
-                                        llvmModule_);
+    FunctionType* funType;
+    switch (n->functionDef()->maxArity()) {
+        case 0:
+            funType = IRHelper_.pUserFunction0();
+            break;
+        case 1:
+            funType = IRHelper_.pUserFunction1();
+            break;
+        case 2:
+            funType = IRHelper_.pUserFunction2();
+            break;
+        case 3:
+            funType = IRHelper_.pUserFunction3();
+            break;
+        case 4:
+            funType = IRHelper_.pUserFunction4();
+            break;
+        case 5:
+            funType = IRHelper_.pUserFunction5();
+            break;
+    }
+    Function *userFun = Function::Create(funType,
+                                         Function::ExternalLinkage,
+                                         pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),
+                                                                             n->functionDef()->name()),
+                                         llvmModule_);
 
     Function::arg_iterator a = userFun->arg_begin();
     (*a).setName("funRetVal");
     Value* runtime = ++a;
     runtime->setName("rEngine");
 
+    // TODO: name args?
+    
     // entry block
     BasicBlock::Create("entry", userFun);
 
@@ -66,6 +86,21 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     switch (n->functionDef()->maxArity()) {
         case 0:
             registerFun = llvmModule_->getFunction("rphp_registerUserFun0");
+            break;
+        case 1:
+            registerFun = llvmModule_->getFunction("rphp_registerUserFun1");
+            break;
+        case 2:
+            registerFun = llvmModule_->getFunction("rphp_registerUserFun2");
+            break;
+        case 3:
+            registerFun = llvmModule_->getFunction("rphp_registerUserFun3");
+            break;
+        case 4:
+            registerFun = llvmModule_->getFunction("rphp_registerUserFun4");
+            break;
+        case 5:
+            registerFun = llvmModule_->getFunction("rphp_registerUserFun5");
             break;
     }
     

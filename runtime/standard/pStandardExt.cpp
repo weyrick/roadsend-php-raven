@@ -41,13 +41,13 @@ void pStandardExt::extensionStartup() {
     pFunction* f;
 
     // TODO: static initialization?
-    f = registerBuiltin("var_dump", &var_dump);
+    f = registerBuiltin("var_dump", &var_dump, 1);
     f->param(0)->setName("var");
 
-    f = registerBuiltin("strlen", &strlen);
+    f = registerBuiltin("strlen", &strlen, 1);
     f->param(0)->setName("string");
 
-    f = registerBuiltin("strpos", &strpos);
+    f = registerBuiltin("strpos", &strpos, 3);
     f->setRequiredArity(2);
     f->param(0)->setName("haystack");
     f->param(1)->setName("needle");

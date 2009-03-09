@@ -61,12 +61,107 @@ FunctionType* pIRHelper::pVarBaseFunType() {
 
 }
 
-// pVar* (*)(void)
+// pVar* (*)(pVar*, pRuntimeEngine*)
 FunctionType* pIRHelper::pUserFunction0() {
 
     std::vector<const Type*>args;
     args.push_back(pVarPointerType()); // retval
     args.push_back(runtimeEngineType());
+    FunctionType* funType = FunctionType::get(
+    /*Result=*///pVarPointerType(),
+    Type::VoidTy,
+    /*Params=*/args,
+    /*isVarArg=*/false);
+
+    return funType;
+
+}
+
+// pVar* (*)(pVar*, pRuntimeEngine*, pVar*)
+FunctionType* pIRHelper::pUserFunction1() {
+
+    std::vector<const Type*>args;
+    args.push_back(pVarPointerType()); // retval
+    args.push_back(runtimeEngineType());
+    args.push_back(pVarPointerType());
+    FunctionType* funType = FunctionType::get(
+    /*Result=*///pVarPointerType(),
+    Type::VoidTy,
+    /*Params=*/args,
+    /*isVarArg=*/false);
+
+    return funType;
+
+}
+
+// pVar* (*)(pVar*, pRuntimeEngine*, pVar*, pVar*)
+FunctionType* pIRHelper::pUserFunction2() {
+
+    std::vector<const Type*>args;
+    args.push_back(pVarPointerType()); // retval
+    args.push_back(runtimeEngineType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
+    FunctionType* funType = FunctionType::get(
+    /*Result=*///pVarPointerType(),
+    Type::VoidTy,
+    /*Params=*/args,
+    /*isVarArg=*/false);
+
+    return funType;
+
+}
+
+// pVar* (*)(pVar*, pRuntimeEngine*, pVar*, pVar*, pVar*)
+FunctionType* pIRHelper::pUserFunction3() {
+
+    std::vector<const Type*>args;
+    args.push_back(pVarPointerType()); // retval
+    args.push_back(runtimeEngineType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
+    FunctionType* funType = FunctionType::get(
+    /*Result=*///pVarPointerType(),
+    Type::VoidTy,
+    /*Params=*/args,
+    /*isVarArg=*/false);
+
+    return funType;
+
+}
+
+// pVar* (*)(pVar*, pRuntimeEngine*, pVar*, pVar*, pVar*, pVar*)
+FunctionType* pIRHelper::pUserFunction4() {
+
+    std::vector<const Type*>args;
+    args.push_back(pVarPointerType()); // retval
+    args.push_back(runtimeEngineType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
+    FunctionType* funType = FunctionType::get(
+    /*Result=*///pVarPointerType(),
+    Type::VoidTy,
+    /*Params=*/args,
+    /*isVarArg=*/false);
+
+    return funType;
+
+}
+
+// pVar* (*)(pVar*, pRuntimeEngine*, pVar*, pVar*, pVar*, pVar*, pVar*)
+FunctionType* pIRHelper::pUserFunction5() {
+
+    std::vector<const Type*>args;
+    args.push_back(pVarPointerType()); // retval
+    args.push_back(runtimeEngineType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
+    args.push_back(pVarPointerType());
     FunctionType* funType = FunctionType::get(
     /*Result=*///pVarPointerType(),
     Type::VoidTy,

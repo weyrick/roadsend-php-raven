@@ -37,7 +37,7 @@ protected:
     pIdentString extName_;
 
     template <typename fPointerType>
-    pFunction* registerBuiltin(const pIdentString& name, const fPointerType& f);
+    pFunction* registerBuiltin(const pIdentString& name, fPointerType f, pUInt arity);
 
 public:
     pExtBase(pRuntimeEngine *r, pIdentString eName) : runtime_(r), extName_(eName) { }

@@ -91,7 +91,27 @@ extern "C" {
     }
 
     void rphp_registerUserFun0(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer0 p) {
-        r->functionManager->registerUser<rphp::pFunPointer0>(name, p);
+        r->functionManager->registerUser(name, p, 0);
+    }
+
+    void rphp_registerUserFun1(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer1 p) {
+        r->functionManager->registerUser(name, p, 1);
+    }
+
+    void rphp_registerUserFun2(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer2 p) {
+        r->functionManager->registerUser(name, p, 2);
+    }
+
+    void rphp_registerUserFun3(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer3 p) {
+        r->functionManager->registerUser(name, p, 3);
+    }
+
+    void rphp_registerUserFun4(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer4 p) {
+        r->functionManager->registerUser(name, p, 4);
+    }
+
+    void rphp_registerUserFun5(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer5 p) {
+        r->functionManager->registerUser(name, p, 5);
     }
 
     rphp::pVar rphp_funCall0(rphp::pRuntimeEngine* r, const char* name) {
@@ -102,8 +122,20 @@ extern "C" {
         return r->functionManager->invoke(name, arg1);
     }
 
+    rphp::pVar rphp_funCall2(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2) {
+        return r->functionManager->invoke(name, arg1, arg2);
+    }
+
     rphp::pVar rphp_funCall3(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3) {
         return r->functionManager->invoke(name, arg1, arg2, arg3);
+    }
+
+    rphp::pVar rphp_funCall4(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3, rphp::pVar arg4) {
+        return r->functionManager->invoke(name, arg1, arg2, arg3, arg4);
+    }
+
+    rphp::pVar rphp_funCall5(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3, rphp::pVar arg4, rphp::pVar arg5) {
+        return r->functionManager->invoke(name, arg1, arg2, arg3, arg4, arg5);
     }
 
     rphp::pVar rphp_newCall(rphp::pRuntimeEngine* r, const char* className, rphp::pVar arg1) {

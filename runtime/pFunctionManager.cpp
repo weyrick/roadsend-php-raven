@@ -33,17 +33,18 @@ pFunctionManager::~pFunctionManager() {
 }
 
 template <typename fPointerType>
-pFunction* pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pIdentString& funName, fPointerType fP) {
+pFunction* pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pIdentString& funName, fPointerType fP, pUInt arity) {
 
-    pFunction *f = new pFunction(sourceExt, funName, fP);
+    pFunction *f = new pFunction(sourceExt, funName, fP, arity);
     functionRegistry_[toLowerCopy(funName)] = f;
     return f;
 
 }
 
 template <typename fPointerType>
-pFunction* pFunctionManager::registerUser(const pIdentString& funName, fPointerType fP) {
-    pFunction *f = new pFunction(funName, fP);
+pFunction* pFunctionManager::registerUser(const pIdentString& funName, fPointerType fP, pUInt arity) {
+    
+    pFunction *f = new pFunction(funName, fP, arity);
     functionRegistry_[toLowerCopy(funName)] = f;
     return f;
     
@@ -56,7 +57,6 @@ pVar pFunctionManager::invoke(const pIdentString& funName) {
     }
     else {
         throw pRuntimeError("undefined function: "+funName);
-        //return pNull;
     }
 }
 
@@ -67,30 +67,64 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1) {
     }
     else {
         throw pRuntimeError("undefined function: "+funName);
-        //return pNull;
+    }
+}
+
+pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2) {
+    functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
+    if (function != functionRegistry_.end()) {
+        return (*function).second->invoke(runtime_, arg1, arg2);
+    }
+    else {
+        throw pRuntimeError("undefined function: "+funName);
     }
 }
 
 pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3) {
     functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
-    // TODO this needs to throw a runtime error if the function wasn't found
     if (function != functionRegistry_.end()) {
-        return (*function).second->invoke(runtime_, arg1,arg2,arg3);
+        return (*function).second->invoke(runtime_, arg1, arg2, arg3);
     }
     else {
         throw pRuntimeError("undefined function: "+funName);
-        //return pNull;
+    }
+}
+
+pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4) {
+    functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
+    if (function != functionRegistry_.end()) {
+        return (*function).second->invoke(runtime_, arg1, arg2, arg3, arg4);
+    }
+    else {
+        throw pRuntimeError("undefined function: "+funName);
+    }
+}
+
+pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5) {
+    functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
+    if (function != functionRegistry_.end()) {
+        return (*function).second->invoke(runtime_, arg1, arg2, arg3, arg4, arg5);
+    }
+    else {
+        throw pRuntimeError("undefined function: "+funName);
     }
 }
 
 
 // template defines
-//template pFunction* pFunctionManager::registerBuiltin<pFunPointer0>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer0 fP);
-template pFunction* pFunctionManager::registerBuiltin<pFunPointer1>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer1 fP);
-template pFunction* pFunctionManager::registerBuiltin<pFunPointer3>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer3 fP);
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer0>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer0 fP, pUInt arity);
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer1>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer1 fP, pUInt arity);
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer2>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer2 fP, pUInt arity);
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer3>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer3 fP, pUInt arity);
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer4>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer4 fP, pUInt arity);
+template pFunction* pFunctionManager::registerBuiltin<pFunPointer5>(const pExtBase* sourceExt, const pIdentString& funName, pFunPointer5 fP, pUInt arity);
 
-template pFunction* pFunctionManager::registerUser<pFunPointer0>(const pIdentString& funName, pFunPointer0 fP);
-
+template pFunction* pFunctionManager::registerUser<pFunPointer0>(const pIdentString& funName, pFunPointer0 fP, pUInt arity);
+template pFunction* pFunctionManager::registerUser<pFunPointer1>(const pIdentString& funName, pFunPointer1 fP, pUInt arity);
+template pFunction* pFunctionManager::registerUser<pFunPointer2>(const pIdentString& funName, pFunPointer2 fP, pUInt arity);
+template pFunction* pFunctionManager::registerUser<pFunPointer3>(const pIdentString& funName, pFunPointer3 fP, pUInt arity);
+template pFunction* pFunctionManager::registerUser<pFunPointer4>(const pIdentString& funName, pFunPointer4 fP, pUInt arity);
+template pFunction* pFunctionManager::registerUser<pFunPointer5>(const pIdentString& funName, pFunPointer5 fP, pUInt arity);
 
 }
 

@@ -24,12 +24,17 @@
 namespace rphp {
 
 template <typename fPointerType>
-pFunction* pExtBase::registerBuiltin(const pIdentString& name, const fPointerType& f) {
-    return runtime_->functionManager->registerBuiltin(this, name, f);
+pFunction* pExtBase::registerBuiltin(const pIdentString& name, fPointerType f, pUInt arity) {
+    return runtime_->functionManager->registerBuiltin(this, name, f, arity);
 }
 
 // template defines
-template pFunction* pExtBase::registerBuiltin<pFunPointer1>(const pIdentString& name, const pFunPointer1& f);
-template pFunction* pExtBase::registerBuiltin<pFunPointer3>(const pIdentString& name, const pFunPointer3& f);
+template pFunction* pExtBase::registerBuiltin<pFunPointer0>(const pIdentString& name, pFunPointer0 f, pUInt arity);
+template pFunction* pExtBase::registerBuiltin<pFunPointer1>(const pIdentString& name, pFunPointer1 f, pUInt arity);
+template pFunction* pExtBase::registerBuiltin<pFunPointer2>(const pIdentString& name, pFunPointer2 f, pUInt arity);
+template pFunction* pExtBase::registerBuiltin<pFunPointer3>(const pIdentString& name, pFunPointer3 f, pUInt arity);
+template pFunction* pExtBase::registerBuiltin<pFunPointer4>(const pIdentString& name, pFunPointer4 f, pUInt arity);
+template pFunction* pExtBase::registerBuiltin<pFunPointer5>(const pIdentString& name, pFunPointer5 f, pUInt arity);
+// N arity
 
 }

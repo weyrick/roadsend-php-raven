@@ -45,14 +45,17 @@ public:
     ~pFunctionManager();
 
     template <typename fPointerType>
-    pFunction* registerBuiltin(const pExtBase*, const pIdentString&, fPointerType);
+    pFunction* registerBuiltin(const pExtBase*, const pIdentString&, fPointerType, pUInt arity);
 
     template <typename fPointerType>
-    pFunction* registerUser(const pIdentString&, fPointerType);
+    pFunction* registerUser(const pIdentString&, fPointerType, pUInt arity);
     
     pVar invoke(const pIdentString& funName);
     pVar invoke(const pIdentString& funName, pVar arg1);
+    pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2);
     pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3);
+    pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4);
+    pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5);
     
 };
 

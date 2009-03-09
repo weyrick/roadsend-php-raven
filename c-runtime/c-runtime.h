@@ -61,16 +61,22 @@ extern "C" {
 
     // function registration
     void rphp_registerUserFun0(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer0 p);
+    void rphp_registerUserFun1(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer1 p);
+    void rphp_registerUserFun2(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer2 p);
+    void rphp_registerUserFun3(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer3 p);
+    void rphp_registerUserFun4(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer4 p);
+    void rphp_registerUserFun5(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer5 p);
 
     // function invocation
     rphp::pVar rphp_funCall0(rphp::pRuntimeEngine* r, const char* name);
     rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
-    //rphp::pVar rphp_funCall2(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
+    rphp::pVar rphp_funCall2(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2);
     rphp::pVar rphp_funCall3(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3);
-    //rphp::pVar rphp_funCall4(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
-    //rphp::pVar rphp_funCall5(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
+    rphp::pVar rphp_funCall4(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3, rphp::pVar arg4);
+    rphp::pVar rphp_funCall5(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3, rphp::pVar arg4, rphp::pVar arg5);
+
+    // constructor
     rphp::pVar rphp_newCall(rphp::pRuntimeEngine* r, const char* className, rphp::pVar arg1);
-    //
 
     void _make_pVar(void);
     void _assign_pVar(void);
