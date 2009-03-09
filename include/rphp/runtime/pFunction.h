@@ -216,8 +216,8 @@ public:
     const pIdentString canonicalName(void) const { return toLowerCopy(name_); }
     const pExtBase* parentExtension(void) const { return parentExtension_; }
     pFunType funType(void) const { return funType_; }
-    const pUInt& requiredArity(void) const { return requiredArity_; }
-    const pUInt& maxArity(void) const { return maxArity_; }
+    pUInt requiredArity(void) const { return requiredArity_; }
+    pUInt maxArity(void) const { return maxArity_; }
     bool isVarArity(void) const { return isVarArity_; }
 
     // takes ownership

@@ -42,19 +42,19 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     // TODO declare pVar parameters as required in functionDecl
     
     // entry function
-    Function *fun = Function::Create(IRHelper_.pUserFunction0(),
-                                     Function::ExternalLinkage,
-                                     pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),
-                                                                         n->functionDef()->name()),
-                                     llvmModule_);
+    Function *userFun = Function::Create(IRHelper_.pUserFunction0(),
+                                        Function::ExternalLinkage,
+                                        pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),
+                                                                            n->functionDef()->name()),
+                                        llvmModule_);
 
-    Function::arg_iterator a = fun->arg_begin();
+    Function::arg_iterator a = userFun->arg_begin();
     (*a).setName("funRetVal");
     Value* runtime = ++a;
     runtime->setName("rEngine");
 
     // entry block
-    BasicBlock::Create("entry", fun);
+    BasicBlock::Create("entry", userFun);
 
     // MODULE INITIALIZATION 
     
@@ -62,13 +62,20 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     IRBuilder<> block;
     block.SetInsertPoint(&initFunction_->getEntryBlock());
 
-    Function* f = llvmModule_->getFunction("rphp_registerUserFun0");
-    assert(f != NULL);
-    Function* f2 = llvmModule_->getFunction(pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),"dohi"));
-    assert(f2 != NULL);
+    Function* registerFun;
+    switch (n->functionDef()->maxArity()) {
+        case 0:
+            registerFun = llvmModule_->getFunction("rphp_registerUserFun0");
+            break;
+    }
+    
+    assert(registerFun != NULL && "function declare doesn't support requested arity");
+    
     int len;
-    block.CreateCall3(f, &(*initFunction_->arg_begin())/* runtime */, IRHelper_.stringConstant("dohi",len), f2);
-
+    block.CreateCall3(registerFun, 
+                      &(*initFunction_->arg_begin())/* runtime */, 
+                      IRHelper_.stringConstant(n->functionDef()->name(),len), 
+                      userFun);
     
 }
 
