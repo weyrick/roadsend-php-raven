@@ -39,19 +39,24 @@ using namespace llvm;
 
 namespace rphp { namespace IR {
 
-std::string pGenSupport::mangleModuleName(std::string inName) {
+std::string pGenSupport::mangleEntryFunctionName(std::string inName) {
 
-    // TODO: mangle
     return inName;
 
 }
 
-std::string pGenSupport::mangleFunctionName(std::string moduleName, std::string inName) {
+std::string pGenSupport::mangleUserFunctionName(std::string moduleName, std::string inName) {
 
-    // TODO: mangle
-    return moduleName+"_"+inName;
+    return moduleName+":"+inName;
 
 }
+
+std::string pGenSupport::mangleInitFunctionName(std::string moduleName) {
+
+    return moduleName+":^init";
+
+}
+
 
 void pGenSupport::writeBitcode(Module* m, std::string outFile) {
 
@@ -126,7 +131,7 @@ Module* pGenSupport::createStandAloneStubModule(const std::string& stubName, con
     // ** entry function call **
     Function *entryFunc = Function::Create(irHelper.moduleEntryFunType(),
                                         Function::ExternalLinkage,
-                                        mangleModuleName(mainModuleName),
+                                        mangleEntryFunctionName(mainModuleName),
                                         M);
                                         
     AllocaInst* pVarTmp = new AllocaInst(irHelper.pVarType(), 0, "mainRetVal");

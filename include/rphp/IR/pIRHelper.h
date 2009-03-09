@@ -41,20 +41,19 @@ namespace rphp { namespace IR {
  */
 class pIRHelper {
 
-    llvm::FunctionType* moduleEntryFunTypeC_;
     llvm::Module* mod_;
 
 public:
 
-    pIRHelper(llvm::Module* m): moduleEntryFunTypeC_(0), mod_(m) { }
+    pIRHelper(llvm::Module* m): mod_(m) { }
 
     // pointer to the runtime engine
     llvm::Type* runtimeEngineType(void);
 
-    // entry function for a single compiled php module
-    llvm::FunctionType* moduleEntryFunType(void);
-
+    llvm::FunctionType* moduleEntryFunType();
+    llvm::FunctionType* moduleInitFunType();
     llvm::FunctionType* pVarBaseFunType();
+    
     const llvm::Type* pVarType();
     llvm::Type* pVarPointerType();
 

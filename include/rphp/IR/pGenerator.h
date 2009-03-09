@@ -29,6 +29,7 @@
 
 namespace llvm {
     class Module;
+    class Function;
 }
 
 namespace rphp { namespace IR {
@@ -38,7 +39,8 @@ class pGenerator: public AST::baseVisitor {
 private:
     llvm::Module* llvmModule_; // won't free
     pSourceModule& sourceModule_;
-    pIdentString entryFunctionName_;
+    llvm::Function* entryFunction_;
+    llvm::Function* initFunction_;
     pIRHelper IRHelper_;
     
 public:
@@ -50,7 +52,7 @@ public:
 
     llvm::Module* getIR(void) {  return llvmModule_; }
     
-    const pIdentString& entryFunctionName(void) const { return entryFunctionName_; }
+    const pIdentString entryFunctionName(void) const;
 
 };
 

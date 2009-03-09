@@ -33,8 +33,9 @@ namespace rphp { namespace IR {
 class pGenSupport {
 
 public:
-    static std::string mangleModuleName(std::string moduleName);
-    static std::string mangleFunctionName(std::string moduleName, std::string inName);
+    static std::string mangleEntryFunctionName(std::string moduleName);
+    static std::string mangleInitFunctionName(std::string moduleName);
+    static std::string mangleUserFunctionName(std::string moduleName, std::string inName);
     static void writeBitcode(llvm::Module* m, std::string outFile);
     static llvm::Module* readBitcode(std::string fileName);
     static llvm::Module* getRuntimeIR();

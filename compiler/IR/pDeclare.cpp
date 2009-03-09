@@ -26,6 +26,7 @@
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
 #include <llvm/Instructions.h>
+#include <llvm/Support/IRBuilder.h>
 
 #include "rphp/IR/pCompileError.h"
 #include "rphp/IR/pDeclare.h"
@@ -43,20 +44,33 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     // entry function
     Function *fun = Function::Create(IRHelper_.pUserFunction0(),
                                      Function::ExternalLinkage,
-                                     pGenSupport::mangleFunctionName(llvmModule_->getModuleIdentifier(),
-                                                                     n->functionDef()->name()),
+                                     pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),
+                                                                         n->functionDef()->name()),
                                      llvmModule_);
 
     Function::arg_iterator a = fun->arg_begin();
     (*a).setName("funRetVal");
-    a++;
-    (*a).setName("rEngine");
+    Value* runtime = ++a;
+    runtime->setName("rEngine");
 
     // entry block
     BasicBlock::Create("entry", fun);
+
+    // MODULE INITIALIZATION 
+    
+    // entry block
+    IRBuilder<> block;
+    block.SetInsertPoint(&initFunction_->getEntryBlock());
+
+    Function* f = llvmModule_->getFunction("rphp_registerUserFun0");
+    assert(f != NULL);
+    Function* f2 = llvmModule_->getFunction(pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),"dohi"));
+    assert(f2 != NULL);
+    int len;
+    block.CreateCall3(f, &(*initFunction_->arg_begin())/* runtime */, IRHelper_.stringConstant("dohi",len), f2);
+
     
 }
-
 
 } } // namespace
 

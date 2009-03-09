@@ -27,6 +27,7 @@
 
 namespace llvm {
     class Module;
+    class Function;
 }
 
 namespace rphp { namespace IR {
@@ -34,12 +35,13 @@ namespace rphp { namespace IR {
 class pDeclare: public AST::baseVisitor {
 
 private:
-    llvm::Module* llvmModule_; // won't free
+    llvm::Module* llvmModule_; // don't own
+    llvm::Function* initFunction_; // don't own
     pIRHelper IRHelper_;
 
 public:
 
-    pDeclare(llvm::Module* mod): llvmModule_(mod), IRHelper_(mod) { }
+    pDeclare(llvm::Module* mod, llvm::Function* initFun): llvmModule_(mod), initFunction_(initFun), IRHelper_(mod) { }
 
     // nodes
     void visit_functionDecl(AST::functionDecl* n);

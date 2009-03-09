@@ -81,20 +81,27 @@ FunctionType* pIRHelper::pUserFunction0() {
 // TODO: extra params for env, args?
 FunctionType* pIRHelper::moduleEntryFunType() {
 
-    if (moduleEntryFunTypeC_)
-        return moduleEntryFunTypeC_;
-
-    // entry function type: void (*)(pRuntimeEngine*)
+    // entry function type: void (*)(pVar*, pRuntimeEngine*)
     std::vector<const Type*> efArgs;
     efArgs.push_back(pVarPointerType()); // retval
     efArgs.push_back(runtimeEngineType());
-    moduleEntryFunTypeC_ = FunctionType::get(Type::VoidTy, /* return type */
-                                           efArgs, /* arguments */
-                                           false /*not vararg*/);
-
-    return moduleEntryFunTypeC_;
+    return FunctionType::get(Type::VoidTy, /* return type */
+                             efArgs, /* arguments */
+                             false /*not vararg*/);
 
 }
+
+FunctionType* pIRHelper::moduleInitFunType() {
+
+    // entry function type: void (*)(pRuntimeEngine*)
+    std::vector<const Type*> efArgs;
+    efArgs.push_back(runtimeEngineType());
+    return FunctionType::get(Type::VoidTy, /* return type */
+                             efArgs, /* arguments */
+                             false /*not vararg*/);
+
+}
+
 
 llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLen) {
 
