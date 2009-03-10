@@ -67,11 +67,16 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
                                          llvmModule_);
 
     Function::arg_iterator a = userFun->arg_begin();
-    (*a).setName("funRetVal");
+    a->setName("funRetVal");
     Value* runtime = ++a;
     runtime->setName("rEngine");
+    a++;
 
-    // TODO: name args?
+    // name args. this is not just for debug, but also used by codeGen symtab
+    for (pUInt i=0; a != userFun->arg_end(); ++a, i++) {
+        assert(i < n->functionDef()->maxArity() && "functionDecl has arity mismatch");
+        a->setName(n->functionDef()->param(i)->name());
+    }
     
     // entry block
     BasicBlock::Create("entry", userFun);

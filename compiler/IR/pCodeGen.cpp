@@ -55,8 +55,13 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
 
     Function::arg_iterator a = thisFunction_->arg_begin();
     a++;
-    runtimeEngine_ = &(*a);
+    runtimeEngine_ = a;
 
+    // rest of the function args (if any) go in symTab
+    for (; a != thisFunction_->arg_end(); ++a) {
+        symTable_[a->getName()] = a;
+    }
+    
     // entry block created in declare
     currentBlock_.SetInsertPoint(&thisFunction_->getEntryBlock());
 
