@@ -33,18 +33,22 @@ class pCompileTarget: public pTarget {
 protected:
     pSourceFileDesc inputFile_;
     std::string projectRoot_;
+    bool createMain_;
 
     // INT options:
     // compileOptimizationLevel - compiler optimization level
     // verbosityLevel           - informational verbosity level
 
 public:
-    pCompileTarget(const pSourceFileDesc& fileName, const std::string& root): inputFile_(fileName), projectRoot_(root) { }
+    pCompileTarget(const pSourceFileDesc& fileName, const std::string& root): inputFile_(fileName), projectRoot_(root), createMain_(false) { }
 
     virtual void execute(void);
 
     const std::string& getInputFileName(void) const { return inputFile_.get<0>(); }
     const std::string& getProjectRoot(void) const { return projectRoot_; }
+
+    bool createMain(void) const { return createMain_; }
+    void setCreateMain(bool v) { createMain_ = v; }
 
 };
 

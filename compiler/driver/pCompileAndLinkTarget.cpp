@@ -30,6 +30,7 @@ void pCompileAndLinkTarget::execute(void) {
 
     addInputFile(cTarget_->getInputFileName()+".bc");
     cTarget_->setVerbosity(verbosity());
+    cTarget_->setCreateMain(true);
     cTarget_->execute();
     pStandAloneTarget::execute();
 

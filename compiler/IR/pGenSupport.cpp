@@ -27,6 +27,7 @@
 #include <llvm/Instructions.h>
 #include <llvm/ValueSymbolTable.h>
 #include <llvm/Instructions.h>
+#include <llvm/Support/IRBuilder.h>
 
 #include <iostream>
 #include <fstream>
@@ -105,82 +106,51 @@ Module* pGenSupport::getRuntimeIR() {
 }
 
 
-Module* pGenSupport::createStandAloneStubModule(const std::string& stubName, const std::string& mainModuleName) {
+void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFunctionName) {
 
-    pIRHelper irHelper(getRuntimeIR());
-    Module *M = new Module(stubName);
-
+    pIRHelper irHelper(llvmModule);
+    
+    // void main(void)
     FunctionType *FT = FunctionType::get(Type::VoidTy, std::vector<const Type*>(),
                                         /*not vararg*/false);
+    Function *main = Function::Create(FT, Function::ExternalLinkage, "main", llvmModule);
+    IRBuilder<> block;
+    block.SetInsertPoint(BasicBlock::Create("entry", main));
+    
+    // alloc return value
+    AllocaInst* pVarTmp = block.CreateAlloca(irHelper.pVarType(), 0, "retVal");
 
-    Function *F = Function::Create(FT, Function::ExternalLinkage, "main", M);
+    // construct return value
+    Function* constructor = llvmModule->getFunction("_ZN4rphp4pVarC1Ev");
+    assert(constructor != NULL);
+    block.CreateCall(constructor, pVarTmp);
 
-    BasicBlock *BB = BasicBlock::Create("EntryBlock", F);
+    // create runtime
+    Function* newRuntime = llvmModule->getFunction("rphp_newRuntimeEngine");
+    assert(newRuntime != NULL);
+    Value* runtime = block.CreateCall(newRuntime, "runtime");
+    
+    // call entry function
+    Function* entry = llvmModule->getFunction(entryFunctionName);
+    assert(entry != NULL);
+    block.CreateCall2(entry, pVarTmp, runtime);
+    
+    // close runtime
+    Function* deleteRuntime = llvmModule->getFunction("rphp_deleteRuntimeEngine");
+    assert(deleteRuntime != NULL);
+    block.CreateCall(deleteRuntime, runtime);
+    
+    // destruct return value
+    Function* destructor = llvmModule->getFunction("_ZN4rphp4pVarD1Ev");
+    assert(destructor != NULL);
+    block.CreateCall(destructor, pVarTmp);
 
-    // ** STARTUP **
-    // startup function type
-    FunctionType *runtimeStartupFuncType = FunctionType::get(irHelper.runtimeEngineType(), std::vector<const Type*>(), false);
-    // startup function
-    Function *runtimeStartupFunc = Function::Create(runtimeStartupFuncType,
-                                                    Function::ExternalLinkage,
-                                                    "rphp_newRuntimeEngine",
-                                                    M);
-    // startup instruction call
-    Instruction *runtimeStartInstr = CallInst::Create(runtimeStartupFunc, "runtime");
+    // return
+    block.CreateRetVoid();
+    
+    //dumpIR(llvmModule);
 
-    // ** entry function call **
-    Function *entryFunc = Function::Create(irHelper.moduleEntryFunType(),
-                                        Function::ExternalLinkage,
-                                        mangleEntryFunctionName(mainModuleName),
-                                        M);
-                                        
-    AllocaInst* pVarTmp = new AllocaInst(irHelper.pVarType(), 0, "mainRetVal");
-    entryFunc->getEntryBlock().getInstList().push_front(pVarTmp);
-
-    //Function* constructor = llvmModule_->getFunction("_ZN4rphp4pVarC1Ev");
-    //assert(constructor != NULL);
-
-    //CallInst* con = CallInst::Create(constructor, pVarTmp);                                        
-                                        
-    std::vector<Value*> entryArgs;
-    entryArgs.push_back(pVarTmp);
-    entryArgs.push_back(runtimeStartInstr);
-    Instruction* entryInstr = CallInst::Create(entryFunc, entryArgs.begin(), entryArgs.end());
-
-
-    //  ** SHUTDOWN **
-    // argument sig for shutdown function
-    std::vector<const Type*> engineSig(1, irHelper.runtimeEngineType());
-    // shutdown function type
-    FunctionType *runtimeDeleteFuncType = FunctionType::get(Type::VoidTy, engineSig, false);
-    // shutdown function
-    Function *runtimeDeleteFunc = Function::Create(runtimeDeleteFuncType,
-                                                Function::ExternalLinkage,
-                                                "rphp_deleteRuntimeEngine",
-                                                M);
-
-    std::vector<Value*> shutdownArgsV;
-    shutdownArgsV.push_back(runtimeStartInstr);
-
-    // shutdown instruction call
-    Instruction *runtimeDeleteInstr = CallInst::Create(runtimeDeleteFunc, shutdownArgsV.begin(), shutdownArgsV.end());
-
-    BB->getInstList().push_back(runtimeStartInstr);
-    BB->getInstList().push_back(entryInstr);
-    BB->getInstList().push_back(runtimeDeleteInstr);
-    BB->getInstList().push_back(ReturnInst::Create());
-
-    /*
-    if (verifyModule(*M, PrintMessageAction)) {
-        cerr << "module corrupt" << endl;
-        exit(-1);
-    }
-    else {
-        cerr << "module verified" << endl;
-    }
-    */
-
-    return M;
+    return;
 
 }
 
@@ -194,6 +164,7 @@ void pGenSupport::dumpIR(Module* llvmModule) {
     for(ValueSymbolTable::const_iterator s = sTable.begin(); s != sTable.end(); ++s) {
         name.assign(s->getKeyData());
         if (// functions start with the module identifier name (mangled script file name)
+            name == "main" || 
             name.substr(0, llvmModule->getModuleIdentifier().length()) == llvmModule->getModuleIdentifier() ||
             // global literal strings
             name.substr(0, 5) == ".bstr" ||

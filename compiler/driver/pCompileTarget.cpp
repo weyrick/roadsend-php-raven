@@ -38,9 +38,16 @@ void pCompileTarget::execute(void) {
     log(logInfo, "compiling module ["+inputFile_.get<0>()+"] to ["+outputFile+"]");
 
     pSourceModule  m(inputFile_);
+    
     IR::pGenerator codeGen(m);
     llvm::Module* ir = codeGen.getIR();
+    
+    if (createMain_) {
+        IR::pGenSupport::createMain(ir, codeGen.entryFunctionName());
+    }
+    
     IR::pGenSupport::writeBitcode(ir, outputFile);
+    
     delete ir;
 
 }

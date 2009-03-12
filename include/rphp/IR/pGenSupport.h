@@ -22,6 +22,7 @@
 #ifndef RPHP_PGENSUPPORT_H_
 #define RPHP_PGENSUPPORT_H_
 
+#include "rphp/runtime/pTypes.h"
 #include <string>
 
 namespace llvm {
@@ -39,7 +40,7 @@ public:
     static void writeBitcode(llvm::Module* m, std::string outFile);
     static llvm::Module* readBitcode(std::string fileName);
     static llvm::Module* getRuntimeIR();
-    static llvm::Module* createStandAloneStubModule(const std::string& name, const std::string& mainModuleName);
+    static void createMain(llvm::Module *m, const pIdentString& entryFunctionName);
     static void dumpIR(llvm::Module* llvmModule);
 
 };
