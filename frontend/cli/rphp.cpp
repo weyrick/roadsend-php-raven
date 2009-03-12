@@ -111,6 +111,8 @@ int main( int argc, char* argv[] )
     try {
         if (verbosity >= 0)
             target->setVerbosity(verbosity);
+        // TODO: debug
+        target->setVerbosity(2);
         target->execute();
     }
     catch (std::exception& e) {

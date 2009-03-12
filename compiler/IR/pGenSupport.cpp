@@ -28,9 +28,13 @@
 #include <llvm/ValueSymbolTable.h>
 #include <llvm/Instructions.h>
 #include <llvm/Support/IRBuilder.h>
+#include <llvm/System/Path.h>
 
 #include <iostream>
 #include <fstream>
+
+// getenv
+#include <stdlib.h>
 
 #include "rphp/IR/pIRHelper.h"
 #include "rphp/IR/pCompileError.h"
@@ -100,8 +104,25 @@ Module* pGenSupport::readBitcode(std::string fileName) {
 
 Module* pGenSupport::getRuntimeIR() {
 
-    // TODO: needs to be a command line option with a good default
-    return readBitcode("../lib/c-runtime.ir");
+    sys::Path irFile;
+    
+    char* libPath = getenv("RPHP_IR_PATH");
+    if (libPath) {
+        irFile.set(libPath);
+    }
+    else {
+        // assume build dir
+        irFile.set("../lib");
+    }
+    irFile.appendComponent("c-runtime.ir");
+
+    if (irFile.exists()) {
+        return readBitcode(irFile.toString());
+    }
+    else {
+        throw pCompileError("unable to find c-runtime.ir - please set RPHP_IR_PATH environment variable to point to the directory containing this file.");
+    }
+    
 
 }
 

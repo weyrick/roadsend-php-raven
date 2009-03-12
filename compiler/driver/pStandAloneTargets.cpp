@@ -34,18 +34,17 @@ namespace rphp {
 
 void pStandAloneTarget::execute(void) {
 
-    /*
-    llvm::Module* M = IR::pGenSupport::createStandAloneStubModule(outputFile_, mainFile_);
-    // TODO: outfile nameing
-    std::string stubOutFile(outputFile_+"-driver.bc");
-    log(logInfo, "writing stand alone binary stub bitcode ["+stubOutFile+"]");
-    IR::pGenSupport::writeBitcode(M, stubOutFile);
-    delete M;
-    */
-
     log(logInfo, "linking stand alone executable ["+outputFile_+"]");
 
     // the following is based on code from llvm/tools/llvm-ld.cpp
+
+    llvm::sys::Path runtimePath;
+    char* rtPathE = getenv("RPHP_RUNTIME_PATH");
+    if (rtPathE) {
+        runtimePath.set(rtPathE);
+        if (runtimePath.isDirectory())
+            libSearchPaths_.push_back(runtimePath.toString());
+    }
 
     // link to native using llvm-ld
     llvm::sys::Path ld = llvm::sys::Program::FindProgramByName("llvm-ld");
@@ -68,7 +67,6 @@ void pStandAloneTarget::execute(void) {
     args.push_back("-lrphp-runtime");
     args.push_back("-o");
     args.push_back(outputFile_);
-    //args.push_back(stubOutFile);
     for (std::vector<std::string>::iterator i = inputFiles_.begin(); i != inputFiles_.end(); ++i) {
         args.push_back(*i);
     }
