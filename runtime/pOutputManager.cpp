@@ -57,7 +57,12 @@ pOutputManager& operator<< (pOutputManager& om, const pInt i) {
 }
 
 pOutputManager& operator<< (pOutputManager& om, const pVar& var) {
-    om.print(var.copyAsBString());
+    if (var.isBString())
+        om.print(var.getBString());
+    else if (var.isUString())
+        om.print(var.getUString());
+    else
+        om.print(var.copyAsBString());
     return om;
 }
 

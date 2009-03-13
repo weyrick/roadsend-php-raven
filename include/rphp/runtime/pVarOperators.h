@@ -62,7 +62,7 @@ public:
     }
 
     void operator()(const pUString &v) const {
-        *buf_ << indent_ << "ustring(" << pInt(v.length()) << ") \"" << v << "\"\n";
+        *buf_ << indent_ << "unicode(" << pInt(v.length()) << ") \"" << v << "\"\n";
     }
 
     void operator()(const pHashP &v) const {
