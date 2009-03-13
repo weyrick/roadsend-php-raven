@@ -37,7 +37,7 @@ public:
 
     void operator()(const pTriState &v) const {
         if (pNull(v)) {
-            *buf_ << indent_ << "NULL";
+            *buf_ << indent_ << "NULL\n";
         }
         else {
             *buf_ << indent_ << "bool(";
