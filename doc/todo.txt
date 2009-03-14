@@ -1,0 +1,50 @@
+Implementation TODO Scratchpad
+------------------------------
+
+= general =
+
+- doxygen docs, wiki implementation status
+
+- testsuite (cpp runtime and php)
+
+- namespaces
+
+- see if it makes sense to use some llvm containers and other functionality:
+  http://llvm.org/docs/SystemLibrary.html
+  http://llvm.org/docs/ProgrammersManual.html
+  
+- exceptions
+  http://llvm.org/docs/ExceptionHandling.html
+
+- coding standards:
+  http://llvm.org/docs/CodingStandards.html
+
+- detailed diagnostics, see clang
+  http://clang.llvm.org/docs/InternalsManual.html
+
+= codegen = 
+
+- debugging symbols: http://llvm.org/docs/SourceLevelDebugging.html
+
+= parser = 
+
+- conditionals: if, switch
+- loops: for, foreach, while
+- class decl/instanceof/clone
+- try/catch/throw
+- include/require
+- constants
+- operators
+- isset/unset/empty
+ 
+= runtime =
+
+- error manager, function tracing
+- configuration manager. basic php.ini type settings support. unicode settings.
+- lambda functions (new pVar entry)
+- object system
+- file/stream system
+- resources
+- constants
+- operators
+- globals

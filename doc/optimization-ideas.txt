@@ -1,0 +1,34 @@
+Optimization Ideas
+------------------
+
+http://en.wikipedia.org/wiki/Category:Compiler_optimizations
+
+= lexer/paser =
+
+- generate static lexer
+
+- ascii version of lexer/parser. there may be a way to template this.
+  work with Ben Hanson on native UChar version
+
+- better mapping of source files to memory, handling encodings (too many 
+  conversions now). see clang SourceManager, use llvm memory buffers?
+
+= analysis =
+
+- php level constant folding
+
+= codegen =
+
+- fast function calls when no stack trace is needed: invoke function pointers 
+  from IR instead of through runtime. esp. in loops? only with proper arity?
+
+- direct use of i32 where possible (loops)
+
+= runtime = 
+
+- change pUString to follow c++ basic_string implementation, where the size and 
+  ref data are on the heap. this would shave 2 words off pVar, which needs to be 
+  small and fast
+  
+- fast checking of common runtime settings like unicode mode
+
