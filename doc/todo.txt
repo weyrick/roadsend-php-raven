@@ -26,6 +26,9 @@ Implementation TODO Scratchpad
 
 - debugging symbols: http://llvm.org/docs/SourceLevelDebugging.html
 
+- checkout pulling pVar instatiaion instructions from c-runtime, using interators
+  for use in IRHelper
+
 = parser = 
 
 - conditionals: if, switch
@@ -39,6 +42,7 @@ Implementation TODO Scratchpad
  
 = runtime =
 
+- do pvar by const ref
 - error manager, function tracing
 - configuration manager. basic php.ini type settings support. unicode settings.
 - lambda functions (new pVar entry)

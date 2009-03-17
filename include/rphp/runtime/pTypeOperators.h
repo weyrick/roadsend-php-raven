@@ -159,7 +159,25 @@ public:
     void operator()(pBString &v) { /* nothing */ }
 
     void operator()(pUString &v) {
-        // TODO
+        // TODO this converts to ASCII. is that what we want?
+        UnicodeString ustr = v.readonlyICUString();
+        UErrorCode err(U_ZERO_ERROR);
+        int32_t bufSize = ustr.extract((char*)NULL, 0, NULL, err);
+        if (bufSize) {
+            err = U_ZERO_ERROR;
+            char *buf = (char*)malloc(++bufSize);
+            ustr.extract(buf, bufSize, NULL, err);
+            if (U_SUCCESS(err)) {
+                var_ = pBString(buf);
+            }
+            else {
+                // TODO runtime error?
+                var_ = pBString();
+            }
+            free(buf);
+            return;
+        }
+        var_ = pBString();
     }
 
     void operator()(pHashP &v) {

@@ -67,7 +67,7 @@ public:
 
     }
 
-    pUString(const char * s): strLen_(0), bufSize_(0), data_(0) {
+    explicit pUString(const char * s): strLen_(0), bufSize_(0), data_(0) {
         strLen_ = bufSize_ = strlen(s);
         if (strLen_) {
             data_.reset(new UChar[bufSize_]);
@@ -105,6 +105,10 @@ public:
     // size
     int32_t size(void) const { return strLen_; }
     int32_t length(void) const { return strLen_; }
+
+    // comparison
+    bool operator== (const pUString& str) const;
+    bool operator!= (const pUString& str) const;
 
     // empty predicate
     bool empty(void) const { return (bool)strLen_; }

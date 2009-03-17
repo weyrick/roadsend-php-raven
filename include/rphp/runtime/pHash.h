@@ -36,8 +36,8 @@ using namespace boost::multi_index;
 
 // custom key type
 namespace rphp {
-    typedef boost::variant< pInt, pIdentString > hKeyVar;
-    typedef enum { hKeyInt, hKeyStr  } hKeyType;
+    typedef boost::variant< pInt, pBString, pUString > hKeyVar;
+    typedef enum { hKeyInt=0, hKeyBStr=1, hKeyUStr=2  } hKeyType;
 }
 
 // customer key hasher
@@ -52,13 +52,16 @@ class hKeyHasher : public boost::static_visitor<std::size_t> {
 
 public:
 
-    std::size_t operator()(const pInt &k) const {
+    std::size_t operator()(pInt k) const {
         return static_cast<std::size_t>(k);
     }
 
-    std::size_t operator()(const pIdentString &k) const {
+    std::size_t operator()(const pBString &k) const {
         return boost::hash_value(k);
-        //return static_cast<std::size_t>(k.hashCode());
+    }
+    
+    std::size_t operator()(const pUString &k) const {
+        return static_cast<std::size_t>(k.hashCode());
     }
 
 };
@@ -69,9 +72,12 @@ struct h_container {
     pVar pData;
     hKeyVar key;
 
-    h_container(const pIdentString k, pVar d) : pData(d), key(k) { }
+    h_container(pInt k, pVar d) : pData(d), key(k) { }
+    
+    h_container(const pBString& k, pVar d) : pData(d), key(k) { }
 
-    h_container(const pInt k, pVar d) : pData(d), key(k) { }
+    h_container(const pUString& k, pVar d) : pData(d), key(k) { }
+
 
 };
 
@@ -125,27 +131,36 @@ public:
 #endif
 
     // modifiers
+    void insert(pInt key, const pVar& data);
+    void insert(const pBString& key, const pVar& data);
+    void insert(const pUString& key, const pVar& data);
     void insert(const pVar& key, const pVar& data);
-    void insert(const pIdentString &key, const pVar& data);
-    void insert(const pInt &key, const pVar& data);
-    void insert(const char* key, const pVar& data) { insert(pIdentString(key), data); }
+    void insert(const char* key, const pVar& data) { 
+        // TODO need to check runtime for default string type
+        insert(pBString(key), data); 
+    }
     void insertNext(const pVar& data);
 
-    size_type remove(const pIdentString &key);
-    size_type remove(const pInt &key);
+    size_type remove(pInt key);
+    size_type remove(const pBString& key);
+    size_type remove(const pUString& key);
+    size_type remove(const char* key);
 
     // queries
     size_type size() const { return hashData_.size(); }
-    bool keyExists(const pIdentString &key) const;
-    bool keyExists(const pInt &key) const;
+    
+    bool keyExists(pInt key) const;
+    bool keyExists(const pBString& key) const;
+    bool keyExists(const pUString& key) const;
+
+    // lookup
+    pVar operator[] (pInt key) const;
+    pVar operator[] (const pBString &key) const;
+    pVar operator[] (const pUString &key) const;
+    pVar operator[] (const char* key) const;
 
     // dump of contents
     void varDump(pOutputBuffer*, const pBString& indent) const;
-
-    // lookup
-    pVar operator[] (const pIdentString &key) const;
-    pVar operator[] (const pInt &key) const;
-
 
 };
 

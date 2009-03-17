@@ -32,59 +32,92 @@ std::size_t hash_value(rphp::hKeyVar const& k) {
 
 namespace rphp {
 
-void pHash::insert(const pVar& key, const pVar& data) {
-    // TODO proper semantics for key conversion
-    hashData_.insert(h_container(key.copyAsBString(), data));
+void pHash::insert(pInt key, const pVar& data) {
+    if (key > maxIntKey_)
+        maxIntKey_ = key+1;
+    hashData_.insert(h_container(key, data));
 }
 
-void pHash::insert(const pIdentString &key, const pVar& data) {
+void pHash::insert(const pBString& key, const pVar& data) {
     // TODO check numeric string, set maxIntKey accordingly
     hashData_.insert(h_container(key, data));
 }
 
-void pHash::insert(const pInt &key, const pVar& data) {
-    if (key > maxIntKey_)
-        maxIntKey_ = key+1;
+void pHash::insert(const pUString& key, const pVar& data) {
+    // TODO check numeric string, set maxIntKey accordingly
     hashData_.insert(h_container(key, data));
+}
+
+void pHash::insert(const pVar& key, const pVar& data) {
+    // TODO proper semantics for key conversion
+    hashData_.insert(h_container(key.copyAsBString(), data));
 }
 
 void pHash::insertNext(const pVar& data) {
     hashData_.insert(h_container(maxIntKey_++, data));
 }
 
-pHash::size_type pHash::remove(const pIdentString &key) {
+pHash::size_type pHash::remove(pInt key) {
     return hashData_.erase(key);
 }
 
-pHash::size_type pHash::remove(const pInt &key) {
+pHash::size_type pHash::remove(const pBString& key) {
     return hashData_.erase(key);
 }
 
+pHash::size_type pHash::remove(const pUString& key) {
+    return hashData_.erase(key);
+}
+
+pHash::size_type pHash::remove(const char* key) {
+    return hashData_.erase(pBString(key));
+}
 
 // query
-bool pHash::keyExists(const pIdentString &key) const {
+bool pHash::keyExists(pInt key) const {
     stableHash::iterator k = hashData_.find(key);
     return (k != hashData_.end());
 }
 
-bool pHash::keyExists(const pInt &key) const {
+bool pHash::keyExists(const pBString& key) const {
+    stableHash::iterator k = hashData_.find(key);
+    return (k != hashData_.end());
+}
+
+bool pHash::keyExists(const pUString& key) const {
     stableHash::iterator k = hashData_.find(key);
     return (k != hashData_.end());
 }
 
 // lookup
-pVar pHash::operator[] ( const pIdentString &key ) const {
+pVar pHash::operator[] (pInt key) const {
     stableHash::iterator k = hashData_.find(key);
     if (k == hashData_.end())
-        return pVar(); // pNull
+        return pNull;
     else
         return (*k).pData;
 }
 
-pVar pHash::operator[] ( const pInt &key ) const {
+pVar pHash::operator[] (const pBString& key) const {
     stableHash::iterator k = hashData_.find(key);
     if (k == hashData_.end())
-        return pVar(); // pNull
+        return pNull;
+    else
+        return (*k).pData;
+}
+
+pVar pHash::operator[] (const pUString& key) const {
+    stableHash::iterator k = hashData_.find(key);
+    if (k == hashData_.end())
+        return pNull;
+    else
+        return (*k).pData;
+}
+
+pVar pHash::operator[] (const char* key) const {
+    stableHash::iterator k = hashData_.find(pBString(key));
+    if (k == hashData_.end())
+        return pNull;
     else
         return (*k).pData;
 }
@@ -102,13 +135,18 @@ void pHash::varDump(pOutputBuffer* buf, const pBString& indent) const {
     const seq_index& ot = get<1>(hashData_);
 
     pBString newIndent(indent+"  ");
-
+    hKeyType kType;
+    
     for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
-        if ((*it).key.which() == hKeyInt) {
+        kType = (hKeyType)(*it).key.which();
+        if (kType == hKeyInt) {
             *buf << newIndent << "[" << (*it).key << "]=>\n";
         }
         else {
-            *buf << newIndent << "['" << (*it).key << "']=>\n";
+            if (kType == hKeyUStr)
+                *buf << newIndent << "[u'" << (*it).key << "']=>\n";
+            else
+                *buf << newIndent << "['" << (*it).key << "']=>\n";
         }
         (*it).pData.applyVisitor<pVar_var_dump>(buf, newIndent);
     }

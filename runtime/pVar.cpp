@@ -59,6 +59,7 @@ pBString& pVar::convertToBString() {
         pVar_convertToBStringVisitor cv(pVarData_);
         boost::apply_visitor(cv, pVarData_);
     }
+    assert(isBString() && "convertToBString failed to convert");
     return getBString();
 }
 

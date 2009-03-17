@@ -157,6 +157,12 @@ void pvarTestCase::test_pUString() {
     z.checkinICUString(ustr3);
     CPPUNIT_ASSERT( z.readonlyICUString() == UnicodeString("1") );
 
+    // equality
+    pUString lhs("foo123");
+    pUString rhs("foo123");
+    CPPUNIT_ASSERT( lhs == rhs );
+    rhs = pUString("foo1234");
+    CPPUNIT_ASSERT( lhs != rhs );
 
 }
 
@@ -317,4 +323,12 @@ void pvarTestCase::test_visitor() {
     // resource
     p = pVarP(new pVar(1));
     p.applyVisitor<tvisitor>();
+}
+
+void pvarTestCase::test_conversion() {
+
+    pVar ustr(pUString("foo"));
+    pBString bstr(ustr.copyAsBString());
+    CPPUNIT_ASSERT( bstr == "foo" );
+    
 }

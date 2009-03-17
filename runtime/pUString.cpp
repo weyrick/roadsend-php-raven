@@ -83,5 +83,15 @@ void pUString::checkinICUString(const UnicodeString& s) {
     }
 }
 
+bool pUString::operator== (const pUString& str) const {
+    //return (u_strcmp(data_.get(), str.getBuffer()) == 0);
+    return this->readonlyICUString() == str.readonlyICUString();
+}
+bool pUString::operator!= (const pUString& str) const {
+    //return (u_strcmp(data_.get(), str.getBuffer()) != 0);
+    return this->readonlyICUString() != str.readonlyICUString();
+}
+
+
 } /* namespace rphp */
 
