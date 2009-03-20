@@ -18,11 +18,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include <iostream>
-#include <unicode/ustream.h>
 
 #include "rphp/runtime/pHash.h"
+
 #include "rphp/runtime/pVarOperators.h"
+
+#include <iostream>
 
 namespace boost {
 std::size_t hash_value(rphp::hKeyVar const& k) {

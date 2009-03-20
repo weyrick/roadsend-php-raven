@@ -1,6 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
+ * Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
  * Copyright (c) 2008 Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
@@ -18,11 +19,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include "rphp/runtime/pVar.h"
-#include "rphp/runtime/pHash.h"
-#include "rphp/runtime/pObject.h"
+#include "rphp/runtime/pObject.h" // pClass decl
 
-#include <boost/foreach.hpp>
+#include "rphp/runtime/pHash.h"
 
 namespace rphp
 {

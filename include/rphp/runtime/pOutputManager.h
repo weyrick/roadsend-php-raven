@@ -21,10 +21,11 @@
 #ifndef RPHP_POUTPUTMANAGER_H_
 #define RPHP_POUTPUTMANAGER_H_
 
-#include <stack>
 #include "rphp/runtime/pOutputBuffer.h"
 #include "rphp/runtime/pTypes.h"
 #include "rphp/runtime/pVar.h"
+
+#include <stack>
 
 namespace rphp {
 

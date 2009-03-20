@@ -22,6 +22,7 @@
 #define RPHP_PVAROPERATORS_H_
 
 #include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pHash.h"
 #include "rphp/runtime/pOutputBuffer.h"
 
 namespace rphp {

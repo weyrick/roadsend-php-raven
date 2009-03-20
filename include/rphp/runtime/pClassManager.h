@@ -21,6 +21,8 @@
 #ifndef RPHP_PCLASSMANAGER
 #define RPHP_PCLASSMANAGER
 
+#include "rphp/runtime/pTypes.h"
+
 #include <boost/unordered_map.hpp>
 
 namespace rphp {

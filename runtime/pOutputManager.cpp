@@ -18,10 +18,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
+#include "rphp/runtime/pOutputManager.h"
+
 #include <unicode/ustream.h>
 #include <iostream>
-
-#include "rphp/runtime/pOutputManager.h"
 
 namespace rphp {
 

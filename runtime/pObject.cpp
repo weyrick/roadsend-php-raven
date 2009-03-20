@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *               2008 Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
@@ -19,9 +19,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include <iostream>
+
 #include "rphp/runtime/pObject.h"
-#include "rphp/runtime/pRuntime.h"
+
+#include <iostream>
 
 namespace rphp {
 

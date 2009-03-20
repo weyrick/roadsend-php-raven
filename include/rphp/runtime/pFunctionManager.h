@@ -23,6 +23,7 @@
 
 #include <boost/unordered_map.hpp>
 
+#include "rphp/runtime/pFunction.h"
 #include "rphp/runtime/pTypes.h"
 
 namespace rphp {

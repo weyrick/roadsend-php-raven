@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -18,9 +18,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include <boost/lexical_cast.hpp>
-
 #include "rphp/runtime/pTypeOperators.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace rphp {
 
