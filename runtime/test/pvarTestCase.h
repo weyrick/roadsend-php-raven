@@ -21,7 +21,7 @@ class pvarTestCase : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( test_pUString );
   // object
   // resource
-  CPPUNIT_TEST( test_pVarRef );
+  CPPUNIT_TEST( test_pVarBoxed );
   CPPUNIT_TEST( test_visitor );
   CPPUNIT_TEST( test_conversion );
   CPPUNIT_TEST_SUITE_END();
@@ -32,7 +32,7 @@ protected:
   void test_pInt();
   void test_pFloat();
   void test_pHash();
-  void test_pVarRef();
+  void test_pVarBoxed();
   void test_pUString();
   void test_visitor();
   void test_conversion();

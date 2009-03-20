@@ -21,13 +21,14 @@
 #ifndef RPHP_PVAR_H_
 #define RPHP_PVAR_H_
 
-#include <iostream>
 #include "rphp/runtime/pTypes.h"
 
+#include <iostream>
+
 // each pVar holds an int32 which stores both refcount (lower 31 bits)
-// and the "is php reference" flag (high bit)
-#define PVAR_RCNT_BITS 0x7fffffff
-#define PVAR_RFLAG_BIT 0x80000000
+// and a flag that determines if this pVar is an alias in the runtime
+#define PVAR_REFCNT_BITS   0x7fffffff
+#define PVAR_ALIAS_FLAG    0x80000000
 
 namespace rphp {
 
@@ -46,9 +47,14 @@ namespace rphp {
  - pHash
  - pObject
  - pResource
- - pVarP (shared ptr to a pVar)
+ - pVarP (reference counted, shared ptr to a pVar)
 
  Space for each type is stored on the stack
+
+ PHP "references", where more than one symbol in the runtime references the same
+ variable, are hereby denoted "aliases". This is differentiate between reference
+ counted pVarP objects (which may or may not be runtime aliases) and PHP reference
+ variables (which are always pVarP, i.e. on the heap)
 
 */
 class pVar {
@@ -58,7 +64,7 @@ class pVar {
      */
     pVarDataType pVarData_;
     /**
-        reference count (lower 31 bits) and reference flag (high bit)
+        reference count (lower 31 bits) and alias flag (high bit)
      */
     boost::int32_t refData_;
 
@@ -75,7 +81,7 @@ public:
 
     /// generic constructor will accept any type that is valid for the pVar variant (see pVarDataType)
     template <typename T>
-    pVar(const T &v): pVarData_(v), refData_(0) {
+    pVar(const T& v): pVarData_(v), refData_(0) {
 #ifdef RPHP_PVAR_DEBUG
         std::cout << "pVar [" << this << "]: generic construct to: " << pVarData_.which() << std::endl;
 #endif
@@ -102,13 +108,10 @@ public:
 
     /* default copy constructor */
 #ifdef RPHP_PVAR_DEBUG
-    pVar(pVar const& v) {
+    pVar(const pVar& v) {
         std::cout << "pVar [" << this << "]: copy construct from [" << &v << "] type: " << v.getType() << std::endl;
         pVarData_ = v.pVarData_;
         refData_ = v.refData_;
-        if (pVarData_.which() == pVarIntType_) {
-            std::cout << " ... was pInt, value [" << getInt() << "]" << std::endl;
-        }
     }
 #endif
 
@@ -121,7 +124,7 @@ public:
 
     /// generic assignment works for any type pVarDataType supports
     template <typename T>
-    void operator=(T val) { pVarData_ = val; }
+    void operator=(const T& val) { pVarData_ = val; }
 
     // some specializations to avoid ambiguity
     /// default assignment from char* to binary strings
@@ -131,44 +134,54 @@ public:
 
     /* reference counting counting */
     /// reference counting is handled automatically upon construction, destruction and
-    /// assignment so this shouldn't normally be called in userland
-    /// only useful when type is NOT pVarP
-    /// in other words, we only count reference when we are the boxed pVar
+    /// assignment of pVarP so inc/dec shouldn't normally be called in userland
+    /// these are only useful when which() is NOT pVarP
+    /// in other words, we only count reference when we are the boxed pVar inside 
+    /// of a pVarP
 
     /// return current reference count.
-    inline boost::int32_t getRefCount(void) {
-        // note, refcount only makes sense if variant type is NOT pVarP
-        return refData_ & PVAR_RCNT_BITS;
+    inline boost::int32_t getRefCount(void) const {
+        return refData_ & PVAR_REFCNT_BITS;
     }
 
     /// increment the reference count
     inline void incRefCount(void) {
-        // TODO: overflow?
+        // TODO: overflow? threadsafety?
         refData_ += 1;
     }
     /// decrement the reference count
     inline void decRefCount(void) {
+        // TODO: underflow? threadsafety?
         refData_ -= 1;
     }
 
-    /* reference variable flag */
-    // note that all reference variables are pVarP, but not all pVarP are
+    /* aliases (i.e. PHP references) */
+    // note that all alaises are pVarP (i.e. on the heap), but not all pVarP are
     // reference variables. this happens because a pVar can live on the
     // heap but not have multiple runtime symbols pointing to it
 
-    /// return true if this pVar is a "reference" variable
-    inline bool isRef(void) {
-        return refData_ & PVAR_RFLAG_BIT;
+    /// return true if this pVar is a runtime "reference" variable
+    inline bool isAlias(void) const {
+        return refData_ & PVAR_ALIAS_FLAG;
     }
-    /// flag this pVar as a reference variable
-    /// this only make sense when the variant type is pVarP
-    inline void makeRef(void) {
-        if (pVarData_.which() == pVarPtrType_)
-            refData_ |= PVAR_RFLAG_BIT;
+    /// make this pVar a runtime "reference" variable, meaning multiple
+    /// runtime symbols are pointing to it. if it's already boxed, meaning
+    /// it's already a pVarP object stored on the heap, then we simply
+    /// flag it as an alias. otherwise, we transfer the current stack based
+    /// data to the heap first.
+    inline void makeAlias(void) {
+        if (pVarData_.which() == pVarPtrType_) {
+            refData_ |= PVAR_ALIAS_FLAG;
+        }
+        else { 
+            pVarData_ = pVarP(new pVar(pVarData_));
+            refData_ |= PVAR_ALIAS_FLAG;
+        }   
     }
-    /// unflag this pVar as a reference variable
-    inline void unmakeRef(void) {
-        refData_ ^= PVAR_RFLAG_BIT;
+    /// unflag this pVar as a reference variable. note that this will not
+    /// move a pVar that is on the heap back to the stack
+    inline void unmakeAlias(void) {
+        refData_ ^= PVAR_ALIAS_FLAG;
     }
 
     /* custom visitors */
@@ -188,7 +201,8 @@ public:
 
     /* type checks */
     /// return the current type represented by this pVar
-    const pVarType getType() const;
+    pVarType getType() const;
+    
     /// return true if pVar is currently a pNull. no type conversion.
     bool isNull() const {
         return ((pVarData_.which() == pVarTriStateType_) && pNull(boost::get<pTriState>(pVarData_)));

@@ -218,7 +218,7 @@ pVar changeRef(pVar r) {
 
 }
 
-void pvarTestCase::test_pVarRef() {
+void pvarTestCase::test_pVarBoxed() {
 
     pVarP ptr = new pVar(5);
     pVar r(ptr);
@@ -228,7 +228,6 @@ void pvarTestCase::test_pVarRef() {
     CPPUNIT_ASSERT( r.getPtr()->isInt() );
     CPPUNIT_ASSERT( r.getPtr()->getInt() == 5 );
 
-
     // ref counting
     CPPUNIT_ASSERT( ptr->getRefCount() == 2 ); // ptr and r
     ptr.reset();
@@ -237,17 +236,20 @@ void pvarTestCase::test_pVarRef() {
     pVar newr(r);
     CPPUNIT_ASSERT( newr.getPtr()->getRefCount() == 2 ); // r, newr
 
-    // php reference flag
-    CPPUNIT_ASSERT( r.isRef() == false );
-    r.makeRef();
-    CPPUNIT_ASSERT( r.isRef() == true );
-    r.unmakeRef();
-    CPPUNIT_ASSERT( r.isRef() == false );
+    // php reference flag (aliases)
+    CPPUNIT_ASSERT( r.isAlias() == false );
+    r.makeAlias();
+    CPPUNIT_ASSERT( r.isAlias() == true );
+    r.unmakeAlias();
+    CPPUNIT_ASSERT( r.isAlias() == false );
 
-    // ref flag only valid on boxed pvars
-    pVar x;
-    x.makeRef();
-    CPPUNIT_ASSERT( x.isRef() == false );
+    // if it's not already boxed, makeAlias will move it to heap
+    pVar x(5);
+    CPPUNIT_ASSERT( x.isAlias() == false );
+    CPPUNIT_ASSERT( x.isBoxed() == false );
+    x.makeAlias();
+    CPPUNIT_ASSERT( x.isAlias() == true );
+    CPPUNIT_ASSERT( x.isBoxed() == true );
 
     pVar r2 = changeRef(r);
     CPPUNIT_ASSERT( r.isBoxed() );

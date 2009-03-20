@@ -25,7 +25,7 @@
 
 namespace rphp {
 
-const pVarType pVar::getType() const {
+pVarType pVar::getType() const {
     int w = pVarData_.which();
     if (w == pVarTriStateType_) {
         return (pNull(boost::get<pTriState>(pVarData_))) ? pVarNullType : pVarBoolType;
@@ -110,7 +110,7 @@ void intrusive_ptr_release(pVar* v) {
     }
     else if (c == 1) {
         // if refcount drops to 1, ensure the pVar is not flagged as a php reference
-        v->unmakeRef();
+        v->unmakeAlias();
     }
 }
 
