@@ -19,13 +19,13 @@
    ***** END LICENSE BLOCK *****
 */
 
+#include "rphp/analysis/pLexer.h"
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
 #include <string>
 #include <sstream>
-
-#include "rphp/analysis/pLexer.h"
 
 namespace rphp { namespace lexer {
 

@@ -19,6 +19,11 @@
    ***** END LICENSE BLOCK *****
 */
 
+#include "rphp/IR/pGenSupport.h"
+
+#include "rphp/IR/pIRHelper.h"
+#include "rphp/IR/pCompileError.h"
+
 #include <llvm/Module.h>
 #include <llvm/ModuleProvider.h>
 #include <llvm/Support/MemoryBuffer.h>
@@ -35,10 +40,6 @@
 
 // getenv
 #include <stdlib.h>
-
-#include "rphp/IR/pIRHelper.h"
-#include "rphp/IR/pCompileError.h"
-#include "rphp/IR/pGenSupport.h"
 
 using namespace llvm;
 

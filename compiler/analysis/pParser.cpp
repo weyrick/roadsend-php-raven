@@ -19,12 +19,14 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <iostream>
-#include <boost/pool/object_pool.hpp>
+#include "rphp/analysis/pParser.h"
 
 #include "rphp/analysis/pLexer.h"
-#include "rphp/analysis/pParser.h"
 #include "rphp/analysis/pSourceModule.h"
+
+#include <boost/pool/object_pool.hpp>
+
+#include <iostream>
 
 /* generated rphp_grammar parser interface */
 void* rphpParseAlloc(void *(*)(size_t));

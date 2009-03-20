@@ -19,20 +19,18 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <iostream>
+#include "rphp/IR/pCodeGen.h"
+
+#include "rphp/IR/pCompileError.h"
+#include "rphp/IR/pIRHelper.h"
+#include "rphp/IR/pGenSupport.h"
 
 #include <llvm/Module.h>
 #include <llvm/GlobalVariable.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
 #include <llvm/Instructions.h>
-
 #include <llvm/Linker.h>
-
-#include "rphp/IR/pCompileError.h"
-#include "rphp/IR/pCodeGen.h"
-#include "rphp/IR/pIRHelper.h"
-#include "rphp/IR/pGenSupport.h"
 
 using namespace llvm;
 

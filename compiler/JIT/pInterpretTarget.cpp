@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -19,14 +19,14 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <llvm/Linker.h>
 
-#include "rphp/driver/pTargetError.h"
+#include "rphp/JIT/pInterpretTarget.h"
+
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/IR/pGenerator.h"
-#include "rphp/IR/pGenSupport.h"
-#include "rphp/JIT/pInterpretTarget.h"
 #include "rphp/JIT/pJIT.h"
+
+#include <llvm/Linker.h>
 
 namespace rphp {
 
@@ -36,23 +36,9 @@ void pInterpretTarget::execute(void) {
     IR::pGenerator codeGen(m);
 
     llvm::Module* ir = codeGen.getIR();
-    /*
-    llvm::Module* stub = pGenSupport::createStandAloneStubModule("stub", codeGen.entryFunctionName());
-
-    std::string errMsg;
-    llvm::Linker l("stub_link", stub);
-    l.LinkInModule(ir, &errMsg);
-    if (errMsg.length()) {
-        throw pTargetError("error linking in runtime IR [" + errMsg + "]");
-    }
-
-    // take ownership of module so it's not freed
-    l.releaseModule();
-    */
     
     // JIT frees ir
     pJIT engine;
-    //engine.executeMain(stub);
     engine.executeWithRuntime(ir, codeGen.entryFunctionName());
 
 }

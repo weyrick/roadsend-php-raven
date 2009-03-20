@@ -19,6 +19,8 @@
    ***** END LICENSE BLOCK *****
 */
 
+#include "rphp/IR/pIRHelper.h"
+
 #include <llvm/Module.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>
@@ -28,8 +30,6 @@
 #include <unicode/ustring.h>
 
 #include <iostream>
-
-#include "rphp/IR/pIRHelper.h"
 
 using namespace llvm;
 

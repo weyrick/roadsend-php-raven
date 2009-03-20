@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -19,6 +19,10 @@
    ***** END LICENSE BLOCK *****
 */
 
+#include "rphp/analysis/pSourceFile.h"
+
+#include "rphp/analysis/pParseError.h"
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -28,9 +32,6 @@
 #include <unicode/unistr.h>
 #include <unicode/schriter.h>
 #include <stdio.h>
-
-#include "rphp/analysis/pParseError.h"
-#include "rphp/analysis/pSourceFile.h"
 
 namespace rphp { 
 

@@ -19,18 +19,16 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <llvm/Module.h>
-#include <llvm/Linker.h>
-#include <llvm/Support/IRBuilder.h>
-
-// tmp
-#include <llvm/Analysis/Verifier.h>
+#include "rphp/IR/pGenerator.h"
 
 #include "rphp/IR/pCompileError.h"
-#include "rphp/IR/pGenerator.h"
 #include "rphp/IR/pGenSupport.h"
 #include "rphp/IR/pDeclare.h"
 #include "rphp/IR/pCodeGen.h"
+
+#include <llvm/Module.h>
+#include <llvm/Linker.h>
+#include <llvm/Support/IRBuilder.h>
 
 using namespace llvm;
 

@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -19,12 +19,13 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <llvm/Module.h>
-
 #include "rphp/driver/pCompileTarget.h"
+
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/IR/pGenerator.h"
 #include "rphp/IR/pGenSupport.h"
+
+#include <llvm/Module.h>
 
 namespace rphp {
 

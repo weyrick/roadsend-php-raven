@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -19,11 +19,12 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <iostream>
-
 #include "rphp/analysis/pSourceModule.h"
+
 #include "rphp/analysis/pASTVisitors.h"
 #include "rphp/analysis/pParser.h"
+
+#include <iostream>
 
 namespace rphp {
 

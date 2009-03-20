@@ -18,14 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
+#include "rphp/runtime/standard/pStandardExt.h"
+
+#include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pFunction.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/range/iterator_range.hpp>
 
 #include <iostream>
-
-#include "rphp/runtime/pRuntime.h"
-#include "rphp/runtime/pFunction.h"
-#include "rphp/runtime/standard/pStandardExt.h"
 
 using namespace boost;
 using namespace boost::algorithm;

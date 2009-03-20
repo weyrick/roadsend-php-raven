@@ -19,9 +19,10 @@
    ***** END LICENSE BLOCK *****
 */
 
+#include "rphp/analysis/pASTVisitors.h"
+
 #include <iostream>
 #include <unicode/ustream.h>
-#include "rphp/analysis/pASTVisitors.h"
 
 namespace rphp { namespace AST {
 

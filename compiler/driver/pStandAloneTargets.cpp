@@ -19,16 +19,17 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include <iostream>
-#include <vector>
-#include <string>
+#include "rphp/driver/pStandAloneTargets.h"
+
+#include "rphp/driver/pTargetError.h"
 
 #include <llvm/Module.h>
 #include <llvm/Support/SystemUtils.h>
 #include <llvm/System/Program.h>
 
-#include "rphp/driver/pTargetError.h"
-#include "rphp/driver/pStandAloneTargets.h"
+#include <iostream>
+#include <vector>
+#include <string>
 
 namespace rphp {
 
