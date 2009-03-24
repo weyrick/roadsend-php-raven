@@ -46,6 +46,7 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     valueStack_(),
     destructList_(),
     symTable_(),
+    // TODO: better way to get int size?
     wordSize_((llvmModule_->getPointerSize() == Module::Pointer64) ? 64 : 32)
 {
 
@@ -147,7 +148,6 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
     // TODO: other bases besides 10
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
     ConstantInt* const_int = ConstantInt::get(
-                                // TODO: better way to get int size?
                                 APInt(wordSize_,  
                                       numLiteral.data(), 
                                       numLiteral.length(), 
@@ -184,7 +184,8 @@ void pCodeGen::visit_literalFloat(AST::literalFloat* n) {
 
 void pCodeGen::visit_literalBool(AST::literalBool* n) {
 
-    ConstantInt* cbool = ConstantInt::get(APInt(wordSize_,  (n->getBoolVal()) ? "1" : "0", 1, 10));
+    // NOTE even on 64 bit, this is 32 (with g++)
+    ConstantInt* cbool = ConstantInt::get(APInt(32,  (n->getBoolVal()) ? "1" : "0", 1, 10));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pBoolTmp");
