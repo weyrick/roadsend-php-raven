@@ -52,7 +52,7 @@ namespace rphp {
  Space for each type is stored on the stack
 
  PHP "references", where more than one symbol in the runtime references the same
- variable, are hereby denoted "aliases". This is differentiate between reference
+ variable, are hereby denoted "aliases". This is to differentiate between reference
  counted pVarP objects (which may or may not be runtime aliases) and PHP reference
  variables (which are always pVarP, i.e. on the heap)
 

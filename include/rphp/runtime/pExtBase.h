@@ -30,12 +30,18 @@ namespace rphp {
 class pRuntimeEngine;
 class pFunction;
 
+/**
+
+ @brief Base class for extensions, with hooks for startup, shutdown, and registering builtin functions and methods.
+
+ */
 class pExtBase {
 
 protected:
     pRuntimeEngine* runtime_;
     pIdentString extName_;
 
+    /// register a builtin function associated with this extension
     template <typename fPointerType>
     pFunction* registerBuiltin(const pIdentString& name, fPointerType f, pUInt arity);
 

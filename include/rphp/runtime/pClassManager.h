@@ -33,6 +33,11 @@ class pClass;
 
 typedef boost::unordered_map<pIdentString, pClass*> classRegistryType;
 
+/**
+ 
+ @brief Manages the PHP classes available to the runtime
+
+ */
 class pClassManager {
 
 private:

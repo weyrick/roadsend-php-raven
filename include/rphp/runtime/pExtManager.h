@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -29,6 +29,11 @@ namespace rphp {
 class pRuntimeEngine;
 class pExtBase;
 
+/**
+ 
+ @brief Manages the extensions available to the runtime
+ 
+ */
 class pExtManager {
 
 typedef std::deque<pExtBase*> extRegistryType;
@@ -41,6 +46,7 @@ public:
     pExtManager(pRuntimeEngine *r): runtime_(r) { }
     ~pExtManager();
 
+    /// run upon creation of the runtime object to initialize the extensions
     void startUp();
 
 };

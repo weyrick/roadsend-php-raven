@@ -29,6 +29,14 @@
 
 namespace rphp {
 
+/**
+
+    @brief An udderly userful templated Copy-On-Write container. Moo!
+
+    Implements copy-on-write by means of a boost::shared_ptr.
+    If a non-const method is invoked, the object is copied.
+
+*/
 template <class T>
 class CowPtr {
 public:

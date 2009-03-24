@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -21,10 +21,10 @@
 #ifndef RPHP_PFUNCTIONMANAGER
 #define RPHP_PFUNCTIONMANAGER
 
-#include <boost/unordered_map.hpp>
-
 #include "rphp/runtime/pFunction.h"
 #include "rphp/runtime/pTypes.h"
+
+#include <boost/unordered_map.hpp>
 
 namespace rphp {
 
@@ -34,6 +34,11 @@ class pRuntimeEngine;
 class pFunction;
 class pExtBase;
 
+/**
+
+ @brief Manager functions globally available in this runtime
+
+ */
 class pFunctionManager {
 
 private:

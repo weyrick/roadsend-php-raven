@@ -21,9 +21,10 @@
 #ifndef RPHP_PFUNCTION
 #define RPHP_PFUNCTION
 
-#include <vector>
 #include "rphp/runtime/pSupport.h"
 #include "rphp/runtime/pVar.h"
+
+#include <vector>
 
 namespace rphp {
 
@@ -31,14 +32,25 @@ class pClass;
 class pExtBase;
 class pRuntimeEngine;
 
+/**
+
+ @brief Represents a named function parameter
+
+ */
 struct pFunctionParam {
 
+    /// name
     pIdentString name_;
+    /// default value
     pVar defaultValue_;
+    /// optional?
     bool isOptional_;
+    /// pass by reference
     bool isByRef_;
-    bool isArray_;      // array type hint
-    const pClass* classHint_; // class type hint
+    /// array type hint
+    bool isArray_;
+    /// class type hint
+    const pClass* classHint_;
 
 public:
 
@@ -78,11 +90,17 @@ public:
 
 };
 
+/**
+
+  @brief Represents a function or method, including decl info and function pointer
+
+ */
 class pFunction {
 
 public:
     typedef std::vector<pFunctionParam*> paramListType;
     
+    /// function types
     typedef enum { 
         pBuiltinFunType, 
         pUserFunType, 
@@ -92,22 +110,28 @@ public:
 
 private:
 
-    // or parent extension (only builtins)
+    /// parent extension (only builtins)
     const pExtBase* parentExtension_;
 
     // docComment?
 
-    // signature
+    /// function name, as declared (not canonical)
     pIdentString name_;
+    /// type i.e. builtin, user, etc
     pFunType funType_;
+    /// number of parameters that aren't optional
     pUInt requiredArity_;
+    /// total number of accepted parameters
     pUInt maxArity_;
     
     // TODO compact flags
+    /// variable arity?
     bool isVarArity_;
     
+    /// named parameters, pFunctionParam objects
     paramListType paramList_;
 
+    /// union representing the actual function or method pointer
     typedef union pFunPointerT {    
         pFunPointer0 funPointer0;
         pFunPointer1 funPointer1;
@@ -140,11 +164,12 @@ private:
         pFunPointerT(pMethodPointerN p): methodPointerN(p) { }
     };
     
+    /// the function pointer
     pFunPointerT funPointer_;
 
 public:
 
-    /// for builtin functions of arity 1-5
+    /// constructor for builtin functions of arity 1-5
     template <typename funPointerType>
     pFunction(const pExtBase* e, const pIdentString& f, funPointerType fun, pUInt arity) :
         parentExtension_(e),
@@ -160,7 +185,7 @@ public:
             paramList_.push_back(new pFunctionParam());
     }
 
-    /// for user functions of arity 1-5
+    /// constructor for user functions of arity 1-5
     template <typename funPointerType>
     pFunction(const pIdentString& f, funPointerType fun, pUInt arity):
         parentExtension_(NULL),
@@ -176,7 +201,7 @@ public:
             paramList_.push_back(new pFunctionParam());
     }
 
-    /// used in analysis phase as data structure only, no function pointer and won't be called
+    /// constructor used in analysis phase as data structure only, no function pointer and won't be called
     pFunction(const pIdentString& f, pFunType t):
         parentExtension_(NULL),
         name_(f),
@@ -200,7 +225,9 @@ public:
     void setMaxArity(pUInt a) { maxArity_ = a; }
     void setFunType(pFunType t) { funType_ = t; }
 
+    /// function name as declared (case sensitive)
     const pIdentString& name(void) const { return name_; }
+    /// canonical function name (lower cased)
     const pIdentString canonicalName(void) const { return toLowerCopy(name_); }
     const pExtBase* parentExtension(void) const { return parentExtension_; }
     pFunType funType(void) const { return funType_; }
@@ -208,7 +235,7 @@ public:
     pUInt maxArity(void) const { return maxArity_; }
     bool isVarArity(void) const { return isVarArity_; }
 
-    // takes ownership
+    /// set parameter list. takes ownership of pFunctionParam objs
     void setParamList(const paramListType& p) { 
         maxArity_ = requiredArity_ = p.size();
         paramList_ = p; 
@@ -216,7 +243,7 @@ public:
 
     paramListType::size_type numParams() const { return paramList_.size(); }
 
-    // param access
+    /// individual param access
     pFunctionParam* param(pUInt i) {
         if (i < paramList_.size()) {
             return paramList_[i];
@@ -225,6 +252,7 @@ public:
             return NULL;
         }
     }
+    /// individual param access (const)
     const pFunctionParam* param(pUInt i) const {
         if (i < paramList_.size()) {
             return paramList_[i];
@@ -234,8 +262,8 @@ public:
         }
     }
 
-    // invocation
     // FIXME: this is too simplistic, it has to setup default values
+    /// function invocation
     pVar invoke(pRuntimeEngine* runtime) { 
         pVar ret;
         funPointer_.funPointer0(&ret, runtime);
