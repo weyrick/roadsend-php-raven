@@ -64,6 +64,7 @@ public:
     llvm::FunctionType* pUserFunction4();
     llvm::FunctionType* pUserFunction5();
     
+    /// create a string constant in the IR. note the int32_t comes from libicu
     llvm::Constant* stringConstant(const std::string& s, int32_t& finalLen);
     llvm::Constant* stringConstant(const std::wstring& s, int32_t& finalLen);
 

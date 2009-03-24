@@ -38,3 +38,9 @@ target_link_libraries( rphpi
                        rphp-llvm-jit
                        ${LLVM_LIBS_JIT}
                       )
+
+# on x86_64, we link in core libs. see compiler/IR/CMakeLists.txt
+IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
+    target_link_libraries( rphp ${LLVM_LIBS_CORE} ) 
+    target_link_libraries( rphpi ${LLVM_LIBS_CORE} ) 
+ENDIF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )

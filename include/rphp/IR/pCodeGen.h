@@ -64,6 +64,8 @@ private:
 
     symbolTableType symTable_;
 
+    unsigned int wordSize_;
+
     llvm::Value* newVarOnStack(const char*);
 
 public:

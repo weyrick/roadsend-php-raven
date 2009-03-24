@@ -45,7 +45,8 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     thisFunction_(NULL),
     valueStack_(),
     destructList_(),
-    symTable_()
+    symTable_(),
+    wordSize_((llvmModule_->getPointerSize() == Module::Pointer64) ? 64 : 32)
 {
 
     thisFunction_ = llvmModule_->getFunction(functionSymbol_);
@@ -130,7 +131,7 @@ void pCodeGen::visit_literalString(AST::literalString* n) {
     assert(f != NULL);
 
     if (isUnicode) {
-        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(APInt(32, finalLen)));
+        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(APInt(wordSize_, finalLen)));
     }
     else {
         currentBlock_.CreateCall2(f, pVarTmp, strPtr);
@@ -145,7 +146,12 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
 
     // TODO: other bases besides 10
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
-    ConstantInt* const_int = ConstantInt::get(APInt(32,  numLiteral.data(), numLiteral.length(), 10));
+    ConstantInt* const_int = ConstantInt::get(
+                                // TODO: better way to get int size?
+                                APInt(wordSize_,  
+                                      numLiteral.data(), 
+                                      numLiteral.length(), 
+                                      10));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pIntTmp");
@@ -178,7 +184,7 @@ void pCodeGen::visit_literalFloat(AST::literalFloat* n) {
 
 void pCodeGen::visit_literalBool(AST::literalBool* n) {
 
-    ConstantInt* cbool = ConstantInt::get(APInt(32,  (n->getBoolVal()) ? "1" : "0", 1, 10));
+    ConstantInt* cbool = ConstantInt::get(APInt(wordSize_,  (n->getBoolVal()) ? "1" : "0", 1, 10));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pBoolTmp");
