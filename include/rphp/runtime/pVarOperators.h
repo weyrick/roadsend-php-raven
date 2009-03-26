@@ -62,8 +62,8 @@ public:
         *buf_ << indent_ << "string(" << pInt(v.length()) << ") \"" << v << "\"\n";
     }
 
-    void operator()(const pUString &v) const {
-        *buf_ << indent_ << "unicode(" << pInt(v.length()) << ") \"" << v << "\"\n";
+    void operator()(const pUStringP &v) const {
+        *buf_ << indent_ << "unicode(" << pInt(v->length()) << ") \"" << v << "\"\n";
     }
 
     void operator()(const pHashP &v) const {

@@ -36,7 +36,9 @@ pBString toLowerCopy(const pBString& v) {
 
 // unicode
 pUString toLowerCopy(const pUString& v) {
-    return v.copyAsICUString().toLower();
+    //return v.copyAsICUString().toLower();
+    pUString str(v);
+    return str.toLower();
 }
 
 }

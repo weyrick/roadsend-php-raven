@@ -25,6 +25,10 @@
 // in shared_ptr. this forces generic pthreads version instead to avoid it for now.
 #define BOOST_SP_USE_PTHREADS
 
+#include "rphp/runtime/CowPtr.h"
+#include "rphp/runtime/pUString.h"
+#include "rphp/runtime/pRuntimeError.h"
+
 #include <boost/cstdint.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/variant.hpp>
@@ -33,12 +37,7 @@
 #include <boost/function.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include <unicode/unistr.h>
 #include <vector>
-
-#include "rphp/runtime/pUString.h"
-#include "rphp/runtime/CowPtr.h"
-#include "rphp/runtime/pRuntimeError.h"
 
 namespace rphp {
 
@@ -60,8 +59,7 @@ typedef double pFloat;
 /// these are simple byte-wide character arrays
 typedef std::string pBString;
 
-/// auto shared pointer to a unicode string, using the ICU library
-typedef boost::shared_ptr<pUString> pUStringP;
+// see pUString.h for unicode string
 
 class pHash;
 /// copy-on-write auto shared hash table type
@@ -86,7 +84,7 @@ typedef boost::variant< pTriState,
                         pInt,
                         pFloat,
                         pBString,
-                        pUString,
+                        pUStringP,
                         pHashP,
                         pObjectP,
                         pResourceP,

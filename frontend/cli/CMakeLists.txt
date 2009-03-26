@@ -41,6 +41,8 @@ target_link_libraries( rphpi
 
 # on x86_64, we link in core libs. see compiler/IR/CMakeLists.txt
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
+    set_target_properties( rphp PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS} )
     target_link_libraries( rphp ${LLVM_LIBS_CORE} ) 
+    set_target_properties( rphpi PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS} )
     target_link_libraries( rphpi ${LLVM_LIBS_CORE} ) 
 ENDIF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )

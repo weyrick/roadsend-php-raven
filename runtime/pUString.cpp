@@ -18,8 +18,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include "rphp/runtime/pUString.h"
+/*
 
+ARCHIVE: not current used, but kept around for now
+
+#include "rphp/runtime/pUString.h"
 #include <iostream>
 
 namespace rphp {
@@ -93,6 +96,6 @@ bool pUString::operator!= (const pUString& str) const {
     return this->readonlyICUString() != str.readonlyICUString();
 }
 
-
-} /* namespace rphp */
+}
+*/
 

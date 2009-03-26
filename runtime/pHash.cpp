@@ -44,7 +44,7 @@ void pHash::insert(const pBString& key, const pVar& data) {
     hashData_.insert(h_container(key, data));
 }
 
-void pHash::insert(const pUString& key, const pVar& data) {
+void pHash::insert(const pUStringP& key, const pVar& data) {
     // TODO check numeric string, set maxIntKey accordingly
     hashData_.insert(h_container(key, data));
 }
@@ -66,7 +66,7 @@ pHash::size_type pHash::remove(const pBString& key) {
     return hashData_.erase(key);
 }
 
-pHash::size_type pHash::remove(const pUString& key) {
+pHash::size_type pHash::remove(const pUStringP& key) {
     return hashData_.erase(key);
 }
 
@@ -85,7 +85,7 @@ bool pHash::keyExists(const pBString& key) const {
     return (k != hashData_.end());
 }
 
-bool pHash::keyExists(const pUString& key) const {
+bool pHash::keyExists(const pUStringP& key) const {
     stableHash::iterator k = hashData_.find(key);
     return (k != hashData_.end());
 }
@@ -107,7 +107,7 @@ pVar pHash::operator[] (const pBString& key) const {
         return (*k).pData;
 }
 
-pVar pHash::operator[] (const pUString& key) const {
+pVar pHash::operator[] (const pUStringP& key) const {
     stableHash::iterator k = hashData_.find(key);
     if (k == hashData_.end())
         return pNull;

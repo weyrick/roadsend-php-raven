@@ -38,39 +38,39 @@ protected:
 public:
     pVar_convertToBoolVisitor(pVarDataType &v) : var_(v) { }
 
-    void operator()(pTriState &v)  {
+    void operator()(const pTriState &v)  {
         (pNull(v)) ? var_ = pFalse : var_ = v;
     }
 
-    void operator()(pInt &v) {
+    void operator()(const pInt &v) {
         (v) ? var_ = pTrue : var_ = pFalse;
     }
 
-    void operator()(pFloat &v) {
+    void operator()(const pFloat &v) {
         (v) ? var_ = pTrue : var_ = pFalse;
     }
 
-    void operator()(pBString &v) {
+    void operator()(const pBString &v) {
         (v.empty()) ? var_ = pFalse : var_ = pTrue;
     }
 
-    void operator()(pUString &v) {
-        (v.empty()) ? var_ = pFalse : var_ = pTrue;
+    void operator()(const pUStringP &v) {
+        (v->isEmpty()) ? var_ = pFalse : var_ = pTrue;
     }
 
-    void operator()(pHashP &v) {
+    void operator()(const pHashP &v) {
         (v->size()) ? var_ = pTrue : var_ = pFalse;
     }
 
-    void operator()(pObjectP &v) {
+    void operator()(const pObjectP &v) {
         (v->numProperties()) ? var_ = pTrue : var_ = pFalse;
     }
 
-    void operator()(pResourceP &v) {
+    void operator()(const pResourceP &v) {
         var_ = pTrue;
     }
 
-    void operator()(pVarP &v) {
+    void operator()(const pVarP &v) {
         v->convertToBool();
     }
 
@@ -85,34 +85,34 @@ protected:
 public:
     pVar_convertToIntVisitor(pVarDataType &v) : var_(v) { }
 
-    void operator()(pTriState &v)  {
+    void operator()(const pTriState &v)  {
             (v) ? var_ = 1l : var_ = 0l;
     }
 
-    void operator()(pInt &v) { /* nothing */ }
+    void operator()(const pInt &v) { /* nothing */ }
     
-    void operator()(pFloat &v) {
+    void operator()(const pFloat &v) {
         var_ = (pInt)v;
     }
 
-    void operator()(pBString &v);
+    void operator()(const pBString &v);
 
-    void operator()(pUString &v);
+    void operator()(const pUStringP &v);
 
-    void operator()(pHashP &v) {
+    void operator()(const pHashP &v) {
         var_ = (pInt)v->size();
     }
 
-    void operator()(pObjectP &v) {
+    void operator()(const pObjectP &v) {
         var_ = (pInt)v->numProperties();
     }
 
-    void operator()(pResourceP &v) {
+    void operator()(const pResourceP& v) {
         // TODO: return static resource count
         var_ = 0l;
     }
 
-    void operator()(pVarP &v) {
+    void operator()(const pVarP &v) {
         v->convertToInt();
     }
 
@@ -125,7 +125,7 @@ protected:
 public:
     pVar_convertToBStringVisitor(pVarDataType &v) : var_(v) { }
 
-    void operator()(pTriState &v) {
+    void operator()(const pTriState &v) {
         if (pNull(v)) {
             var_ = pBString("");
         }
@@ -134,7 +134,7 @@ public:
         }
     }
 
-    void operator()(pInt &v) {
+    void operator()(const pInt &v) {
         using boost::lexical_cast;
         using boost::bad_lexical_cast;
         try {
@@ -145,7 +145,7 @@ public:
         }
     }
 
-    void operator()(pFloat &v) {
+    void operator()(const pFloat &v) {
         using boost::lexical_cast;
         using boost::bad_lexical_cast;
         try {
@@ -156,17 +156,17 @@ public:
         }
     }
 
-    void operator()(pBString &v) { /* nothing */ }
+    void operator()(const pBString &v) { /* nothing */ }
 
-    void operator()(pUString &v) {
+    void operator()(const pUStringP &v) {
         // TODO this converts to ASCII. is that what we want?
-        UnicodeString ustr = v.readonlyICUString();
+        //UnicodeString ustr = v.readonlyICUString();
         UErrorCode err(U_ZERO_ERROR);
-        int32_t bufSize = ustr.extract((char*)NULL, 0, NULL, err);
+        int32_t bufSize = v->extract((char*)NULL, 0, NULL, err);
         if (bufSize) {
             err = U_ZERO_ERROR;
             char *buf = (char*)malloc(++bufSize);
-            ustr.extract(buf, bufSize, NULL, err);
+            v->extract(buf, bufSize, NULL, err);
             if (U_SUCCESS(err)) {
                 var_ = pBString(buf);
             }
@@ -180,20 +180,20 @@ public:
         var_ = pBString();
     }
 
-    void operator()(pHashP &v) {
+    void operator()(const pHashP &v) {
         var_ = pBString("array");
     }
 
-    void operator()(pObjectP &v) {
+    void operator()(const pObjectP &v) {
         // TODO: toString
         var_ = pBString("object");
     }
 
-    void operator()(pResourceP &v) {
+    void operator()(const pResourceP &v) {
         var_ = pBString("resource");
     }
 
-    void operator()(pVarP &v) const {
+    void operator()(const pVarP &v) const {
         v->convertToBString();
     }
 

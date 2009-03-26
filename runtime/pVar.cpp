@@ -23,6 +23,8 @@
 
 #include "rphp/runtime/pTypeOperators.h"
 
+#include <unicode/ustream.h>
+
 namespace rphp {
 
 pVarType pVar::getType() const {

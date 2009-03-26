@@ -125,11 +125,54 @@ void pvarTestCase::test_pFloat() {
 // ** UNICODE STRING **
 void pvarTestCase::test_pUString() {
 
-    pVar v(pUString("12345"));
+    const pVar v(pUStringP("12345"));
 
-    CPPUNIT_ASSERT( v.getUString().length() == 5 );
-    CPPUNIT_ASSERT( v.getUString().readonlyICUString() == UnicodeString("12345") );
+    CPPUNIT_ASSERT( v.getUString()->length() == 5 );
+    CPPUNIT_ASSERT( *v.getUString() == UnicodeString("12345") );
 
+    // test COW. there are two levels here: one in CowPtr, one in UnicodeString
+    // but UnicodeString has it's own small buffer on the stack and only does
+    // COW for larger buffers (> 7?), so we do that here:
+    pUStringP base("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam auctor condimentum est. Nunc id leo. Donec vel tortor. Suspendisse odio");
+    pUStringP copy(base);
+    const pUStringP constCopy(base);
+    CPPUNIT_ASSERT( base == constCopy );
+    CPPUNIT_ASSERT( base == copy );
+    CPPUNIT_ASSERT( base.use_count() == 3 );
+    CPPUNIT_ASSERT( copy.use_count() == 3 );
+    CPPUNIT_ASSERT( constCopy.use_count() == 3 );
+    
+    // calling a const method will not detach
+    CPPUNIT_ASSERT( constCopy->length() > 5 );
+    
+    CPPUNIT_ASSERT( base == constCopy );
+    CPPUNIT_ASSERT( base == copy );
+    CPPUNIT_ASSERT( base.use_count() == 3 );
+    CPPUNIT_ASSERT( copy.use_count() == 3 );
+    CPPUNIT_ASSERT( constCopy.use_count() == 3 );
+    
+    // but since copy is non const, dereferencing it will detach
+    CPPUNIT_ASSERT( copy->length() > 5 );
+    
+    CPPUNIT_ASSERT( !(base == copy) );
+    CPPUNIT_ASSERT( base == constCopy );
+    CPPUNIT_ASSERT( base.use_count() == 2 );
+    CPPUNIT_ASSERT( constCopy.use_count() == 2 );
+    CPPUNIT_ASSERT( copy.use_count() == 1 );
+    
+    // so, they now point to different UnicodeString objects on the heap
+    // however, these objects should share a pointer to the actual string
+    // (this is UnicodeString's COW mechanism)
+    CPPUNIT_ASSERT( base->getBuffer() == copy->getBuffer() );
+    
+    // until we change one of them...
+    copy = "copy on write complete";
+    CPPUNIT_ASSERT( base->getBuffer() != copy->getBuffer() );
+    
+    /*
+    
+    ARCHIVE: old pUString tests
+    
     pUString u = v.getUString();
     pVar x(u); // x should have a shared ptr to v's buffer now, until write
     CPPUNIT_ASSERT( x.getUString().getBuffer() == v.getUString().getBuffer() );
@@ -163,22 +206,10 @@ void pvarTestCase::test_pUString() {
     CPPUNIT_ASSERT( lhs == rhs );
     rhs = pUString("foo1234");
     CPPUNIT_ASSERT( lhs != rhs );
-
+    */
 }
 
 // ** HASH **
-pVar hashObserver(pVar H) {
-    // use const pHash, which will not copy data
-    CPPUNIT_ASSERT( H.getConstHash()->size() == 1 );
-    return H;
-}
-
-pVar hashMutator(pVar H) {
-    // use non const pHash which copies data
-    CPPUNIT_ASSERT( H.getHash()->size() == 1 );
-    return H;
-}
-
 void pvarTestCase::test_pHash() {
 
     // NOTE: this mostly tests pHash functionality as it relates to pVar
@@ -191,16 +222,35 @@ void pvarTestCase::test_pHash() {
     CPPUNIT_ASSERT( h1.getHash()->size() == 1 );
 
     // test copy on write
-    pVar h2(h1);
-    CPPUNIT_ASSERT( h2.getConstHash()->size() == 1 );
-    // this calls CowPtr::operator==, which calls boost::shared_ptr::operator== to
-    // see if they point to the same object
-    CPPUNIT_ASSERT( h1.getHash() == h2.getHash() );
-
-    h2 = hashObserver(h1);
-    CPPUNIT_ASSERT( h1.getHash() == h2.getHash() );
-    h2 = hashMutator(h1);
-    CPPUNIT_ASSERT( !(h1.getHash() == h2.getHash()) );
+    pHashP base(new pHash());
+    base->insert("foo", 5);
+    pHashP copy(base);
+    const pHashP constCopy(base);
+    
+    CPPUNIT_ASSERT( base == constCopy );
+    CPPUNIT_ASSERT( base == copy );
+    CPPUNIT_ASSERT( base.use_count() == 3 );
+    CPPUNIT_ASSERT( copy.use_count() == 3 );
+    CPPUNIT_ASSERT( constCopy.use_count() == 3 );
+    
+    // calling a const method will not detach
+    CPPUNIT_ASSERT( constCopy->size() == 1 );
+    
+    CPPUNIT_ASSERT( base == constCopy );
+    CPPUNIT_ASSERT( base == copy );
+    CPPUNIT_ASSERT( base.use_count() == 3 );
+    CPPUNIT_ASSERT( copy.use_count() == 3 );
+    CPPUNIT_ASSERT( constCopy.use_count() == 3 );
+    
+    // but since copy is non const, dereferencing it will detach
+    CPPUNIT_ASSERT( copy->size() == 1 );
+    
+    CPPUNIT_ASSERT( !(base == copy) );
+    CPPUNIT_ASSERT( base == constCopy );
+    CPPUNIT_ASSERT( base.use_count() == 2 );
+    CPPUNIT_ASSERT( constCopy.use_count() == 2 );
+    CPPUNIT_ASSERT( copy.use_count() == 1 );
+    
 
 }
 
@@ -286,8 +336,8 @@ public:
         CPPUNIT_ASSERT( v == "test" );
     }
 
-    void operator()(const pUString &v) const {
-        CPPUNIT_ASSERT( v.readonlyICUString() == UnicodeString("utest") );
+    void operator()(const pUStringP &v) const {
+        CPPUNIT_ASSERT( *v/*.readonlyICUString()*/ == UnicodeString("utest") );
     }
 
     void operator()(const pHashP &v) const {
@@ -316,7 +366,7 @@ void pvarTestCase::test_visitor() {
     p.applyVisitor<tvisitor>();
     p = "test";
     p.applyVisitor<tvisitor>();
-    p = pUString("utest");
+    p = pUStringP("utest");
     p.applyVisitor<tvisitor>();
     p.newEmptyHash();
     p.getHash()->insert("foo", 1);
@@ -329,7 +379,7 @@ void pvarTestCase::test_visitor() {
 
 void pvarTestCase::test_conversion() {
 
-    pVar ustr(pUString("foo"));
+    pVar ustr(pUStringP("foo"));
     pBString bstr(ustr.copyAsBString());
     CPPUNIT_ASSERT( bstr == "foo" );
     

@@ -29,6 +29,7 @@
 #include <string>
 #include <sstream>
 
+#include <unicode/ustring.h>
 #include <unicode/unistr.h>
 #include <unicode/schriter.h>
 #include <stdio.h>

@@ -119,10 +119,12 @@ public:
     void print(const pUString& str) {
         if (bType_ == bufTypeBinary) {
             // convert to unicode buffer
-            uBuffer_ = new UnicodeString(str.readonlyICUString());
+            //uBuffer_ = new UnicodeString(str.readonlyICUString());
+            uBuffer_ = new UnicodeString(str);
             delete bBuffer_;
         }
-        uBuffer_->append(str.readonlyICUString());
+        //uBuffer_->append(str.readonlyICUString());
+        uBuffer_->append(str);
     }
 
 };

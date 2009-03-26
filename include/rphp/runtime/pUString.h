@@ -21,6 +21,47 @@
 #ifndef RPHP_PUSTRING_H_
 #define RPHP_PUSTRING_H_
 
+#include "rphp/runtime/CowPtr.h"
+
+#include <unicode/unistr.h>
+
+namespace rphp {
+
+/// basic unicode string is libicu's UnicodeString class
+typedef UnicodeString pUString;
+
+/**
+ @brief a shared auto ptr, copy-on-write wrapper for libicu UnicodeString
+ */
+class pUStringP: public CowPtr<UnicodeString> {
+    
+public:
+    /// char* constructor. MUST be null terminated!
+    explicit pUStringP(const char* str):
+        CowPtr<pUString>(new UnicodeString(str, -1, US_INV))
+    {
+    }
+
+    /// for passing in an already allocated/constructed UnicodeString
+    pUStringP(pUString* ptr):
+        CowPtr<pUString>(ptr)
+    {
+    }
+
+    /// char* assignment. MUST be null terminated!
+    pUStringP& operator=(const char* str) {
+        this->operator*() = UnicodeString(str, -1, US_INV);
+        return *this;
+    }
+    
+};
+
+} /* namespace rphp */
+
+/*
+
+ARCHIVE: this is an alternative implementation that I want to keep around for now.
+
 #include <string>
 #include <cstring>
 #include <exception>
@@ -138,7 +179,7 @@ public:
 
 };
 
-} /* namespace rphp */
-
+} 
+*/
 
 #endif /* RPHP_PUSTRING_H_ */

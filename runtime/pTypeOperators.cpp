@@ -24,7 +24,7 @@
 
 namespace rphp {
 
-void pVar_convertToIntVisitor::operator()(pBString &v) {
+void pVar_convertToIntVisitor::operator()(const pBString &v) {
     // TODO: handle floats
     try {
         var_ = boost::lexical_cast<pInt>(v);
@@ -33,7 +33,7 @@ void pVar_convertToIntVisitor::operator()(pBString &v) {
     }
 }
 
-void pVar_convertToIntVisitor:: operator()(pUString &v) {
+void pVar_convertToIntVisitor:: operator()(const pUStringP &v) {
     // TODO: do a real conversion here
     // should handle both integers and floats
     var_ = 0l;

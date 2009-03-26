@@ -82,7 +82,7 @@ public:
     void print(const pUString& str) {
         if (bufferStack_.empty())
             return;
-        bufferStack_.top()->print(str.readonlyICUString());
+        bufferStack_.top()->print(str);//.readonlyICUString());
     }
 
 

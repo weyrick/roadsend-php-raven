@@ -331,13 +331,13 @@ public:
     }
 
     /// pUString accessor. throws exception if pVar is wrong type
-    pUString& getUString() {
-        return boost::get<pUString&>(pVarData_);
+    pUStringP& getUString() {
+        return boost::get<pUStringP&>(pVarData_);
     }
 
-    /// const pBString accessor. throws exception if pVar is wrong type
-    const pUString& getUString() const {
-        return boost::get<const pUString&>(pVarData_);
+    /// const pUString accessor. throws exception if pVar is wrong type
+    const pUStringP& getUString() const {
+        return boost::get<const pUStringP&>(pVarData_);
     }
 
     /// pHash accessor. throws exception if pVar is wrong type
@@ -351,9 +351,9 @@ public:
     }
 
     /// read only hash access
-    const pHashP& getConstHash() const {
-        return boost::get<const pHashP&>(pVarData_);
-    }
+    //const pHashP& getConstHash() const {
+    //    return boost::get<const pHashP&>(pVarData_);
+    //}
 
     /// pObject accessor. throws exception if pVar is wrong type
     pObjectP& getObject() {
@@ -376,11 +376,18 @@ public:
     }
 
     /// boxed pVar accessor. throws exception if pVar is wrong type
+    /*
+    // note: you don't want this, you want the const version below.
     pVarP& getPtr() {
         return boost::get<pVarP&>(pVarData_);
     }
+    */
 
-    /// boxed pVar accessor (const). throws exception if pVar is wrong type
+    /**
+      @brief boxed pVar accessor (const). throws exception if pVar is wrong type
+      note that this returns a const pVarP: this means the pointer itself can't
+      change, but the pVar data it points to can.
+     */
     const pVarP& getPtr() const {
         return boost::get<const pVarP&>(pVarData_);
     }

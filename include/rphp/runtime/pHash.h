@@ -36,13 +36,13 @@ using namespace boost::multi_index;
 
 // custom key type
 namespace rphp {
-    typedef boost::variant< pInt, pBString, pUString > hKeyVar;
+    typedef boost::variant< pInt, pBString, pUStringP > hKeyVar;
     typedef enum { hKeyInt=0, hKeyBStr=1, hKeyUStr=2  } hKeyType;
 }
 
 // customer key hasher
 namespace boost {
-    std::size_t hash_value(rphp::hKeyVar const& k);
+    std::size_t hash_value(const rphp::hKeyVar& k);
 }
 
 namespace rphp {
@@ -60,8 +60,8 @@ public:
         return boost::hash_value(k);
     }
     
-    std::size_t operator()(const pUString &k) const {
-        return static_cast<std::size_t>(k.hashCode());
+    std::size_t operator()(const pUStringP &k) const {
+        return static_cast<std::size_t>(k->hashCode());
     }
 
 };
@@ -76,7 +76,7 @@ struct h_container {
     
     h_container(const pBString& k, pVar d) : pData(d), key(k) { }
 
-    h_container(const pUString& k, pVar d) : pData(d), key(k) { }
+    h_container(const pUStringP& k, pVar d) : pData(d), key(k) { }
 
 
 };
@@ -133,7 +133,7 @@ public:
     // modifiers
     void insert(pInt key, const pVar& data);
     void insert(const pBString& key, const pVar& data);
-    void insert(const pUString& key, const pVar& data);
+    void insert(const pUStringP& key, const pVar& data);
     void insert(const pVar& key, const pVar& data);
     void insert(const char* key, const pVar& data) { 
         // TODO need to check runtime for default string type
@@ -143,7 +143,7 @@ public:
 
     size_type remove(pInt key);
     size_type remove(const pBString& key);
-    size_type remove(const pUString& key);
+    size_type remove(const pUStringP& key);
     size_type remove(const char* key);
 
     // queries
@@ -151,12 +151,12 @@ public:
     
     bool keyExists(pInt key) const;
     bool keyExists(const pBString& key) const;
-    bool keyExists(const pUString& key) const;
+    bool keyExists(const pUStringP& key) const;
 
     // lookup
     pVar operator[] (pInt key) const;
     pVar operator[] (const pBString &key) const;
-    pVar operator[] (const pUString &key) const;
+    pVar operator[] (const pUStringP &key) const;
     pVar operator[] (const char* key) const;
 
     // dump of contents

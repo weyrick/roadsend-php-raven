@@ -132,7 +132,7 @@ private:
     paramListType paramList_;
 
     /// union representing the actual function or method pointer
-    typedef union pFunPointerT {    
+    union pFunPointerT {    
         pFunPointer0 funPointer0;
         pFunPointer1 funPointer1;
         pFunPointer2 funPointer2;

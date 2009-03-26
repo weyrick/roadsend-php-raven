@@ -83,7 +83,7 @@ public:
         return *this;
     }
 
-    bool operator==(const CowPtr& rhs) {
+    bool operator==(const CowPtr& rhs) const {
         return (sPtr_ == rhs.sPtr_);
     }
 
@@ -104,6 +104,11 @@ public:
         detach();
         return sPtr_.operator->();
     }
+    
+    long use_count() const {
+        return sPtr_.use_count();
+    }
+    
 };
 
 }
