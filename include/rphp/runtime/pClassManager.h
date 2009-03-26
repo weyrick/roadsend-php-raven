@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -27,11 +27,8 @@
 
 namespace rphp {
 
-
 class pRuntimeEngine;
 class pClass;
-
-typedef boost::unordered_map<pIdentString, pClass*> classRegistryType;
 
 /**
  
@@ -39,6 +36,8 @@ typedef boost::unordered_map<pIdentString, pClass*> classRegistryType;
 
  */
 class pClassManager {
+public:
+    typedef boost::unordered_map<pIdentString, pClass*> classRegistryType;
 
 private:
     pRuntimeEngine* runtime_;

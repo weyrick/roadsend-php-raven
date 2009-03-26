@@ -21,6 +21,9 @@
 #ifndef RPHP_PHASH_H_
 #define RPHP_PHASH_H_
 
+#include "rphp/runtime/pVar.h"
+#include "rphp/runtime/pOutputBuffer.h"
+
 #include <boost/variant.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/hashed_index.hpp>
@@ -28,26 +31,23 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #include <iostream>
 
-#include "rphp/runtime/pVar.h"
-#include "rphp/runtime/pOutputBuffer.h"
-
 using boost::multi_index_container;
 using namespace boost::multi_index;
 
-// custom key type
+/// custom mutli index key type
 namespace rphp {
     typedef boost::variant< pInt, pBString, pUStringP > hKeyVar;
     typedef enum { hKeyInt=0, hKeyBStr=1, hKeyUStr=2  } hKeyType;
 }
 
-// customer key hasher
+/// customer key hasher
 namespace boost {
     std::size_t hash_value(const rphp::hKeyVar& k);
 }
 
 namespace rphp {
 
-// a visitor for hashing phash keys
+/// a visitor for hashing phash keys
 class hKeyHasher : public boost::static_visitor<std::size_t> {
 
 public:
@@ -66,23 +66,22 @@ public:
 
 };
 
-// define the container stored in stableHash
+/// the container stored in stableHash
 struct h_container {
 
     pVar pData;
     hKeyVar key;
 
-    h_container(pInt k, pVar d) : pData(d), key(k) { }
-    
-    h_container(const pBString& k, pVar d) : pData(d), key(k) { }
-
-    h_container(const pUStringP& k, pVar d) : pData(d), key(k) { }
-
+    h_container(pInt k, const pVar& d) : pData(d), key(k) { }
+    h_container(const pBString& k, const pVar& d) : pData(d), key(k) { }
+    h_container(const pUStringP& k, const pVar& d) : pData(d), key(k) { }
 
 };
 
-// the stableHash container
-// a boost.multiindex that stores data with two indexes: hashed and sequenced
+/**
+ the stableHash container
+ a boost.multiindex that stores data with two indexes: hashed and sequenced
+*/
 typedef multi_index_container<
     // the container structure we store for each item in the hash
     h_container,
@@ -93,7 +92,7 @@ typedef multi_index_container<
     >
 > stableHash;
 
-// sequenced index accessor
+/// sequenced index accessor
 typedef nth_index<stableHash,1>::type seq_index;
 
 /**
@@ -101,24 +100,27 @@ typedef nth_index<stableHash,1>::type seq_index;
 */
 class pHash {
 
-    pInt maxIntKey_;
+public:
+
+    typedef stableHash::size_type size_type;
+    typedef stableHash::iterator iterator;
+
+private:
+    /// maximum (unsigned) integer used as a next key so far
+    pUInt maxIntKey_;
+    /// the actual stable hash data
     stableHash hashData_;
 
 public:
 
-    // types
-    typedef stableHash::size_type size_type;
-
-    typedef stableHash::iterator iterator;
-
-    // construct/destroy/copy
+    /// construct an empty hash
     pHash() : maxIntKey_(0) {
 #ifdef RPHP_PVAR_DEBUG
     std::cerr << "pHash(): create" << std::endl;
 #endif
     }
 
-    // default copy construtor, destructor
+    // NOTE: default copy construtor, destructor
 
 #ifdef RPHP_PVAR_DEBUG
     pHash(pHash const& p) : maxIntKey_(p.maxIntKey_), hashData_(p.hashData_) {
@@ -155,8 +157,8 @@ public:
 
     // lookup
     pVar operator[] (pInt key) const;
-    pVar operator[] (const pBString &key) const;
-    pVar operator[] (const pUStringP &key) const;
+    pVar operator[] (const pBString& key) const;
+    pVar operator[] (const pUStringP& key) const;
     pVar operator[] (const char* key) const;
 
     // dump of contents

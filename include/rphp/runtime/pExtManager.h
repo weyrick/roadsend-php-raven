@@ -35,8 +35,8 @@ class pExtBase;
  
  */
 class pExtManager {
-
-typedef std::deque<pExtBase*> extRegistryType;
+public:
+    typedef std::deque<pExtBase*> extRegistryType;
 
 private:
     pRuntimeEngine* runtime_;

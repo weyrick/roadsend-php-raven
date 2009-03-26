@@ -50,9 +50,16 @@ public:
     pFunctionManager(pRuntimeEngine *r) : runtime_(r), functionRegistry_() { }
     ~pFunctionManager();
 
+    /** 
+        register a new builtin function, i.e. from an extension. these do not get
+        lost on page reset
+    */
     template <typename fPointerType>
     pFunction* registerBuiltin(const pExtBase*, const pIdentString&, fPointerType, pUInt arity);
 
+    /**
+        register a new user function. these are valid only for one page load
+    */
     template <typename fPointerType>
     pFunction* registerUser(const pIdentString&, fPointerType, pUInt arity);
     

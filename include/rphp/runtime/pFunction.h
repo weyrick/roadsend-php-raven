@@ -54,6 +54,10 @@ struct pFunctionParam {
 
 public:
 
+    /**
+      @brief new named function parameter, with no name and default values
+      use the setter methods to refine it
+     */
     pFunctionParam(void):
                 name_(),
                 defaultValue_(pNull),

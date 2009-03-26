@@ -21,9 +21,10 @@
 #ifndef PEXTENSIONBASE_H_
 #define PEXTENSIONBASE_H_
 
+#include "rphp/runtime/pVar.h"
+
 #include <boost/bind.hpp>
 #include <string>
-#include "rphp/runtime/pVar.h"
 
 namespace rphp {
 
@@ -48,7 +49,9 @@ protected:
 public:
     pExtBase(pRuntimeEngine *r, pIdentString eName) : runtime_(r), extName_(eName) { }
 
+    /// trigged once at extension startup
     virtual void extensionStartup() = 0;
+    /// trigged once at extension shutdown 
     virtual void extensionShutdown() = 0;
 
 };
