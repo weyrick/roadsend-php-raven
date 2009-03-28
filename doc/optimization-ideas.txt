@@ -22,13 +22,13 @@ http://en.wikipedia.org/wiki/Category:Compiler_optimizations
 - fast function calls when no stack trace is needed: invoke function pointers 
   from IR instead of through runtime. esp. in loops? only with proper arity?
 
-- direct use of i32 where possible (loops)
+- direct use of i32/64 where possible (loops)
 
 = runtime = 
-
-- change pUString to follow c++ basic_string implementation, where the size and 
-  ref data are on the heap. this would shave 2 words off pVar, which needs to be 
-  small and fast
   
 - fast checking of common runtime settings like unicode mode
 
+- store pointer to hash data in pHash, initialized on use. the idea would be
+  to allow very cheap empty arrays. this would need some benching to determine
+  effectivness
+  

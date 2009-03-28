@@ -2,7 +2,8 @@
 
 
 IF(CPPUNIT_FOUND)
-  MESSAGE(STATUS "cppunit found: configuring for tests")
+
+  MESSAGE(STATUS "cppunit found: configuring runtime tests")
 
   include_directories(${CPPUNIT_INCLUDE_DIR})
 
@@ -14,9 +15,24 @@ IF(CPPUNIT_FOUND)
                 functionTestCase.cpp
                 runtimeTestCase.cpp
                )
-
-
-  add_executable( rphp-sizes rphp-sizes.cpp )
-  target_link_libraries( rphp-runtime-suite ${CPPUNIT_LIBRARY} rphp-runtime ${ICU_LIBRARIES} ${ICU_IO_LIBRARIES})
+   
+  target_link_libraries( rphp-runtime-suite 
+                         ${CPPUNIT_LIBRARY} 
+                         rphp-runtime
+                        )
 
 ENDIF(CPPUNIT_FOUND)
+
+add_executable( rphp-sizes rphp-sizes.cpp )
+
+add_executable( rphp-pVar-speed rphp-pVar-speed.cpp )
+
+target_link_libraries( rphp-runtime-suite 
+                        ${CPPUNIT_LIBRARY} 
+                        rphp-runtime
+                    )
+
+target_link_libraries( rphp-pVar-speed 
+                        ${CPPUNIT_LIBRARY} 
+                        rphp-runtime
+                    )
