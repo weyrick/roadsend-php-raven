@@ -11,6 +11,7 @@ project (rphp)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules )
 set(RPHP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
+set(ASIO_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include/asio)
 set(RPHP_LIB_DIR ${PROJECT_SOURCE_DIR}/lib)
 
 set(CMAKE_CXX_FLAGS_DEBUG "-fexceptions -g -Wall -Winline -W -Wwrite-strings -Wno-unused")
@@ -37,7 +38,7 @@ add_subdirectory(runtime)
 add_subdirectory(c-runtime)
 add_subdirectory(compiler)
 add_subdirectory(frontend/cli)
-
+add_subdirectory(frontend/http)
 
 IF(CPPUNIT_FOUND)
   ENABLE_TESTING()
