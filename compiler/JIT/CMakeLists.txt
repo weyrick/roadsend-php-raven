@@ -9,13 +9,21 @@ include_directories (
                      ${CMAKE_CURRENT_BINARY_DIR}
                     )
 
-# source files that depend on llvm
-set(RJIT_SRC_FILES
-    pJIT.cpp
-    pInterpretTarget.cpp    
-    # moved to rphpi binary
-    #${LLVM_LIBS_JIT_OBJECTS}
-)
+IF(RPHP_JIT_LINK STREQUAL "library")
+ # llvm jit objs are part of this library on this platform
+ set(RJIT_SRC_FILES
+     pJIT.cpp
+     pInterpretTarget.cpp    
+     ${LLVM_LIBS_JIT_OBJECTS}
+    )
+ELSE(RPHP_JIT_LINK STREQUAL "library")
+ # llvm jit objs are part of rphpi binary on this platform
+ set(RJIT_SRC_FILES
+     pJIT.cpp
+     pInterpretTarget.cpp    
+    )
+ENDIF(RPHP_JIT_LINK STREQUAL "library")
+
 
 add_library( rphp-llvm-jit SHARED ${RJIT_SRC_FILES} )
 
@@ -23,14 +31,23 @@ add_library( rphp-llvm-jit SHARED ${RJIT_SRC_FILES} )
 set_source_files_properties( ${RJIT_SRC_FILES}
                              PROPERTIES COMPILE_FLAGS ${LLVM_COMPILE_FLAGS}
                            )
-                           
-target_link_libraries( rphp-llvm-jit
-                       rphp-runtime
-                       rphp-llvm-ir
-                       # moved to rphpi binary
-                       #${LLVM_LIBS_JIT}
-                      )
 
+
+IF(RPHP_JIT_LINK STREQUAL "library")
+ # llvm jit objs are part of this library on this platform
+ target_link_libraries( rphp-llvm-jit
+                        rphp-runtime
+                        rphp-llvm-ir
+                        ${LLVM_LIBS_JIT}
+                       )
+ELSE(RPHP_JIT_LINK STREQUAL "library")
+ # llvm jit objs are part of rphpi binary on this platform
+ target_link_libraries( rphp-llvm-jit
+                        rphp-runtime
+                        rphp-llvm-ir
+                       )
+ENDIF(RPHP_JIT_LINK STREQUAL "library")
+                           
 set_target_properties( rphp-llvm-jit
                        PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
                        # this tells cmake not to link the llvm libs into targets that link to rphp-llvm-jit

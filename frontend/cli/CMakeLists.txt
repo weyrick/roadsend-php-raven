@@ -13,10 +13,20 @@ set(RPHP_SRC_FILES
   rphp.cpp
 )
 
-set(RPHPI_SRC_FILES
-  rphpi.cpp
-  ${LLVM_LIBS_JIT_OBJECTS}
-)
+IF(RPHP_JIT_LINK STREQUAL "library")
+ # llvm jit objs are part of this library on this platform
+ set(RPHPI_SRC_FILES
+    rphpi.cpp
+ )
+ELSE(RPHP_JIT_LINK STREQUAL "library")
+ # llvm jit objs are part of rphpi binary on this platform
+ set(RPHPI_SRC_FILES
+   rphpi.cpp
+   ${LLVM_LIBS_JIT_OBJECTS}
+ )
+ENDIF(RPHP_JIT_LINK STREQUAL "library")
+
+
 
 add_executable( rphp ${RPHP_SRC_FILES} )
 add_executable( rphpi ${RPHPI_SRC_FILES} )
@@ -27,17 +37,25 @@ set_target_properties( rphpi
 
 target_link_libraries( rphp
                        rphp-analysis
-                       rphp-driver
                        rphp-llvm-ir
                       )
 
-target_link_libraries( rphpi
-                       rphp-analysis
-                       rphp-driver
-                       rphp-llvm-ir
-                       rphp-llvm-jit
-                       ${LLVM_LIBS_JIT}
-                      )
+IF(RPHP_JIT_LINK STREQUAL "library")
+ # llvm jit objs are part of this jit library on this platform
+ target_link_libraries( rphpi
+                        rphp-analysis
+                        rphp-llvm-ir
+                        rphp-llvm-jit
+                       )                       
+ELSE(RPHP_JIT_LINK STREQUAL "library")
+ # llvm jit objs are part of rphpi binary on this platform
+ target_link_libraries( rphpi
+                        rphp-analysis
+                        rphp-llvm-ir
+                        rphp-llvm-jit
+                        ${LLVM_LIBS_JIT}
+                       )                       
+ENDIF(RPHP_JIT_LINK STREQUAL "library")
 
 # on x86_64, we link in core libs. see compiler/IR/CMakeLists.txt
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )

@@ -61,7 +61,7 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     for (; a != thisFunction_->arg_end(); ++a) {
         symTable_[a->getName()] = a;
     }
-    
+
     // entry block created in declare
     currentBlock_.SetInsertPoint(&thisFunction_->getEntryBlock());
 
@@ -72,7 +72,7 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
 pCodeGen::~pCodeGen(void) {
 
     finalize();
-    
+
 }
 
 void pCodeGen::finalize(void) {
@@ -148,9 +148,9 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
     // TODO: other bases besides 10
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
     ConstantInt* const_int = ConstantInt::get(
-                                APInt(wordSize_,  
-                                      numLiteral.data(), 
-                                      numLiteral.length(), 
+                                APInt(wordSize_,
+                                      numLiteral.data(),
+                                      numLiteral.length(),
                                       10));
 
     // allocate tmp pVar for return value
@@ -227,7 +227,7 @@ void pCodeGen::visit_literalArray(AST::literalArray* n) {
     Value* key;
     Value* val;
 
-    for (AST::arrayList::const_reverse_iterator i = n->itemList().rbegin();
+    for (AST::arrayList::reverse_iterator i = n->itemList().rbegin();
         i != n->itemList().rend();
         ++i)
     {

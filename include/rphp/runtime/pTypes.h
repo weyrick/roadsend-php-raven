@@ -23,7 +23,7 @@
 
 // llvm JIT doesn't do inline asm, which is used by the atomic locking mechanism
 // in shared_ptr. this forces generic pthreads version instead to avoid it for now.
-//#define BOOST_SP_USE_PTHREADS
+#define BOOST_SP_USE_PTHREADS
 
 #include "rphp/runtime/CowPtr.h"
 #include "rphp/runtime/pUString.h"

@@ -1,5 +1,5 @@
 // consts.h
-// Copyright (c) 2007-2008 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2007-2009 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -15,12 +15,12 @@ namespace boost
 namespace lexer
 {
     enum regex_flags {none = 0, icase = 1, dot_not_newline = 2};
-    // 0 = end state, 1 = id, 2 = lex state, 3 = bol, 4 = eol,
-    // 5 = dead_state_index
-    enum {end_state_index, id_index, state_index, bol_index, eol_index,
-        dead_state_index, dfa_offset};
+    // 0 = end state, 1 = id, 2 = unique_id, 3 = lex state, 4 = bol, 5 = eol,
+    // 6 = dead_state_index
+    enum {end_state_index, id_index, unique_id_index, state_index, bol_index,
+        eol_index, dead_state_index, dfa_offset};
 
-    const std::size_t max_macro_len = 20;
+    const std::size_t max_macro_len = 30;
     const std::size_t num_chars = 256;
     const std::size_t num_wchar_ts =
         (boost::integer_traits<wchar_t>::const_max < 0x110000) ?

@@ -1,5 +1,5 @@
 // tokeniser_helper.hpp
-// Copyright (c) 2007-2008 Ben Hanson (http://www.benhanson.net/)
+// Copyright (c) 2007-2009 Ben Hanson (http://www.benhanson.net/)
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file licence_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -103,7 +103,7 @@ public:
                         std::ostringstream ss_;
 
                         ss_ << "Mismatch in charset negation preceding "
-                            "index " << state_.index () - 1 << '.';
+                            "index " << state_.index () << '.';
                         throw runtime_error (ss_.str ().c_str ());
                     }
 

@@ -25,14 +25,25 @@ MESSAGE( STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR} )
 
 Find_Package(Boost REQUIRED)
 include_directories(${RPHP_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
-IF( Boost_VERSION LESS "103600" )
-  MESSAGE(FATAL_ERROR "Boost version ${Boost_VERSION} too old, please install 1.36 or greater!")
-ENDIF( Boost_VERSION LESS "103600" )
+IF( Boost_VERSION LESS "103800" )
+  MESSAGE(FATAL_ERROR "Boost version ${Boost_VERSION} too old, please install 1.38 or greater!")
+ENDIF( Boost_VERSION LESS "103800" )
 
 Find_Package(ICU REQUIRED)
 Find_Package(LLVM REQUIRED)
 FIND_PACKAGE(CppUnit) # optional
 Find_PACKAGE(Doxygen) # optional
+
+# OS dependant linking items
+
+# determine if we will link llvm jit objects to the jit library or the rphpi binary
+IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	set(RPHP_JIT_LINK "library")
+ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+	set(RPHP_JIT_LINK "binary")
+ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+
+MESSAGE( STATUS "JIT libs linked to: " ${RPHP_JIT_LINK} )
 
 add_subdirectory(runtime)
 add_subdirectory(c-runtime)
@@ -51,3 +62,4 @@ IF(DOXYGEN_FOUND)
   SET(DOXYFILE doc/Doxyfile.rphp)
   ADD_CUSTOM_TARGET(doc ${DOXYGEN_EXECUTABLE} ${DOXYFILE} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 ENDIF(DOXYGEN_FOUND)
+

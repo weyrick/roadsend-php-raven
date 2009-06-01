@@ -7,6 +7,8 @@ include_directories (
                      ${RPHP_INCLUDE_DIR}
                      ${LLVM_INCLUDE_DIR}
                      ${Boost_INCLUDE_DIRS}
+                     # FIXME: this is for rphp_grammar.h. need a better place
+                     ${CMAKE_CURRENT_BINARY_DIR}/../analysis/                     
                     )
 
 # source files that depend on llvm
@@ -16,6 +18,13 @@ set(GENERATOR_SRC_FILES
     pIRHelper.cpp
     pCodeGen.cpp
     pDeclare.cpp
+    # targets
+    pCompileAndLinkTarget.cpp
+    pLinkTarget.cpp
+    pLibTargets.cpp
+    pStandAloneTargets.cpp
+    pCompileTarget.cpp
+    pDumpTarget.cpp    
 )
 
 add_library( rphp-llvm-ir SHARED ${GENERATOR_SRC_FILES} )
@@ -29,8 +38,8 @@ target_link_libraries( rphp-llvm-ir
                        rphp-analysis
                        )
 
-# on x86_64, some of the core libs are not current -fPIC and need to be
-# to create a shared library here. for now, we link them in the rphp
+# on x86_64, some of the core libs are not currently -fPIC and need to be
+# to create a shared library here. for now, we link them in the rphpi
 # executable instead.
 IF( NOT CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
     target_link_libraries( rphp-llvm-ir ${LLVM_LIBS_CORE} ) 

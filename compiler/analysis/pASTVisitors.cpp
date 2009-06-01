@@ -210,7 +210,7 @@ void dumpVisitor::visit_literalArray(literalArray* n)  {
     showindent();
     std::cout << "(contents: " << std::endl;
     indent();
-    for (arrayList::const_reverse_iterator i = n->itemList().rbegin();
+    for (arrayList::reverse_iterator i = n->itemList().rbegin();
         i != n->itemList().rend();
         ++i)
     {
