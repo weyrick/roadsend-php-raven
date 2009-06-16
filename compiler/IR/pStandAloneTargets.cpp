@@ -24,6 +24,7 @@
 #include "rphp/driver/pTargetError.h"
 
 #include <llvm/Module.h>
+#include <llvm/System/Path.h>
 #include <llvm/Support/SystemUtils.h>
 #include <llvm/System/Program.h>
 
@@ -33,18 +34,39 @@
 
 namespace rphp {
 
+// from llvm/lib/System/Path.cpp. why isnt it exported?
+static void getPathList(const char*path, std::vector<llvm::sys::Path>& Paths) {
+  const char* at = path;
+  const char* delim = strchr(at, llvm::sys::PathSeparator);
+  llvm::sys::Path tmpPath;
+  while (delim != 0) {
+    std::string tmp(at, size_t(delim-at));
+    if (tmpPath.set(tmp))
+      if (tmpPath.canRead())
+        Paths.push_back(tmpPath);
+    at = delim + 1;
+    delim = strchr(at, llvm::sys::PathSeparator);
+  }
+
+  if (*at != 0)
+    if (tmpPath.set(std::string(at)))
+      if (tmpPath.canRead())
+        Paths.push_back(tmpPath);
+}
+
 void pStandAloneTarget::execute(void) {
 
     log(logInfo, "linking stand alone executable ["+outputFile_+"]");
 
     // the following is based on code from llvm/tools/llvm-ld.cpp
 
-    llvm::sys::Path runtimePath;
+    std::vector<llvm::sys::Path> rtPaths;
     char* rtPathE = getenv("RPHP_RUNTIME_PATH");
     if (rtPathE) {
-        runtimePath.set(rtPathE);
-        if (runtimePath.isDirectory())
-            libSearchPaths_.push_back(runtimePath.toString());
+        getPathList(rtPathE, rtPaths);
+        for (unsigned int i=0; i < rtPaths.size(); i++) {
+            libSearchPaths_.push_back(rtPaths[i].toString());
+        }
     }
 
     // link to native using llvm-ld
@@ -66,6 +88,14 @@ void pStandAloneTarget::execute(void) {
         args.push_back("-v");
     //
     args.push_back("-lrphp-runtime");
+
+    // XXX osx
+#ifdef __APPLE__
+    args.push_back("-lstdc++.6");
+    args.push_back("-licuuc");
+    args.push_back("-licuio");
+#endif
+
     args.push_back("-o");
     args.push_back(outputFile_);
     for (std::vector<std::string>::iterator i = inputFiles_.begin(); i != inputFiles_.end(); ++i) {
@@ -91,7 +121,7 @@ void pStandAloneTarget::execute(void) {
         }
         log(logFull, cline);
     }
-    
+
     std::string errMsg;
     int R = llvm::sys::Program::ExecuteAndWait(
         ld, &Args[0], 0, 0, 0, 0, &errMsg);
