@@ -50,7 +50,7 @@ pLexer::pLexer(const pSourceFile* s):
 
     langRules_.add_state(L"PHP");
 
-    langRules_.add(L"INITIAL", L"<\\?|<\\?PHP", T_OPEN_TAG, L"PHP"); // go to PHP state
+    langRules_.add(L"INITIAL", L"<\\?\\s*|<\\?PHP\\s*", T_OPEN_TAG, L"PHP"); // go to PHP state
     langRules_.add(L"INITIAL", L".+|\\n+", T_INLINE_HTML, L".");
 
     langRules_.add(L"PHP", L"\\?>", T_CLOSE_TAG, L"INITIAL"); // go to HTML state
