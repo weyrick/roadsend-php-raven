@@ -21,7 +21,7 @@
 #ifndef RPHP_PCLASSMANAGER
 #define RPHP_PCLASSMANAGER
 
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 
 #include <boost/unordered_map.hpp>
 
@@ -31,7 +31,7 @@ class pRuntimeEngine;
 class pClass;
 
 /**
- 
+
  @brief Manages the PHP classes available to the runtime
 
  */

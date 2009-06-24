@@ -51,7 +51,7 @@ public:
 
     /// trigged once at extension startup
     virtual void extensionStartup() = 0;
-    /// trigged once at extension shutdown 
+    /// trigged once at extension shutdown
     virtual void extensionShutdown() = 0;
 
 };

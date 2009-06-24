@@ -27,14 +27,14 @@
 #include <iostream>
 #include <vector>
 #include "rphp/runtime/pHash.h"
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 
 /*
 ; PHP5 case sensitivity:
 ;  - class names are NOT case sensitive
 ;  - method names are NOT case sensitive
 ;  - properties ARE case sensitive
-; 
+;
 ; regardless of whether it is case sensitive, each item must
 ; know the case it was defined as, because it's shown that way
 ; by various reporting functions
@@ -49,13 +49,13 @@ class pMethod {
 
     const static int FINAL    = 0x01;
     const static int ABSTRACT = 0x02;
-    
+
     pIdentString name_;          // method name, case sensitive (as declared)
                                  // canonical name, lowercased XXX needed?
     pClass* definingClass_;      // origin class: original defining class pClass*, used in inheritance
     boost::uint_fast8_t flags_;  // final, abstract flags
     pFunction* signature_;       // function pointer
-    
+
 };
 
 typedef boost::unordered_map<pIdentString, pMethod*> methodRegistryType;
@@ -67,7 +67,7 @@ private:
     const static int FINAL     = 0x02;
     const static int INTERFACE = 0x03;
     const static int ABSTRACT_IMPLIED = 0x04;
-    
+
     pHash properties_;                // declared properties
     methodRegistryType methods_;      // declared methods
     pIdentString name_;               // class name, case sensitive (as declared)
@@ -75,7 +75,7 @@ private:
     std::vector<pClass*> extends_;    // list of parent classes (only 1, unless interface)
     std::vector<pClass*> implements_; // list of interfaces the class implements
     pHash constants_;                 // class constants
-    
+
 public:
     pClass();
     pHash properties();

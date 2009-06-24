@@ -21,7 +21,7 @@
 #ifndef RPHP_POUTPUTBUFFER_H_
 #define RPHP_POUTPUTBUFFER_H_
 
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 
 namespace rphp {
 
@@ -96,10 +96,10 @@ public:
     void newline() {
         switch (bType_) {
             case bufTypeBinary:
-                bBuffer_->push_back(RPHP_NEWLINE);
+                bBuffer_->push_back('\n');
                 break;
             case bufTypeUnicode:
-                uBuffer_->append(RPHP_NEWLINE);
+                uBuffer_->append('\n');
                 break;
         }
     }

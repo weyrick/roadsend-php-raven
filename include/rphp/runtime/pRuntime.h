@@ -24,7 +24,7 @@
 
 #include <boost/unordered_map.hpp>
 
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pVar.h"
 #include "rphp/runtime/pHash.h"
 #include "rphp/runtime/pObject.h"

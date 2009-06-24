@@ -22,7 +22,7 @@
 #define RPHP_PFUNCTIONMANAGER
 
 #include "rphp/runtime/pFunction.h"
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 
 #include <boost/unordered_map.hpp>
 
@@ -50,7 +50,7 @@ public:
     pFunctionManager(pRuntimeEngine *r) : runtime_(r), functionRegistry_() { }
     ~pFunctionManager();
 
-    /** 
+    /**
         register a new builtin function, i.e. from an extension. these do not get
         lost on page reset
     */
@@ -62,14 +62,14 @@ public:
     */
     template <typename fPointerType>
     pFunction* registerUser(const pIdentString&, fPointerType, pUInt arity);
-    
+
     pVar invoke(const pIdentString& funName);
     pVar invoke(const pIdentString& funName, pVar arg1);
     pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2);
     pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3);
     pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4);
     pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5);
-    
+
 };
 
 }

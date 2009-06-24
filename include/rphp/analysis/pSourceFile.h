@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -23,7 +23,7 @@
 #define RPHP_PSOURCEFILE_H_
 
 #include <string>
-#include "rphp/runtime/pTypes.h"
+#include "rphp/pTypes.h"
 #include "rphp/analysis/pSourceTypes.h"
 
 namespace rphp {

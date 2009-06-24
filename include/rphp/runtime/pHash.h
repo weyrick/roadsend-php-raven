@@ -59,7 +59,7 @@ public:
     std::size_t operator()(const pBString &k) const {
         return boost::hash_value(k);
     }
-    
+
     std::size_t operator()(const pUStringP &k) const {
         return static_cast<std::size_t>(k->hashCode());
     }
@@ -106,8 +106,9 @@ public:
     typedef stableHash::iterator iterator;
 
 private:
-    /// maximum (unsigned) integer used as a next key so far
-    pUInt maxIntKey_;
+    /// maximum (signed) integer used as a next key so far
+    /// this is signed because the runtime type is too
+    pInt maxIntKey_;
     /// the actual stable hash data
     stableHash hashData_;
 
@@ -137,9 +138,9 @@ public:
     void insert(const pBString& key, const pVar& data);
     void insert(const pUStringP& key, const pVar& data);
     void insert(const pVar& key, const pVar& data);
-    void insert(const char* key, const pVar& data) { 
+    void insert(const char* key, const pVar& data) {
         // TODO need to check runtime for default string type
-        insert(pBString(key), data); 
+        insert(pBString(key), data);
     }
     void insertNext(const pVar& data);
 
@@ -150,7 +151,7 @@ public:
 
     // queries
     size_type size() const { return hashData_.size(); }
-    
+
     bool keyExists(pInt key) const;
     bool keyExists(const pBString& key) const;
     bool keyExists(const pUStringP& key) const;

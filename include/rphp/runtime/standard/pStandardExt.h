@@ -21,13 +21,13 @@
 #ifndef PSTANDARDEXT_H_
 #define PSTANDARDEXT_H_
 
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pExtBase.h"
 
 #define STD_EXT_NAME "standard"
 
-namespace rphp { 
- namespace ext { 
+namespace rphp {
+ namespace ext {
   namespace standard {
 
     class pStandardExt : public pExtBase {
@@ -44,8 +44,8 @@ namespace rphp {
     // standard functions
     void var_dump(RPHP_STDFUNC_ARGS, pVar v);
     void strlen(RPHP_STDFUNC_ARGS, pVar str);
-    void strpos(RPHP_STDFUNC_ARGS, pVar haystack, pVar needle, pVar offset);            
-            
+    void strpos(RPHP_STDFUNC_ARGS, pVar haystack, pVar needle, pVar offset);
+
     }
   }
 }

@@ -22,7 +22,7 @@
 #define RPHP_POUTPUTMANAGER_H_
 
 #include "rphp/runtime/pOutputBuffer.h"
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pVar.h"
 
 #include <stack>

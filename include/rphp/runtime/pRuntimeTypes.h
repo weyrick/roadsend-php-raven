@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
  * Roadsend PHP Compiler Runtime Libraries
  *
- * Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+ * Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -18,24 +18,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef RPHP_PTYPES_H_
-#define RPHP_PTYPES_H_
+#ifndef RPHP_PRUNTIMETYPES_H_
+#define RPHP_PRUNTIMETYPES_H_
 
-// llvm JIT doesn't do inline asm, which is used by the atomic locking mechanism
-// in shared_ptr. this forces generic pthreads version instead to avoid it for now.
-#define BOOST_SP_USE_PTHREADS
-
+#include "rphp/pTypes.h"
 #include "rphp/runtime/CowPtr.h"
 #include "rphp/runtime/pUString.h"
 #include "rphp/runtime/pRuntimeError.h"
 
-#include <boost/cstdint.hpp>
 #include <boost/logic/tribool.hpp>
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/intrusive_ptr.hpp>
 #include <boost/function.hpp>
-#include <boost/tuple/tuple.hpp>
 
 #include <vector>
 
@@ -50,10 +45,7 @@ BOOST_TRIBOOL_THIRD_STATE(pNull)
 #define pTrue  pTriState(true)
 #define pFalse pTriState(false)
 
-/// runtime integer type
-typedef signed long pInt;
-/// runtime float type
-typedef double pFloat;
+// number types defined in pTypes.h
 
 /// runtime "binary" string type
 /// these are simple byte-wide character arrays
@@ -121,23 +113,6 @@ typedef enum {
     pVarPtrType
 } pVarType;
 
-/// note, pUInt is not a base PHP type (all PHP numbers are signed)
-typedef boost::uint_fast32_t pUInt;
-
-/// string type used for identifiers (classes, functions, variable names)
-typedef std::string pIdentString;
-
-/// string type used for filenames
-typedef std::string pFileNameString;
-
-/// source file description: filename/encoding
-typedef boost::tuple<const pFileNameString, const std::string> pSourceFileDesc;
-
-/// source locations: filename/linenum
-typedef boost::tuple<const pFileNameString, const pUInt> pSourceLocation;
-
-/// source locations: filename/startlinenum/endlinenum
-typedef boost::tuple<const pFileNameString, const pUInt, const pUInt> pSourceStartEndLocation;
 
 /// php function signature: no arguments
 class pRuntimeEngine;
@@ -175,12 +150,7 @@ typedef void (*pMethodPointer5)(RPHP_STDMETHOD_ARGS, pVar, pVar, pVar, pVar, pVa
 /// php method signature: n arguments
 typedef void (*pMethodPointerN)(RPHP_STDMETHOD_ARGS, std::vector<pVar>);
 
-
-// platform specific
-#define RPHP_NEWLINE     '\n'
-#define RPHP_WNEWLINE    L'\n'
-
 } /* namespace rphp */
 
 
-#endif /* RPHP_PTYPES_H_ */
+#endif /* RPHP_PRUNTIMETYPES_H_ */

@@ -252,7 +252,7 @@ bool pLexer::preprocess(void) {
                         break;
                     case T_DQ_NEWLINE:
                         // replace newline escape sequence with literal newline
-                        buffer.push_back(RPHP_NEWLINE);
+                        buffer.push_back('\n');
                         break;
                     case T_DQ_VARIABLE:
                         // replace with concatination

@@ -21,7 +21,7 @@
 #ifndef RPHP_PVAR_H_
 #define RPHP_PVAR_H_
 
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 
 #include <iostream>
 
@@ -136,7 +136,7 @@ public:
     /// reference counting is handled automatically upon construction, destruction and
     /// assignment of pVarP so inc/dec shouldn't normally be called in userland
     /// these are only useful when which() is NOT pVarP
-    /// in other words, we only count reference when we are the boxed pVar inside 
+    /// in other words, we only count reference when we are the boxed pVar inside
     /// of a pVarP
 
     /// return current reference count.
@@ -173,10 +173,10 @@ public:
         if (pVarData_.which() == pVarPtrType_) {
             refData_ |= PVAR_ALIAS_FLAG;
         }
-        else { 
+        else {
             pVarData_ = pVarP(new pVar(pVarData_));
             refData_ |= PVAR_ALIAS_FLAG;
-        }   
+        }
     }
     /// unflag this pVar as a reference variable. note that this will not
     /// move a pVar that is on the heap back to the stack
@@ -202,7 +202,7 @@ public:
     /* type checks */
     /// return the current type represented by this pVar
     pVarType getType() const;
-    
+
     /// return true if pVar is currently a pNull. no type conversion.
     bool isNull() const {
         return ((pVarData_.which() == pVarTriStateType_) && pNull(boost::get<pTriState>(pVarData_)));

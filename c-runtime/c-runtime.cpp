@@ -22,7 +22,6 @@
 #include <iostream>
 #include <unicode/ustream.h>
 
-#include "rphp/runtime/pTypes.h"
 #include "c-runtime.h"
 
 using namespace rphp;

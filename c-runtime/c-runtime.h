@@ -23,10 +23,10 @@
 #define RPHP_IRRUNTIME_H_
 
 #include "rphp/runtime/pRuntime.h"
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 
 extern "C" {
-    
+
     // create a new runtime engine
     rphp::pRuntimeEngine* rphp_newRuntimeEngine();
 

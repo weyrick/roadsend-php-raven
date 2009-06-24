@@ -138,7 +138,7 @@ void dumpVisitor::visit_echoStmt(echoStmt* n) {
 void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
     // NOTE: newlines are lexed separately, don't dump them here
     if (n->getStringVal().length() == 1 &&
-        n->getStringVal().at(0) == RPHP_WNEWLINE)
+        n->getStringVal().at(0) == '\n')
         return;
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;

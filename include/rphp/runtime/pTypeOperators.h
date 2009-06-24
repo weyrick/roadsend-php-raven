@@ -23,7 +23,7 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include "rphp/runtime/pTypes.h"
+#include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pHash.h"
 #include "rphp/runtime/pObject.h"
 
@@ -76,7 +76,7 @@ public:
 
 };
 
-    
+
 /* a visitor for converting to a php number (long or float), in place */
 class pVar_convertToIntVisitor : public boost::static_visitor<void> {
 protected:
@@ -90,7 +90,7 @@ public:
     }
 
     void operator()(const pInt &v) { /* nothing */ }
-    
+
     void operator()(const pFloat &v) {
         var_ = (pInt)v;
     }
