@@ -19,30 +19,44 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PDRIVER_H_
-#define RPHP_PDRIVER_H_
+#ifndef RPHP_PLINKTARGET_H_
+#define RPHP_PLINKTARGET_H_
 
 #include <string>
-#include "pCompilerTypes.h"
+#include <vector>
+#include "rphp/pTarget.h"
+
+namespace llvm {
+    class Module;
+}
 
 namespace rphp {
 
-class pSourceModule;
+// link targets will create various native binaries from one or more compile bitcode files
+class pLinkTarget : public pTarget {
 
-class pDriver {
+protected:
+    std::string outputFile_;
+    std::vector<std::string> inputFiles_;
+    std::vector<std::string> libSearchPaths_;
+
+    // link options (static, dynamic)
 
 public:
+    pLinkTarget(std::string outFile): outputFile_(outFile) { }
 
-    bool executeBC(std::string fileName);
-    bool executeModule(pSourceModule* pMod);
+    void addInputFile(std::string f) {
+        inputFiles_.push_back(f);
+    }
 
-    void dumpTokens(pSourceFileDesc file);
-    void dumpAST(pSourceFileDesc file);
-    void dumpIR(pSourceFileDesc file);
-    void dumpPre(pSourceFileDesc file);
+    void addLibSearchPath(std::string f) {
+        libSearchPaths_.push_back(f);
+    }
+
+    const std::string& getOutputFileName(void) const { return outputFile_; }
 
 };
 
-}
+} // namespace
 
-#endif /* RPHP_PDRIVER_H_ */
+#endif /* RPHP_PLINKTARGET_H_ */

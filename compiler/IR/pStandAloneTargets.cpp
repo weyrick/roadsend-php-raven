@@ -19,9 +19,9 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include "rphp/driver/pStandAloneTargets.h"
+#include "rphp/IR/pStandAloneTargets.h"
 
-#include "rphp/driver/pTargetError.h"
+#include "rphp/pTargetError.h"
 
 #include <llvm/Module.h>
 #include <llvm/System/Path.h>

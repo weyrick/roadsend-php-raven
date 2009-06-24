@@ -52,6 +52,8 @@ public:
                    intOptions_(),
                    verbosity_(0) { }
 
+    virtual ~pTarget(void) { }
+
     virtual void execute(void) = 0;
 
     int verbosity(void) { return verbosity_; }

@@ -6,10 +6,10 @@
 #include <llvm/Support/CommandLine.h>
 #include <llvm/System/Path.h>
 
-#include "rphp/driver/pDumpTarget.h"
-#include "rphp/driver/pCompileTarget.h"
-#include "rphp/driver/pStandAloneTargets.h"
-#include "rphp/driver/pCompileAndLinkTarget.h"
+#include "rphp/IR/pDumpTarget.h"
+#include "rphp/IR/pCompileTarget.h"
+#include "rphp/IR/pStandAloneTargets.h"
+#include "rphp/IR/pCompileAndLinkTarget.h"
 
 using namespace llvm;
 using namespace rphp;
@@ -48,7 +48,7 @@ int main( int argc, char* argv[] )
 
 
     assert(!inputFile.empty() && "empty input file");
-    
+
     pSourceFileDesc inFile = boost::make_tuple(inputFile, encoding);
 
     pTarget* target = NULL;
@@ -96,7 +96,7 @@ int main( int argc, char* argv[] )
         }
 
         assert(!oFileName.empty() && "empty output file");
-        
+
         pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inFile, "/", oFileName);
         if (!libSearchPath.empty())
             saTarget->addLibSearchPath(libSearchPath);

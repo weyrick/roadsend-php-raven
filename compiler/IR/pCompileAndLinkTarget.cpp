@@ -20,7 +20,7 @@
 */
 
 
-#include "rphp/driver/pCompileAndLinkTarget.h"
+#include "rphp/IR/pCompileAndLinkTarget.h"
 
 using namespace llvm;
 

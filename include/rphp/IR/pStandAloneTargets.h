@@ -22,7 +22,7 @@
 #ifndef RPHP_PSTANDALONETARGETS_H_
 #define RPHP_PSTANDALONETARGETS_H_
 
-#include "rphp/driver/pLinkTarget.h"
+#include "rphp/IR/pLinkTarget.h"
 #include "rphp/IR/pGenSupport.h"
 
 namespace rphp {

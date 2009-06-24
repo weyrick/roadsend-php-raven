@@ -19,36 +19,39 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PCOMPILEANDLINKTARGET_H_
-#define RPHP_PCOMPILEANDLINKTARGET_H_
+#ifndef RPHP_PCOMPILETARGET_H_
+#define RPHP_PCOMPILETARGET_H_
 
 #include "rphp/runtime/pTypes.h"
-#include "rphp/driver/pCompileTarget.h"
-#include "rphp/driver/pStandAloneTargets.h"
+#include "rphp/pTarget.h"
 
 namespace rphp {
 
-class pCompileAndLinkTarget : public pStandAloneTarget {
+// the compile target always translates a single php source file into llvm bitcode
+class pCompileTarget: public pTarget {
 
-    pCompileTarget* cTarget_;
+protected:
+    pSourceFileDesc inputFile_;
+    std::string projectRoot_;
+    bool createMain_;
+
+    // INT options:
+    // compileOptimizationLevel - compiler optimization level
+    // verbosityLevel           - informational verbosity level
 
 public:
-    pCompileAndLinkTarget(const pSourceFileDesc& fileName,
-                          const std::string& root,
-                          const std::string& outName):
-                            pStandAloneTarget(outName, fileName.get<0>()),
-                            cTarget_(new pCompileTarget(fileName, root))
-    {
-        assert(cTarget_ && "compile target was empty");
-        assert(!cTarget_->getInputFileName().empty() && "input file was empty");
-    }
-
-    ~pCompileAndLinkTarget(void) { delete cTarget_; }
+    pCompileTarget(const pSourceFileDesc& fileName, const std::string& root): inputFile_(fileName), projectRoot_(root), createMain_(false) { }
 
     virtual void execute(void);
+
+    const std::string& getInputFileName(void) const { return inputFile_.get<0>(); }
+    const std::string& getProjectRoot(void) const { return projectRoot_; }
+
+    bool createMain(void) const { return createMain_; }
+    void setCreateMain(bool v) { createMain_ = v; }
 
 };
 
 } // namespace
 
-#endif /* RPHP_PCOMPILEANDLINKTARGET_H_ */
+#endif /* RPHP_PCOMPILETARGET_H_ */

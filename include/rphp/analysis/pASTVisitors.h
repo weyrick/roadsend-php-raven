@@ -32,6 +32,8 @@ private:
     static dispatchFunction dispatchTable_[];
 
 public:
+    virtual ~baseVisitor(void) { }
+
     virtual void visit(stmt*);
 
     void visit_block(block*);

@@ -22,7 +22,7 @@
 #ifndef RPHP_PINTERPRETTARGET_H_
 #define RPHP_PINTERPRETTARGET_H_
 
-#include "rphp/driver/pCompileTarget.h"
+#include "rphp/IR/pCompileTarget.h"
 
 namespace rphp {
 

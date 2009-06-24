@@ -19,7 +19,7 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include "rphp/driver/pDumpTarget.h"
+#include "rphp/IR/pDumpTarget.h"
 
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/analysis/pLexer.h"

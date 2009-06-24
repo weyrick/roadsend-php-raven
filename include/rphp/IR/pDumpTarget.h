@@ -22,7 +22,7 @@
 #ifndef RPHP_PDUMPTARGET_H_
 #define RPHP_PDUMPTARGET_H_
 
-#include "rphp/driver/pTarget.h"
+#include "rphp/pTarget.h"
 #include "rphp/analysis/pSourceFile.h"
 
 namespace rphp {

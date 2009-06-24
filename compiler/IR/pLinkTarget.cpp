@@ -19,7 +19,7 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include "rphp/driver/pLinkTarget.h"
+#include "rphp/IR/pLinkTarget.h"
 
 namespace rphp {
 

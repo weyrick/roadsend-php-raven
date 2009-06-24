@@ -19,7 +19,7 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include "rphp/driver/pLibTargets.h"
+#include "rphp/IR/pLibTargets.h"
 
 namespace rphp {
 
