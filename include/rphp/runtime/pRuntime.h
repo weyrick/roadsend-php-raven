@@ -24,6 +24,7 @@
 
 #include <boost/unordered_map.hpp>
 
+#include "rphp/pConfig.h"
 #include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pVar.h"
 #include "rphp/runtime/pHash.h"
@@ -52,16 +53,19 @@ class pRuntimeEngine {
 
     // runtime reset functionality (for page resets)
 
-    // maintainance: startup, shutdown hooks. signal/slots?
-
-    // php.ini compatilbility
+    // maintenance: startup, shutdown hooks. signal/slots?
 
     // error manager
 
+    bool ownConfig_;
+
 public:
 
-    pRuntimeEngine();
+    pRuntimeEngine(pConfig* c = NULL);
     ~pRuntimeEngine();
+
+    // runtime configuration
+    pConfig* config;
 
     // output buffering management
     pOutputManager output;
@@ -73,7 +77,7 @@ public:
     pFunctionManager* functionManager;
 
     // class manager
-    // --> similar to funciton manager, but stores builtin and currently defined classes
+    // --> similar to function manager, but stores builtin and currently defined classes
     // --> interface for new class definition
     pClassManager* classManager;
 

@@ -22,6 +22,8 @@
 #ifndef RPHP_PTARGET_H_
 #define RPHP_PTARGET_H_
 
+#include "rphp/pConfig.h"
+
 #include <boost/unordered_map.hpp>
 #include <string>
 #include <iostream>
@@ -35,10 +37,8 @@ namespace rphp {
 class pTarget {
 
 protected:
-    // hash table for generic options
-    boost::unordered_map<std::string, std::string> stringOptions_;
-    boost::unordered_map<std::string, int> intOptions_;
 
+    pConfig* config_;
     int verbosity_;
 
 public:
@@ -48,8 +48,7 @@ public:
     static const int logFull  = 2;
     static const int logDebug = 3;
 
-    pTarget(void): stringOptions_(),
-                   intOptions_(),
+    pTarget(void): config_(NULL),
                    verbosity_(0) { }
 
     virtual ~pTarget(void) { }
@@ -59,13 +58,7 @@ public:
     int verbosity(void) { return verbosity_; }
     void setVerbosity(int v) { verbosity_ = v; }
 
-    void setOption(std::string k, std::string v) {
-        stringOptions_[k] = v;
-    }
-
-    void setOption(std::string k, int v) {
-        intOptions_[k] = v;
-    }
+    void setConfig(pConfig* c) { config_ = c; }
 
     /**
         log a message at the given verbosity level

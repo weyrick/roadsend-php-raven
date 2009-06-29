@@ -24,12 +24,21 @@
 
 namespace rphp {
 
-pRuntimeEngine::pRuntimeEngine() : globals_(),
+pRuntimeEngine::pRuntimeEngine(pConfig* c) :
+                                   globals_(),
+                                   ownConfig_(false),
+                                   config(c),
                                    output(this),
                                    functionManager(new pFunctionManager(this)),
                                    classManager(new pClassManager(this)),
                                    extManager(new pExtManager(this))
 {
+
+    // handle empty config
+    if (!config) {
+        config = new pConfig();
+        ownConfig_ = true;
+    }
 
     // runtime initialization
     extManager->startUp();
@@ -43,6 +52,8 @@ pRuntimeEngine::~pRuntimeEngine() {
     delete extManager;
     delete functionManager;
     delete classManager;
+    if (ownConfig_)
+        delete config;
 
 }
 
