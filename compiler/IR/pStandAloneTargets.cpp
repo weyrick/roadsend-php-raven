@@ -28,6 +28,7 @@
 #include <llvm/Support/SystemUtils.h>
 #include <llvm/System/Program.h>
 
+#include <cstring>
 #include <iostream>
 #include <vector>
 #include <string>
