@@ -22,6 +22,7 @@
 #ifndef RPHP_PIRHELPER_H_
 #define RPHP_PIRHELPER_H_
 
+#include <unicode/utypes.h>
 #include <string>
 
 namespace llvm {
