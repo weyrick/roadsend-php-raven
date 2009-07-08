@@ -191,7 +191,10 @@ statement(A) ::= functionDecl(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement(A) ::= ifBlock(B). { A = B; }
-statement ::= T_SEMI.
+statement(A) ::= T_SEMI.
+{
+	A = new AST::emptyStmt();
+}
 
 // statement block
 %type statementBlock{AST::block*}

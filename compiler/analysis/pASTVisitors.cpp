@@ -43,7 +43,8 @@ baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_assignment),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_var),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionInvoke),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_constructorInvoke)
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_constructorInvoke),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_emptyStmt)
 };
 
 

@@ -47,7 +47,8 @@ enum nodeKind {
     assignmentKind,
     varKind,
     functionInvokeKind,
-    constructorInvokeKind
+    constructorInvokeKind,
+    emptyStmtKind
 };
 
 // statement base class
@@ -366,6 +367,12 @@ public:
 
 };
 
+// NOP statement such as ;;
+class emptyStmt: public stmt {
+
+public:
+	emptyStmt() : stmt(emptyStmtKind) {}
+};
 
 } } // namespace
 

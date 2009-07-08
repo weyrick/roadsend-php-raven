@@ -52,6 +52,7 @@ public:
     virtual void visit_var(var*) { }
     virtual void visit_functionInvoke(functionInvoke*) { }
     virtual void visit_constructorInvoke(constructorInvoke*) { }
+    virtual void visit_emptyStmt(emptyStmt*) { }
 
 };
 
