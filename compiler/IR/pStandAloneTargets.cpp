@@ -57,7 +57,7 @@ static void getPathList(const char*path, std::vector<llvm::sys::Path>& Paths) {
 
 void pStandAloneTarget::execute(void) {
 
-    log(logInfo, "linking stand alone executable ["+outputFile_+"]");
+    log(E_CORE_WARNING, "linking stand alone executable ["+outputFile_+"]");
 
     // the following is based on code from llvm/tools/llvm-ld.cpp
 
@@ -85,7 +85,7 @@ void pStandAloneTarget::execute(void) {
     // TODO: opt flags
     //args.push_back("-disable-opt");
     //args.push_back("-verify-each");
-    if (verbosity() > logInfo)
+    if (verbosity_ & E_COMPILE_DEBUG)
         args.push_back("-v");
     //
     args.push_back("-lrphp-runtime");
@@ -110,7 +110,7 @@ void pStandAloneTarget::execute(void) {
 
     std::vector<const char*>::const_iterator I = Args.begin(), E = Args.end();
 
-    if (verbosity() >= logFull) {
+    if (verbosity_ & E_COMPILE_DEBUG) {
         std::string cline;
         for (; I != E; ++I) {
             if (*I) {
@@ -120,7 +120,7 @@ void pStandAloneTarget::execute(void) {
                 cline.push_back(' ');
             }
         }
-        log(logFull, cline);
+        log(E_COMPILE_DEBUG, cline);
     }
 
     std::string errMsg;

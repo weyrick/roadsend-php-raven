@@ -19,6 +19,11 @@ void rphpVersion(void) {
     std::cout << "Roadsend PHP" << std::endl;
 }
 
+
+void consoleNoticeHandler(pUInt level, pMsgString msg) {
+    std::cerr << "]] " << msg << std::endl;
+}
+
 int main( int argc, char* argv[] )
 {
 
@@ -109,10 +114,11 @@ int main( int argc, char* argv[] )
     }
 
     try {
-        if (verbosity >= 0)
-            target->setVerbosity(verbosity);
+        //if (verbosity >= 0)
+            target->setVerbosity(E_ALL);
+        target->setNotifyHandler(&consoleNoticeHandler);
         // TODO: debug
-        target->setVerbosity(2);
+        //target->setVerbosity(2);
         target->execute();
     }
     catch (std::exception& e) {

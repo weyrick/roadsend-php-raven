@@ -47,6 +47,9 @@ typedef std::string pIdentString;
 /// string type used for filenames
 typedef std::string pFileNameString;
 
+/// string type used for warning/notice messages
+typedef std::string pMsgString;
+
 /// source file description: filename/encoding
 typedef boost::tuple<const pFileNameString, const std::string> pSourceFileDesc;
 
@@ -55,6 +58,30 @@ typedef boost::tuple<const pFileNameString, const pUInt> pSourceLocation;
 
 /// source locations: filename/startlinenum/endlinenum
 typedef boost::tuple<const pFileNameString, const pUInt, const pUInt> pSourceStartEndLocation;
+
+// notifier emit function callback
+typedef void (*pNotifyEmitFun)(pUInt level, pMsgString msg);
+
+// notifier log levels
+#define E_ERROR             0x00000001
+#define E_WARNING           0x00000002
+#define E_PARSE             0x00000004
+#define E_NOTICE            0x00000008
+#define E_CORE_ERROR        0x00000010
+#define E_CORE_WARNING      0x00000020
+#define E_COMPILE_ERROR     0x00000040
+#define E_COMPILE_WARNING   0x00000080
+#define E_USER_ERROR        0x00000100
+#define E_USER_WARNING      0x00000200
+#define E_USER_NOTICE       0x00000400
+#define E_STRICT            0x00000800
+#define E_RECOVERABLE_ERROR 0x00001000
+#define E_DEPRECATED        0x00002000
+#define E_USER_DEPRECATED   0x00004000
+// rphp
+#define E_COMPILE_DEBUG     0x01000000
+#define E_RUNTIME_DEBUG     0x02000000
+#define E_ALL               0xffffffff
 
 } /* namespace rphp */
 

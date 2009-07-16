@@ -22,44 +22,49 @@
 #ifndef RPHP_PTARGET_H_
 #define RPHP_PTARGET_H_
 
-#include "rphp/pConfig.h"
-
-#include <boost/unordered_map.hpp>
-#include <string>
-#include <iostream>
+#include "rphp/pTypes.h"
 
 namespace rphp {
 
+class pConfig;
+
 /**
     A target is a configurable purpose created in the frontend
-    it conveys the user's wishes to the driver
+    it conveys the user's wishes to a driver. it is configured by
+    a pConfig object, and can emit warnings and notices
  */
 class pTarget {
 
 protected:
 
+    pNotifyEmitFun notifyHandler_;
     pConfig* config_;
-    int verbosity_;
+    pUInt verbosity_;
+
+    /**
+        log a message at the given verbosity level
+     */
+    void log(pUInt level, pMsgString msg) {
+        if (notifyHandler_ && (verbosity_ & level)) {
+            notifyHandler_(level, msg);
+        }
+    }
 
 public:
 
-    static const int logQuiet = 0;
-    static const int logInfo  = 1;
-    static const int logFull  = 2;
-    static const int logDebug = 3;
+    pTarget(pConfig* c): notifyHandler_(NULL), config_(c), verbosity_(E_ALL) { }
 
-    pTarget(pConfig* c): config_(c), verbosity_(0) { }
-
-    pTarget(void): config_(NULL),
-                   verbosity_(0) { }
+    pTarget(void): notifyHandler_(NULL),
+                   config_(NULL),
+                   verbosity_(E_ALL) { }
 
     virtual ~pTarget(void) { }
 
     virtual void execute(void) = 0;
 
-    int verbosity(void) const { return verbosity_; }
+    pUInt verbosity(void) const { return verbosity_; }
 
-    void setVerbosity(int v) { verbosity_ = v; }
+    void setVerbosity(pUInt v) { verbosity_ = v; }
     void setVerbosity(const pTarget* t) { verbosity_ = t->verbosity_; }
 
     const pConfig* config(void) const { return config_; }
@@ -68,19 +73,12 @@ public:
     void setConfig(const pTarget* t) { config_ = t->config_; }
 
     void configureWith(const pTarget* t) {
+        notifyHandler_ = t->notifyHandler_;
         verbosity_ = t->verbosity_;
         config_ = t->config_;
     }
 
-protected:
-    /**
-        log a message at the given verbosity level
-     */
-    void log(int level, std::string msg) {
-        if (verbosity_ >= level) {
-            std::cerr << ">> " << msg << std::endl << std::flush;
-        }
-    }
+    void setNotifyHandler(pNotifyEmitFun f) { notifyHandler_ = f; }
 
 };
 

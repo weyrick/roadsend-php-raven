@@ -17,6 +17,10 @@ void rphpVersion(void) {
     std::cout << "Roadsend PHP JIT" << std::endl;
 }
 
+void consoleNoticeHandler(pUInt level, pMsgString msg) {
+    std::cerr << "]] " << msg << std::endl;
+}
+
 int main( int argc, char* argv[] )
 {
 
@@ -42,9 +46,12 @@ int main( int argc, char* argv[] )
 
     pCachedJIT engine(config);
 
+    // TODO this actually needs to redirect to the runtime handler
+    engine.setNotifyHandler(&consoleNoticeHandler);
+
     try {
-        if (verbosity >= 0)
-            engine.setVerbosity(verbosity);
+        //if (verbosity >= 0)
+            engine.setVerbosity(E_ALL);
         engine.cacheAndJITFileOnDisk(inFile);
     }
     catch (std::exception& e) {
