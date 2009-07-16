@@ -19,24 +19,41 @@
    ***** END LICENSE BLOCK *****
 */
 
+#ifndef RPHP_PJITTARGET_H_
+#define RPHP_PJITTARGET_H_
 
-#include "rphp/IR/pCompileAndLinkTarget.h"
+#include "rphp/pTarget.h"
 
-using namespace llvm;
+#include <string>
+
+namespace llvm {
+    class Module;
+}
 
 namespace rphp {
 
-void pCompileAndLinkTarget::execute(void) {
+class pRuntimeEngine;
 
-    std::string outfileName = cTarget_->getInputFileName()+".bc";
-    addInputFile(outfileName);
-    cTarget_->configureWith(this);
-    cTarget_->setCreateMain(true);
-    cTarget_->execute();
-    cTarget_->writeToFile(outfileName);
-    pStandAloneTarget::execute();
+class pJITTarget: public pTarget {
+
+    // does not own runtime or module
+    pRuntimeEngine* runtime_;
+    llvm::Module* llvmModule_;
+    std::string entryFunction_;
+
+public:
+    pJITTarget(pRuntimeEngine* engine, llvm::Module* M, std::string entryFunction):
+        runtime_(engine),
+        llvmModule_(M),
+        entryFunction_(entryFunction) { }
+
+    virtual void execute(void);
+
+    //bool executeWithRuntime(llvm::Module* M, std::string entryFunction);
+    //bool executeMain(llvm::Module* M);
+
+};
 
 }
 
-} // namespace
-
+#endif /* RPHP_PJIT_H_ */

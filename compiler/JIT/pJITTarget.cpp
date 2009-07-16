@@ -19,7 +19,7 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include "rphp/JIT/pJIT.h"
+#include "rphp/JIT/pJITTarget.h"
 
 #include "rphp/runtime/pRuntime.h"
 
@@ -37,6 +37,7 @@ using namespace llvm;
 
 namespace rphp {
 
+/*
 bool pJIT::executeMain(llvm::Module* M) {
 
 //M->dump();
@@ -68,47 +69,48 @@ bool pJIT::executeMain(llvm::Module* M) {
     return true;
 
 }
+*/
 
+//bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
+void pJITTarget::execute(void) {
 
-bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
-
-    ExistingModuleProvider* MP = new ExistingModuleProvider(M);
+    ExistingModuleProvider* MP = new ExistingModuleProvider(llvmModule_);
 
     std::string errMsg;
     ExecutionEngine* EE = ExecutionEngine::createJIT(MP, &errMsg);
     if (!EE) {
         std::cerr << errMsg << std::endl;
-        return false;
+        return;// false;
     }
 
     // EE now owns MP and M
-    Function* main = MP->getModule()->getFunction(entryFunction);
+    Function* main = MP->getModule()->getFunction(entryFunction_);
 
     if (!main) {
-        std::cerr << "error: entry symbol not found: " << entryFunction << std::endl;
+        std::cerr << "error: entry symbol not found: " << entryFunction_ << std::endl;
         delete EE;
-        return false;
+        return;// false;
     }
 
     EE->runStaticConstructorsDestructors(false);
 
     // JIT magic
-    pRuntimeEngine* r = new pRuntimeEngine();
+    //pRuntimeEngine* r = new pRuntimeEngine();
     void *mainPtr = EE->getPointerToFunction(main);
 //    std::cerr << "found main function at: " << mainPtr << std::endl;
     // cast to entry function type (returns void, takes one parameter of runtime engine instance)
     // see pGenerator::createEntryPoint, pIRHelper::moduleEntryFunType
     void (*mainFunc)(pVar*,pRuntimeEngine*) = (void (*)(pVar*,pRuntimeEngine*))mainPtr;
     pVar retVal;
-    mainFunc(&retVal, r);
+    mainFunc(&retVal, runtime_);
 
     EE->runStaticConstructorsDestructors(true);
 
     // FIXME: leak?
     //delete EE;
-    delete r;
+    //delete r;
 
-    return true;
+    //return true;
 
 }
 

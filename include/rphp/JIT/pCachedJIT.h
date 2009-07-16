@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -19,25 +19,38 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PJIT_H_
-#define RPHP_PJIT_H_
+#ifndef RPHP_PCACHEDJIT_H_
+#define RPHP_PCACHEDJIT_H_
 
+#include "rphp/pTarget.h"
+#include "rphp/pTypes.h"
 #include <string>
-
-namespace llvm {
-    class Module;
-}
 
 namespace rphp {
 
-class pJIT {
+class pRuntimeEngine;
+
+/**
+ *
+ * this class is given a config, and creates a runtime instance based on it.
+ * it can then be given filenames to interpret from disk. these are compiled
+ * to IR, cached, then JITed. the runtime may be reset between requests.
+ *
+ */
+class pCachedJIT: public pTarget {
+
+    pRuntimeEngine* runtime_;
 
 public:
-    bool executeWithRuntime(llvm::Module* M, std::string entryFunction);
-    bool executeMain(llvm::Module* M);
+    pCachedJIT(pConfig* config);
+    ~pCachedJIT(void);
+
+    void execute(void) { }
+
+    void cacheAndJITFileOnDisk(const pSourceFileDesc& fileName);
 
 };
 
 }
 
-#endif /* RPHP_PJIT_H_ */
+#endif /* RPHP_PCACHEDJIT_H_ */

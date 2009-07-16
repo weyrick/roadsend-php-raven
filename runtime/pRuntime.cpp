@@ -27,6 +27,8 @@ namespace rphp {
 pRuntimeEngine::pRuntimeEngine(pConfig* c) :
                                    globals_(),
                                    ownConfig_(false),
+                                   includeHandler_(NULL),
+                                   evalHandler_(NULL),
                                    config(c),
                                    output(this),
                                    functionManager(new pFunctionManager(this)),

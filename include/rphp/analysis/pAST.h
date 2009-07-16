@@ -24,7 +24,7 @@
 
 #include <vector>
 
-#include "rphp/analysis/pSourceTypes.h"
+#include "rphp/pSourceTypes.h"
 #include "rphp/pTypes.h"
 #include "rphp/runtime/pFunction.h"
 

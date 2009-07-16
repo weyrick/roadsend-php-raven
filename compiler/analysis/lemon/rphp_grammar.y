@@ -27,8 +27,8 @@
 #include <algorithm>
 #include <unicode/unistr.h>
 
+#include "rphp/pSourceTypes.h"
 #include "rphp/analysis/pAST.h"
-#include "rphp/analysis/pSourceTypes.h"
 #include "rphp/analysis/pSourceModule.h"
 
 using namespace rphp;

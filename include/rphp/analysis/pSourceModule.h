@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -22,12 +22,12 @@
 #ifndef RPHP_PSOURCEMODULE_H_
 #define RPHP_PSOURCEMODULE_H_
 
-#include <vector>
-#include <boost/unordered_map.hpp>
-
-#include "rphp/analysis/pSourceTypes.h"
+#include "rphp/pSourceTypes.h"
 #include "rphp/analysis/pSourceFile.h"
 #include "rphp/analysis/pAST.h"
+
+#include <vector>
+#include <boost/unordered_map.hpp>
 
 namespace rphp {
 
@@ -78,7 +78,7 @@ public:
     void setTokenLine(const pSourceCharIterator& t) {
         tokenLineInfo_[&(*t)] = currentLineNum_;
     }
-    
+
     pUInt getTokenLine(const pSourceCharIterator& t) {
         boost::unordered_map<pSourceCharIterator::pointer, pUInt>::const_iterator i = tokenLineInfo_.find(&(*t));
         if (i == tokenLineInfo_.end())

@@ -19,29 +19,49 @@
    ***** END LICENSE BLOCK *****
 */
 
+#include "rphp/JIT/pCachedJIT.h"
 
-#include "rphp/JIT/pInterpretTarget.h"
+#include "rphp/runtime/pRuntime.h"
+#include "rphp/IR/pCompileTarget.h"
+#include "rphp/JIT/pJITTarget.h"
 
-#include "rphp/analysis/pSourceModule.h"
-#include "rphp/IR/pGenerator.h"
-#include "rphp/JIT/pJIT.h"
+#include <string>
 
-#include <llvm/Linker.h>
 
 namespace rphp {
 
-void pInterpretTarget::execute(void) {
-
-    pSourceModule  m(inputFile_);
-    IR::pGenerator codeGen(m);
-
-    llvm::Module* ir = codeGen.getIR();
-    
-    // JIT frees ir
-    pJIT engine;
-    engine.executeWithRuntime(ir, codeGen.entryFunctionName());
+pCachedJIT::pCachedJIT(pConfig* config):
+    pTarget(config),
+    runtime_(new pRuntimeEngine(config))
+{
 
 }
 
-} // namespace
+
+pCachedJIT::~pCachedJIT(void) {
+    delete runtime_;
+}
+
+void pCachedJIT::cacheAndJITFileOnDisk(const pSourceFileDesc& fileName) {
+
+    pCompileTarget cTarget(fileName);
+    cTarget.configureWith(this);
+    cTarget.execute();
+
+    llvm::Module* m = cTarget.releaseModuleOwnership();
+
+    // TODO: caching mechanism. no problem.
+
+    pJITTarget engine(runtime_, m, cTarget.entryFunctionName());
+
+    engine.configureWith(this);
+    engine.execute();
+
+    // TODO: what about m? does llvm JIT clean it up?
+    // delete m;
+
+
+}
+
+}
 

@@ -53,7 +53,7 @@ int main( int argc, char* argv[] )
 
     pTarget* target = NULL;
     if (compileModule) {
-        target = new pCompileTarget(inFile, "/");
+        target = new pCompileTarget(inFile/*, "/"*/);
     }
     else if (linkSA) {
         if (outputFile.empty()) {
@@ -97,7 +97,7 @@ int main( int argc, char* argv[] )
 
         assert(!oFileName.empty() && "empty output file");
 
-        pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inFile, "/", oFileName);
+        pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inFile, /*"/",*/ oFileName);
         if (!libSearchPath.empty())
             saTarget->addLibSearchPath(libSearchPath);
         target = saTarget;

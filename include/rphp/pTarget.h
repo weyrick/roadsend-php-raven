@@ -48,6 +48,8 @@ public:
     static const int logFull  = 2;
     static const int logDebug = 3;
 
+    pTarget(pConfig* c): config_(c), verbosity_(0) { }
+
     pTarget(void): config_(NULL),
                    verbosity_(0) { }
 
@@ -55,11 +57,22 @@ public:
 
     virtual void execute(void) = 0;
 
-    int verbosity(void) { return verbosity_; }
+    int verbosity(void) const { return verbosity_; }
+
     void setVerbosity(int v) { verbosity_ = v; }
+    void setVerbosity(const pTarget* t) { verbosity_ = t->verbosity_; }
+
+    const pConfig* config(void) const { return config_; }
 
     void setConfig(pConfig* c) { config_ = c; }
+    void setConfig(const pTarget* t) { config_ = t->config_; }
 
+    void configureWith(const pTarget* t) {
+        verbosity_ = t->verbosity_;
+        config_ = t->config_;
+    }
+
+protected:
     /**
         log a message at the given verbosity level
      */

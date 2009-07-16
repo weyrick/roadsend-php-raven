@@ -29,27 +29,34 @@
 
 namespace rphp {
 
+pCompileTarget::~pCompileTarget(void) {
+    if (ownModule_)
+        delete llvmModule_;
+}
+
 void pCompileTarget::execute(void) {
 
     std::string outputFile;
 
-    // TODO: check stringOptions for outputFile
-    outputFile = inputFile_.get<0>()+".bc";
-
-    log(logInfo, "compiling module ["+inputFile_.get<0>()+"] to ["+outputFile+"]");
+    log(logInfo, "compiling module ["+inputFile_.get<0>()+"] to IR");
 
     pSourceModule  m(inputFile_);
 
     IR::pGenerator codeGen(m);
-    llvm::Module* ir = codeGen.getIR();
+    llvmModule_ = codeGen.getIR();
+    entryFunctionName_ = codeGen.entryFunctionName();
 
-    if (createMain_) {
-        IR::pGenSupport::createMain(ir, codeGen.entryFunctionName());
-    }
+    if (createMain_)
+        IR::pGenSupport::createMain(llvmModule_, entryFunctionName_);
 
-    IR::pGenSupport::writeBitcode(ir, outputFile);
+}
 
-    delete ir;
+void pCompileTarget::writeToFile(std::string outputFile) {
+
+    log(logInfo, "saving IR from ["+inputFile_.get<0>()+"] to output file ["+outputFile+"]");
+
+    if (llvmModule_)
+        IR::pGenSupport::writeBitcode(llvmModule_, outputFile);
 
 }
 

@@ -24,7 +24,7 @@
 
 #include <string>
 #include "rphp/pTypes.h"
-#include "rphp/analysis/pSourceTypes.h"
+#include "rphp/pSourceTypes.h"
 
 namespace rphp {
 

@@ -25,30 +25,56 @@
 #include "rphp/pTypes.h"
 #include "rphp/pTarget.h"
 
+namespace llvm {
+    class Module;
+}
+
 namespace rphp {
 
 // the compile target always translates a single php source file into llvm bitcode
 class pCompileTarget: public pTarget {
 
 protected:
+    llvm::Module *llvmModule_;
     pSourceFileDesc inputFile_;
     std::string projectRoot_;
+    pIdentString entryFunctionName_;
     bool createMain_;
+    bool ownModule_;
 
     // INT options:
     // compileOptimizationLevel - compiler optimization level
     // verbosityLevel           - informational verbosity level
 
 public:
-    pCompileTarget(const pSourceFileDesc& fileName, const std::string& root): inputFile_(fileName), projectRoot_(root), createMain_(false) { }
+    pCompileTarget(const pSourceFileDesc& fileName/*, const std::string& root*/):
+        llvmModule_(NULL),
+        inputFile_(fileName),
+        projectRoot_(/*root*/),
+        entryFunctionName_(),
+        createMain_(false),
+        ownModule_(true) { }
+
+    ~pCompileTarget(void);
 
     virtual void execute(void);
 
     const std::string& getInputFileName(void) const { return inputFile_.get<0>(); }
     const std::string& getProjectRoot(void) const { return projectRoot_; }
 
+    void writeToFile(std::string outputFile);
+
+    llvm::Module* releaseModuleOwnership(void) {
+        ownModule_ = false;
+        return llvmModule_;
+    }
+
     bool createMain(void) const { return createMain_; }
     void setCreateMain(bool v) { createMain_ = v; }
+
+    const pIdentString& entryFunctionName(void) const {
+        return entryFunctionName_;
+    }
 
 };
 

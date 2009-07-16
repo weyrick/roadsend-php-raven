@@ -12,15 +12,15 @@ include_directories (
 IF(RPHP_JIT_LINK STREQUAL "library")
  # llvm jit objs are part of this library on this platform
  set(RJIT_SRC_FILES
-     pJIT.cpp
-     pInterpretTarget.cpp    
+     pJITTarget.cpp
+     pCachedJIT.cpp    
      ${LLVM_LIBS_JIT_OBJECTS}
     )
 ELSE(RPHP_JIT_LINK STREQUAL "library")
  # llvm jit objs are part of rphpi binary on this platform
  set(RJIT_SRC_FILES
-     pJIT.cpp
-     pInterpretTarget.cpp    
+     pJITTarget.cpp
+     pCachedJIT.cpp    
     )
 ENDIF(RPHP_JIT_LINK STREQUAL "library")
 

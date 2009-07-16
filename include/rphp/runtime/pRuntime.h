@@ -25,6 +25,7 @@
 #include <boost/unordered_map.hpp>
 
 #include "rphp/pConfig.h"
+#include "rphp/pSourceTypes.h"
 #include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pVar.h"
 #include "rphp/runtime/pHash.h"
@@ -37,6 +38,10 @@
 #include "rphp/runtime/pOutputManager.h"
 
 namespace rphp {
+
+// runtime handlers
+typedef void (*pIncludeHandlerFun)(pFileNameString file);
+typedef void (*pEvalHandlerFun)(pSourceString code);
 
 class pExtManager;
 typedef boost::unordered_map<pIdentString, pVarP> globalRegistryType;
@@ -58,6 +63,10 @@ class pRuntimeEngine {
     // error manager
 
     bool ownConfig_;
+
+    // runtime handlers
+    pIncludeHandlerFun includeHandler_;
+    pEvalHandlerFun evalHandler_;
 
 public:
 

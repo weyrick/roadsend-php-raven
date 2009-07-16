@@ -6,7 +6,8 @@
 #include <llvm/Support/CommandLine.h>
 #include <llvm/System/Path.h>
 
-#include "rphp/JIT/pInterpretTarget.h"
+#include "rphp/pConfig.h"
+#include "rphp/JIT/pCachedJIT.h"
 
 using namespace llvm;
 using namespace rphp;
@@ -33,25 +34,27 @@ int main( int argc, char* argv[] )
         encoding = "ASCII";
 
     assert(!inputFile.empty() && "empty input file");
-    
+
+    pConfig* config = new pConfig();
+    // TODO: read php.ini type file, do command line options
+
     pSourceFileDesc inFile = boost::make_tuple(inputFile, encoding);
 
-    pTarget* target = NULL;
-    target = new pInterpretTarget(inFile, "/");
+    pCachedJIT engine(config);
 
     try {
         if (verbosity >= 0)
-            target->setVerbosity(verbosity);
-        target->execute();
+            engine.setVerbosity(verbosity);
+        engine.cacheAndJITFileOnDisk(inFile);
     }
     catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
-        delete target;
+        delete config;
         return 1;
     }
 
     // success
-    delete target;
+    delete config;
     return 0;
 
 }
