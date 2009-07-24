@@ -46,11 +46,8 @@ int main( int argc, char* argv[] )
 
     pCachedJIT engine(config);
 
-    // TODO this actually needs to redirect to the runtime handler
-    engine.setNotifyHandler(&consoleNoticeHandler);
-
     try {
-        //if (verbosity >= 0)
+        if (verbosity >= 0)
             engine.setVerbosity(E_ALL);
         engine.cacheAndJITFileOnDisk(inFile);
     }

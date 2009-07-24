@@ -22,8 +22,6 @@
 #ifndef RPHP_PRUNTIME_H_
 #define RPHP_PRUNTIME_H_
 
-#include <boost/unordered_map.hpp>
-
 #include "rphp/pConfig.h"
 #include "rphp/pSourceTypes.h"
 #include "rphp/runtime/pRuntimeTypes.h"
@@ -33,9 +31,12 @@
 #include "rphp/runtime/pResource.h"
 #include "rphp/runtime/pVarOperators.h"
 
+#include "rphp/runtime/pErrorManager.h"
 #include "rphp/runtime/pFunctionManager.h"
 #include "rphp/runtime/pClassManager.h"
 #include "rphp/runtime/pOutputManager.h"
+
+#include <boost/unordered_map.hpp>
 
 namespace rphp {
 
@@ -60,8 +61,6 @@ class pRuntimeEngine {
 
     // maintenance: startup, shutdown hooks. signal/slots?
 
-    // error manager
-
     bool ownConfig_;
 
     // runtime handlers
@@ -72,6 +71,9 @@ public:
 
     pRuntimeEngine(pConfig* c = NULL);
     ~pRuntimeEngine();
+
+    // error manager
+    pErrorManager* errorManager;
 
     // runtime configuration
     pConfig* config;

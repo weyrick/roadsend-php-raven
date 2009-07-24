@@ -6,6 +6,7 @@ include_directories (${Boost_INCLUDE_DIRS} ${RPHP_INCLUDE_DIR})
 
 set(RUNTIME_SRC_FILES
   #pUString.cpp
+  pErrorManager.cpp
   pSupport.cpp
   pVar.cpp
   pVarOperators.cpp

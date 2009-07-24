@@ -52,11 +52,11 @@ protected:
 
 public:
 
-    pTarget(pConfig* c): notifyHandler_(NULL), config_(c), verbosity_(E_ALL) { }
+    pTarget(pConfig* c): notifyHandler_(NULL), config_(c), verbosity_(0) { }
 
     pTarget(void): notifyHandler_(NULL),
                    config_(NULL),
-                   verbosity_(E_ALL) { }
+                   verbosity_(0) { }
 
     virtual ~pTarget(void) { }
 

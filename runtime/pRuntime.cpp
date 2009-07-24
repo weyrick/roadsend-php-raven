@@ -29,6 +29,7 @@ pRuntimeEngine::pRuntimeEngine(pConfig* c) :
                                    ownConfig_(false),
                                    includeHandler_(NULL),
                                    evalHandler_(NULL),
+                                   errorManager(new pErrorManager(this)),
                                    config(c),
                                    output(this),
                                    functionManager(new pFunctionManager(this)),
@@ -42,6 +43,9 @@ pRuntimeEngine::pRuntimeEngine(pConfig* c) :
         ownConfig_ = true;
     }
 
+    // error handler initialization
+    errorManager->startUp();
+
     // runtime initialization
     extManager->startUp();
 
@@ -54,6 +58,7 @@ pRuntimeEngine::~pRuntimeEngine() {
     delete extManager;
     delete functionManager;
     delete classManager;
+    delete errorManager;
     if (ownConfig_)
         delete config;
 

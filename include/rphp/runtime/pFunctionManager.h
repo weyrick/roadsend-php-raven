@@ -36,7 +36,7 @@ class pExtBase;
 
 /**
 
- @brief Manager functions globally available in this runtime
+ @brief Manage functions globally available in this runtime
 
  */
 class pFunctionManager {

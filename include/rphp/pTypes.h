@@ -25,6 +25,7 @@
 // in shared_ptr. this forces generic pthreads version instead to avoid it for now.
 #define BOOST_SP_USE_PTHREADS
 
+#include <boost/function.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -60,7 +61,7 @@ typedef boost::tuple<const pFileNameString, const pUInt> pSourceLocation;
 typedef boost::tuple<const pFileNameString, const pUInt, const pUInt> pSourceStartEndLocation;
 
 // notifier emit function callback
-typedef void (*pNotifyEmitFun)(pUInt level, pMsgString msg);
+typedef boost::function<void (pUInt level, pMsgString msg)> pNotifyEmitFun;
 
 // notifier log levels
 #define E_ERROR             0x00000001
@@ -78,7 +79,7 @@ typedef void (*pNotifyEmitFun)(pUInt level, pMsgString msg);
 #define E_RECOVERABLE_ERROR 0x00001000
 #define E_DEPRECATED        0x00002000
 #define E_USER_DEPRECATED   0x00004000
-// rphp
+// rphp: not catchable in php land
 #define E_COMPILE_DEBUG     0x01000000
 #define E_RUNTIME_DEBUG     0x02000000
 #define E_ALL               0xffffffff

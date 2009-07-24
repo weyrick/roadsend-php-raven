@@ -19,12 +19,14 @@
    ***** END LICENSE BLOCK *****
 */
 
+
 #include "rphp/JIT/pCachedJIT.h"
 
 #include "rphp/runtime/pRuntime.h"
 #include "rphp/IR/pCompileTarget.h"
 #include "rphp/JIT/pJITTarget.h"
 
+#include <boost/bind.hpp>
 #include <string>
 
 
@@ -34,6 +36,9 @@ pCachedJIT::pCachedJIT(pConfig* config):
     pTarget(config),
     runtime_(new pRuntimeEngine(config))
 {
+
+    // bind the notify handler to our runtime's error manager
+    setNotifyHandler(boost::bind(&pErrorManager::notify, runtime_->errorManager, _1, _2));
 
 }
 
