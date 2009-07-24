@@ -22,6 +22,8 @@
 #ifndef RPHP_PCOMPILEANDLINKTARGET_H_
 #define RPHP_PCOMPILEANDLINKTARGET_H_
 
+#include <cassert>
+
 #include "rphp/pTypes.h"
 #include "rphp/IR/pCompileTarget.h"
 #include "rphp/IR/pStandAloneTargets.h"
