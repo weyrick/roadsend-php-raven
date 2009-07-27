@@ -114,7 +114,7 @@ int main( int argc, char* argv[] )
     }
 
     try {
-        //if (verbosity >= 0)
+        if (verbosity > 0)
             target->setVerbosity(E_ALL);
         target->setNotifyHandler(&consoleNoticeHandler);
         // TODO: debug

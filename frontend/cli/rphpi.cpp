@@ -47,7 +47,7 @@ int main( int argc, char* argv[] )
     pCachedJIT engine(config);
 
     try {
-        if (verbosity >= 0)
+        if (verbosity > 0)
             engine.setVerbosity(E_ALL);
         engine.cacheAndJITFileOnDisk(inFile);
     }
