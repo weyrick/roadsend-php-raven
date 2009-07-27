@@ -20,6 +20,7 @@
 
 #include "rphp/runtime/pFunctionManager.h"
 
+#include "rphp/runtime/pRuntime.h"
 #include "rphp/runtime/pSupport.h"
 
 namespace rphp {
@@ -42,11 +43,11 @@ pFunction* pFunctionManager::registerBuiltin(const pExtBase* sourceExt, const pI
 
 template <typename fPointerType>
 pFunction* pFunctionManager::registerUser(const pIdentString& funName, fPointerType fP, pUInt arity) {
-    
+
     pFunction *f = new pFunction(funName, fP, arity);
     functionRegistry_[toLowerCopy(funName)] = f;
     return f;
-    
+
 }
 
 pVar pFunctionManager::invoke(const pIdentString& funName) {
@@ -55,7 +56,8 @@ pVar pFunctionManager::invoke(const pIdentString& funName) {
         return (*function).second->invoke(runtime_);
     }
     else {
-        throw pRuntimeError("undefined function: "+funName);
+        runtime_->errorManager->fatalError("undefined function: "+funName);
+        return pNull;
     }
 }
 
@@ -65,7 +67,8 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1) {
         return (*function).second->invoke(runtime_, arg1);
     }
     else {
-        throw pRuntimeError("undefined function: "+funName);
+        runtime_->errorManager->fatalError("undefined function: "+funName);
+        return pNull;
     }
 }
 
@@ -75,7 +78,8 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2)
         return (*function).second->invoke(runtime_, arg1, arg2);
     }
     else {
-        throw pRuntimeError("undefined function: "+funName);
+        runtime_->errorManager->fatalError("undefined function: "+funName);
+        return pNull;
     }
 }
 
@@ -85,7 +89,8 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2,
         return (*function).second->invoke(runtime_, arg1, arg2, arg3);
     }
     else {
-        throw pRuntimeError("undefined function: "+funName);
+        runtime_->errorManager->fatalError("undefined function: "+funName);
+        return pNull;
     }
 }
 
@@ -95,7 +100,8 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2,
         return (*function).second->invoke(runtime_, arg1, arg2, arg3, arg4);
     }
     else {
-        throw pRuntimeError("undefined function: "+funName);
+        runtime_->errorManager->fatalError("undefined function: "+funName);
+        return pNull;
     }
 }
 
@@ -105,7 +111,8 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2,
         return (*function).second->invoke(runtime_, arg1, arg2, arg3, arg4, arg5);
     }
     else {
-        throw pRuntimeError("undefined function: "+funName);
+        runtime_->errorManager->fatalError("undefined function: "+funName);
+        return pNull;
     }
 }
 

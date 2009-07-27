@@ -60,7 +60,14 @@ void pCachedJIT::cacheAndJITFileOnDisk(const pSourceFileDesc& fileName) {
     pJITTarget engine(runtime_, m, cTarget.entryFunctionName());
 
     engine.configureWith(this);
-    engine.execute();
+
+    try {
+        engine.execute();
+    }
+    catch (pRuntimeError& r) {
+        // TODO: reset runtime state
+        std::cerr << "pCachedJIT: caught runtime error" << std::endl;
+    }
 
     // TODO: what about m? does llvm JIT clean it up?
     // delete m;

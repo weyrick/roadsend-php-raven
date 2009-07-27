@@ -67,6 +67,7 @@ public:
     void fatalError(pMsgString msg) {
         fatalState_ = true;
         notify(E_ERROR, msg);
+        throw pRuntimeError(msg);
     }
 
     // XXX exception throw

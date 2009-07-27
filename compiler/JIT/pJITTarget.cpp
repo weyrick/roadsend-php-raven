@@ -27,6 +27,7 @@
 #include <llvm/System/DynamicLibrary.h>
 #include <llvm/ModuleProvider.h>
 #include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Target/TargetOptions.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
 
@@ -73,6 +74,10 @@ bool pJIT::executeMain(llvm::Module* M) {
 
 //bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
 void pJITTarget::execute(void) {
+
+    // we need exception handling for our c++ runtime to work properly
+    // therefore we tell llvm JIT to generate the proper dwarf tables
+    llvm::ExceptionHandling = true;
 
     ExistingModuleProvider* MP = new ExistingModuleProvider(llvmModule_);
 
