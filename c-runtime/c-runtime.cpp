@@ -49,6 +49,11 @@ extern "C" {
         e->output << v;
     }
 
+    // create a new pVar for a NULL
+    pVar rphp_make_pVar_pNull() {
+        return pVar(pNull);
+    }
+
     // create a new binary string
     pVar rphp_make_pVar_pBString(const char* str) {
         return pVar(pBString(str));
@@ -81,6 +86,10 @@ extern "C" {
 
     pVar rphp_make_pVar_pHash() {
         return pHashP(new pHash());
+    }
+
+    int rphp_pVar_evalAsBool(pVar arg) {
+    	return arg.evalAsBool();
     }
 
     void rphp_pHash_insertNext(pVar h, pVar v) {

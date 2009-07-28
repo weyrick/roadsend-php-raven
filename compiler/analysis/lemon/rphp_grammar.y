@@ -224,11 +224,22 @@ inlineHTML(A) ::= T_INLINE_HTML(B).
 
 // conditionals
 %type ifBlock {AST::ifStmt*}
+
+// if with else
+ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY) T_ELSE statementBlock(FALSEBODY).
+{
+	A = new AST::ifStmt(COND, TRUEBODY, FALSEBODY);
+	A->setLine(TOKEN_LINE(IF));
+}
+
+// if without else
 ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY).
 {
-    A = new AST::ifStmt(COND, TRUEBODY);
+    A = new AST::ifStmt(COND, TRUEBODY, 0);
     A->setLine(TOKEN_LINE(IF));
 }
+
+
 
 /** DECLARATIONS **/
 

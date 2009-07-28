@@ -139,16 +139,19 @@ class ifStmt: public stmt {
 
     expr* condition_;
     block* trueBlock_;
+    block* falseBlock_;
 
 public:
-    ifStmt(expr* cond, block* trueBlock): stmt(ifStmtKind), condition_(cond), trueBlock_(trueBlock) { }
+    ifStmt(expr* cond, block* trueBlock, block* falseBlock): stmt(ifStmtKind), condition_(cond), trueBlock_(trueBlock), falseBlock_(falseBlock) { }
     ~ifStmt(void) {
         delete condition_;
         delete trueBlock_;
+        delete falseBlock_;
     }
 
     expr* condition(void) { return condition_; }
     block* trueBlock(void) { return trueBlock_; }
+    block* falseBlock(void) { return falseBlock_; }
 
 };
 

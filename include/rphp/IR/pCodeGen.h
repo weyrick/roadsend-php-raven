@@ -24,6 +24,7 @@
 
 #include <queue>
 #include <string>
+#include <stack>
 
 #include <boost/unordered_map.hpp>
 
@@ -57,17 +58,21 @@ private:
     llvm::IRBuilder<> currentBlock_;
     llvm::Value* runtimeEngine_; // don't own
 
+    llvm::BasicBlock* allocBlock;
+    llvm::BasicBlock* beginBlock;
+    std::stack<llvm::BasicBlock*> endingIfBlocks_;
     llvm::Function* thisFunction_;
 
-    std::queue<llvm::Value*> valueStack_;
+    std::stack<llvm::Value*> valueStack_;
     std::queue<valueVectorType> destructList_;
 
     symbolTableType symTable_;
 
     unsigned int wordSize_;
+    unsigned int ifRecursionDepth_;
 
     llvm::Value* newVarOnStack(const char*);
-
+    llvm::BasicBlock* visitInOwnBlock(AST::stmt* n, const std::string &Name = "");
 public:
 
     pCodeGen(llvm::Module* mod, const pIdentString& funSym);
@@ -87,6 +92,7 @@ public:
     void visit_assignment(AST::assignment*);
     void visit_var(AST::var*);
     void visit_functionInvoke(AST::functionInvoke*);
+    void visit_ifStmt(AST::ifStmt*);
 
 };
 

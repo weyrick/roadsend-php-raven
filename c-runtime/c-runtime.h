@@ -53,11 +53,15 @@ extern "C" {
 
     rphp::pVar rphp_make_pVar_pHash();
 
+    rphp::pVar rphp_make_pVar_pNull();
+
     void rphp_pHash_insertNext(rphp::pVar h, rphp::pVar v);
     void rphp_pHash_insert(rphp::pVar h, rphp::pVar k, rphp::pVar v);
 
     rphp::pVar rphp_make_pVar_pObject(const char* name );
     //
+
+    int rphp_pVar_evalAsBool(rphp::pVar arg);
 
     // function registration
     void rphp_registerUserFun0(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer0 p);

@@ -47,7 +47,8 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     destructList_(),
     symTable_(),
     // TODO: better way to get int size?
-    wordSize_((llvmModule_->getPointerSize() == Module::Pointer64) ? 64 : 32)
+    wordSize_((llvmModule_->getPointerSize() == Module::Pointer64) ? 64 : 32),
+    ifRecursionDepth_(0)
 {
 
     thisFunction_ = llvmModule_->getFunction(functionSymbol_);
@@ -67,6 +68,14 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
 
     destructList_.push(valueVectorType());
 
+
+    allocBlock = BasicBlock::Create("allocBlock", thisFunction_);
+    currentBlock_.CreateBr(allocBlock);
+
+    // Go to this at the end of allocBlock.
+    beginBlock = BasicBlock::Create("begin", thisFunction_);
+    currentBlock_.SetInsertPoint(beginBlock);
+
 }
 
 pCodeGen::~pCodeGen(void) {
@@ -80,13 +89,20 @@ void pCodeGen::finalize(void) {
     // destruct current stack vars
     Function* destructor = llvmModule_->getFunction("_ZN4rphp4pVarD1Ev");
     assert(destructor != NULL);
+    BasicBlock* end = BasicBlock::Create("end", thisFunction_);
+    currentBlock_.CreateBr(end);
+    currentBlock_.SetInsertPoint(end);
     for (valueVectorType::iterator i = destructList_.back().begin(); i != destructList_.back().end(); ++i) {
-        thisFunction_->getEntryBlock().getInstList().push_back(CallInst::Create(destructor, *i));
+        currentBlock_.CreateCall(destructor, *i);
     }
     destructList_.pop();
     // create return
-    thisFunction_->getEntryBlock().getInstList().push_back(ReturnInst::Create());
+    currentBlock_.CreateRet(0);
 
+    // newVarOnStack isn't used anymore, so build it's block end.
+    currentBlock_.SetInsertPoint(allocBlock);
+    // Jump to the beginBlock.
+    currentBlock_.CreateBr(beginBlock);
 
 }
 
@@ -101,13 +117,27 @@ llvm::Value* pCodeGen::newVarOnStack(const char* name) {
     Function* constructor = llvmModule_->getFunction("_ZN4rphp4pVarC1Ev");
     assert(constructor != NULL);
 
-    CallInst* con = CallInst::Create(constructor, pVarTmp);
-    thisFunction_->getEntryBlock().getInstList().push_back(con);
+    BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
+    currentBlock_.SetInsertPoint(allocBlock);
+    currentBlock_.CreateCall(constructor, pVarTmp);
+    currentBlock_.SetInsertPoint(oldBlock);
 
     destructList_.back().push_back(pVarTmp);
 
     return pVarTmp;
 
+}
+
+BasicBlock* pCodeGen::visitInOwnBlock(AST::stmt* n, const std::string &Name)
+{
+	llvm::BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
+	llvm::BasicBlock* block = llvm::BasicBlock::Create(Name, thisFunction_);
+	if(n) {
+		currentBlock_.SetInsertPoint(block);
+		visit(n);
+		currentBlock_.SetInsertPoint(oldBlock);
+	}
+	return block;
 }
 
 void pCodeGen::visit_literalString(AST::literalString* n) {
@@ -203,9 +233,12 @@ void pCodeGen::visit_literalNull(AST::literalNull* n) {
 
     Value* pVarTmp = newVarOnStack("pNullTmp");
 
+    Function* f = llvmModule_->getFunction("rphp_make_pVar_pNull");
+    assert(f != NULL);
+    currentBlock_.CreateCall(f, pVarTmp);
+
     // push to stack
     valueStack_.push(pVarTmp);
-
 }
 
 void pCodeGen::visit_literalArray(AST::literalArray* n) {
@@ -231,12 +264,11 @@ void pCodeGen::visit_literalArray(AST::literalArray* n) {
         i != n->itemList().rend();
         ++i)
     {
-
         // gen key (if necessary) and value
         if ((*i).key) {
             visit((*i).key);
             assert(valueStack_.size() && "array key didn't push a value!");
-            key = valueStack_.back();
+            key = valueStack_.top();
             valueStack_.pop();
         }
         else {
@@ -245,7 +277,7 @@ void pCodeGen::visit_literalArray(AST::literalArray* n) {
 
         visit((*i).val);
         assert(valueStack_.size() && "array value didn't push a value!");
-        val = valueStack_.back();
+        val = valueStack_.top();
         valueStack_.pop();
 
         // insert
@@ -260,7 +292,6 @@ void pCodeGen::visit_literalArray(AST::literalArray* n) {
 
     // push to stack
     valueStack_.push(pHashTmp);
-
 }
 
 void pCodeGen::visit_inlineHtml(AST::inlineHtml* n) {
@@ -276,14 +307,13 @@ void pCodeGen::visit_inlineHtml(AST::inlineHtml* n) {
 void pCodeGen::visit_echoStmt(AST::echoStmt* n) {
 
     visit(n->rVal());
-    Value* rVal = valueStack_.back();
+    Value* rVal = valueStack_.top();
     valueStack_.pop();
 
     Function *f = llvmModule_->getFunction("rphp_print_pVar");
     assert(f != NULL);
 
     currentBlock_.CreateCall2(f, runtimeEngine_, rVal);
-
 }
 
 void pCodeGen::visit_assignment(AST::assignment* n) {
@@ -291,7 +321,7 @@ void pCodeGen::visit_assignment(AST::assignment* n) {
     // gen rval
     visit(n->rVal());
     assert(valueStack_.size() && "rVal didn't push a value!");
-    Value* rVal = valueStack_.back();
+    Value* rVal = valueStack_.top();
     valueStack_.pop();
 
     // gen lval
@@ -301,14 +331,14 @@ void pCodeGen::visit_assignment(AST::assignment* n) {
         name = l->name();
     }
     visit(n->lVal());
-    Value* lVal = valueStack_.back();
+    Value* lVal = valueStack_.top();
     valueStack_.pop();
 
     Function* f = llvmModule_->getFunction("_ZN4rphp4pVaraSERKS0_");
     assert(f != NULL);
 
     currentBlock_.CreateCall2(f, lVal, rVal, name.c_str());
-
+    //@TODO: push the return to the stack, make the assignement function to adhere php's standards here.
 }
 
 void pCodeGen::visit_var(AST::var* n) {
@@ -364,13 +394,73 @@ void pCodeGen::visit_functionInvoke(AST::functionInvoke* n) {
     // visit arguments in reverse order, add to call arg list as we go
     for (AST::expressionList::reverse_iterator i = n->argList().rbegin(); i != n->argList().rend(); ++i) {
         visit(*i);
-        callArgList.push_back(valueStack_.back());
+        callArgList.push_back(valueStack_.top());
         valueStack_.pop();
     }
 
     currentBlock_.CreateCall(f, callArgList.begin(), callArgList.end());
 
     valueStack_.push(retval);
+}
+
+void pCodeGen::visit_ifStmt(AST::ifStmt* n) {
+
+	// Keep track of the level of recursion, so we can adjust the afterConds accordingly.
+	ifRecursionDepth_++;
+
+	// Trueblock
+	llvm::BasicBlock* trueBlock = visitInOwnBlock(n->trueBlock(), "trueblock");
+
+	// Falseblock, visitInOwnBlock handles NULLs.
+	llvm::BasicBlock* falseBlock = visitInOwnBlock(n->falseBlock(), "falseblock");
+
+	// Condition
+	//assert(currentBlock_.GetInsertBlock()->getTerminator() == NULL && "Already a terminator instruction in this BB!");
+	visit(n->condition());
+
+	Function* evalTo = llvmModule_->getFunction("rphp_pVar_evalAsBool");
+	assert(evalTo != NULL && "Couldn't find the rphp_pVar_evalAsBool function in the runtime");
+
+	//@TODO: do we have to valueStack_.pop() here?
+	// I guess we do, as we consume that value of the condition expression.
+	Value* conditionValue = currentBlock_.CreateCall(evalTo, valueStack_.top());
+	valueStack_.pop();
+
+	Value* trueValue = ConstantInt::get(evalTo->getReturnType(), 1);
+
+	llvm::Value* condition = currentBlock_.CreateICmpEQ(conditionValue, trueValue, "if-cmp");
+	llvm::BasicBlock* afterCond = BasicBlock::Create("afterCond", thisFunction_);
+
+	// Branch
+	currentBlock_.CreateCondBr(condition, trueBlock, falseBlock);
+
+	// Both blocks jump after there execution to the afterCond block.
+	// Don't create branch instructions in already terminated BBs, llvm doesn't like this.
+	// This happens when the control flow moves out of these BBs during the execution of the if.
+	// Note: LLVM doesn't support nested Blocks, that's why this is necessary at all.
+	if(!trueBlock->getTerminator()) {
+		currentBlock_.SetInsertPoint(trueBlock);
+		currentBlock_.CreateBr(afterCond);
+	}
+	if(!falseBlock->getTerminator()) {
+		currentBlock_.SetInsertPoint(falseBlock);
+		currentBlock_.CreateBr(afterCond);
+	}
+
+	// Fix up the Control Flow, as when we do an if() in another if, we leave it's BB, and afterwards we get in another BB
+	// To which we need to add our branch.
+	while(!endingIfBlocks_.empty()) {
+		llvm::BasicBlock* block = endingIfBlocks_.top();
+		if(!block->getTerminator()) {
+			currentBlock_.SetInsertPoint(block);
+			currentBlock_.CreateBr(afterCond);
+		}
+		endingIfBlocks_.pop();
+	}
+	currentBlock_.SetInsertPoint(afterCond);
+	ifRecursionDepth_--;
+	if(ifRecursionDepth_)
+		endingIfBlocks_.push(afterCond);
 
 }
 
