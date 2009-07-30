@@ -61,10 +61,10 @@ public:
     void startUp(void);
 
     // this matches pNotifyEmitFun
-    void notify(pUInt level, pMsgString msg);
+    void notify(pUInt level, const pMsgString& msg);
 
     // fatal error
-    void fatalError(pMsgString msg) {
+    void fatalError(const pMsgString& msg) {
         fatalState_ = true;
         notify(E_ERROR, msg);
         throw pRuntimeError(msg);
@@ -73,17 +73,17 @@ public:
     // XXX exception throw
 
     // throw php notice
-    void notice(pMsgString msg) {
+    void notice(const pMsgString& msg) {
         notify(E_NOTICE, msg);
     }
 
     // throw php warning
-    void warning(pMsgString msg) {
+    void warning(const pMsgString& msg) {
         notify(E_WARNING, msg);
     }
 
     // throw php recoverable error
-    void recoverableError(pMsgString msg) {
+    void recoverableError(const pMsgString& msg) {
         notify(E_RECOVERABLE_ERROR, msg);
     }
 

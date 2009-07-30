@@ -85,7 +85,7 @@ void pErrorManager::startUp(void) {
 
 }
 
-void pErrorManager::notify(pUInt level, pMsgString msg) {
+void pErrorManager::notify(pUInt level, const pMsgString& msg) {
 
     if (errorHandler_) {
         pVar retval;
