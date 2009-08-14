@@ -125,7 +125,13 @@ extern "C" {
     }
 
     pVar rphp_funCall0(pRuntimeEngine* r, const char* name) {
-        return r->functionManager->invoke(name);
+        //return r->functionManager->invoke(name);
+        try {
+            return r->functionManager->invoke(name);
+        }
+        catch (...) {
+            std::cerr << "caught somethin" << std::endl;
+        }
     }
 
     pVar rphp_funCall1(pRuntimeEngine* r, const char* name, pVar arg1) {

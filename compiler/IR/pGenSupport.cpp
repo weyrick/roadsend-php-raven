@@ -106,7 +106,7 @@ Module* pGenSupport::readBitcode(std::string fileName) {
 Module* pGenSupport::getRuntimeIR() {
 
     sys::Path irFile;
-    
+
     char* libPath = getenv("RPHP_IR_PATH");
     if (libPath) {
         irFile.set(libPath);
@@ -115,15 +115,15 @@ Module* pGenSupport::getRuntimeIR() {
         // assume build dir
         irFile.set("../lib");
     }
-    irFile.appendComponent("c-runtime.ir");
+    irFile.appendComponent("c-runtime.bc");
 
     if (irFile.exists()) {
         return readBitcode(irFile.toString());
     }
     else {
-        throw pCompileError("unable to find c-runtime.ir - please set RPHP_IR_PATH environment variable to point to the directory containing this file.");
+        throw pCompileError("unable to find c-runtime.bc - please set RPHP_IR_PATH environment variable to point to the directory containing this file.");
     }
-    
+
 
 }
 
@@ -131,14 +131,14 @@ Module* pGenSupport::getRuntimeIR() {
 void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFunctionName) {
 
     pIRHelper irHelper(llvmModule);
-    
+
     // void main(void)
     FunctionType *FT = FunctionType::get(Type::VoidTy, std::vector<const Type*>(),
                                         /*not vararg*/false);
     Function *main = Function::Create(FT, Function::ExternalLinkage, "main", llvmModule);
     IRBuilder<> block;
     block.SetInsertPoint(BasicBlock::Create("entry", main));
-    
+
     // alloc return value
     AllocaInst* pVarTmp = block.CreateAlloca(irHelper.pVarType(), 0, "retVal");
 
@@ -151,17 +151,17 @@ void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFuncti
     Function* newRuntime = llvmModule->getFunction("rphp_newRuntimeEngine");
     assert(newRuntime != NULL);
     Value* runtime = block.CreateCall(newRuntime, "runtime");
-    
+
     // call entry function
     Function* entry = llvmModule->getFunction(entryFunctionName);
     assert(entry != NULL);
     block.CreateCall2(entry, pVarTmp, runtime);
-    
+
     // close runtime
     Function* deleteRuntime = llvmModule->getFunction("rphp_deleteRuntimeEngine");
     assert(deleteRuntime != NULL);
     block.CreateCall(deleteRuntime, runtime);
-    
+
     // destruct return value
     Function* destructor = llvmModule->getFunction("_ZN4rphp4pVarD1Ev");
     assert(destructor != NULL);
@@ -169,7 +169,7 @@ void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFuncti
 
     // return
     block.CreateRetVoid();
-    
+
     //dumpIR(llvmModule);
 
     return;
@@ -186,7 +186,7 @@ void pGenSupport::dumpIR(Module* llvmModule) {
     for(ValueSymbolTable::const_iterator s = sTable.begin(); s != sTable.end(); ++s) {
         name.assign(s->getKeyData());
         if (// functions start with the module identifier name (mangled script file name)
-            name == "main" || 
+            name == "main" ||
             name.substr(0, llvmModule->getModuleIdentifier().length()) == llvmModule->getModuleIdentifier() ||
             // global literal strings
             name.substr(0, 5) == ".bstr" ||

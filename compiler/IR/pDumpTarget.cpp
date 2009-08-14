@@ -92,9 +92,9 @@ void pDumpTarget::dumpIR(void) {
     llvm::Module* ir = codeGen.getIR();
     IR::pGenSupport::dumpIR(ir);
     std::string errMsg;
-//    if (llvm::verifyModule(*ir, llvm::ReturnStatusAction, &errMsg)) {
-//        std::cout << "IR verify failed: " << errMsg << std::endl;
-//    }
+    if (llvm::verifyModule(*ir, llvm::ReturnStatusAction, &errMsg)) {
+        std::cout << "*** IR verify failed: " << errMsg << std::endl;
+    }
     delete ir;
 
 }
