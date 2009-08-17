@@ -51,6 +51,11 @@ add_subdirectory(compiler)
 add_subdirectory(frontend/cli)
 add_subdirectory(frontend/http)
 
+# check whether to include the sandbox
+IF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+add_subdirectory(sandbox)
+ENDIF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+
 IF(CPPUNIT_FOUND)
   ENABLE_TESTING()
   ADD_TEST(rphp-runtime-suite runtime/test/rphp-runtime-suite)
