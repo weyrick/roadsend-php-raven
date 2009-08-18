@@ -39,3 +39,12 @@ void mockRuntimeLib::throwError(const std::string& msg) {
 
 }
 
+mockRuntimeLib lib;
+
+
+extern "C" {
+	void mockError() {
+		lib.mockError();
+	}
+}
+

@@ -14,9 +14,17 @@ set(SB_CPPE_LIB_SRC_FILES
 # exceptions
 set(SB_CPPE_JIT_SRC_FILES
   cpp-jit-catcher.cpp
+   ${LLVM_LIBS_JIT_OBJECTS}
 )
 
+# A normal program calling the runtime function
+set(SB_CPPE_NORM_SRC_FILES
+  cpp-call-runtime.cpp
+)
+
+
 add_executable( cpp-jit-catcher ${SB_CPPE_JIT_SRC_FILES} )
+add_executable( cpp-call-runtime ${SB_CPPE_NORM_SRC_FILES} )
 
 set_target_properties( cpp-jit-catcher
                        PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
@@ -28,5 +36,9 @@ target_link_libraries( cpp-jit-catcher
                        ${LLVM_LIBS_JIT}
                        cpp-lib
                      )                       
+
+target_link_libraries( cpp-call-runtime
+                       cpp-lib
+                     )
 
 

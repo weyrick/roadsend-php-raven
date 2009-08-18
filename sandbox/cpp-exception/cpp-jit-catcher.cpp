@@ -18,69 +18,97 @@
 ;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
    ***** END LICENSE BLOCK *****
 */
-
+#include <llvm/CallingConv.h>
+#include <llvm/Function.h>
 #include <llvm/Module.h>
+#include <llvm/PassManager.h>
 #include <llvm/System/DynamicLibrary.h>
 #include <llvm/ModuleProvider.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
+#include <llvm/Analysis/Verifier.h>
+#include <llvm/Assembly/PrintModulePass.h>
+#include <llvm/Support/IRBuilder.h>
+
 
 #include <iostream>
 #include <string>
 
 using namespace llvm;
 
+ExecutionEngine *executionEngine;
 
-// TODO: generate IR that calls into the mock runtime lib
-// then execute it inside of a c++ try/catch to verify exceptions
 
-/*
-void execute(void) {
+// copy & paste by the llvm JIT tutorial.
 
-    // we need exception handling for our c++ runtime to work properly
-    // therefore we tell llvm JIT to generate the proper dwarf tables
+Module* makeLLVMModule() {
     llvm::ExceptionHandling = true;
 
-    ExistingModuleProvider* MP = new ExistingModuleProvider(llvmModule_);
+	// Module Construction
+	Module* mod = new Module("cppe-mod");
 
-    std::string errMsg;
-    ExecutionEngine* EE = ExecutionEngine::createJIT(MP, &errMsg);
-    if (!EE) {
-        std::cerr << errMsg << std::endl;
-        return;// false;
-    }
-
-    // EE now owns MP and M
-    Function* main = MP->getModule()->getFunction(entryFunction_);
-
-    if (!main) {
-        std::cerr << "error: entry symbol not found: " << entryFunction_ << std::endl;
-        delete EE;
-        return;// false;
-    }
-
-    EE->runStaticConstructorsDestructors(false);
-
-    // JIT magic
-    //pRuntimeEngine* r = new pRuntimeEngine();
-    void *mainPtr = EE->getPointerToFunction(main);
-//    std::cerr << "found main function at: " << mainPtr << std::endl;
-    // cast to entry function type (returns void, takes one parameter of runtime engine instance)
-    // see pGenerator::createEntryPoint, pIRHelper::moduleEntryFunType
-    void (*mainFunc)(pVar*,pRuntimeEngine*) = (void (*)(pVar*,pRuntimeEngine*))mainPtr;
-    pVar retVal;
-    mainFunc(&retVal, runtime_);
-
-    EE->runStaticConstructorsDestructors(true);
-
-    // FIXME: leak?
-    //delete EE;
-    //delete r;
-
-    //return true;
-
+	return mod;
 }
 
-*/
+Function* createCallFunc(Module* mod)
+{
+	// Create the function which we JIT and call.
+	Constant* c = mod->getOrInsertFunction("cppe-func", Type::VoidTy, NULL);
+	Function* func = cast<Function>(c);
+
+	// Get the type of the function in the runtime, mockError();
+	std::vector<const Type*>RuntimeFuncArgs;
+	FunctionType* RuntimeFuncType = FunctionType::get(
+			/*Result=*/Type::VoidTy,
+			/*Params=*/RuntimeFuncArgs,
+			/*isVarArg=*/false);
+
+	// Get the type for the pointer to it.
+	PointerType* RuntimeFuncTypePtr = PointerType::get(RuntimeFuncType, 0);
+
+	// Get a constant for the address of the function in the runtime, this is currently x86_64 specific!!
+	ConstantInt* addressConstant = ConstantInt::get(APInt(64, (uint64_t)sys::DynamicLibrary::SearchForAddressOfSymbol("mockError")));
+	// Cast the address constant to a funcptr
+	Constant* funcAddress = ConstantExpr::getCast(Instruction::IntToPtr, addressConstant, RuntimeFuncTypePtr);
+
+	// IR setup
+	BasicBlock* entry = BasicBlock::Create("entry", func);
+	IRBuilder<> builder(entry);
+
+	// Call the runtime func.
+	builder.CreateCall(funcAddress);
+
+	// Terminator instruction
+	builder.CreateRetVoid();
+	return func;
+}
+
+int main()
+{
+	// Load the cpp mock runtime
+	sys::DynamicLibrary::LoadLibraryPermanently("./libcpp-lib.so");
+
+	Module* mod = makeLLVMModule();
+	executionEngine = ExecutionEngine::create(mod);
+	Function* execFunc = createCallFunc(mod);
+
+	executionEngine->runStaticConstructorsDestructors(false);
+	verifyModule(*mod, PrintMessageAction);
+
+	// JIT and exec the generated function-
+	void* funcPtr = executionEngine->getPointerToFunction(execFunc);
+	void (*func)() = (void (*)())funcPtr;
+	
+	try {
+	func();
+	}
+	catch(...)
+	{
+		std::cerr<<"exception catched"<<std::endl;
+	}
+	executionEngine->runStaticConstructorsDestructors(true);
+
+	return 0;
+}

@@ -32,3 +32,6 @@ public:
 
 };
 
+extern "C" {
+	void mockError();
+}
