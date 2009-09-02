@@ -53,7 +53,7 @@ FunctionType* pIRHelper::pVarBaseFunType() {
     std::vector<const Type*>args;
     args.push_back(pVarPointerType());
     FunctionType* funType = FunctionType::get(
-    /*Result=*/Type::VoidTy,
+    /*Result=*/Type::getVoidTy(getGlobalContext()),
     /*Params=*/args,
     /*isVarArg=*/false);
 
@@ -69,7 +69,7 @@ FunctionType* pIRHelper::pUserFunction0() {
     args.push_back(runtimeEngineType());
     FunctionType* funType = FunctionType::get(
     /*Result=*///pVarPointerType(),
-    Type::VoidTy,
+    Type::getVoidTy(getGlobalContext()),
     /*Params=*/args,
     /*isVarArg=*/false);
 
@@ -86,7 +86,7 @@ FunctionType* pIRHelper::pUserFunction1() {
     args.push_back(pVarPointerType());
     FunctionType* funType = FunctionType::get(
     /*Result=*///pVarPointerType(),
-    Type::VoidTy,
+    Type::getVoidTy(getGlobalContext()),
     /*Params=*/args,
     /*isVarArg=*/false);
 
@@ -104,7 +104,7 @@ FunctionType* pIRHelper::pUserFunction2() {
     args.push_back(pVarPointerType());
     FunctionType* funType = FunctionType::get(
     /*Result=*///pVarPointerType(),
-    Type::VoidTy,
+    Type::getVoidTy(getGlobalContext()),
     /*Params=*/args,
     /*isVarArg=*/false);
 
@@ -123,7 +123,7 @@ FunctionType* pIRHelper::pUserFunction3() {
     args.push_back(pVarPointerType());
     FunctionType* funType = FunctionType::get(
     /*Result=*///pVarPointerType(),
-    Type::VoidTy,
+    Type::getVoidTy(getGlobalContext()),
     /*Params=*/args,
     /*isVarArg=*/false);
 
@@ -143,7 +143,7 @@ FunctionType* pIRHelper::pUserFunction4() {
     args.push_back(pVarPointerType());
     FunctionType* funType = FunctionType::get(
     /*Result=*///pVarPointerType(),
-    Type::VoidTy,
+    Type::getVoidTy(getGlobalContext()),
     /*Params=*/args,
     /*isVarArg=*/false);
 
@@ -164,7 +164,7 @@ FunctionType* pIRHelper::pUserFunction5() {
     args.push_back(pVarPointerType());
     FunctionType* funType = FunctionType::get(
     /*Result=*///pVarPointerType(),
-    Type::VoidTy,
+    Type::getVoidTy(getGlobalContext()),
     /*Params=*/args,
     /*isVarArg=*/false);
 
@@ -180,7 +180,7 @@ FunctionType* pIRHelper::moduleEntryFunType() {
     std::vector<const Type*> efArgs;
     efArgs.push_back(pVarPointerType()); // retval
     efArgs.push_back(runtimeEngineType());
-    return FunctionType::get(Type::VoidTy, /* return type */
+    return FunctionType::get(Type::getVoidTy(getGlobalContext()), /* return type */
                              efArgs, /* arguments */
                              false /*not vararg*/);
 
@@ -191,7 +191,7 @@ FunctionType* pIRHelper::moduleInitFunType() {
     // entry function type: void (*)(pRuntimeEngine*)
     std::vector<const Type*> efArgs;
     efArgs.push_back(runtimeEngineType());
-    return FunctionType::get(Type::VoidTy, /* return type */
+    return FunctionType::get(Type::getVoidTy(getGlobalContext()), /* return type */
                              efArgs, /* arguments */
                              false /*not vararg*/);
 
@@ -203,8 +203,8 @@ llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLe
     finalLen = s.length()+1;
 
     // global value creation
-    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(8), finalLen);
-    GlobalVariable* gVarStr = new GlobalVariable(
+    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(getGlobalContext(),8), finalLen);
+    GlobalVariable* gVarStr = new GlobalVariable(getGlobalContext(),
                                     /*Type=*/byteArrayType,
                                     /*isConstant=*/true,
                                     /*Linkage=*/GlobalValue::InternalLinkage,
@@ -213,12 +213,12 @@ llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLe
                                     mod_);
 
     // constant definition
-    Constant* constArray = ConstantArray::get(s, true);
+    Constant* constArray = ConstantArray::get(getGlobalContext(), s, true);
     gVarStr->setInitializer(constArray);
 
     // get pointer to global str
     std::vector<Constant*> indices;
-    Constant* nullC = Constant::getNullValue(IntegerType::get(32));
+    Constant* nullC = Constant::getNullValue(IntegerType::get(getGlobalContext(),32));
     indices.push_back(nullC);
     indices.push_back(nullC);
 
@@ -251,8 +251,8 @@ llvm::Constant* pIRHelper::stringConstant(const std::wstring& s, int32_t& finalL
     finalLen = ustr.length();
 
     // global value creation
-    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(8), finalLen);
-    GlobalVariable* gVarStr = new GlobalVariable(
+    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(getGlobalContext(), 8), finalLen);
+    GlobalVariable* gVarStr = new GlobalVariable(getGlobalContext(),
                                     /*Type=*/byteArrayType,
                                     /*isConstant=*/true,
                                     /*Linkage=*/GlobalValue::InternalLinkage,
@@ -261,12 +261,12 @@ llvm::Constant* pIRHelper::stringConstant(const std::wstring& s, int32_t& finalL
                                     mod_);
 
     // constant definition
-    Constant* constArray = ConstantArray::get(ustr, false);
+    Constant* constArray = ConstantArray::get(getGlobalContext(), ustr, false);
     gVarStr->setInitializer(constArray);
 
     // get pointer to global str
     std::vector<Constant*> indices;
-    Constant* nullC = Constant::getNullValue(IntegerType::get(32));
+    Constant* nullC = Constant::getNullValue(IntegerType::get(getGlobalContext(), 32));
     indices.push_back(nullC);
     indices.push_back(nullC);
 

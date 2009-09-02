@@ -88,7 +88,7 @@ Module* pGenSupport::readBitcode(std::string fileName) {
         throw pCompileError("error loading runtime IR file [" + fileName + "]: " + errMsg);
     }
 
-    ModuleProvider* mp = getBitcodeModuleProvider(mb, &errMsg);
+    ModuleProvider* mp = getBitcodeModuleProvider(mb, getGlobalContext(), &errMsg);
     if (errMsg.length()) {
         throw pCompileError("error parsing bitcode file [" + fileName + "]: " + errMsg);
     }
@@ -133,11 +133,11 @@ void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFuncti
     pIRHelper irHelper(llvmModule);
 
     // void main(void)
-    FunctionType *FT = FunctionType::get(Type::VoidTy, std::vector<const Type*>(),
+    FunctionType *FT = FunctionType::get(Type::getVoidTy(getGlobalContext()), std::vector<const Type*>(),
                                         /*not vararg*/false);
     Function *main = Function::Create(FT, Function::ExternalLinkage, "main", llvmModule);
-    IRBuilder<> block;
-    block.SetInsertPoint(BasicBlock::Create("entry", main));
+    IRBuilder<> block(getGlobalContext());
+    block.SetInsertPoint(BasicBlock::Create(getGlobalContext(), "entry", main));
 
     // alloc return value
     AllocaInst* pVarTmp = block.CreateAlloca(irHelper.pVarType(), 0, "retVal");

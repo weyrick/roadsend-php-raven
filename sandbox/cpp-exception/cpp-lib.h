@@ -32,6 +32,9 @@ public:
 
 };
 
+
 extern "C" {
-	void mockError();
+  void mockError();
 }
+
+

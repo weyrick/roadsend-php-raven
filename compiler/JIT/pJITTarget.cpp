@@ -30,6 +30,8 @@
 #include <llvm/Target/TargetOptions.h>
 #include <llvm/ExecutionEngine/JIT.h>
 #include <llvm/ExecutionEngine/GenericValue.h>
+#include <llvm/Target/TargetSelect.h>
+#include <llvm/Support/ManagedStatic.h>
 
 #include <iostream>
 #include <string>
@@ -75,21 +77,26 @@ bool pJIT::executeMain(llvm::Module* M) {
 //bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
 void pJITTarget::execute(void) {
 
+    //llvm::sys::DynamicLibrary::LoadLibraryPermanently("librphp-runtime.so");
+
     // we need exception handling for our c++ runtime to work properly
     // therefore we tell llvm JIT to generate the proper dwarf tables
-    llvm::ExceptionHandling = true;
+    InitializeNativeTarget();
+    llvm::DwarfExceptionHandling = true;
+    llvm::UnwindTablesMandatory = true;
 
-    ExistingModuleProvider* MP = new ExistingModuleProvider(llvmModule_);
+    //ExistingModuleProvider* MP = new ExistingModuleProvider(llvmModule_);
 
-    std::string errMsg;
-    ExecutionEngine* EE = ExecutionEngine::createJIT(MP, &errMsg);
+    //std::string errMsg;
+    //ExecutionEngine* EE = ExecutionEngine::createJIT(MP, &errMsg);
+    ExecutionEngine* EE = EngineBuilder(llvmModule_).create();
     if (!EE) {
-        std::cerr << errMsg << std::endl;
+        std::cerr << "unable to create JIT" << std::endl;
         return;// false;
     }
 
-    // EE now owns MP and M
-    Function* main = MP->getModule()->getFunction(entryFunction_);
+    // EE now owns llvmModule_
+    Function* main = llvmModule_->getFunction(entryFunction_);
 
     if (!main) {
         std::cerr << "error: entry symbol not found: " << entryFunction_ << std::endl;
@@ -97,7 +104,7 @@ void pJITTarget::execute(void) {
         return;// false;
     }
 
-    EE->runStaticConstructorsDestructors(false);
+    EE->runStaticConstructorsDestructors(llvmModule_, false);
 
     // JIT magic
     //pRuntimeEngine* r = new pRuntimeEngine();
@@ -109,13 +116,11 @@ void pJITTarget::execute(void) {
     pVar retVal;
     mainFunc(&retVal, runtime_);
 
-    EE->runStaticConstructorsDestructors(true);
+    EE->runStaticConstructorsDestructors(llvmModule_, true);
 
-    // FIXME: leak?
-    //delete EE;
-    //delete r;
+    delete EE;
+    llvm_shutdown();
 
-    //return true;
 
 }
 

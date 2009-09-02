@@ -35,7 +35,7 @@ using namespace llvm;
 namespace rphp { namespace IR {
 
 pGenerator::pGenerator(pSourceModule& mod):
-    llvmModule_(new Module(mod.fileName())),
+    llvmModule_(new Module(mod.fileName(), getGlobalContext())),
     sourceModule_(mod),
     entryFunction_(NULL),
     initFunction_(NULL),
@@ -45,21 +45,21 @@ pGenerator::pGenerator(pSourceModule& mod):
     loadAndLinkRuntimeIR();
     createEntryPoint();
     runPasses();
-    
+
 }
 
 void pGenerator::runPasses() {
 
     assert(entryFunction_ != NULL);
     assert(initFunction_ != NULL);
-    
+
     pDeclare* declarePass = new pDeclare(llvmModule_, initFunction_);
     sourceModule_.applyVisitor(declarePass);
     delete declarePass;
 
     // declare is over, terminate init function
-    initFunction_->getEntryBlock().getInstList().push_back(ReturnInst::Create());
-    
+    initFunction_->getEntryBlock().getInstList().push_back(ReturnInst::Create(getGlobalContext()));
+
     AST::statementList& topStmts = sourceModule_.getAST();
     pCodeGen* codeGenPass;
 
@@ -124,16 +124,16 @@ void pGenerator::createEntryPoint(void) {
                                      Function::ExternalLinkage,
                                      pGenSupport::mangleInitFunctionName(llvmModule_->getModuleIdentifier()),
                                      llvmModule_);
-    initFunction_->arg_begin()->setName("rEngine");    
-    BasicBlock::Create("entry", initFunction_);
-    
+    initFunction_->arg_begin()->setName("rEngine");
+    BasicBlock::Create(getGlobalContext(), "entry", initFunction_);
+
     // module entry, entry block. exit is created in pCodeGen finalize
-    IRBuilder<> block;
-    block.SetInsertPoint(BasicBlock::Create("entry", entryFunction_));
+    IRBuilder<> block(getGlobalContext());
+    block.SetInsertPoint(BasicBlock::Create(getGlobalContext(), "entry", entryFunction_));
 
     // call init function
     block.CreateCall(initFunction_, runtime);
-    
+
 }
 
 const pIdentString pGenerator::entryFunctionName(void) const {

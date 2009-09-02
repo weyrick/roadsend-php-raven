@@ -40,7 +40,7 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     llvmModule_(mod),
     functionSymbol_(funSym),
     IRHelper_(mod),
-    currentBlock_(),
+    currentBlock_(getGlobalContext()),
     runtimeEngine_(NULL),
     thisFunction_(NULL),
     valueStack_(),
@@ -69,11 +69,11 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     destructList_.push(valueVectorType());
 
 
-    allocBlock = BasicBlock::Create("allocBlock", thisFunction_);
+    allocBlock = BasicBlock::Create(getGlobalContext(), "allocBlock", thisFunction_);
     currentBlock_.CreateBr(allocBlock);
 
     // Go to this at the end of allocBlock.
-    beginBlock = BasicBlock::Create("begin", thisFunction_);
+    beginBlock = BasicBlock::Create(getGlobalContext(), "begin", thisFunction_);
     currentBlock_.SetInsertPoint(beginBlock);
 
 }
@@ -89,7 +89,7 @@ void pCodeGen::finalize(void) {
     // destruct current stack vars
     Function* destructor = llvmModule_->getFunction("_ZN4rphp4pVarD1Ev");
     assert(destructor != NULL);
-    BasicBlock* end = BasicBlock::Create("end", thisFunction_);
+    BasicBlock* end = BasicBlock::Create(getGlobalContext(), "end", thisFunction_);
     currentBlock_.CreateBr(end);
     currentBlock_.SetInsertPoint(end);
     for (valueVectorType::iterator i = destructList_.back().begin(); i != destructList_.back().end(); ++i) {
@@ -131,7 +131,7 @@ llvm::Value* pCodeGen::newVarOnStack(const char* name) {
 BasicBlock* pCodeGen::visitInOwnBlock(AST::stmt* n, const std::string &Name)
 {
 	llvm::BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
-	llvm::BasicBlock* block = llvm::BasicBlock::Create(Name, thisFunction_);
+	llvm::BasicBlock* block = llvm::BasicBlock::Create(getGlobalContext(), Name, thisFunction_);
 	if(n) {
 		currentBlock_.SetInsertPoint(block);
 		visit(n);
@@ -162,7 +162,7 @@ void pCodeGen::visit_literalString(AST::literalString* n) {
     assert(f != NULL);
 
     if (isUnicode) {
-        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(APInt(wordSize_, finalLen)));
+        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(getGlobalContext(), APInt(wordSize_, finalLen)));
     }
     else {
         currentBlock_.CreateCall2(f, pVarTmp, strPtr);
@@ -177,10 +177,10 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
 
     // TODO: other bases besides 10
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
-    ConstantInt* const_int = ConstantInt::get(
+    ConstantInt* const_int = ConstantInt::get(getGlobalContext(),
                                 APInt(wordSize_,
-                                      numLiteral.data(),
-                                      numLiteral.length(),
+                                      StringRef(numLiteral.data(),
+						numLiteral.length()),
                                       10));
 
     // allocate tmp pVar for return value
@@ -197,7 +197,7 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
 void pCodeGen::visit_literalFloat(AST::literalFloat* n) {
 
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
-    ConstantFP* const_float = ConstantFP::get(APFloat(APFloat::IEEEdouble,  numLiteral.c_str()));
+    ConstantFP* const_float = ConstantFP::get(getGlobalContext(), APFloat(APFloat::IEEEdouble,  numLiteral.c_str()));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pFloatTmp");
@@ -215,7 +215,7 @@ void pCodeGen::visit_literalFloat(AST::literalFloat* n) {
 void pCodeGen::visit_literalBool(AST::literalBool* n) {
 
     // NOTE even on 64 bit, this is 32 (with g++)
-    ConstantInt* cbool = ConstantInt::get(APInt(32,  (n->getBoolVal()) ? "1" : "0", 1, 10));
+    ConstantInt* cbool = ConstantInt::get(getGlobalContext(), APInt(32,  (n->getBoolVal()) ? "1" : "0", 10));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pBoolTmp");
@@ -429,7 +429,7 @@ void pCodeGen::visit_ifStmt(AST::ifStmt* n) {
 	Value* trueValue = ConstantInt::get(evalTo->getReturnType(), 1);
 
 	llvm::Value* condition = currentBlock_.CreateICmpEQ(conditionValue, trueValue, "if-cmp");
-	llvm::BasicBlock* afterCond = BasicBlock::Create("afterCond", thisFunction_);
+	llvm::BasicBlock* afterCond = BasicBlock::Create(getGlobalContext(), "afterCond", thisFunction_);
 
 	// Branch
 	currentBlock_.CreateCondBr(condition, trueBlock, falseBlock);

@@ -5,5 +5,13 @@
 #include <stdexcept>
 int main()
 {
-	mockError();
+	//mockError();
+	//mockRuntimeLib l;
+	try {
+	  //l.mockError();
+	  mockError();
+	}
+	catch (std::runtime_error& e) {
+	    std::cout << "caught: " << e.what() << std::endl;
+	}
 }

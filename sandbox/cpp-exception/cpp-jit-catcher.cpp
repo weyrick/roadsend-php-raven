@@ -31,37 +31,27 @@
 #include <llvm/Analysis/Verifier.h>
 #include <llvm/Assembly/PrintModulePass.h>
 #include <llvm/Support/IRBuilder.h>
-
+#include <llvm/Target/TargetSelect.h>
+#include <llvm/Support/ManagedStatic.h>
 
 #include <iostream>
 #include <string>
+#include <stdexcept>
 
 using namespace llvm;
 
-ExecutionEngine *executionEngine;
 
-
-// copy & paste by the llvm JIT tutorial.
-
-Module* makeLLVMModule() {
-    llvm::ExceptionHandling = true;
-
-	// Module Construction
-	Module* mod = new Module("cppe-mod");
-
-	return mod;
-}
 
 Function* createCallFunc(Module* mod)
 {
 	// Create the function which we JIT and call.
-	Constant* c = mod->getOrInsertFunction("cppe-func", Type::VoidTy, NULL);
+	Constant* c = mod->getOrInsertFunction("cppe-func", Type::getVoidTy(getGlobalContext()), NULL);
 	Function* func = cast<Function>(c);
 
 	// Get the type of the function in the runtime, mockError();
 	std::vector<const Type*>RuntimeFuncArgs;
 	FunctionType* RuntimeFuncType = FunctionType::get(
-			/*Result=*/Type::VoidTy,
+			/*Result=*/Type::getVoidTy(getGlobalContext()),
 			/*Params=*/RuntimeFuncArgs,
 			/*isVarArg=*/false);
 
@@ -69,16 +59,19 @@ Function* createCallFunc(Module* mod)
 	PointerType* RuntimeFuncTypePtr = PointerType::get(RuntimeFuncType, 0);
 
 	// Get a constant for the address of the function in the runtime, this is currently x86_64 specific!!
-	ConstantInt* addressConstant = ConstantInt::get(APInt(64, (uint64_t)sys::DynamicLibrary::SearchForAddressOfSymbol("mockError")));
+	//ConstantInt* addressConstant = ConstantInt::get(getGlobalContext(), APInt(64, (uint64_t)sys::DynamicLibrary::SearchForAddressOfSymbol("mockError")));
 	// Cast the address constant to a funcptr
-	Constant* funcAddress = ConstantExpr::getCast(Instruction::IntToPtr, addressConstant, RuntimeFuncTypePtr);
+	//Constant* funcAddress = ConstantExpr::getCast(Instruction::IntToPtr, addressConstant, RuntimeFuncTypePtr);
+
+	Constant* c2 = mod->getOrInsertFunction("mockError", Type::getVoidTy(getGlobalContext()), NULL);
+	Function* errFunc = cast<Function>(c2);
 
 	// IR setup
-	BasicBlock* entry = BasicBlock::Create("entry", func);
+	BasicBlock* entry = BasicBlock::Create(getGlobalContext(), "entry", func);
 	IRBuilder<> builder(entry);
 
 	// Call the runtime func.
-	builder.CreateCall(funcAddress);
+	builder.CreateCall(errFunc);
 
 	// Terminator instruction
 	builder.CreateRetVoid();
@@ -87,28 +80,51 @@ Function* createCallFunc(Module* mod)
 
 int main()
 {
-	// Load the cpp mock runtime
-	sys::DynamicLibrary::LoadLibraryPermanently("./libcpp-lib.so");
 
-	Module* mod = makeLLVMModule();
-	executionEngine = ExecutionEngine::create(mod);
+        ExecutionEngine *executionEngine;
+
+	InitializeNativeTarget();
+	llvm::DwarfExceptionHandling = true;
+	llvm::UnwindTablesMandatory = true;
+
+	// Load the cpp mock runtime
+	if (sys::DynamicLibrary::LoadLibraryPermanently("./libcpp-lib.so")) {
+	  std::cout << "unable to find libcpp-lib\n";
+	  return 1;
+	}
+
+	Module* mod = new Module("cppe-mod", getGlobalContext());
 	Function* execFunc = createCallFunc(mod);
+	verifyModule(*mod, PrintMessageAction);
+	mod->dump();
+
+	executionEngine = EngineBuilder(mod).create();
+	if (!executionEngine) {
+	  std::cout << "JIT CREATION FAILED\n";
+	  return 1;
+	}
 
 	executionEngine->runStaticConstructorsDestructors(false);
-	verifyModule(*mod, PrintMessageAction);
 
 	// JIT and exec the generated function-
 	void* funcPtr = executionEngine->getPointerToFunction(execFunc);
+	if (!funcPtr) {
+	  std::cout << "unable to find entry function\n";
+	  return 1;
+	}
+
+	// voodoo
 	void (*func)() = (void (*)())funcPtr;
 	
 	try {
-	func();
+	  func();
 	}
-	catch(...)
+	catch(std::runtime_error& e)
 	{
-		std::cerr<<"exception catched"<<std::endl;
+	  std::cerr << "exception caught: " << e.what() <<std::endl;
 	}
 	executionEngine->runStaticConstructorsDestructors(true);
 
+	llvm_shutdown();
 	return 0;
 }
