@@ -83,7 +83,7 @@ void pJITTarget::execute(void) {
     // therefore we tell llvm JIT to generate the proper dwarf tables
     InitializeNativeTarget();
     llvm::DwarfExceptionHandling = true;
-    llvm::UnwindTablesMandatory = true;
+    //llvm::UnwindTablesMandatory = true;
 
     //ExistingModuleProvider* MP = new ExistingModuleProvider(llvmModule_);
 

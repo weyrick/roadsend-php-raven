@@ -26,6 +26,7 @@
 #include "rphp/IR/pCompileTarget.h"
 #include "rphp/JIT/pJITTarget.h"
 
+#include <llvm/Module.h>
 #include <boost/bind.hpp>
 #include <string>
 
@@ -61,16 +62,11 @@ void pCachedJIT::cacheAndJITFileOnDisk(const pSourceFileDesc& fileName) {
 
     engine.configureWith(this);
 
-    try {
-        engine.execute();
-    }
-    catch (pRuntimeError& r) {
-        // TODO: reset runtime state
-        std::cerr << "pCachedJIT: caught runtime error" << std::endl;
-    }
+    // note: this may throw a runtime error, but we allow that to be caught higher up
+    engine.execute();
 
-    // TODO: what about m? does llvm JIT clean it up?
-    // delete m;
+    // segfault? who owns this?
+    //delete m;
 
 
 }

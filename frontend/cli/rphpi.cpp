@@ -7,6 +7,7 @@
 #include <llvm/System/Path.h>
 
 #include "rphp/pConfig.h"
+#include "rphp/runtime/pRuntimeError.h"
 #include "rphp/JIT/pCachedJIT.h"
 
 using namespace llvm;
@@ -50,6 +51,11 @@ int main( int argc, char* argv[] )
         if (verbosity > 0)
             engine.setVerbosity(E_ALL);
         engine.cacheAndJITFileOnDisk(inFile);
+    }
+    catch (pRuntimeError& e) {
+        // runtime errors go to output buffer by default, so we don't display here
+        delete config;
+        return 1;
     }
     catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
