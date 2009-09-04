@@ -207,7 +207,7 @@ llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLe
     GlobalVariable* gVarStr = new GlobalVariable(*mod_,
                                     /*Type=*/byteArrayType,
                                     /*isConstant=*/true,
-                                    /*Linkage=*/GlobalValue::PrivateLinkage,
+                                    /*Linkage=*/GlobalValue::InternalLinkage,
                                     /*Initializer=*/0, // has initializer, specified below
                                     /*Name=*/".bstr"
                                     );
@@ -255,7 +255,7 @@ llvm::Constant* pIRHelper::stringConstant(const std::wstring& s, int32_t& finalL
     GlobalVariable* gVarStr = new GlobalVariable(*mod_,
                                     /*Type=*/byteArrayType,
                                     /*isConstant=*/true,
-                                    /*Linkage=*/GlobalValue::PrivateLinkage,
+                                    /*Linkage=*/GlobalValue::InternalLinkage,
                                     /*Initializer=*/0, // has initializer, specified below
                                     /*Name=*/".ustr"
                                     );

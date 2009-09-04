@@ -77,7 +77,7 @@ bool pJIT::executeMain(llvm::Module* M) {
 //bool pJIT::executeWithRuntime(Module* M, std::string entryFunction) {
 void pJITTarget::execute(void) {
 
-    //llvm::sys::DynamicLibrary::LoadLibraryPermanently("librphp-runtime.so");
+  //llvm::sys::DynamicLibrary::LoadLibraryPermanently("librphp-runtime.so");
 
     // we need exception handling for our c++ runtime to work properly
     // therefore we tell llvm JIT to generate the proper dwarf tables
@@ -104,7 +104,7 @@ void pJITTarget::execute(void) {
         return;// false;
     }
 
-    EE->runStaticConstructorsDestructors(llvmModule_, false);
+    //EE->runStaticConstructorsDestructors(llvmModule_, false);
 
     // JIT magic
     //pRuntimeEngine* r = new pRuntimeEngine();
@@ -116,7 +116,7 @@ void pJITTarget::execute(void) {
     pVar retVal;
     mainFunc(&retVal, runtime_);
 
-    EE->runStaticConstructorsDestructors(llvmModule_, true);
+    //EE->runStaticConstructorsDestructors(llvmModule_, true);
 
     delete EE;
     llvm_shutdown();
