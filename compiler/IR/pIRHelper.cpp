@@ -204,13 +204,13 @@ llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLe
 
     // global value creation
     ArrayType* byteArrayType = ArrayType::get(IntegerType::get(getGlobalContext(),8), finalLen);
-    GlobalVariable* gVarStr = new GlobalVariable(getGlobalContext(),
+    GlobalVariable* gVarStr = new GlobalVariable(*mod_,
                                     /*Type=*/byteArrayType,
                                     /*isConstant=*/true,
-                                    /*Linkage=*/GlobalValue::InternalLinkage,
+                                    /*Linkage=*/GlobalValue::PrivateLinkage,
                                     /*Initializer=*/0, // has initializer, specified below
-                                    /*Name=*/".bstr",
-                                    mod_);
+                                    /*Name=*/".bstr"
+                                    );
 
     // constant definition
     Constant* constArray = ConstantArray::get(getGlobalContext(), s, true);
@@ -252,13 +252,13 @@ llvm::Constant* pIRHelper::stringConstant(const std::wstring& s, int32_t& finalL
 
     // global value creation
     ArrayType* byteArrayType = ArrayType::get(IntegerType::get(getGlobalContext(), 8), finalLen);
-    GlobalVariable* gVarStr = new GlobalVariable(getGlobalContext(),
+    GlobalVariable* gVarStr = new GlobalVariable(*mod_,
                                     /*Type=*/byteArrayType,
                                     /*isConstant=*/true,
-                                    /*Linkage=*/GlobalValue::InternalLinkage,
+                                    /*Linkage=*/GlobalValue::PrivateLinkage,
                                     /*Initializer=*/0, // has initializer, specified below
-                                    /*Name=*/".ustr",
-                                    mod_);
+                                    /*Name=*/".ustr"
+                                    );
 
     // constant definition
     Constant* constArray = ConstantArray::get(getGlobalContext(), ustr, false);
