@@ -63,6 +63,9 @@ extern "C" {
 
     int rphp_pVar_evalAsBool(rphp::pVar arg);
 
+    // error handling
+    void rphp_setSourceLocation(rphp::pRuntimeEngine* r, const char* file, rphp::pInt line);
+
     // function registration
     void rphp_registerUserFun0(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer0 p);
     void rphp_registerUserFun1(rphp::pRuntimeEngine* r, const char* name, rphp::pFunPointer1 p);

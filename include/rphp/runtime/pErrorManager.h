@@ -60,6 +60,11 @@ public:
 
     void startUp(void);
 
+    void setSourceLocation(const pFileNameString& file, pInt line) {
+        currentFile_ = file;
+        currentLine_ = line;
+    }
+
     // this matches pNotifyEmitFun
     void notify(pUInt level, const pMsgString& msg);
 

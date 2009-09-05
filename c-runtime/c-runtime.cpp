@@ -154,6 +154,10 @@ extern "C" {
       return result;
     }
 
+    void rphp_setSourceLocation(rphp::pRuntimeEngine* r, const char* file, rphp::pInt line) {
+       r->errorManager->setSourceLocation(file, line);
+    }
+
     void _make_pVar(void) {
       pVar p;
       p = 5;

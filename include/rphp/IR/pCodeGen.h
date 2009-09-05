@@ -71,6 +71,10 @@ private:
     unsigned int wordSize_;
     unsigned int ifRecursionDepth_;
 
+    pUInt lastSourceLoc_;
+
+    void updateSourceLocation(const AST::stmt*);
+
     llvm::Value* newVarOnStack(const char*);
     llvm::BasicBlock* visitInOwnBlock(AST::stmt* n, const std::string &Name = "");
 public:
