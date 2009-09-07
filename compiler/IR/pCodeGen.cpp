@@ -466,8 +466,7 @@ void pCodeGen::visit_ifStmt(AST::ifStmt* n) {
 	Function* evalTo = llvmModule_->getFunction("rphp_pVar_evalAsBool");
 	assert(evalTo != NULL && "Couldn't find the rphp_pVar_evalAsBool function in the runtime");
 
-	//@TODO: do we have to valueStack_.pop() here?
-	// I guess we do, as we consume that value of the condition expression.
+	assert(!valueStack_.empty() && "No expression for the condition avaible.");
 	Value* conditionValue = currentBlock_.CreateCall(evalTo, valueStack_.top());
 	valueStack_.pop();
 
