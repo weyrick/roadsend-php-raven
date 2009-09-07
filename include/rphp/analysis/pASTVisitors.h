@@ -35,6 +35,8 @@ public:
     virtual ~baseVisitor(void) { }
 
     virtual void visit(stmt*);
+    virtual void pre_visit(stmt*) {};
+    virtual void post_visit(stmt*) {};
 
     void visit_block(block*);
     virtual void visit_functionDecl(functionDecl*) { }

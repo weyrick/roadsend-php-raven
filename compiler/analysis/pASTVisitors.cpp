@@ -49,11 +49,11 @@ baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
 
 
 void baseVisitor::visit(stmt* s) {
-
     if (s) {
-      (this->*dispatchTable_[s->getKind()])(s);
+    	pre_visit(s);
+    	(this->*dispatchTable_[s->getKind()])(s);
+        post_visit(s);
     }
-
 }
 
 void baseVisitor::visit_block(block* b) {
