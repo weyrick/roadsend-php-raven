@@ -114,29 +114,28 @@ void pCodeGen::finalize(void) {
     currentBlock_.SetInsertPoint(allocBlock);
     // Jump to the beginBlock.
     currentBlock_.CreateBr(beginBlock);
-
 }
 
 
 // create a pVar on the stack. this handles construction
 // at the start of the current function, and destruction at it's end
-llvm::Value* pCodeGen::newVarOnStack(const char* name) {
+Value* pCodeGen::newVarOnStack(const char* name) {
+	BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
+	currentBlock_.SetInsertPoint(allocBlock);
 
-	// TODO: insert allocinstrs in the allocBlock as well.
-    AllocaInst* pVarTmp = new AllocaInst(IRHelper_.pVarType(), 0, name);
-    thisFunction_->getEntryBlock().getInstList().push_front(pVarTmp);
+	Value* pVarTmp = currentBlock_.CreateAlloca(IRHelper_.pVarType(), 0, name);
 
     // rphp::pVar::pVar()
     Function* constructor = llvmModule_->getFunction("_ZN4rphp4pVarC1Ev");
-    assert(constructor != NULL);
+    assert(constructor != NULL && "couldn't find pVar constructor in IR runtime.");
 
-    BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
-    currentBlock_.SetInsertPoint(allocBlock);
     currentBlock_.CreateCall(constructor, pVarTmp);
+
+    // Set back the insert point to the old block.
     currentBlock_.SetInsertPoint(oldBlock);
 
+    // Call the destructor of the new pVar at the end of the function.
     destructList_.back().push_back(pVarTmp);
-
     return pVarTmp;
 }
 
