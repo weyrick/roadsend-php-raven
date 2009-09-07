@@ -160,9 +160,7 @@ void pCodeGen::pre_visit(AST::stmt* n) {
 
     // TODO check current pConfig, avoid this if optimizing
     int32_t finalLen(0);
-    Constant* filestrPtr;
-    // TODO we can cache this here since it will never change
-    filestrPtr = IRHelper_.stringConstant(llvmModule_->getModuleIdentifier(), finalLen);
+    static Constant* filestrPtr = IRHelper_.stringConstant(llvmModule_->getModuleIdentifier(), finalLen);
 
     lastSourceLoc_ = n->getStartLine();
 
