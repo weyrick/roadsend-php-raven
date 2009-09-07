@@ -139,11 +139,9 @@ Value* pCodeGen::newVarOnStack(const char* name) {
     return pVarTmp;
 }
 
-BasicBlock* pCodeGen::visitInOwnBlock(AST::stmt* n, const std::string &Name)
-{
-	// TODO: remove llvm:: in cpp.
-	llvm::BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
-	llvm::BasicBlock* block = llvm::BasicBlock::Create(getGlobalContext(), Name, thisFunction_);
+BasicBlock* pCodeGen::visitInOwnBlock(AST::stmt* n, const std::string &Name) {
+	BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
+	BasicBlock* block = BasicBlock::Create(getGlobalContext(), Name, thisFunction_);
 	if(n) {
 		currentBlock_.SetInsertPoint(block);
 		visit(n);
