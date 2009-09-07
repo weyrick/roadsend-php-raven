@@ -57,6 +57,7 @@ void baseVisitor::visit(stmt* s) {
 }
 
 void baseVisitor::visit_block(block* b) {
+	// TODO: Why don't we use visit() here?
     for (statementList::size_type i=0; i < b->statements.size(); i++) {
         (this->*dispatchTable_[b->statements[i]->getKind()])(b->statements[i]);
     }

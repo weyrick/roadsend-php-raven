@@ -58,6 +58,8 @@ void pGenerator::runPasses() {
     delete declarePass;
 
     // declare is over, terminate init function
+    // @TODO: probably wrong, as a) the _entry_ block is terminated
+    // and b) the way of creating the ret is not really good...
     initFunction_->getEntryBlock().getInstList().push_back(ReturnInst::Create(getGlobalContext()));
 
     AST::statementList& topStmts = sourceModule_.getAST();
@@ -69,7 +71,7 @@ void pGenerator::runPasses() {
          ++i) {
         if ((*i)->getKind() == AST::functionDeclKind) {
             AST::functionDecl* f = static_cast<AST::functionDecl*>(*i);
-            codeGenPass = new pCodeGen(llvmModule_, 
+            codeGenPass = new pCodeGen(llvmModule_,
                                        pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),
                                                                            f->functionDef()->name()));
             codeGenPass->visit(f->body());
@@ -83,7 +85,7 @@ void pGenerator::runPasses() {
     delete codeGenPass;
 
     //verifyModule(*llvmModule_, PrintMessageAction);
-    
+
 }
 
 void pGenerator::loadAndLinkRuntimeIR(void) {
@@ -107,7 +109,7 @@ void pGenerator::loadAndLinkRuntimeIR(void) {
 }
 
 void pGenerator::createEntryPoint(void) {
-    
+
     // entry function
     entryFunction_ = Function::Create(IRHelper_.moduleEntryFunType(),
                                       Function::ExternalLinkage,

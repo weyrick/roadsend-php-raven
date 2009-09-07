@@ -52,10 +52,12 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     lastSourceLoc_(0)
 {
 
+    // This is the entry function of the module if we compile a whole module.
     thisFunction_ = llvmModule_->getFunction(functionSymbol_);
     assert(thisFunction_ && "declare pass didn't initialize this function");
 
     Function::arg_iterator a = thisFunction_->arg_begin();
+    // Skip the retval argument
     a++;
     runtimeEngine_ = a;
 
@@ -65,15 +67,17 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     }
 
     // entry block created in declare
+    // This sets the start of codegen after all instrs already added by pGenerator.cpp
     currentBlock_.SetInsertPoint(&thisFunction_->getEntryBlock());
 
     destructList_.push(valueVectorType());
 
-
+    // The allocBlock should contain all allocas for vars + their constructor calls.
     allocBlock = BasicBlock::Create(getGlobalContext(), "allocBlock", thisFunction_);
     currentBlock_.CreateBr(allocBlock);
 
     // Go to this at the end of allocBlock.
+    // This is the first block wich contains compiled code.
     beginBlock = BasicBlock::Create(getGlobalContext(), "begin", thisFunction_);
     currentBlock_.SetInsertPoint(beginBlock);
 
@@ -88,11 +92,17 @@ pCodeGen::~pCodeGen(void) {
 void pCodeGen::finalize(void) {
 
     // destruct current stack vars
+	// rphp::pVar::~pVar()
     Function* destructor = llvmModule_->getFunction("_ZN4rphp4pVarD1Ev");
     assert(destructor != NULL);
+
     BasicBlock* end = BasicBlock::Create(getGlobalContext(), "end", thisFunction_);
+    // Branch to the last BasicBlock
     currentBlock_.CreateBr(end);
     currentBlock_.SetInsertPoint(end);
+
+    // The destructList is a queue
+    // TODO:
     for (valueVectorType::iterator i = destructList_.back().begin(); i != destructList_.back().end(); ++i) {
         currentBlock_.CreateCall(destructor, *i);
     }
@@ -112,9 +122,11 @@ void pCodeGen::finalize(void) {
 // at the start of the current function, and destruction at it's end
 llvm::Value* pCodeGen::newVarOnStack(const char* name) {
 
+	// TODO: insert allocinstrs in the allocBlock as well.
     AllocaInst* pVarTmp = new AllocaInst(IRHelper_.pVarType(), 0, name);
     thisFunction_->getEntryBlock().getInstList().push_front(pVarTmp);
 
+    // rphp::pVar::pVar()
     Function* constructor = llvmModule_->getFunction("_ZN4rphp4pVarC1Ev");
     assert(constructor != NULL);
 
@@ -126,11 +138,11 @@ llvm::Value* pCodeGen::newVarOnStack(const char* name) {
     destructList_.back().push_back(pVarTmp);
 
     return pVarTmp;
-
 }
 
 BasicBlock* pCodeGen::visitInOwnBlock(AST::stmt* n, const std::string &Name)
 {
+	// TODO: remove llvm:: in cpp.
 	llvm::BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
 	llvm::BasicBlock* block = llvm::BasicBlock::Create(getGlobalContext(), Name, thisFunction_);
 	if(n) {
@@ -142,7 +154,7 @@ BasicBlock* pCodeGen::visitInOwnBlock(AST::stmt* n, const std::string &Name)
 }
 
 void pCodeGen::updateSourceLocation(const AST::stmt* n) {
-
+    // TODO: it makes maybe more sense to implement this as a pre-visitor for all stmts?
     // if we already emitted for this line, skip it
     if (n->getStartLine() == lastSourceLoc_)
         return;

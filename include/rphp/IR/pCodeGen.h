@@ -64,6 +64,8 @@ private:
     llvm::Function* thisFunction_;
 
     std::stack<llvm::Value*> valueStack_;
+    //TODO: The destructList_ currently contains one vector of Value*'s for destruction, evaluate
+    // if we still need a queue for that or if one vector is enough.
     std::queue<valueVectorType> destructList_;
 
     symbolTableType symTable_;

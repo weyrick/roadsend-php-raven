@@ -40,9 +40,10 @@ private:
     llvm::Module* llvmModule_; // won't free
     pSourceModule& sourceModule_;
     llvm::Function* entryFunction_;
+    // initFunction_ is not used yet.
     llvm::Function* initFunction_;
     pIRHelper IRHelper_;
-    
+
 public:
 
     pGenerator(pSourceModule& mod);
@@ -51,7 +52,7 @@ public:
     void runPasses();
 
     llvm::Module* getIR(void) {  return llvmModule_; }
-    
+
     const pIdentString entryFunctionName(void) const;
 
 };
