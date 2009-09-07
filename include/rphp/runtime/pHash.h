@@ -121,7 +121,7 @@ public:
 #endif
     }
 
-    // NOTE: default copy construtor, destructor
+    // NOTE: default copy constructor, destructor
 
 #ifdef RPHP_PVAR_DEBUG
     pHash(pHash const& p) : maxIntKey_(p.maxIntKey_), hashData_(p.hashData_) {
