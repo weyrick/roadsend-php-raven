@@ -58,8 +58,6 @@ void pGenerator::runPasses() {
     delete declarePass;
 
     // declare is over, terminate init function
-    // @TODO: probably wrong, as a) the _entry_ block is terminated
-    // and b) the way of creating the ret is not really good...
     initFunction_->getEntryBlock().getInstList().push_back(ReturnInst::Create(getGlobalContext()));
 
     AST::statementList& topStmts = sourceModule_.getAST();
