@@ -75,8 +75,6 @@ private:
 
     pUInt lastSourceLoc_;
 
-    void updateSourceLocation(const AST::stmt*);
-
     llvm::Value* newVarOnStack(const char*);
     llvm::BasicBlock* visitInOwnBlock(AST::stmt* n, const std::string &Name = "");
 public:
@@ -86,6 +84,7 @@ public:
 
     void finalize(void);
 
+    void pre_visit(AST::stmt* n);
     // nodes
     void visit_echoStmt(AST::echoStmt*);
     void visit_inlineHtml(AST::inlineHtml*);

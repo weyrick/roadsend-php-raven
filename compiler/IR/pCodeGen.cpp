@@ -150,10 +150,12 @@ BasicBlock* pCodeGen::visitInOwnBlock(AST::stmt* n, const std::string &Name) {
 	return block;
 }
 
-void pCodeGen::updateSourceLocation(const AST::stmt* n) {
-    // TODO: it makes maybe more sense to implement this as a pre-visitor for all stmts?
-    // if we already emitted for this line, skip it
-    if (n->getStartLine() == lastSourceLoc_)
+void pCodeGen::pre_visit(AST::stmt* n) {
+    // if we already emitted for this line, skip it.
+	// if we have no line for a stmt, skip it.
+	// if we have a decl, skip it as declarations aren't codegen'd.
+	// if we have a block stmt, skip it here, as failures in blocks are pre-codegen.
+    if (n->getStartLine() == lastSourceLoc_ || n->getStartLine() == 0 || dynamic_cast<AST::decl*>(n) || n->getKind() == AST::blockKind)
         return;
 
     // TODO check current pConfig, avoid this if optimizing
@@ -170,14 +172,9 @@ void pCodeGen::updateSourceLocation(const AST::stmt* n) {
     Function* f = llvmModule_->getFunction("rphp_setSourceLocation");
     assert(f != NULL);
     currentBlock_.CreateCall3(f, runtimeEngine_, filestrPtr, lineNo);
-
-
 }
 
 void pCodeGen::visit_literalString(AST::literalString* n) {
-
-    updateSourceLocation(n);
-
     bool isUnicode = !n->isBinary();
     int32_t finalLen(0);
 
@@ -210,9 +207,6 @@ void pCodeGen::visit_literalString(AST::literalString* n) {
 }
 
 void pCodeGen::visit_literalInt(AST::literalInt* n) {
-
-    updateSourceLocation(n);
-
     // TODO: other bases besides 10
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
     ConstantInt* const_int = ConstantInt::get(getGlobalContext(),
@@ -233,9 +227,6 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
 }
 
 void pCodeGen::visit_literalFloat(AST::literalFloat* n) {
-
-    updateSourceLocation(n);
-
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
     ConstantFP* const_float = ConstantFP::get(getGlobalContext(), APFloat(APFloat::IEEEdouble,  numLiteral.c_str()));
 
@@ -253,9 +244,6 @@ void pCodeGen::visit_literalFloat(AST::literalFloat* n) {
 
 
 void pCodeGen::visit_literalBool(AST::literalBool* n) {
-
-    updateSourceLocation(n);
-
     // NOTE even on 64 bit, this is 32 (with g++)
     ConstantInt* cbool = ConstantInt::get(getGlobalContext(), APInt(32,  (n->getBoolVal()) ? "1" : "0", 10));
 
@@ -272,9 +260,6 @@ void pCodeGen::visit_literalBool(AST::literalBool* n) {
 }
 
 void pCodeGen::visit_literalNull(AST::literalNull* n) {
-
-    updateSourceLocation(n);
-
     Value* pVarTmp = newVarOnStack("pNullTmp");
 
     Function* f = llvmModule_->getFunction("rphp_make_pVar_pNull");
@@ -286,9 +271,6 @@ void pCodeGen::visit_literalNull(AST::literalNull* n) {
 }
 
 void pCodeGen::visit_literalArray(AST::literalArray* n) {
-
-    updateSourceLocation(n);
-
     Value* pHashTmp = newVarOnStack("pHashTmp");
 
     Function* f = llvmModule_->getFunction("rphp_make_pVar_pHash");
@@ -351,9 +333,6 @@ void pCodeGen::visit_inlineHtml(AST::inlineHtml* n) {
 }
 
 void pCodeGen::visit_echoStmt(AST::echoStmt* n) {
-
-    updateSourceLocation(n);
-
     visit(n->rVal());
     Value* rVal = valueStack_.top();
     valueStack_.pop();
@@ -365,9 +344,6 @@ void pCodeGen::visit_echoStmt(AST::echoStmt* n) {
 }
 
 void pCodeGen::visit_assignment(AST::assignment* n) {
-
-    updateSourceLocation(n);
-
     // gen rval
     visit(n->rVal());
     assert(valueStack_.size() && "rVal didn't push a value!");
@@ -392,9 +368,6 @@ void pCodeGen::visit_assignment(AST::assignment* n) {
 }
 
 void pCodeGen::visit_var(AST::var* n) {
-
-    updateSourceLocation(n);
-
     symbolTableType::iterator sym = symTable_.find(n->name());
     if (sym == symTable_.end()) {
         Value* v = newVarOnStack(n->name().c_str());
@@ -435,8 +408,6 @@ void pCodeGen::visit_functionInvoke(AST::functionInvoke* n) {
         break;
     }
     assert(f != NULL && " visit_functionInvoke couldn't find appropriate rphp_funCall in c-runtime");
-
-    updateSourceLocation(n);
 
     Value* retval = newVarOnStack("retval");
     std::vector<Value*> callArgList;
