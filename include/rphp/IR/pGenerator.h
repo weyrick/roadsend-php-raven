@@ -39,8 +39,9 @@ class pGenerator: public AST::baseVisitor {
 private:
     llvm::Module* llvmModule_; // won't free
     pSourceModule& sourceModule_;
+    /// entry point of execution into this module
     llvm::Function* entryFunction_;
-    // initFunction_ is not used yet.
+    /// startup procedures such as registering user defined functions and classes. called upon entry.
     llvm::Function* initFunction_;
     pIRHelper IRHelper_;
 
