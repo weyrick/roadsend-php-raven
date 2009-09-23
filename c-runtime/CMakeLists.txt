@@ -4,7 +4,7 @@ MESSAGE( STATUS "c-runtime check" )
 
 add_custom_command(
    COMMAND ${LLVM_GXX_EXECUTABLE}
-   ARGS -fPIC -emit-llvm -I${Boost_INCLUDE_DIRS} -I${RPHP_INCLUDE_DIR} -c -o ${RPHP_LIB_DIR}/c-runtime.bc ${CMAKE_CURRENT_SOURCE_DIR}/c-runtime.cpp
+   ARGS -fPIC -emit-llvm -I${ICU_INCLUDE_DIRS} -I${Boost_INCLUDE_DIRS} -I${RPHP_INCLUDE_DIR} -c -o ${RPHP_LIB_DIR}/c-runtime.bc ${CMAKE_CURRENT_SOURCE_DIR}/c-runtime.cpp
    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/c-runtime.cpp
    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/c-runtime.h
    OUTPUT ${RPHP_LIB_DIR}/c-runtime.bc

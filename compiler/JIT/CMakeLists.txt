@@ -4,6 +4,7 @@ MESSAGE( STATUS "compiler: JIT check" )
 include_directories (
                      ${RPHP_INCLUDE_DIR}
                      ${LLVM_INCLUDE_DIR}
+                     ${ICU_INCLUDE_DIRS}
                      ${Boost_INCLUDE_DIRS}
                      # this one is for rphp_grammar generated files
                      ${CMAKE_CURRENT_BINARY_DIR}
