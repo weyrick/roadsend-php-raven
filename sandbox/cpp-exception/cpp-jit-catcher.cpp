@@ -88,7 +88,8 @@ int main()
 	llvm::UnwindTablesMandatory = true;
 
 	// Load the cpp mock runtime
-	if (sys::DynamicLibrary::LoadLibraryPermanently("./libcpp-lib.so")) {
+	std::string lib = std::string("./libcpp-lib")+std::string(LTDL_SHLIB_EXT);
+	if (sys::DynamicLibrary::LoadLibraryPermanently(lib.data())) {
 	  std::cout << "unable to find libcpp-lib\n";
 	  return 1;
 	}
