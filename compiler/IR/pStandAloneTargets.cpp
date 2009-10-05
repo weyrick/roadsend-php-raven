@@ -83,7 +83,7 @@ void pStandAloneTarget::execute(void) {
     }
     args.push_back("-native");
     // TODO: opt flags
-    //args.push_back("-disable-opt");
+    args.push_back("-disable-opt");
     //args.push_back("-verify-each");
     if (verbosity_ & E_COMPILE_DEBUG)
         args.push_back("-v");

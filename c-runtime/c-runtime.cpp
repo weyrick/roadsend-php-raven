@@ -169,5 +169,18 @@ extern "C" {
       l = r;
     }
 
+    int _runtimeError(void) {
+        pVar l;
+        try {
+            l = 0;
+        }
+        catch (pRuntimeError& e) {
+            return l.copyAsInt();
+        }
+        catch (...) {
+            return l.copyAsInt();
+        }
+    }
+
 }
 
