@@ -9,6 +9,11 @@ endif(COMMAND cmake_policy)
 
 project (rphp)
 
+set(LLVM_MIN_VERSION       "2006000")
+set(LLVM_MIN_VERSION_TEXT  "2.6")
+set(BOOST_MIN_VERSION      "103800")
+set(BOOST_MIN_VERSION_TEXT "1.38")
+
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules )
 set(RPHP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 set(ASIO_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include/asio)
@@ -25,14 +30,19 @@ MESSAGE( STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR} )
 
 Find_Package(Boost REQUIRED)
 include_directories(${RPHP_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
-IF( Boost_VERSION LESS "103800" )
-  MESSAGE(FATAL_ERROR "Boost version ${Boost_VERSION} too old, please install 1.38 or greater!")
-ENDIF( Boost_VERSION LESS "103800" )
+IF( Boost_VERSION LESS ${BOOST_MIN_VERSION} )
+  MESSAGE(FATAL_ERROR "Boost version ${Boost_VERSION} too old, please install ${BOOST_MIN_VERSION_TEXT} or greater!")
+ENDIF( Boost_VERSION LESS ${BOOST_MIN_VERSION} )
 
 Find_Package(ICU REQUIRED)
 Find_Package(LLVM REQUIRED)
 FIND_PACKAGE(CppUnit) # optional
 Find_PACKAGE(Doxygen) # optional
+
+IF( LLVM_VERSION LESS ${LLVM_MIN_VERSION} )
+  MESSAGE(FATAL_ERROR "LLVM version ${LLVM_STRING_VERSION} too old, please install ${LLVM_MIN_VERSION_TEXT} of greater!")
+ENDIF( LLVM_VERSION LESS ${LLVM_MIN_VERSION} )
+add_definitions(-DLLVM_VERSION=${LLVM_VERSION})
 
 # OS dependant linking items
 

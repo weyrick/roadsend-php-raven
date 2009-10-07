@@ -66,7 +66,11 @@ void pStandAloneTarget::execute(void) {
     if (rtPathE) {
         getPathList(rtPathE, rtPaths);
         for (unsigned int i=0; i < rtPaths.size(); i++) {
+#ifdef LLVM_VERSION >= 2007000
+            libSearchPaths_.push_back(rtPaths[i].str());
+#else
             libSearchPaths_.push_back(rtPaths[i].toString());
+#endif
         }
     }
 

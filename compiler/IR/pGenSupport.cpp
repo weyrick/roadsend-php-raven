@@ -33,6 +33,7 @@
 #include <llvm/ValueSymbolTable.h>
 #include <llvm/Instructions.h>
 #include <llvm/Support/IRBuilder.h>
+#include <llvm/Support/raw_ostream.h>
 #include <llvm/System/Path.h>
 #include <llvm/CallingConv.h>
 
@@ -70,8 +71,14 @@ void pGenSupport::writeBitcode(Module* m, std::string outFile) {
     assert(m != NULL);
     assert(outFile.length() > 0);
 
+#ifdef LLVM_VERSION >= 2007000
+    std::string ErrInfo;
+    raw_fd_ostream OS(outFile.c_str(), ErrInfo, raw_fd_ostream::F_Binary);
+    if (ErrInfo.empty()) {
+#else
     std::ofstream OS(outFile.c_str(), std::ios_base::out|std::ios::trunc|std::ios::binary);
     if (!OS.fail()) {
+#endif
         WriteBitcodeToFile(m, OS);
     }
     else {
@@ -119,7 +126,11 @@ Module* pGenSupport::getRuntimeIR() {
     irFile.appendComponent("c-runtime.bc");
 
     if (irFile.exists()) {
+#ifdef LLVM_VERSION >= 2007000
+        return readBitcode(irFile.str());
+#else
         return readBitcode(irFile.toString());
+#endif
     }
     else {
         throw pCompileError("unable to find c-runtime.bc - please set RPHP_IR_PATH environment variable to point to the directory containing this file.");

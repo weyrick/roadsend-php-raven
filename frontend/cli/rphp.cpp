@@ -95,7 +95,11 @@ int main( int argc, char* argv[] )
             sys::Path oFileP(inputFile);
             oFileP.eraseSuffix();
             if (oFileP.isValid())
+#ifdef LLVM_VERSION >= 2007000
+                oFileName = oFileP.str();
+#else
                 oFileName = oFileP.toString();
+#endif
             else
                 oFileName = "a.out";
         }
