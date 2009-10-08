@@ -31,17 +31,17 @@ set_target_properties( rphpi
                      )
 
 target_link_libraries( rphp
-                       rphp-runtime
-                       rphp-analysis
                        rphp-llvm-ir
+                       rphp-analysis
+                       rphp-runtime
                        ${LLVM_LIBS_CORE}
                        ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
                       ) 
 target_link_libraries( rphpi
-                       rphp-runtime
-                       rphp-analysis
-                       rphp-llvm-ir
                        rphp-llvm-jit
+                       rphp-llvm-ir
+                       rphp-analysis
+                       rphp-runtime
                        ${LLVM_LIBS_JIT}
                        ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
                        )                       
