@@ -14,6 +14,8 @@ set(LLVM_MIN_VERSION_TEXT  "2.6")
 set(BOOST_MIN_VERSION      "103800")
 set(BOOST_MIN_VERSION_TEXT "1.38")
 
+set(RPHP_SHARED_LIBS       0)
+
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/modules )
 set(RPHP_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include)
 set(ASIO_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/include/asio)
@@ -44,17 +46,6 @@ IF( LLVM_VERSION LESS ${LLVM_MIN_VERSION} )
 ENDIF( LLVM_VERSION LESS ${LLVM_MIN_VERSION} )
 add_definitions(-DLLVM_VERSION=${LLVM_VERSION})
 
-# OS dependant linking items
-
-# determine if we will link llvm jit objects to the jit library or the rphpi binary
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	set(RPHP_JIT_LINK "library")
-ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-	set(RPHP_JIT_LINK "binary")
-ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
-
-MESSAGE( STATUS "JIT libs linked to: " ${RPHP_JIT_LINK} )
-
 add_subdirectory(runtime)
 add_subdirectory(c-runtime)
 add_subdirectory(compiler)
@@ -71,7 +62,6 @@ IF(CPPUNIT_FOUND)
   ADD_TEST(rphp-runtime-suite runtime/test/rphp-runtime-suite)
   ADD_TEST(rphp-sizes runtime/test/rphp-sizes)
 ENDIF(CPPUNIT_FOUND)
-
 
 IF(DOXYGEN_FOUND)
   SET(DOXYFILE doc/Doxyfile.rphp)

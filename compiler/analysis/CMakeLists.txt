@@ -66,10 +66,17 @@ set(PARSER_SRC_FILES
   pSourceModule.cpp
 )
 
-add_library( rphp-analysis SHARED ${PARSER_SRC_FILES} )
 
-target_link_libraries( rphp-analysis
-					   rphp-runtime
-                       ${ICU_LIBRARIES}
-                       ${ICU_I18_LIBRARIES}
-                       )
+if (${RPHP_SHARED_LIBS})
+ # SHARED 
+ add_library( rphp-analysis SHARED ${PARSER_SRC_FILES} )
+ target_link_libraries( rphp-analysis
+ 					   rphp-runtime
+                        ${ICU_LIBRARIES}
+                        ${ICU_I18_LIBRARIES}
+                        )
+else (${RPHP_SHARED_LIBS})
+ # STATIC
+ add_library( rphp-analysis ${PARSER_SRC_FILES} )
+endif (${RPHP_SHARED_LIBS})
+
