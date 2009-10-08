@@ -71,7 +71,7 @@ void pGenSupport::writeBitcode(Module* m, std::string outFile) {
     assert(m != NULL);
     assert(outFile.length() > 0);
 
-#ifdef LLVM_VERSION >= 2007000
+#if(LLVM_VERSION >= 2007000)
     std::string ErrInfo;
     raw_fd_ostream OS(outFile.c_str(), ErrInfo, raw_fd_ostream::F_Binary);
     if (ErrInfo.empty()) {
@@ -126,7 +126,7 @@ Module* pGenSupport::getRuntimeIR() {
     irFile.appendComponent("c-runtime.bc");
 
     if (irFile.exists()) {
-#ifdef LLVM_VERSION >= 2007000
+#if(LLVM_VERSION >= 2007000)
         return readBitcode(irFile.str());
 #else
         return readBitcode(irFile.toString());
