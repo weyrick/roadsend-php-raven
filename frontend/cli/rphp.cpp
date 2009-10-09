@@ -6,10 +6,13 @@
 #include <llvm/Support/CommandLine.h>
 #include <llvm/System/Path.h>
 
+#include "rphp/pConfig.h"
 #include "rphp/IR/pDumpTarget.h"
 #include "rphp/IR/pCompileTarget.h"
 #include "rphp/IR/pStandAloneTargets.h"
 #include "rphp/IR/pCompileAndLinkTarget.h"
+#include "rphp/runtime/pRuntimeError.h"
+#include "rphp/JIT/pCachedJIT.h"
 
 using namespace llvm;
 using namespace rphp;
@@ -35,6 +38,8 @@ int main( int argc, char* argv[] )
     cl::opt<bool> dumpPre ("dump-pre", cl::desc("Preprocess the source file and dump it to stdout"));
     cl::opt<int> verbosity ("v", cl::desc("Verbosity level (0=Silent/1=Info/2=Full/3+=Debug)"));
 
+    cl::opt<bool> iSF ("f", cl::desc("Execute source file immediately"));
+
     cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
     cl::opt<std::string> mainFile ("main-file",cl::desc("Main entry script for stand alone programs"));
     cl::opt<std::string> encoding ("encoding",cl::desc("Character encoding of the source file"));
@@ -54,8 +59,38 @@ int main( int argc, char* argv[] )
 
     assert(!inputFile.empty() && "empty input file");
 
+    pConfig* config = new pConfig();
+    // TODO: read php.ini type file, do command line options
+
     pSourceFileDesc inFile = boost::make_tuple(inputFile, encoding);
 
+    // JIT
+    if (iSF) {
+        pCachedJIT engine(config);
+
+        try {
+            if (verbosity > 0)
+                engine.setVerbosity(E_ALL);
+            engine.cacheAndJITFileOnDisk(inFile);
+        }
+        catch (pRuntimeError& e) {
+            // runtime errors go to output buffer by default, so we don't display here
+            delete config;
+            return 1;
+        }
+        catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            delete config;
+            return 1;
+        }
+
+        // success
+        delete config;
+        return 0;
+    }
+
+
+    // AOT COMPILER
     pTarget* target = NULL;
     if (compileModule) {
         target = new pCompileTarget(inFile/*, "/"*/);
@@ -63,10 +98,12 @@ int main( int argc, char* argv[] )
     else if (linkSA) {
         if (outputFile.empty()) {
             std::cerr << "no output file was specified" << std::endl;
+            delete config;
             return 1;
         }
         if (mainFile.empty()) {
             std::cerr << "no main file was specified" << std::endl;
+            delete config;
             return 1;
         }
         pStandAloneTarget* saTarget = new pStandAloneTarget(outputFile, mainFile);
@@ -114,6 +151,7 @@ int main( int argc, char* argv[] )
 
     if (!target) {
         // success
+        delete config;
         return 0;
     }
 
@@ -128,11 +166,13 @@ int main( int argc, char* argv[] )
     catch (std::exception& e) {
         std::cerr << e.what() << std::endl;
         delete target;
+        delete config;
         return 1;
     }
 
     // success
     delete target;
+    delete config;
     return 0;
 
 }

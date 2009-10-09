@@ -11,39 +11,42 @@ include_directories (${CMAKE_SOURCE_DIR}
 
 set(RPHP_SRC_FILES
   rphp.cpp
-)
-
-set(RPHPI_SRC_FILES
-  rphpi.cpp
   ${LLVM_LIBS_JIT_OBJECTS}
 )
 
+#set(RPHPI_SRC_FILES
+#  rphpi.cpp
+#  ${LLVM_LIBS_JIT_OBJECTS}
+#)
+
 add_executable( rphp ${RPHP_SRC_FILES} )
-add_executable( rphpi ${RPHPI_SRC_FILES} )
+#add_executable( rphpi ${RPHPI_SRC_FILES} )
 
 
 set_target_properties( rphp
                        PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
                      )
                      
-set_target_properties( rphpi
-                       PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
-                     )
+#set_target_properties( rphpi
+#                       PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
+#                     )
 
 target_link_libraries( rphp
-                       rphp-llvm-ir
-                       rphp-analysis
-                       rphp-runtime
-                       ${LLVM_LIBS_CORE}
-                       ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
-                      ) 
-target_link_libraries( rphpi
                        rphp-llvm-jit
                        rphp-llvm-ir
                        rphp-analysis
                        rphp-runtime
+#                       ${LLVM_LIBS_CORE}
                        ${LLVM_LIBS_JIT}
                        ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
-                       )                       
+                      ) 
+#target_link_libraries( rphpi
+#                       rphp-llvm-jit
+#                       rphp-llvm-ir
+#                       rphp-analysis
+#                       rphp-runtime
+#                       ${LLVM_LIBS_JIT}
+#                       ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
+#                       )                       
 
  
