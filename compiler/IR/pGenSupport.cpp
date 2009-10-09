@@ -39,6 +39,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 // getenv
 #include <stdlib.h>
@@ -166,7 +167,10 @@ void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFuncti
     PointerType* PointerTy_4 = PointerType::get(FuncTy_5, 0);
     PointerType* PointerTy_27 =PointerType::get(llvmModule->getTypeByName("struct.rphp::pRuntimeEngine"), 0);
     PointerType* PointerTy_39 = PointerType::get(llvmModule->getTypeByName("struct.rphp::pConfig"), 0);
-    PointerType* PointerTy_594 = PointerType::get(llvmModule->getTypeByName("struct.icu_3_8::UObject"), 0);
+
+    std::stringstream icuVersion;
+    icuVersion << '_' << U_ICU_VERSION_MAJOR_NUM << '_' << U_ICU_VERSION_MINOR_NUM;
+    PointerType* PointerTy_594 = PointerType::get(llvmModule->getTypeByName("struct.icu"+icuVersion.str()+"::UObject"), 0);
     PointerType* PointerTy_596 = PointerType::get(llvmModule->getTypeByName("struct.rphp::pRuntimeError"), 0);
     const StructType* StructTy_struct_rphp__pVar = (const StructType*)llvmModule->getTypeByName("struct.rphp::pVar");
     const StructType* StructTy_struct___si_class_type_info_pseudo = (const StructType*)llvmModule->getTypeByName("struct.__si_class_type_info_pseudo");
@@ -183,10 +187,15 @@ void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFuncti
     ConstantInt* const_int32_649 = ConstantInt::get(getGlobalContext(), APInt(32,  StringRef("-1"), 10));
     ConstantInt* const_int32_643 = ConstantInt::get(getGlobalContext(), APInt(32,  StringRef("1"), 10));
 
-    Function* func__Znwj = llvmModule->getFunction("_Znwj");
+#ifdef __APPLE__
+    Function* func__Znwj = llvmModule->getFunction("_Znwm"); // new(long)
+#else
+    Function* func__Znwj = llvmModule->getFunction("_Znwj"); // new(uint)
+#endif
+    Function* func__ZdlPv = llvmModule->getFunction("_ZdlPv"); // delete(void*)
+
     Function* func__ZN4rphp14pRuntimeEngineC1EPNS_7pConfigE = llvmModule->getFunction("_ZN4rphp14pRuntimeEngineC1EPNS_7pConfigE");
     Function* func__ZN4rphp4pVarC1Ev = llvmModule->getFunction("_ZN4rphp4pVarC1Ev");
-    Function* func__ZdlPv = llvmModule->getFunction("_ZdlPv");
     Function* func__ZN4rphp4pVaraSEi = llvmModule->getFunction("_ZN4rphp4pVaraSEi");
     Function* func__ZSt9terminatev = llvmModule->getFunction("_ZSt9terminatev");
     Function* func___cxa_begin_catch = llvmModule->getFunction("__cxa_begin_catch");
