@@ -46,8 +46,12 @@ void pCompileTarget::execute(void) {
     llvmModule_ = codeGen.getIR();
     entryFunctionName_ = codeGen.entryFunctionName();
 
-    if (createMain_)
+    if (createMain_) {
         IR::pGenSupport::createMain(llvmModule_, entryFunctionName_);
+    }
+    else {
+        // TODO remove main from c-runtime base
+    }
 
 }
 

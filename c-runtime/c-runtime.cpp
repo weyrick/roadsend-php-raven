@@ -169,16 +169,23 @@ extern "C" {
       l = r;
     }
 
-    int _runtimeError(void) {
-        pVar l;
+    ////
+
+    void rphp_mainEntry(pVar*, pRuntimeEngine*);
+
+    // stand alone entry point
+    // this will be removed from the module base if there is no entry point
+    int main(int argc, char** argv) {
+        pVar retVal;
+        pRuntimeEngine rEngine;
         try {
-            l = 0;
+            rphp_mainEntry(&retVal, &rEngine);
         }
         catch (pRuntimeError& e) {
-            return l.copyAsInt();
+            return retVal.copyAsInt();
         }
         catch (...) {
-            return l.copyAsInt();
+            return retVal.copyAsInt();
         }
     }
 
