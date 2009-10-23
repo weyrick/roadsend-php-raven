@@ -219,8 +219,6 @@ void dumpVisitor::visit_literalArray(literalArray* n)  {
         ++i)
     {
         showindent();
-        std::cout << "is ref? " << (*i).isRef << std::endl;
-        showindent();
         std::cout << "key: " << std::endl;
         indent();
         if ((*i).key) {

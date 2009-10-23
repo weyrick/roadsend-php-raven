@@ -115,15 +115,13 @@ class functionDecl: public decl {
 
     pFunction* functionDef_;
     block* body_;
-    bool returnRef_;
 
 public:
 
-    functionDecl(pFunction* def, block* body, bool ref):
+    functionDecl(pFunction* def, block* body):
         decl(functionDeclKind),
         functionDef_(def),
-        body_(body),
-        returnRef_(ref) { }
+        body_(body) { }
 
     ~functionDecl(void) {
         delete functionDef_;
@@ -218,11 +216,9 @@ public:
 struct arrayItem {
     expr* key;
     expr* val;
-    bool isRef;
-    arrayItem(expr* k, expr* v, bool r):
+    arrayItem(expr* k, expr* v):
      key(k),
-     val(v),
-     isRef(r) { }
+     val(v) { }
 };
 
 typedef std::vector<arrayItem> arrayList;

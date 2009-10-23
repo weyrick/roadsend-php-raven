@@ -4,7 +4,7 @@
 
 #include <cppunit/extensions/HelperMacros.h>
 
-/* 
+/*
  * A test case for rphp pvar
  *
  */
@@ -36,7 +36,7 @@ protected:
   void test_pUString();
   void test_visitor();
   void test_conversion();
-  
+
 };
 
 

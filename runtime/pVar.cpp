@@ -28,7 +28,7 @@
 namespace rphp {
 
 pVarType pVar::getType() const {
-    int w = pVarData_.which();
+    int w = (isBoxed() ? getPtr()->pVarData_.which() : pVarData_.which());
     if (w == pVarTriStateType_) {
         return (pNull(boost::get<pTriState>(pVarData_))) ? pVarNullType : pVarBoolType;
     }
@@ -38,29 +38,42 @@ pVarType pVar::getType() const {
 }
 
 void pVar::convertToNull() {
-    pVarData_ = pNull;
+    PVAR_DATA = pNull;
 }
 
 pTriState& pVar::convertToBool() {
     if (!isBool()) {
-        pVar_convertToBoolVisitor cv(pVarData_);
-        boost::apply_visitor(cv, pVarData_);
+        pVarDataType* d;
+        d = (isBoxed() ? &getPtr()->pVarData_ : &pVarData_);
+        pVar_convertToBoolVisitor cv(*d);
+        boost::apply_visitor(cv, *d);
     }
     return getBool();
 }
 
+pHashP& pVar::convertToHash() {
+	if(!isHash()) {
+        pVarDataType* d = (isBoxed() ? &getPtr()->pVarData_ : &pVarData_);
+		pVar_convertToHashVisitor cv(*d);
+		boost::apply_visitor(cv, *d);
+	}
+	return getHash();
+}
+
 pInt& pVar::convertToInt() {
     if (!isInt()) {
-        pVar_convertToIntVisitor cv(pVarData_);
-        boost::apply_visitor(cv, pVarData_);
+        pVarDataType* d = (isBoxed() ? &getPtr()->pVarData_ : &pVarData_);
+        pVar_convertToIntVisitor cv(*d);
+        boost::apply_visitor(cv, *d);
     }
     return getInt();
 }
 
 pBString& pVar::convertToBString() {
     if (!isBString()) {
-        pVar_convertToBStringVisitor cv(pVarData_);
-        boost::apply_visitor(cv, pVarData_);
+        pVarDataType* d = (isBoxed() ? &getPtr()->pVarData_ : &pVarData_);
+        pVar_convertToBStringVisitor cv(*d);
+        boost::apply_visitor(cv, *d);
     }
     assert(isBString() && "convertToBString failed to convert");
     return getBString();
@@ -70,6 +83,12 @@ pInt pVar::copyAsInt() const {
     pVar v(*this);
     return v.convertToInt();
 }
+
+pHashP pVar::copyAsHash() const {
+    pVar v(*this);
+    return v.convertToHash();
+}
+
 
 pBString pVar::copyAsBString() const {
     pVar v(*this);
@@ -94,27 +113,6 @@ void pVar::convertToString() {
     convertToBString();
 }
 
-void intrusive_ptr_add_ref(pVar* v) {
-    v->incRefCount();
-#ifdef RPHP_PVAR_DEBUG
-    std::cout << "pVarP [" << v << "]: inc ref count, now: " << v->getRefCount() << std::endl;
-#endif
-}
-
-void intrusive_ptr_release(pVar* v) {
-    v->decRefCount();
-    boost::int32_t c = v->getRefCount();
-#ifdef RPHP_PVAR_DEBUG
-    std::cout << "pVarP [" << v << "]: dec ref count, now: " << c << std::endl;
-#endif
-    if (c == 0) {
-        delete v;
-    }
-    else if (c == 1) {
-        // if refcount drops to 1, ensure the pVar is not flagged as a php reference
-        v->unmakeAlias();
-    }
-}
 
 std::ostream& operator << (std::ostream& os, const pVar& v)
 {

@@ -29,7 +29,6 @@
 #include <boost/logic/tribool.hpp>
 #include <boost/variant.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/intrusive_ptr.hpp>
 #include <boost/function.hpp>
 
 #include <vector>
@@ -67,9 +66,7 @@ typedef boost::shared_ptr<pResource> pResourceP;
 
 class pVar;
 /// auto shared pointer to a pVar
-/// used for a pVar that needs to live on the heap,
-/// in particular: reference variables
-typedef boost::intrusive_ptr<pVar> pVarP;
+typedef boost::shared_ptr<pVar> pVarP;
 
 /// main pVar variant type
 typedef boost::variant< pTriState,

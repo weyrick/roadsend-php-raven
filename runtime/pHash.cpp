@@ -36,26 +36,57 @@ namespace rphp {
 void pHash::insert(pInt key, const pVar& data) {
     if (key > maxIntKey_)
         maxIntKey_ = key+1;
-    hashData_.insert(h_container(key, data));
+    h_container dataKeyed(key, data);
+    stableHash::iterator k = hashData_.find(key);
+    if(k == hashData_.end())
+    	hashData_.insert(dataKeyed);
+    else
+    	assert(hashData_.replace(k, dataKeyed));
 }
 
 void pHash::insert(const pBString& key, const pVar& data) {
     // TODO check numeric string, set maxIntKey accordingly
-    hashData_.insert(h_container(key, data));
+    h_container dataKeyed(key, data);
+    stableHash::iterator k = hashData_.find(key);
+    if(k == hashData_.end())
+    	hashData_.insert(dataKeyed);
+    else
+    	assert(hashData_.replace(k, dataKeyed));
 }
 
 void pHash::insert(const pUStringP& key, const pVar& data) {
     // TODO check numeric string, set maxIntKey accordingly
-    hashData_.insert(h_container(key, data));
+    h_container dataKeyed(key, data);
+    stableHash::iterator k = hashData_.find(key);
+    if(k == hashData_.end())
+    	hashData_.insert(dataKeyed);
+    else
+    	assert(hashData_.replace(k, dataKeyed));
 }
 
 void pHash::insert(const pVar& key, const pVar& data) {
     // TODO proper semantics for key conversion
-    hashData_.insert(h_container(key.copyAsBString(), data));
+	if(key.isInt())
+		insert(key.getInt(), data);
+	else if(key.isBool())
+		insert(pInt(key.evalAsBool()), data);
+	else if(key.isBString())
+		insert(key.getBString(), data);
+	else if(key.isUString())
+		insert(key.getUString(), data);
+	if(!key.isInt() && !key.isBool() && !key.isBString() && !key.isUString())
+		assert(0 && "unsupported type for array key detected!");
+    //hashData_.insert(h_container(key.copyAsBString(), data));
 }
 
 void pHash::insertNext(const pVar& data) {
-    hashData_.insert(h_container(maxIntKey_++, data));
+	pInt key(maxIntKey_++);
+    h_container dataKeyed(key, data);
+    stableHash::iterator k = hashData_.find(key);
+    if(k == hashData_.end())
+    	hashData_.insert(dataKeyed);
+    else
+    	assert(hashData_.replace(k, dataKeyed));
 }
 
 pHash::size_type pHash::remove(pInt key) {
@@ -137,7 +168,7 @@ void pHash::varDump(pOutputBuffer* buf, const pBString& indent) const {
 
     pBString newIndent(indent+"  ");
     hKeyType kType;
-    
+
     for (seq_index::iterator it = ot.begin(); it!=ot.end(); it++) {
         kType = (hKeyType)(*it).key.which();
         if (kType == hKeyInt) {
@@ -145,9 +176,9 @@ void pHash::varDump(pOutputBuffer* buf, const pBString& indent) const {
         }
         else {
             if (kType == hKeyUStr)
-                *buf << newIndent << "[u'" << (*it).key << "']=>\n";
+                *buf << newIndent << "[u\"" << (*it).key << "\"]=>\n";
             else
-                *buf << newIndent << "['" << (*it).key << "']=>\n";
+                *buf << newIndent << "[\"" << (*it).key << "\"]=>\n";
         }
         (*it).pData.applyVisitor<pVar_var_dump>(buf, newIndent);
     }

@@ -23,57 +23,125 @@
 
 #include "rphp/runtime/pRuntimeTypes.h"
 
+#ifdef RPHP_PVAR_DEBUG
 #include <iostream>
-
-// each pVar holds an int32 which stores both refcount (lower 31 bits)
-// and a flag that determines if this pVar is an alias in the runtime
-#define PVAR_REFCNT_BITS   0x7fffffff
-#define PVAR_ALIAS_FLAG    0x80000000
+#endif
 
 namespace rphp {
 
 /**
  @brief pVar is the basic container for a runtime variable
 
- It is implemented with a boost::variant, which is a type-safe, discriminated union.
- pVar can hold all of the basic runtime types
+ pVar is built to model PHP runtime variable semantics within C++. This makes it very easy to use within the
+ runtime and extensions. It tries to be as efficient as possible while still maintaining this goal. It is meant
+ to be a simple container for passing and retrieving values of dynamic type (while still maintaining c++ type info).
+
+ It is implemented with a boost::variant, which is a type-safe, stack based, discriminated union.
+ pVar can represent all of the basic runtime types
 
  - pNull
  - pBool
  - pInt
+ * [future] pBitInt(mpz_t) (arbitrary precision integers)
  - pFloat
- - pBString
- - pUString
+ - pBString (binary string)
+ - pUString (unicode string)
  - pHash
  - pObject
  - pResource
  - pVarP (reference counted, shared ptr to a pVar)
+ * [future] pFunction (lambda function)
 
- Space for each type is stored on the stack
+ In the documentation below, the following notation is used:
 
- PHP "references", where more than one symbol in the runtime references the same
- variable, are hereby denoted "aliases". This is to differentiate between reference
- counted pVarP objects (which may or may not be runtime aliases) and PHP reference
- variables (which are always pVarP, i.e. on the heap)
+ X{T1}
+
+ represents pVar named X, with active type T1. For example, a pVar named A representing a pInt = 5 would be:
+
+ X{pInt} = 5
+
+ When type T1 is a pVarP, we have a boxed pVar, represented as:
+
+ X{pVarP[Y{T2}]}
+
+ where X is the "outer" pVar (on the stack) with active type pVarP, and Y is the "inner" pVar (on the heap) of
+ some type T2. As noted further below, T2 may be any type T above except pVarP.
+
+ Data for each type is stored on the stack (i.e. within the pVar class itself), which requires
+ max(sizeof(T1),..,sizeof(TN)) for types T above, plus a possible alignment.
+ Currently this amounts to 4 words on x86 and x86-64: 2 for the data storage, and 1 for the
+ active type discriminator
+
+ A pVar on the heap is implemented via a reference counted, shared pointer pVarP.
+ pVar* should normally not be used directly.
+
+ Memory management is automatic: the constructor, assignment operator, and destructor for each type is run
+ according to normal C++ semantics for the active type. For local variables, this means memory is reclaimed
+ when the variable goes out of scope, by the destructor. For boxed pVars, memory is reclaimed by pVarP when
+ the reference count drops to 0, at which point the destructor for T2 runs. Note that the destructor is also
+ run (and memory may be reclaimed) when type T1 changes upon assignment.
+
+ The default copy semantic is by value for all types except pObjectP, pResourceP, pVarP. These three are always
+ shared pointers, and so copying it and then mutating it will change the shared copy. The rest are either always
+ simple types copied by value, or more complex types but with copy-on-write semantics and so still relatively
+ efficient to copy (until mutated).
+
+   pVar a(5); pVar b(a); b = 4;
+
+   a is initialized to pInt 5. b is initialized from a, and the value is copied. a = 5 and b = 4.
+
+   pVar a("foo"); pVar b(a); b = "baz";
+
+   a is initialized to pBString "foo". b is initialized from a. However (GNU libstdc++), because std::string is
+   copy-on-write, the string is not copied until the assignment to b.
+
+ A pVar on the stack can represent a pVarP (with T1=pVarP), in which case we say the data is "boxed". However, pVar
+ guarantees that pVars cannot be chained. That is, the boxed (or inner) pVar Y can never itself represent a pVarP,
+ only simpler types. This is enforced during construction and assignment by asserting that T2!=pVarP
+
+ pVar itself hides the details of working with data on the heap: there is no difference from general user code.
+
+ PHP "references", where more than one symbol in the runtime references the same variable data, are not supported
+ in Roadsend PHP. Any circumstance that requires reference semantics can be rewritten using a PHP object.
+
+ [future] pVar has operator overloading to support the basic arithmetic operators + - * / %, which adjust type as necessary
+ according to PHP semantics for these operations. One difference between Zend and Roadsend PHP is with integer overflows:
+ in Roadsend PHP, an hardware integer will overflow to an arbitrary precision integer.
+
+ The current active type is available through getType() or the type predicates isInt(), etc. Once the type is known,
+ a reference to the correctly typed data is available through the getInt(), et al. methods (available const and nonconst)
+ Types may be arbitrarily converted through the appropriate methods offered, also according to PHP type conversion semantics.
+ Different methods are available to change the types in place, or return a copy of the type converted data as a new pVar.
+
+ pVar is const correct and within C++ functions and methods, should be passed by const C++ reference (i.e. "const pVar&")
+ for efficiency. The runtime uses this method for PHP functions and methods.
+
+ A visitor is available to code that needs to operate differently according to each type. This is safer than a switch statement
+ that checks getType() because if pVar is changed in the future, the visitor will result in a compile error while the switch
+ may go unhandled.
+
+ -- thread safety?
+ -- memory pools, creation using static function with runtime
 
 */
+
+// we encapsulate the boxing of pVar data. this is used to determine
+// where our data lives. this macro chooses inner or out data.
+#define PVAR_DATA          (isBoxed() ? getPtr()->pVarData_ : pVarData_)
+
 class pVar {
 
     /**
         variant data
      */
     pVarDataType pVarData_;
-    /**
-        reference count (lower 31 bits) and alias flag (high bit)
-     */
-    boost::int32_t refData_;
 
 public:
 
     /* constructors */
 
     /// default constructor holds a pNull
-    pVar(void): pVarData_(pNull), refData_(0) {
+    pVar(void): pVarData_(pNull) {
 #ifdef RPHP_PVAR_DEBUG
         std::cout << "pVar [" << this << "]: default construct (pNull)" << std::endl;
 #endif
@@ -81,7 +149,7 @@ public:
 
     /// generic constructor will accept any type that is valid for the pVar variant (see pVarDataType)
     template <typename T>
-    pVar(const T& v): pVarData_(v), refData_(0) {
+    pVar(const T& v): pVarData_(v) {
 #ifdef RPHP_PVAR_DEBUG
         std::cout << "pVar [" << this << "]: generic construct to: " << pVarData_.which() << std::endl;
 #endif
@@ -90,14 +158,14 @@ public:
     // some specializations to avoid ambiguity
 
     /// construction from char* defaults to a binary strings
-    pVar(const char* str): pVarData_(pBString(str)), refData_(0) {
+    pVar(const char* str): pVarData_(pBString(str)) {
 #ifdef RPHP_PVAR_DEBUG
         std::cout << "pVar [" << this << "]: binary string construct" << std::endl;
 #endif
     }
 
     /// construction from int creates pInt
-    pVar(int i): pVarData_(pInt(i)), refData_(0) {
+    pVar(int i): pVarData_(pInt(i)) {
 #ifdef RPHP_PVAR_DEBUG
         std::cout << "pVar [" << this << "]: int construct: " << i << std::endl;
 #endif
@@ -111,7 +179,6 @@ public:
     pVar(const pVar& v) {
         std::cout << "pVar [" << this << "]: copy construct from [" << &v << "] type: " << v.getType() << std::endl;
         pVarData_ = v.pVarData_;
-        refData_ = v.refData_;
     }
 #endif
 
@@ -124,79 +191,50 @@ public:
 
     /// generic assignment works for any type pVarDataType supports
     template <typename T>
-    void operator=(const T& val) { pVarData_ = val; }
+    void operator=(const T& val) {
+        PVAR_DATA = val;
+    }
+
+    // this specializes on pVarP to ensure we don't create chains of pVars on the heap.
+    // it says that we can only assign a pVarP to the outer pVar, not the inner
+    void operator=(const pVarP& p) {
+        pVarData_ = p;
+    }
 
     // some specializations to avoid ambiguity
     /// default assignment from char* to binary strings
-    void operator=(const char* str) { pVarData_ = pBString(str); }
+    void operator=(const char* str) {
+        PVAR_DATA = pBString(str);
+    }
+
     /// default assignment from int to pInt
-    void operator=(int i) { pVarData_ = pInt(i); }
-
-    /* reference counting counting */
-    /// reference counting is handled automatically upon construction, destruction and
-    /// assignment of pVarP so inc/dec shouldn't normally be called in userland
-    /// these are only useful when which() is NOT pVarP
-    /// in other words, we only count reference when we are the boxed pVar inside
-    /// of a pVarP
-
-    /// return current reference count.
-    inline boost::int32_t getRefCount(void) const {
-        return refData_ & PVAR_REFCNT_BITS;
+    void operator=(int i) {
+        PVAR_DATA = pInt(i);
     }
 
-    /// increment the reference count
-    inline void incRefCount(void) {
-        // TODO: overflow? threadsafety?
-        refData_ += 1;
-    }
-    /// decrement the reference count
-    inline void decRefCount(void) {
-        // TODO: underflow? threadsafety?
-        refData_ -= 1;
-    }
 
-    /* aliases (i.e. PHP references) */
-    // note that all alaises are pVarP (i.e. on the heap), but not all pVarP are
-    // reference variables. this happens because a pVar can live on the
-    // heap but not have multiple runtime symbols pointing to it
-
-    /// return true if this pVar is a runtime "reference" variable
-    inline bool isAlias(void) const {
-        return refData_ & PVAR_ALIAS_FLAG;
-    }
-    /// make this pVar a runtime "reference" variable, meaning multiple
-    /// runtime symbols are pointing to it. if it's already boxed, meaning
-    /// it's already a pVarP object stored on the heap, then we simply
-    /// flag it as an alias. otherwise, we transfer the current stack based
-    /// data to the heap first.
-    inline void makeAlias(void) {
-        if (pVarData_.which() == pVarPtrType_) {
-            refData_ |= PVAR_ALIAS_FLAG;
-        }
-        else {
+    /// promote this pVar's data to the heap, if it's not already there
+    void boxData(void) {
+        if (!isBoxed()) {
             pVarData_ = pVarP(new pVar(pVarData_));
-            refData_ |= PVAR_ALIAS_FLAG;
         }
-    }
-    /// unflag this pVar as a reference variable. note that this will not
-    /// move a pVar that is on the heap back to the stack
-    inline void unmakeAlias(void) {
-        refData_ ^= PVAR_ALIAS_FLAG;
     }
 
     /* custom visitors */
     /// apply a boost static visitor to the variant
+    // TODO small optimization here is to not use PVAR_DATA twice since it involves
+    // a redundant isBoxed()
     template <typename T>
     typename T::result_type applyVisitor() const {
-        return boost::apply_visitor( T(pVarData_), pVarData_ );
+        return boost::apply_visitor( T(PVAR_DATA), PVAR_DATA );
     }
     template <typename T, typename T2>
     typename T::result_type applyVisitor(T2 param1) const {
-        return boost::apply_visitor( T(pVarData_, param1), pVarData_ );
+        return boost::apply_visitor( T(PVAR_DATA, param1), PVAR_DATA );
     }
     template <typename T, typename T2, typename T3>
     typename T::result_type applyVisitor(T2 param1, T3 param2) const {
-        return boost::apply_visitor( T(pVarData_, param1, param2), pVarData_ );
+        return boost::apply_visitor( T(PVAR_DATA, param1, param2), PVAR_DATA );
     }
 
     /* type checks */
@@ -204,43 +242,44 @@ public:
     pVarType getType() const;
 
     /// return true if pVar is currently a pNull. no type conversion.
-    bool isNull() const {
-        return ((pVarData_.which() == pVarTriStateType_) && pNull(boost::get<pTriState>(pVarData_)));
+    inline bool isNull() const {
+        return (PVAR_DATA.which() == pVarTriStateType_) && pNull(boost::get<pTriState>(PVAR_DATA));
     }
     /// return true if pVar is currently a pBool. no type conversion.
-    bool isBool() const {
-        return ((pVarData_.which() == pVarTriStateType_) && !pNull(boost::get<pTriState>(pVarData_)));
+    inline bool isBool() const {
+        return (PVAR_DATA.which() == pVarTriStateType_) && !pNull(boost::get<pTriState>(PVAR_DATA));
     }
     /// return true if pVar is currently a pInt. no type conversion.
-    bool isInt() const {
-        return (pVarData_.which() == pVarIntType_);
+    inline bool isInt() const {
+        return (PVAR_DATA.which() == pVarIntType_);
     }
     /// return true if pVar is currently a pFloat. no type conversion.
-    bool isFloat() const {
-        return (pVarData_.which() == pVarFloatType_);
+    inline bool isFloat() const {
+        return (PVAR_DATA.which() == pVarFloatType_);
     }
     /// return true if pVar is currently a pBString. no type conversion.
-    bool isBString() const {
-        return (pVarData_.which() == pVarBStringType_);
+    inline bool isBString() const {
+        return (PVAR_DATA.which() == pVarBStringType_);
     }
     /// return true if pVar is currently a pUString. no type conversion.
-    bool isUString() const {
-        return (pVarData_.which() == pVarUStringType_);
+    inline bool isUString() const {
+        return (PVAR_DATA.which() == pVarUStringType_);
     }
     /// return true if pVar is currently a pHash. no type conversion.
-    bool isHash() const {
-        return (pVarData_.which() == pVarHashType_);
+    inline bool isHash() const {
+        return (PVAR_DATA.which() == pVarHashType_);
     }
     /// return true if pVar is currently a pObject. no type conversion.
-    bool isObject() const {
-        return (pVarData_.which() == pVarObjectType_);
+    inline bool isObject() const {
+        return (PVAR_DATA.which() == pVarObjectType_);
     }
     /// return true if pVar is currently a pResource. no type conversion.
-    bool isResource() const {
-        return (pVarData_.which() == pVarResourceType_);
+    inline bool isResource() const {
+        return (PVAR_DATA.which() == pVarResourceType_);
     }
-    /// return true if pVar is currently a boxed pVar. no type conversion.
-    bool isBoxed() const {
+    /// return true if pVar is currently a boxed pVarP. no type conversion.
+    // note this is the only one that checks local pVarData_
+    inline bool isBoxed() const {
         return (pVarData_.which() == pVarPtrType_);
     }
 
@@ -262,6 +301,8 @@ public:
     pTriState& convertToBool();
     /// convert current value to an integer. return converted value.
     pInt& convertToInt();
+    // Converts the current pVar to an pHash. returns the converted value.
+    pHashP& convertToHash();
     // float
     /** @brief convert to binary or unicode string
 
@@ -272,7 +313,6 @@ public:
     /// force convertion to a binary string. if it was a unicode string, the conversion is lossy
     pBString& convertToBString();
     // ustring
-    // hash
     // object
     // resource
 
@@ -284,70 +324,70 @@ public:
     // float
     /// cast to pBString, does not mutate
     pBString copyAsBString() const;
+    pHashP copyAsHash() const;
     // ustring
-    // hash
     // object
     // resource
 
     /* these do no conversions, and throw exception if the wrong type is accessed */
     /// bool accessor. throws exception if pVar is wrong type
     pTriState& getBool() {
-        return boost::get<pTriState&>(pVarData_);
+        return boost::get<pTriState&>(PVAR_DATA);
     }
 
     /// const bool accessor. throws exception if pVar is wrong type
     const pTriState& getBool() const {
-        return boost::get<const pTriState&>(pVarData_);
+        return boost::get<const pTriState&>(PVAR_DATA);
     }
 
     /// pInt accessor. throws exception if pVar is wrong type
     pInt& getInt() {
-        return boost::get<pInt&>(pVarData_);
+        return boost::get<pInt&>(PVAR_DATA);
     }
 
     /// const pInt accessor. throws exception if pVar is wrong type
     const pInt& getInt() const {
-        return boost::get<const pInt&>(pVarData_);
+        return boost::get<const pInt&>(PVAR_DATA);
     }
 
     /// pFloat accessor. throws exception if pVar is wrong type
     pFloat& getFloat() {
-        return boost::get<pFloat&>(pVarData_);
+        return boost::get<pFloat&>(PVAR_DATA);
     }
 
     /// const pFloat accessor. throws exception if pVar is wrong type
     const pFloat& getFloat() const {
-        return boost::get<const pFloat&>(pVarData_);
+        return boost::get<const pFloat&>(PVAR_DATA);
     }
 
     /// pBString accessor. throws exception if pVar is wrong type
     pBString& getBString() {
-        return boost::get<pBString&>(pVarData_);
+        return boost::get<pBString&>(PVAR_DATA);
     }
 
     /// const pBString accessor. throws exception if pVar is wrong type
     const pBString& getBString() const {
-        return boost::get<const pBString&>(pVarData_);
+        return boost::get<const pBString&>(PVAR_DATA);
     }
 
     /// pUString accessor. throws exception if pVar is wrong type
     pUStringP& getUString() {
-        return boost::get<pUStringP&>(pVarData_);
+        return boost::get<pUStringP&>(PVAR_DATA);
     }
 
     /// const pUString accessor. throws exception if pVar is wrong type
     const pUStringP& getUString() const {
-        return boost::get<const pUStringP&>(pVarData_);
+        return boost::get<const pUStringP&>(PVAR_DATA);
     }
 
     /// pHash accessor. throws exception if pVar is wrong type
     pHashP& getHash() {
-        return boost::get<pHashP&>(pVarData_);
+        return boost::get<pHashP&>(PVAR_DATA);
     }
 
     /// const pHash accessor. throws exception if pVar is wrong type
     const pHashP& getHash() const {
-        return boost::get<const pHashP&>(pVarData_);
+        return boost::get<const pHashP&>(PVAR_DATA);
     }
 
     /// read only hash access
@@ -357,22 +397,22 @@ public:
 
     /// pObject accessor. throws exception if pVar is wrong type
     pObjectP& getObject() {
-        return boost::get<pObjectP&>(pVarData_);
+        return boost::get<pObjectP&>(PVAR_DATA);
     }
 
     /// const pObject accessor. throws exception if pVar is wrong type
     const pObjectP& getObject() const {
-        return boost::get<const pObjectP&>(pVarData_);
+        return boost::get<const pObjectP&>(PVAR_DATA);
     }
 
     /// pResource accessor. throws exception if pVar is wrong type
     pResourceP& getResource() {
-        return boost::get<pResourceP&>(pVarData_);
+        return boost::get<pResourceP&>(PVAR_DATA);
     }
 
     /// const pResource accessor. throws exception if pVar is wrong type
     const pResourceP& getResource() const {
-        return boost::get<const pResourceP&>(pVarData_);
+        return boost::get<const pResourceP&>(PVAR_DATA);
     }
 
     /// boxed pVar accessor. throws exception if pVar is wrong type
@@ -393,10 +433,6 @@ public:
     }
 
 };
-
-// used by boost::instrusive_ptr to handle ref counting
-void intrusive_ptr_add_ref(pVar* v);
-void intrusive_ptr_release(pVar* v);
 
 } /* namespace rphp */
 

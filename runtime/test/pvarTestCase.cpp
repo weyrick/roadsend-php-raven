@@ -141,38 +141,38 @@ void pvarTestCase::test_pUString() {
     CPPUNIT_ASSERT( base.use_count() == 3 );
     CPPUNIT_ASSERT( copy.use_count() == 3 );
     CPPUNIT_ASSERT( constCopy.use_count() == 3 );
-    
+
     // calling a const method will not detach
     CPPUNIT_ASSERT( constCopy->length() > 5 );
-    
+
     CPPUNIT_ASSERT( base == constCopy );
     CPPUNIT_ASSERT( base == copy );
     CPPUNIT_ASSERT( base.use_count() == 3 );
     CPPUNIT_ASSERT( copy.use_count() == 3 );
     CPPUNIT_ASSERT( constCopy.use_count() == 3 );
-    
+
     // but since copy is non const, dereferencing it will detach
     CPPUNIT_ASSERT( copy->length() > 5 );
-    
+
     CPPUNIT_ASSERT( !(base == copy) );
     CPPUNIT_ASSERT( base == constCopy );
     CPPUNIT_ASSERT( base.use_count() == 2 );
     CPPUNIT_ASSERT( constCopy.use_count() == 2 );
     CPPUNIT_ASSERT( copy.use_count() == 1 );
-    
+
     // so, they now point to different UnicodeString objects on the heap
     // however, these objects should share a pointer to the actual string
     // (this is UnicodeString's COW mechanism)
     CPPUNIT_ASSERT( base->getBuffer() == copy->getBuffer() );
-    
+
     // until we change one of them...
     copy = "copy on write complete";
     CPPUNIT_ASSERT( base->getBuffer() != copy->getBuffer() );
-    
+
     /*
-    
+
     ARCHIVE: old pUString tests
-    
+
     pUString u = v.getUString();
     pVar x(u); // x should have a shared ptr to v's buffer now, until write
     CPPUNIT_ASSERT( x.getUString().getBuffer() == v.getUString().getBuffer() );
@@ -226,42 +226,42 @@ void pvarTestCase::test_pHash() {
     base->insert("foo", 5);
     pHashP copy(base);
     const pHashP constCopy(base);
-    
+
     CPPUNIT_ASSERT( base == constCopy );
     CPPUNIT_ASSERT( base == copy );
     CPPUNIT_ASSERT( base.use_count() == 3 );
     CPPUNIT_ASSERT( copy.use_count() == 3 );
     CPPUNIT_ASSERT( constCopy.use_count() == 3 );
-    
+
     // calling a const method will not detach
     CPPUNIT_ASSERT( constCopy->size() == 1 );
-    
+
     CPPUNIT_ASSERT( base == constCopy );
     CPPUNIT_ASSERT( base == copy );
     CPPUNIT_ASSERT( base.use_count() == 3 );
     CPPUNIT_ASSERT( copy.use_count() == 3 );
     CPPUNIT_ASSERT( constCopy.use_count() == 3 );
-    
+
     // but since copy is non const, dereferencing it will detach
     CPPUNIT_ASSERT( copy->size() == 1 );
-    
+
     CPPUNIT_ASSERT( !(base == copy) );
     CPPUNIT_ASSERT( base == constCopy );
     CPPUNIT_ASSERT( base.use_count() == 2 );
     CPPUNIT_ASSERT( constCopy.use_count() == 2 );
     CPPUNIT_ASSERT( copy.use_count() == 1 );
-    
+
 
 }
 
-// ** REF **
-pVar changeRef(pVar r) {
+// ** HEAP **
+pVar changeBox(pVar r) {
 
     CPPUNIT_ASSERT( r.isBoxed() );
-    CPPUNIT_ASSERT( r.getPtr()->getRefCount() == 3 ); // (r, newr) from test_pVarRef, plus our r
+    CPPUNIT_ASSERT( r.getPtr().use_count()== 4 ); // (r, newr,ptr) from test_pVarRef, plus our r
 
     pVarP r2(r.getPtr());
-    CPPUNIT_ASSERT( r2->getRefCount() == 4 ); // (r, newr) from test_pVarRef, plus our r and r2
+    CPPUNIT_ASSERT( r2.use_count() == 5 ); // (r, newr,ptr) from test_pVarRef, plus our r and r2
     *r2 = 10;
 
     return pVar(r2);
@@ -270,45 +270,43 @@ pVar changeRef(pVar r) {
 
 void pvarTestCase::test_pVarBoxed() {
 
-    pVarP ptr = new pVar(5);
+    // new pVar on the heap, which will be "boxed"
+    pVarP ptr(new pVar(5));
+    // new pVar on the stack: becomes the "box" itself
     pVar r(ptr);
 
     // basic
-    CPPUNIT_ASSERT( r.isBoxed() );
+    CPPUNIT_ASSERT( r.isBoxed() == true );
+    CPPUNIT_ASSERT( r.isInt() );
     CPPUNIT_ASSERT( r.getPtr()->isInt() );
+    CPPUNIT_ASSERT( r.getInt() == 5 );
     CPPUNIT_ASSERT( r.getPtr()->getInt() == 5 );
 
     // ref counting
-    CPPUNIT_ASSERT( ptr->getRefCount() == 2 ); // ptr and r
-    ptr.reset();
-    CPPUNIT_ASSERT( r.getPtr()->getRefCount() == 1 ); // r
+    CPPUNIT_ASSERT( ptr.use_count() == 2 ); // ptr and r
 
     pVar newr(r);
-    CPPUNIT_ASSERT( newr.getPtr()->getRefCount() == 2 ); // r, newr
+    CPPUNIT_ASSERT( newr.getPtr().use_count() == 3 ); // ptr, r, newr
 
-    // php reference flag (aliases)
-    CPPUNIT_ASSERT( r.isAlias() == false );
-    r.makeAlias();
-    CPPUNIT_ASSERT( r.isAlias() == true );
-    r.unmakeAlias();
-    CPPUNIT_ASSERT( r.isAlias() == false );
+    // make sure they point to the same thing
+    CPPUNIT_ASSERT( newr.isInt() );
+    CPPUNIT_ASSERT( r.isInt() );
+    CPPUNIT_ASSERT( newr.getInt() == r.getInt() );
+    CPPUNIT_ASSERT( r.getPtr() == newr.getPtr() );
 
     // if it's not already boxed, makeAlias will move it to heap
     pVar x(5);
-    CPPUNIT_ASSERT( x.isAlias() == false );
     CPPUNIT_ASSERT( x.isBoxed() == false );
-    x.makeAlias();
-    CPPUNIT_ASSERT( x.isAlias() == true );
+    x.boxData();
     CPPUNIT_ASSERT( x.isBoxed() == true );
 
-    pVar r2 = changeRef(r);
+    pVar r2 = changeBox(r);
     CPPUNIT_ASSERT( r.isBoxed() );
-    CPPUNIT_ASSERT( r.getPtr()->getRefCount() == 3 ); // r, r2, newr
+    CPPUNIT_ASSERT( r.getPtr().use_count() == 4 ); // r, r2, newr, ptr
     CPPUNIT_ASSERT( r.getPtr()->isInt() );
     CPPUNIT_ASSERT( r.getPtr()->getInt() == 10 );
     CPPUNIT_ASSERT( r.isBoxed() );
     CPPUNIT_ASSERT( r.getPtr() == r2.getPtr() );
-
 
 }
 
@@ -382,5 +380,6 @@ void pvarTestCase::test_conversion() {
     pVar ustr(pUStringP("foo"));
     pBString bstr(ustr.copyAsBString());
     CPPUNIT_ASSERT( bstr == "foo" );
-    
+
 }
+

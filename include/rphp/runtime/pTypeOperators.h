@@ -26,6 +26,7 @@
 #include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pHash.h"
 #include "rphp/runtime/pObject.h"
+#include "rphp/runtime/CowPtr.h"
 
 namespace rphp {
 
@@ -198,6 +199,68 @@ public:
     }
 
 };
+
+/* a visitor for converting to array, in place */
+class pVar_convertToHashVisitor : public boost::static_visitor<void> {
+
+protected:
+    pVarDataType &var_;
+
+public:
+    pVar_convertToHashVisitor(pVarDataType &v) : var_(v) { }
+
+    void operator()(const pTriState &v)  {
+    	pHash* hash = new pHash;
+    	if(!pNull(v))
+    		hash->insertNext(v);
+        var_ = pHashP(hash);
+    }
+
+    void operator()(const pInt &v) {
+        pHash* hash = new pHash;
+        hash->insertNext(v);
+        var_ = pHashP(hash);
+    }
+
+    void operator()(const pFloat &v) {
+        pHash* hash = new pHash;
+        hash->insertNext(v);
+        var_ = pHashP(hash);
+   }
+
+    void operator()(const pBString &v) {
+        pHash* hash = new pHash;
+        hash->insertNext(v);
+        var_ = pHashP(hash);
+    }
+
+    void operator()(const pUStringP &v) {
+        pHash* hash = new pHash;
+        hash->insertNext(v);
+        var_ = pHashP(hash);
+    }
+
+    void operator()(const pHashP &v) {
+    	/* none */
+    }
+
+    void operator()(const pObjectP &v) {
+    	// TODO: needs array_merge like behaviour + name mangling in the pObject strucure.
+    	throw pRuntimeError("cast of an object to an array not implemented yet!");
+    }
+
+    void operator()(const pResourceP &v) {
+    	pHash* hash = new pHash;
+    	hash->insertNext(v);
+    	var_ = pHashP(hash);
+    }
+
+    void operator()(const pVarP &v) {
+        v->convertToHash();
+    }
+
+};
+
 
 } /* namespace rphp */
 

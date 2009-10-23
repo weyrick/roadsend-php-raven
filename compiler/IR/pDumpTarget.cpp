@@ -29,6 +29,8 @@
 #include <llvm/Module.h>
 #include <llvm/Analysis/Verifier.h>
 
+#include <iostream>
+
 namespace rphp {
 
 void pDumpTarget::execute(void) {

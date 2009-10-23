@@ -72,17 +72,16 @@ public:
 
     void operator()(const pObjectP &v) const {
         // TODO
-        *buf_ << indent_ << "object";
+        *buf_ << indent_ << "object\n";
     }
 
     void operator()(const pResourceP &v) const {
         // TODO
-        *buf_ << indent_ << "resource";
+        *buf_ << indent_ << "resource\n";
     }
 
     void operator()(const pVarP &v) const {
-        // TODO
-        *buf_ << indent_ << "&ref";
+    	v->applyVisitor<pVar_var_dump>(buf_);
     }
 };
 

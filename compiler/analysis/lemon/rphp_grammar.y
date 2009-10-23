@@ -278,7 +278,7 @@ functionDecl(A) ::= T_FUNCTION T_IDENTIFIER(NAME) T_LEFTPAREN decl_argList(ARGS)
     }
 	funDef->setParamList(rArgs); // takes ownership of pFunctionParam objs
 	delete ARGS; // free container from parse
-	A = new AST::functionDecl(funDef, BODY, false/* ref? */);
+	A = new AST::functionDecl(funDef, BODY);
 	A->setLine(TOKEN_LINE(NAME));
 }                    
 
@@ -379,19 +379,19 @@ arrayItemList(A) ::= .
 %type arrayItem {AST::arrayItem*}
 arrayItem(A) ::= expr(B).
 {
-    A = new AST::arrayItem(NULL, B, false);
+    A = new AST::arrayItem(NULL, B);
 }
 arrayItem(A) ::= T_REF expr(B).
 {
-    A = new AST::arrayItem(NULL, B, true);
+    A = new AST::arrayItem(NULL, B);
 }
 arrayItem(A) ::= expr(KEY) T_ARROWKEY expr(VAL).
 {
-    A = new AST::arrayItem(KEY, VAL, false);
+    A = new AST::arrayItem(KEY, VAL);
 }
 arrayItem(A) ::= expr(KEY) T_ARROWKEY T_REF expr(VAL).
 {
-    A = new AST::arrayItem(KEY, VAL, true);
+    A = new AST::arrayItem(KEY, VAL);
 }
 
 // literal array
