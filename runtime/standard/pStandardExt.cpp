@@ -65,26 +65,26 @@ void pStandardExt::extensionShutdown() {
 
 /* Library Implementation */
 
-void var_dump(RPHP_STDFUNC_ARGS, pVar v) {
+void var_dump(RPHP_STDFUNC_ARGS, const pVar& v) {
     v.applyVisitor<pVar_var_dump>(runtime->output.topBuffer());
     *retVal = pNull;
 }
 
-void strlen(RPHP_STDFUNC_ARGS, pVar v) {
-    v.convertToString();
-    if (v.isBString())
-        *retVal = (pInt)v.getBString().length();
+void strlen(RPHP_STDFUNC_ARGS, const pVar& v) {
+    pVar lv(v.copyAsString());
+    if (lv.isBString())
+        *retVal = (pInt)lv.getBString().length();
     else
-        *retVal = (pInt)v.getUString()->length();
+        *retVal = (pInt)lv.getUString()->length();
 }
 
-void strpos(RPHP_STDFUNC_ARGS, pVar haystackV, pVar needleV, pVar offsetV) {
+void strpos(RPHP_STDFUNC_ARGS, const pVar& haystackV, const pVar& needleV, const pVar& offsetV) {
 
     // TODO: unicode
 
-    pBString haystack = haystackV.convertToBString();
-    pBString needle = needleV.convertToBString();
-    pInt offset = offsetV.convertToInt();
+    pBString haystack(haystackV.copyAsBString());
+    pBString needle(needleV.copyAsBString());
+    pInt offset(offsetV.copyAsInt());
 
     // TODO: use offset
 

@@ -42,9 +42,9 @@ namespace rphp {
     };
 
     // standard functions
-    void var_dump(RPHP_STDFUNC_ARGS, pVar v);
-    void strlen(RPHP_STDFUNC_ARGS, pVar str);
-    void strpos(RPHP_STDFUNC_ARGS, pVar haystack, pVar needle, pVar offset);
+    void var_dump(RPHP_STDFUNC_ARGS, const pVar& v);
+    void strlen(RPHP_STDFUNC_ARGS, const pVar& str);
+    void strpos(RPHP_STDFUNC_ARGS, const pVar& haystack, const pVar& needle, const pVar& offset);
 
     }
   }

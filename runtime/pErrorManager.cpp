@@ -26,10 +26,10 @@ namespace rphp {
 
 namespace errorManager {
 
-void defaultErrorHandler(RPHP_STDFUNC_ARGS, pVar errno, pVar errmsg, pVar file, pVar line, pVar context) {
+void defaultErrorHandler(RPHP_STDFUNC_ARGS, const pVar& errno, const pVar& errmsg, const pVar& file, const pVar& line, const pVar& context) {
 
     pBString errTitle;
-    switch (errno.convertToInt()) {
+    switch (errno.copyAsInt()) {
     case E_PARSE:
         errTitle = "Parse error";
         break;
@@ -70,7 +70,7 @@ void defaultErrorHandler(RPHP_STDFUNC_ARGS, pVar errno, pVar errmsg, pVar file, 
 
 }
 
-void defaultExceptionHandler(RPHP_STDFUNC_ARGS, pVar obj) {
+void defaultExceptionHandler(RPHP_STDFUNC_ARGS, const pVar& obj) {
 
     // XXX
 

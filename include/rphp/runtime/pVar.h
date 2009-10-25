@@ -324,6 +324,8 @@ public:
     // float
     /// cast to pBString, does not mutate
     pBString copyAsBString() const;
+    /// cast to string (binary or unicode), does not mutate
+    pVar copyAsString() const;
     pHashP copyAsHash() const;
     // ustring
     // object

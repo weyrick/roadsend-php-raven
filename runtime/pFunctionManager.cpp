@@ -61,7 +61,7 @@ pVar pFunctionManager::invoke(const pIdentString& funName) {
     }
 }
 
-pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1) {
+pVar pFunctionManager::invoke(const pIdentString& funName, const pVar& arg1) {
     functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
     if (function != functionRegistry_.end()) {
         return (*function).second->invoke(runtime_, arg1);
@@ -72,7 +72,7 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1) {
     }
 }
 
-pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2) {
+pVar pFunctionManager::invoke(const pIdentString& funName, const pVar& arg1, const pVar& arg2) {
     functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
     if (function != functionRegistry_.end()) {
         return (*function).second->invoke(runtime_, arg1, arg2);
@@ -83,7 +83,7 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2)
     }
 }
 
-pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3) {
+pVar pFunctionManager::invoke(const pIdentString& funName, const pVar& arg1, const pVar& arg2, const pVar& arg3) {
     functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
     if (function != functionRegistry_.end()) {
         return (*function).second->invoke(runtime_, arg1, arg2, arg3);
@@ -94,7 +94,7 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2,
     }
 }
 
-pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4) {
+pVar pFunctionManager::invoke(const pIdentString& funName, const pVar& arg1, const pVar& arg2, const pVar& arg3, const pVar& arg4) {
     functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
     if (function != functionRegistry_.end()) {
         return (*function).second->invoke(runtime_, arg1, arg2, arg3, arg4);
@@ -105,7 +105,7 @@ pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2,
     }
 }
 
-pVar pFunctionManager::invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5) {
+pVar pFunctionManager::invoke(const pIdentString& funName, const pVar& arg1, const pVar& arg2, const pVar& arg3, const pVar& arg4, const pVar& arg5) {
     functionRegistryType::iterator function = functionRegistry_.find(toLowerCopy(funName));
     if (function != functionRegistry_.end()) {
         return (*function).second->invoke(runtime_, arg1, arg2, arg3, arg4, arg5);

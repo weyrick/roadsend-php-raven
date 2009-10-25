@@ -64,11 +64,11 @@ public:
     pFunction* registerUser(const pIdentString&, fPointerType, pUInt arity);
 
     pVar invoke(const pIdentString& funName);
-    pVar invoke(const pIdentString& funName, pVar arg1);
-    pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2);
-    pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3);
-    pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4);
-    pVar invoke(const pIdentString& funName, pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5);
+    pVar invoke(const pIdentString& funName, const pVar& arg1);
+    pVar invoke(const pIdentString& funName, const pVar& arg1, const pVar& arg2);
+    pVar invoke(const pIdentString& funName, const pVar& arg1, const pVar& arg2, const pVar& arg3);
+    pVar invoke(const pIdentString& funName, const pVar& arg1, const pVar& arg2, const pVar& arg3, const pVar& arg4);
+    pVar invoke(const pIdentString& funName, const pVar& arg1, const pVar& arg2, const pVar& arg3, const pVar& arg4, const pVar& arg5);
 
 };
 

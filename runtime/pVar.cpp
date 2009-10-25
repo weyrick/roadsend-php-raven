@@ -113,6 +113,13 @@ void pVar::convertToString() {
     convertToBString();
 }
 
+// copy as BString or UString as appropriate
+pVar pVar::copyAsString() const {
+    pVar v(*this);
+    v.convertToString();
+    return v;
+}
+
 
 std::ostream& operator << (std::ostream& os, const pVar& v)
 {
