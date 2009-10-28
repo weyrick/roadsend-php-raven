@@ -102,17 +102,17 @@ typedef enum {
 
 /// an enum for determining the type of data stored in a pVar
 typedef enum {
-    pVarNullType,
-    pVarBoolType,
-    pVarIntType,
-    pVarBigIntType,
-    pVarFloatType,
-    pVarBStringType,
-    pVarUStringType,
-    pVarHashType,
-    pVarObjectType,
-    pVarResourceType,
-    pVarPtrType
+    pVarNullType = 0,
+    pVarBoolType = 0,
+    pVarIntType = 1,
+    pVarBigIntType = 2,
+    pVarFloatType = 3,
+    pVarBStringType = 4,
+    pVarUStringType = 5,
+    pVarHashType = 6,
+    pVarObjectType = 7,
+    pVarResourceType = 8,
+    pVarPtrType = 9
 } pVarType;
 
 

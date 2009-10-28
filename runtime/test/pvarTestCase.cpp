@@ -24,6 +24,8 @@ void pvarTestCase::test_pNull()
     pVar a;
     CPPUNIT_ASSERT( a.isNull() );
 
+    CPPUNIT_ASSERT( a.getType() == pVarNullType );
+
     // null construct
     pVar a1(pNull);
     CPPUNIT_ASSERT( a1.isNull() );
@@ -52,6 +54,10 @@ void pvarTestCase::test_pBool() {
 
     // bool construct
     pVar b1(pTrue);
+
+    CPPUNIT_ASSERT( b1.isBool() );
+    CPPUNIT_ASSERT( b1.getType() == pVarBoolType );
+
     CPPUNIT_ASSERT( b1.getBool() == pTrue );
     CPPUNIT_ASSERT( b1.evalAsBool() );
 
@@ -103,6 +109,7 @@ void pvarTestCase::test_pInt() {
 
     pVar i(123456);
     CPPUNIT_ASSERT( i.isInt() );
+    CPPUNIT_ASSERT( i.getType() == pVarIntType );
     CPPUNIT_ASSERT( i.getInt() == 123456 );
 
     i = -987654;
@@ -115,6 +122,7 @@ void pvarTestCase::test_pBigInt() {
 
     pVar i(pBigIntP(new pBigInt(123456)));
     CPPUNIT_ASSERT( i.isBigInt() );
+    CPPUNIT_ASSERT( i.getType() == pVarBigIntType );
     CPPUNIT_ASSERT( *i.getBigIntP() == pBigInt(123456) );
 
     i = pBigIntP(new pBigInt(-987654));
@@ -127,6 +135,7 @@ void pvarTestCase::test_pFloat() {
 
     pVar i(123.1234);
     CPPUNIT_ASSERT( i.isFloat() );
+    CPPUNIT_ASSERT( i.getType() == pVarFloatType );
     CPPUNIT_ASSERT( *i.getFloatP() == pFloat(123.1234) );
 
     i = -8.34233;
@@ -134,10 +143,25 @@ void pvarTestCase::test_pFloat() {
 
 }
 
+// ** BINARY STRING **
+void pvarTestCase::test_pBString() {
+
+    pVar s(pBString("foo"));
+
+    CPPUNIT_ASSERT( s.isBString() );
+    CPPUNIT_ASSERT( s.getType() == pVarBStringType );
+
+    CPPUNIT_ASSERT( s.getBString() == "foo" );
+
+}
+
 // ** UNICODE STRING **
 void pvarTestCase::test_pUString() {
 
     const pVar v(pUStringP("12345"));
+
+    CPPUNIT_ASSERT( v.isUString() );
+    CPPUNIT_ASSERT( v.getType() == pVarUStringType );
 
     CPPUNIT_ASSERT( v.getUStringP()->length() == 5 );
     CPPUNIT_ASSERT( *v.getUStringP() == UnicodeString("12345") );
@@ -266,6 +290,25 @@ void pvarTestCase::test_pHash() {
 
 
 }
+
+void pvarTestCase::test_pObject() {
+
+    pVar o(pObjectP(new pObject("testClass")));
+
+    CPPUNIT_ASSERT( o.isObject() );
+    CPPUNIT_ASSERT( o.getType() == pVarObjectType );
+
+}
+
+void pvarTestCase::test_pResource() {
+
+    pVar o(pResourceP(new pResource()));
+
+    CPPUNIT_ASSERT( o.isResource() );
+    CPPUNIT_ASSERT( o.getType() == pVarResourceType );
+
+}
+
 
 // ** HEAP **
 pVar changeBox(pVar r) {
