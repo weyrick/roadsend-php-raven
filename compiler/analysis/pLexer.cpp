@@ -270,6 +270,7 @@ bool pLexer::preprocess(void) {
             }
 
             endOfDQ:
+            delete preInput;
             ;
             // exit processing DQ string
 
