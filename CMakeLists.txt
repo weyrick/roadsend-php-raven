@@ -38,8 +38,9 @@ ENDIF( Boost_VERSION LESS ${BOOST_MIN_VERSION} )
 
 Find_Package(ICU REQUIRED)
 Find_Package(LLVM REQUIRED)
-FIND_PACKAGE(CppUnit) # optional
-Find_PACKAGE(Doxygen) # optional
+Find_Package(GMP REQUIRED)
+Find_Package(CppUnit) # optional
+Find_Package(Doxygen) # optional
 
 IF( LLVM_VERSION LESS ${LLVM_MIN_VERSION} )
   MESSAGE(FATAL_ERROR "LLVM version ${LLVM_STRING_VERSION} too old, please install ${LLVM_MIN_VERSION_TEXT} of greater!")

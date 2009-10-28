@@ -73,7 +73,7 @@ void pHash::insert(const pVar& key, const pVar& data) {
 	else if(key.isBString())
 		insert(key.getBString(), data);
 	else if(key.isUString())
-		insert(key.getUString(), data);
+		insert(key.getUStringP(), data);
 	if(!key.isInt() && !key.isBool() && !key.isBString() && !key.isUString())
 		assert(0 && "unsupported type for array key detected!");
     //hashData_.insert(h_container(key.copyAsBString(), data));

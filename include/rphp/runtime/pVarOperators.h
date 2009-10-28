@@ -54,7 +54,11 @@ public:
         *buf_ << indent_ << "int(" << var_ << ")\n";
     }
 
-    void operator()(const pFloat &v) const {
+    void operator()(const pBigIntP &v) const {
+        *buf_ << indent_ << "int(" << var_ << ")\n";
+    }
+
+    void operator()(const pFloatP &v) const {
         *buf_ << indent_ << "float(" << var_ << ")\n";
     }
 

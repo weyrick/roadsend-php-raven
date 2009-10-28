@@ -19,7 +19,7 @@ IF(CPPUNIT_FOUND)
   target_link_libraries( rphp-runtime-suite 
                          ${CPPUNIT_LIBRARY} 
                          rphp-runtime
-                         ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
+                         ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES} ${GMP_LIBRARIES} ${GMPXX_LIBRARIES}
                         )
 
 ENDIF(CPPUNIT_FOUND)
@@ -30,5 +30,5 @@ add_executable( rphp-pVar-speed rphp-pVar-speed.cpp )
 
 target_link_libraries( rphp-pVar-speed 
                        rphp-runtime
-                       ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
+                       ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES} ${GMP_LIBRARIES} ${GMPXX_LIBRARIES}
                     )

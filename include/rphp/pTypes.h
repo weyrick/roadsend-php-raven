@@ -25,6 +25,8 @@
 // in shared_ptr. this forces generic pthreads version instead to avoid it for now.
 #define BOOST_SP_USE_PTHREADS
 
+#include <gmpxx.h>
+
 #include <boost/function.hpp>
 #include <boost/cstdint.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -33,11 +35,14 @@
 
 namespace rphp {
 
-/// signed integer type (used in pVar)
+/// signed (fast) integer type (used in pVar)
 typedef signed long pInt;
 
-/// float type (used in pVar)
-typedef double pFloat;
+/// signed (arbitrary precision) integer type (used in pVar)
+typedef mpz_class pBigInt;
+
+/// float type (used in pVar). GMP float
+typedef mpf_class pFloat;
 
 /// unsigned integer type (not used in pVar)
 typedef boost::uint_fast32_t pUInt;

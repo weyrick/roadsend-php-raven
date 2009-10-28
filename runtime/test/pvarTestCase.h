@@ -15,6 +15,7 @@ class pvarTestCase : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( test_pNull );
   CPPUNIT_TEST( test_pBool );
   CPPUNIT_TEST( test_pInt );
+  CPPUNIT_TEST( test_pBigInt );
   CPPUNIT_TEST( test_pFloat );
   CPPUNIT_TEST( test_pHash );
   // pBString
@@ -30,6 +31,7 @@ protected:
   void test_pNull();
   void test_pBool();
   void test_pInt();
+  void test_pBigInt();
   void test_pFloat();
   void test_pHash();
   void test_pVarBoxed();

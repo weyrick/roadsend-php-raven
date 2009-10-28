@@ -75,7 +75,7 @@ void strlen(RPHP_STDFUNC_ARGS, const pVar& v) {
     if (lv.isBString())
         *retVal = (pInt)lv.getBString().length();
     else
-        *retVal = (pInt)lv.getUString()->length();
+        *retVal = (pInt)lv.getUStringP()->length();
 }
 
 void strpos(RPHP_STDFUNC_ARGS, const pVar& haystackV, const pVar& needleV, const pVar& offsetV) {

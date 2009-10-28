@@ -57,7 +57,7 @@ pHashP& pVar::convertToHash() {
 		pVar_convertToHashVisitor cv(*d);
 		boost::apply_visitor(cv, *d);
 	}
-	return getHash();
+	return getHashP();
 }
 
 pInt& pVar::convertToInt() {

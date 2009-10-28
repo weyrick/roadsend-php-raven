@@ -21,6 +21,7 @@
 #include "rphp/runtime/pTypeOperators.h"
 
 #include <boost/lexical_cast.hpp>
+#include <sstream>
 
 namespace rphp {
 
@@ -37,6 +38,13 @@ void pVar_convertToIntVisitor:: operator()(const pUStringP &v) {
     // TODO: do a real conversion here
     // should handle both integers and floats
     var_ = 0l;
+}
+
+void pVar_convertToBStringVisitor::operator ()(const pFloatP& v) {
+    // take advantage of gmp's builtin stream output
+    std::stringstream s;
+    s << *v;
+    var_ = s.str();
 }
 
 } /* namespace rphp */

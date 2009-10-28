@@ -47,7 +47,7 @@ extern "C" {
 
     rphp::pVar rphp_make_pVar_pInt(rphp::pInt v);
 
-    rphp::pVar rphp_make_pVar_pFloat(rphp::pFloat v);
+    rphp::pVar rphp_make_pVar_pFloat(double v);
 
     rphp::pVar rphp_make_pVar_pBool(int v);
 
@@ -76,14 +76,14 @@ extern "C" {
 
     // function invocation
     rphp::pVar rphp_funCall0(rphp::pRuntimeEngine* r, const char* name);
-    rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1);
-    rphp::pVar rphp_funCall2(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2);
-    rphp::pVar rphp_funCall3(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3);
-    rphp::pVar rphp_funCall4(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3, rphp::pVar arg4);
-    rphp::pVar rphp_funCall5(rphp::pRuntimeEngine* r, const char* name, rphp::pVar arg1, rphp::pVar arg2, rphp::pVar arg3, rphp::pVar arg4, rphp::pVar arg5);
+    rphp::pVar rphp_funCall1(rphp::pRuntimeEngine* r, const char* name, const rphp::pVar& arg1);
+    rphp::pVar rphp_funCall2(rphp::pRuntimeEngine* r, const char* name, const rphp::pVar& arg1, const rphp::pVar& arg2);
+    rphp::pVar rphp_funCall3(rphp::pRuntimeEngine* r, const char* name, const rphp::pVar& arg1, const rphp::pVar& arg2, const rphp::pVar& arg3);
+    rphp::pVar rphp_funCall4(rphp::pRuntimeEngine* r, const char* name, const rphp::pVar& arg1, const rphp::pVar& arg2, const rphp::pVar& arg3, const rphp::pVar& arg4);
+    rphp::pVar rphp_funCall5(rphp::pRuntimeEngine* r, const char* name, const rphp::pVar& arg1, const rphp::pVar& arg2, const rphp::pVar& arg3, const rphp::pVar& arg4, const rphp::pVar& arg5);
 
     // constructor
-    rphp::pVar rphp_newCall(rphp::pRuntimeEngine* r, const char* className, rphp::pVar arg1);
+    rphp::pVar rphp_newCall(rphp::pRuntimeEngine* r, const char* className, const rphp::pVar& arg1);
 
     void _make_pVar(void);
     void _assign_pVar(void);

@@ -42,8 +42,8 @@ namespace rphp {
  - pNull
  - pBool
  - pInt
- * [future] pBitInt(mpz_t) (arbitrary precision integers)
- - pFloat
+ - pBitInt(mpz_t) (arbitrary precision integers)
+ - pFloat(mpf_t)
  - pBString (binary string)
  - pUString (unicode string)
  - pHash
@@ -171,6 +171,21 @@ public:
 #endif
     }
 
+    /// construction from float creates pFloat
+    pVar(float f): pVarData_(pFloatP(new pFloat(f))) {
+#ifdef RPHP_PVAR_DEBUG
+        std::cout << "pVar [" << this << "]: float construct: " << i << std::endl;
+#endif
+    }
+
+    /// construction from double creates pFloat
+    pVar(double d): pVarData_(pFloatP(new pFloat(d))) {
+#ifdef RPHP_PVAR_DEBUG
+        std::cout << "pVar [" << this << "]: double construct: " << i << std::endl;
+#endif
+    }
+
+
     /// convenience function for creating a new empty hash
     void newEmptyHash(void);
 
@@ -212,6 +227,15 @@ public:
         PVAR_DATA = pInt(i);
     }
 
+    /// default assignment from float to pFloat
+    void operator=(float f) {
+        PVAR_DATA = pFloatP(new pFloat(f));
+    }
+
+    /// default assignment from float to pFloat
+    void operator=(double d) {
+        PVAR_DATA = pFloatP(new pFloat(d));
+    }
 
     /// promote this pVar's data to the heap, if it's not already there
     void boxData(void) {
@@ -252,6 +276,10 @@ public:
     /// return true if pVar is currently a pInt. no type conversion.
     inline bool isInt() const {
         return (PVAR_DATA.which() == pVarIntType_);
+    }
+    /// return true if pVar is currently a pInt. no type conversion.
+    inline bool isBigInt() const {
+        return (PVAR_DATA.which() == pVarBigIntType_);
     }
     /// return true if pVar is currently a pFloat. no type conversion.
     inline bool isFloat() const {
@@ -352,14 +380,24 @@ public:
         return boost::get<const pInt&>(PVAR_DATA);
     }
 
+    /// pBigInt accessor. throws exception if pVar is wrong type
+    pBigIntP& getBigIntP() {
+        return boost::get<pBigIntP&>(PVAR_DATA);
+    }
+
+    /// pBigInt accessor. throws exception if pVar is wrong type
+    const pBigIntP& getBigIntP() const {
+        return boost::get<const pBigIntP&>(PVAR_DATA);
+    }
+
     /// pFloat accessor. throws exception if pVar is wrong type
-    pFloat& getFloat() {
-        return boost::get<pFloat&>(PVAR_DATA);
+    pFloatP& getFloatP() {
+        return boost::get<pFloatP&>(PVAR_DATA);
     }
 
     /// const pFloat accessor. throws exception if pVar is wrong type
-    const pFloat& getFloat() const {
-        return boost::get<const pFloat&>(PVAR_DATA);
+    const pFloatP& getFloatP() const {
+        return boost::get<const pFloatP&>(PVAR_DATA);
     }
 
     /// pBString accessor. throws exception if pVar is wrong type
@@ -373,22 +411,22 @@ public:
     }
 
     /// pUString accessor. throws exception if pVar is wrong type
-    pUStringP& getUString() {
+    pUStringP& getUStringP() {
         return boost::get<pUStringP&>(PVAR_DATA);
     }
 
     /// const pUString accessor. throws exception if pVar is wrong type
-    const pUStringP& getUString() const {
+    const pUStringP& getUStringP() const {
         return boost::get<const pUStringP&>(PVAR_DATA);
     }
 
     /// pHash accessor. throws exception if pVar is wrong type
-    pHashP& getHash() {
+    pHashP& getHashP() {
         return boost::get<pHashP&>(PVAR_DATA);
     }
 
     /// const pHash accessor. throws exception if pVar is wrong type
-    const pHashP& getHash() const {
+    const pHashP& getHashP() const {
         return boost::get<const pHashP&>(PVAR_DATA);
     }
 
@@ -398,22 +436,22 @@ public:
     //}
 
     /// pObject accessor. throws exception if pVar is wrong type
-    pObjectP& getObject() {
+    pObjectP& getObjectP() {
         return boost::get<pObjectP&>(PVAR_DATA);
     }
 
     /// const pObject accessor. throws exception if pVar is wrong type
-    const pObjectP& getObject() const {
+    const pObjectP& getObjectP() const {
         return boost::get<const pObjectP&>(PVAR_DATA);
     }
 
     /// pResource accessor. throws exception if pVar is wrong type
-    pResourceP& getResource() {
+    pResourceP& getResourceP() {
         return boost::get<pResourceP&>(PVAR_DATA);
     }
 
     /// const pResource accessor. throws exception if pVar is wrong type
-    const pResourceP& getResource() const {
+    const pResourceP& getResourceP() const {
         return boost::get<const pResourceP&>(PVAR_DATA);
     }
 

@@ -110,15 +110,27 @@ void pvarTestCase::test_pInt() {
 
 }
 
+// ** BIG INT **
+void pvarTestCase::test_pBigInt() {
+
+    pVar i(pBigIntP(new pBigInt(123456)));
+    CPPUNIT_ASSERT( i.isBigInt() );
+    CPPUNIT_ASSERT( *i.getBigIntP() == pBigInt(123456) );
+
+    i = pBigIntP(new pBigInt(-987654));
+    CPPUNIT_ASSERT( *i.getBigIntP() == pBigInt(-987654) );
+
+}
+
 // ** FLOAT **
 void pvarTestCase::test_pFloat() {
 
     pVar i(123.1234);
     CPPUNIT_ASSERT( i.isFloat() );
-    CPPUNIT_ASSERT( i.getFloat() == 123.1234 );
+    CPPUNIT_ASSERT( *i.getFloatP() == pFloat(123.1234) );
 
     i = -8.34233;
-    CPPUNIT_ASSERT( i.getFloat() == -8.34233 );
+    CPPUNIT_ASSERT( *i.getFloatP() == pFloat(-8.34233) );
 
 }
 
@@ -127,8 +139,8 @@ void pvarTestCase::test_pUString() {
 
     const pVar v(pUStringP("12345"));
 
-    CPPUNIT_ASSERT( v.getUString()->length() == 5 );
-    CPPUNIT_ASSERT( *v.getUString() == UnicodeString("12345") );
+    CPPUNIT_ASSERT( v.getUStringP()->length() == 5 );
+    CPPUNIT_ASSERT( *v.getUStringP() == UnicodeString("12345") );
 
     // test COW. there are two levels here: one in CowPtr, one in UnicodeString
     // but UnicodeString has it's own small buffer on the stack and only does
@@ -218,8 +230,9 @@ void pvarTestCase::test_pHash() {
     h1.newEmptyHash();
     CPPUNIT_ASSERT( h1.isHash() );
 
-    h1.getHash()->insert("foo", 5);
-    CPPUNIT_ASSERT( h1.getHash()->size() == 1 );
+    h1.getHashP()->insert("foo", 5);
+    const pVar& ch1(h1);
+    CPPUNIT_ASSERT( ch1.getHashP()->size() == 1 );
 
     // test copy on write
     pHashP base(new pHash());
@@ -326,8 +339,12 @@ public:
         CPPUNIT_ASSERT( v == 1 );
     }
 
-    void operator()(const pFloat &v) const {
-        CPPUNIT_ASSERT( v == 2.0 );
+    void operator()(const pBigIntP &v) const {
+        CPPUNIT_ASSERT( *v == 2 );
+    }
+
+    void operator()(const pFloatP &v) const {
+        CPPUNIT_ASSERT( *v == 2.0 );
     }
 
     void operator()(const pBString &v) const {
@@ -367,7 +384,7 @@ void pvarTestCase::test_visitor() {
     p = pUStringP("utest");
     p.applyVisitor<tvisitor>();
     p.newEmptyHash();
-    p.getHash()->insert("foo", 1);
+    p.getHashP()->insert("foo", 1);
     p.applyVisitor<tvisitor>();
     // object
     // resource

@@ -60,7 +60,7 @@ pOutputManager& operator<< (pOutputManager& om, const pVar& var) {
     if (var.isBString())
         om.print(var.getBString());
     else if (var.isUString())
-        om.print(var.getUString());
+        om.print(var.getUStringP());
     else
         om.print(var.copyAsBString());
     return om;

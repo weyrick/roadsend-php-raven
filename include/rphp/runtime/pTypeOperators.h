@@ -47,8 +47,12 @@ public:
         (v) ? var_ = pTrue : var_ = pFalse;
     }
 
-    void operator()(const pFloat &v) {
-        (v) ? var_ = pTrue : var_ = pFalse;
+    void operator()(const pBigIntP &v) {
+        (*v != 0) ? var_ = pTrue : var_ = pFalse;
+    }
+
+    void operator()(const pFloatP &v) {
+        (*v != 0) ? var_ = pTrue : var_ = pFalse;
     }
 
     void operator()(const pBString &v) {
@@ -92,8 +96,12 @@ public:
 
     void operator()(const pInt &v) { /* nothing */ }
 
-    void operator()(const pFloat &v) {
-        var_ = (pInt)v;
+    void operator()(const pBigIntP &v) {
+        var_ = v->get_si();
+    }
+
+    void operator()(const pFloatP &v) {
+        var_ = v->get_si();
     }
 
     void operator()(const pBString &v);
@@ -146,16 +154,11 @@ public:
         }
     }
 
-    void operator()(const pFloat &v) {
-        using boost::lexical_cast;
-        using boost::bad_lexical_cast;
-        try {
-            var_ = pBString(lexical_cast<pBString>(v));
-        }
-        catch(bad_lexical_cast &) {
-            var_ = pBString("0.0");
-        }
+    void operator()(const pBigIntP &v) {
+        var_ = pBString(v->get_str());
     }
+
+    void operator()(const pFloatP &v);
 
     void operator()(const pBString &v) { /* nothing */ }
 
@@ -222,9 +225,16 @@ public:
         var_ = pHashP(hash);
     }
 
-    void operator()(const pFloat &v) {
+    void operator()(const pBigIntP &v) {
         pHash* hash = new pHash;
-        hash->insertNext(v);
+        // TODO overflow?
+        hash->insertNext(v->get_si());
+        var_ = pHashP(hash);
+    }
+
+    void operator()(const pFloatP &v) {
+        pHash* hash = new pHash;
+        hash->insertNext(v->get_si());
         var_ = pHashP(hash);
    }
 

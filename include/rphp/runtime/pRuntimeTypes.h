@@ -44,7 +44,9 @@ BOOST_TRIBOOL_THIRD_STATE(pNull)
 #define pTrue  pTriState(true)
 #define pFalse pTriState(false)
 
-// number types defined in pTypes.h
+// basic number types defined in pTypes.h
+typedef CowPtr<pBigInt> pBigIntP;
+typedef CowPtr<pFloat> pFloatP;
 
 /// runtime "binary" string type
 /// these are simple byte-wide character arrays
@@ -71,7 +73,8 @@ typedef boost::shared_ptr<pVar> pVarP;
 /// main pVar variant type
 typedef boost::variant< pTriState,
                         pInt,
-                        pFloat,
+                        pBigIntP,
+                        pFloatP,
                         pBString,
                         pUStringP,
                         pHashP,
@@ -87,13 +90,14 @@ typedef boost::variant< pTriState,
 typedef enum {
     pVarTriStateType_ = 0,
     pVarIntType_      = 1,
-    pVarFloatType_    = 2,
-    pVarBStringType_  = 3,
-    pVarUStringType_  = 4,
-    pVarHashType_     = 5,
-    pVarObjectType_   = 6,
-    pVarResourceType_ = 7,
-    pVarPtrType_      = 8
+    pVarBigIntType_   = 2,
+    pVarFloatType_    = 3,
+    pVarBStringType_  = 4,
+    pVarUStringType_  = 5,
+    pVarHashType_     = 6,
+    pVarObjectType_   = 7,
+    pVarResourceType_ = 8,
+    pVarPtrType_      = 9
 } pVarWhichType_;
 
 /// an enum for determining the type of data stored in a pVar
@@ -101,6 +105,7 @@ typedef enum {
     pVarNullType,
     pVarBoolType,
     pVarIntType,
+    pVarBigIntType,
     pVarFloatType,
     pVarBStringType,
     pVarUStringType,

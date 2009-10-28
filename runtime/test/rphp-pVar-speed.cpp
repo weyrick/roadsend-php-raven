@@ -71,7 +71,7 @@ void testHash(int reps, int size) {
     for(int i = 0; i < reps; i++) {
         foo.newEmptyHash();
         for (int j = 0; j < size; j++) {
-            foo.getHash()->insert(j,42);
+            foo.getHashP()->insert(j,42);
         }
         foo = pNull;
     }

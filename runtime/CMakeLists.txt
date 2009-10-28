@@ -2,7 +2,7 @@
 
 MESSAGE( STATUS "runtime check" )
 
-include_directories (${Boost_INCLUDE_DIRS} ${RPHP_INCLUDE_DIR} ${ICU_INCLUDE_DIRS})
+include_directories (${Boost_INCLUDE_DIRS} ${RPHP_INCLUDE_DIR} ${ICU_INCLUDE_DIRS} ${GMP_INCLUDE_DIR} )
 
 set(RUNTIME_SRC_FILES
   #pUString.cpp
@@ -29,4 +29,4 @@ set(RUNTIME_SRC_FILES
 add_subdirectory(test)
 
 add_library( rphp-runtime SHARED ${RUNTIME_SRC_FILES} )
-target_link_libraries( rphp-runtime ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES} ) 
+target_link_libraries( rphp-runtime ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES} ${GMP_LIBRARIES} ${GMPXX_LIBRARIES} ) 

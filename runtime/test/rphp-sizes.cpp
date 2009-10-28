@@ -8,7 +8,8 @@ int main(void) {
 
     std::cout << "pTriState: " << sizeof(pTriState) << std::endl;
     std::cout << "pInt: " << sizeof(pInt) << std::endl;
-    std::cout << "pFloat: " << sizeof(pFloat) << std::endl;
+    std::cout << "pBigInt: " << sizeof(pBigInt) << std::endl;
+    std::cout << "pFloat: " << sizeof(pFloat)<< std::endl;
     std::cout << "pBString: " << sizeof(pBString) << std::endl;
     std::cout << "pUString: " << sizeof(pUString) << std::endl;
     std::cout << "pUStringP: " << sizeof(pUStringP) << std::endl;

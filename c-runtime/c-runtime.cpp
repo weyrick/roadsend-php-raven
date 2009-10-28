@@ -71,7 +71,7 @@ extern "C" {
     }
 
     // create a new pVar from a pFloat
-    pVar rphp_make_pVar_pFloat(pFloat v) {
+    pVar rphp_make_pVar_pFloat(double v) {
         return pVar(v);
     }
 
@@ -93,11 +93,11 @@ extern "C" {
     }
 
     void rphp_pHash_insertNext(pVar h, pVar v) {
-        h.getHash()->insertNext(v);
+        h.getHashP()->insertNext(v);
     }
 
     void rphp_pHash_insert(pVar h, pVar k, pVar v) {
-        h.getHash()->insert(k, v);
+        h.getHashP()->insert(k, v);
     }
 
     void rphp_registerUserFun0(pRuntimeEngine* r, const char* name, pFunPointer0 p) {
@@ -128,27 +128,27 @@ extern "C" {
         return r->functionManager->invoke(name);
     }
 
-    pVar rphp_funCall1(pRuntimeEngine* r, const char* name, pVar arg1) {
+    pVar rphp_funCall1(pRuntimeEngine* r, const char* name, const pVar& arg1) {
         return r->functionManager->invoke(name, arg1);
     }
 
-    pVar rphp_funCall2(pRuntimeEngine* r, const char* name, pVar arg1, pVar arg2) {
+    pVar rphp_funCall2(pRuntimeEngine* r, const char* name, const pVar& arg1, const pVar& arg2) {
         return r->functionManager->invoke(name, arg1, arg2);
     }
 
-    pVar rphp_funCall3(pRuntimeEngine* r, const char* name, pVar arg1, pVar arg2, pVar arg3) {
+    pVar rphp_funCall3(pRuntimeEngine* r, const char* name, const pVar& arg1, const pVar& arg2, const pVar& arg3) {
         return r->functionManager->invoke(name, arg1, arg2, arg3);
     }
 
-    pVar rphp_funCall4(pRuntimeEngine* r, const char* name, pVar arg1, pVar arg2, pVar arg3, pVar arg4) {
+    pVar rphp_funCall4(pRuntimeEngine* r, const char* name, const pVar& arg1, const pVar& arg2, const pVar& arg3, const pVar& arg4) {
         return r->functionManager->invoke(name, arg1, arg2, arg3, arg4);
     }
 
-    pVar rphp_funCall5(pRuntimeEngine* r, const char* name, pVar arg1, pVar arg2, pVar arg3, pVar arg4, pVar arg5) {
+    pVar rphp_funCall5(pRuntimeEngine* r, const char* name, const pVar& arg1, const pVar& arg2, const pVar& arg3, const pVar& arg4, const pVar& arg5) {
         return r->functionManager->invoke(name, arg1, arg2, arg3, arg4, arg5);
     }
 
-    pVar rphp_newCall(pRuntimeEngine* r, const char* className, pVar arg1) {
+    pVar rphp_newCall(pRuntimeEngine* r, const char* className, const pVar& arg1) {
       pVar result = rphp_make_pVar_pObject( className );
       // invoke method call "__construct" on result
       return result;
