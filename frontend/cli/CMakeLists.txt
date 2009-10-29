@@ -7,7 +7,9 @@ include_directories (${CMAKE_SOURCE_DIR}
                      ${CMAKE_BINARY_DIR} 
                      ${RPHP_INCLUDE_DIR}
                      ${Boost_INCLUDE_DIRS}
-                     ${LLVM_INCLUDE_DIR})
+                     ${LLVM_INCLUDE_DIR}
+                     ${GMP_INCLUDE_DIR}
+                    )
 
 set(RPHP_SRC_FILES
   rphp.cpp
