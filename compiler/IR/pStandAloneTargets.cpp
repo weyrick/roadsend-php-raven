@@ -99,6 +99,7 @@ void pStandAloneTarget::execute(void) {
     args.push_back("-lstdc++.6");
     args.push_back("-licuuc");
     args.push_back("-licuio");
+    args.push_back("-lgmp");
 #endif
 
     args.push_back("-o");
