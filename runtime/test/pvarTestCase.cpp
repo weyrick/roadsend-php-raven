@@ -464,10 +464,10 @@ void pvarTestCase::test_math_operators() {
     CPPUNIT_ASSERT( sum.getInt() == 16 );
 
     // + overflow to pBigInt
-    lhs = LONG_MAX;
-    lhs += LONG_MAX;
+    lhs = RPHP_INT_MAX;
+    lhs += RPHP_INT_MAX;
     CPPUNIT_ASSERT( lhs.isBigInt() );
-    CPPUNIT_ASSERT( *lhs.getBigIntP() == (pBigInt(LONG_MAX)+pBigInt(LONG_MAX)) );
+    CPPUNIT_ASSERT( *lhs.getBigIntP() == (pBigInt(RPHP_INT_MAX)+pBigInt(RPHP_INT_MAX)) );
 
     // -= on basic pInt
     // - on basic pInt
@@ -480,8 +480,21 @@ void pvarTestCase::test_math_operators() {
     // /= on basic pInt
     // / on basic pInt
 
-    // -= on basic pBigInt
-    // - on basic pBigInt
+    // += on basic pBigInt
+    lhs = pBigIntP(new pBigInt(RPHP_INT_MAX));
+    rhs = pBigIntP(new pBigInt(RPHP_INT_MAX));
+    CPPUNIT_ASSERT( lhs.isBigInt() );
+    lhs += rhs;
+    CPPUNIT_ASSERT( lhs.isBigInt() );
+    CPPUNIT_ASSERT( *rhs.getBigIntP() == (pBigInt(RPHP_INT_MAX)) );
+    CPPUNIT_ASSERT( *lhs.getBigIntP() == (pBigInt(RPHP_INT_MAX)+pBigInt(RPHP_INT_MAX)) );
+
+    // + on basic pBigInt
+    lhs = pBigIntP(new pBigInt(RPHP_INT_MAX));
+    rhs = pBigIntP(new pBigInt(RPHP_INT_MAX));
+    sum = lhs + rhs;
+    CPPUNIT_ASSERT( sum.isBigInt() );
+    CPPUNIT_ASSERT( *sum.getBigIntP() == (pBigInt(RPHP_INT_MAX)+pBigInt(RPHP_INT_MAX)) );
 
     // -= on basic pBigInt
     // - on basic pBigInt
@@ -491,6 +504,18 @@ void pvarTestCase::test_math_operators() {
 
     // /= on basic pBigInt
     // / on basic pBigInt
+
+    // += on basic pFloat
+    // + on basic pFloat
+
+    // -= on basic pFloat
+    // - on basic pFloat
+
+    // *= on basic pFloat
+    // * on basic pFloat
+
+    // /= on basic pFloat
+    // / on basic pFloat
 
     // += on pInt/pFloat
     // += on pInt/pBigInt
@@ -504,6 +529,7 @@ void pvarTestCase::test_math_operators() {
     // /= on pInt/pFloat
     // /= on pInt/pBigInt
     // /= on pFloat/pBigInt
+
 
 
 }

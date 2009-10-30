@@ -130,18 +130,24 @@ pVar& pVar::operator+=(const pVar& rhs) {
         if ( (a & RPHP_INT_MIN) == (b & RPHP_INT_MIN)
           && (a & RPHP_INT_MIN) != (lval & RPHP_INT_MIN) ) {
             // overflow
-            pVarData_ = pBigIntP(new pBigInt(pBigInt(a)+pBigInt(b)));
+            PVAR_DATA = pBigIntP(new pBigInt(pBigInt(a)+pBigInt(b)));
         }
         else {
-            pVarData_ = lval;
+            PVAR_DATA = lval;
         }
+    }
+    else if (isBigInt() && rhs.isBigInt()) {
+        pBigIntP& a = getBigIntP();
+        const pBigIntP& b = rhs.getBigIntP();
+        *a += *b;
     }
     else if (isHash() && rhs.isHash()) {
         // TODO: array concat
-        pVarData_ = pInt(0);
+        PVAR_DATA = pInt(0);
     }
     else {
-        pVarData_ = copyAsInt() + rhs.copyAsInt();
+        // default case
+        PVAR_DATA = copyAsInt() + rhs.copyAsInt();
     }
 
     return *this;
