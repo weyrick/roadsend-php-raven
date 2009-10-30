@@ -446,3 +446,64 @@ void pvarTestCase::test_conversion() {
 
 }
 
+void pvarTestCase::test_math_operators() {
+
+    pVar lhs(5);
+    pVar rhs(6);
+    CPPUNIT_ASSERT( lhs.isInt() );
+    CPPUNIT_ASSERT( rhs.isInt() );
+
+    // += on basic pInt
+    lhs += 5;
+    CPPUNIT_ASSERT( lhs.isInt() );
+    CPPUNIT_ASSERT( lhs.getInt() == 10 );
+
+    // + on basic pInt
+    pVar sum(lhs+rhs);
+    CPPUNIT_ASSERT( sum.isInt() );
+    CPPUNIT_ASSERT( sum.getInt() == 16 );
+
+    // + overflow to pBigInt
+    lhs = LONG_MAX;
+    lhs += LONG_MAX;
+    CPPUNIT_ASSERT( lhs.isBigInt() );
+    CPPUNIT_ASSERT( *lhs.getBigIntP() == (pBigInt(LONG_MAX)+pBigInt(LONG_MAX)) );
+
+    // -= on basic pInt
+    // - on basic pInt
+    // - underflow to pBigInt
+
+    // *= on basic pInt
+    // * on basic pInt
+    // * overflow to pBigInt
+
+    // /= on basic pInt
+    // / on basic pInt
+
+    // -= on basic pBigInt
+    // - on basic pBigInt
+
+    // -= on basic pBigInt
+    // - on basic pBigInt
+
+    // *= on basic pBigInt
+    // * on basic pBigInt
+
+    // /= on basic pBigInt
+    // / on basic pBigInt
+
+    // += on pInt/pFloat
+    // += on pInt/pBigInt
+    // += on pFloat/pBigInt
+    // -= on pInt/pFloat
+    // -= on pInt/pBigInt
+    // -= on pFloat/pBigInt
+    // *= on pInt/pFloat
+    // *= on pInt/pBigInt
+    // *= on pFloat/pBigInt
+    // /= on pInt/pFloat
+    // /= on pInt/pBigInt
+    // /= on pFloat/pBigInt
+
+
+}

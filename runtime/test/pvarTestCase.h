@@ -25,6 +25,7 @@ class pvarTestCase : public CPPUNIT_NS::TestFixture
   CPPUNIT_TEST( test_pVarBoxed );
   CPPUNIT_TEST( test_visitor );
   CPPUNIT_TEST( test_conversion );
+  CPPUNIT_TEST( test_math_operators );
   CPPUNIT_TEST_SUITE_END();
 
 protected:
@@ -41,6 +42,7 @@ protected:
   void test_pVarBoxed();
   void test_visitor();
   void test_conversion();
+  void test_math_operators();
 
 };
 

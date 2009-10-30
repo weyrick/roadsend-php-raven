@@ -120,6 +120,62 @@ pVar pVar::copyAsString() const {
     return v;
 }
 
+pVar& pVar::operator+=(const pVar& rhs) {
+
+    // we want this to be our fastest case
+    if (isInt() && rhs.isInt()) {
+        pInt a(getInt());
+        pInt b(rhs.getInt());
+        pInt lval(a+b);
+        if ( (a & RPHP_INT_MIN) == (b & RPHP_INT_MIN)
+          && (a & RPHP_INT_MIN) != (lval & RPHP_INT_MIN) ) {
+            // overflow
+            pVarData_ = pBigIntP(new pBigInt(pBigInt(a)+pBigInt(b)));
+        }
+        else {
+            pVarData_ = lval;
+        }
+    }
+    else if (isHash() && rhs.isHash()) {
+        // TODO: array concat
+        pVarData_ = pInt(0);
+    }
+    else {
+        pVarData_ = copyAsInt() + rhs.copyAsInt();
+    }
+
+    return *this;
+
+}
+
+pVar& pVar::operator-=(const pVar& rhs) {
+
+}
+
+pVar& pVar::operator*=(const pVar& rhs) {
+
+}
+
+pVar& pVar::operator/=(const pVar& rhs) {
+
+}
+
+const pVar pVar::operator+(const pVar& rhs) const {
+    return pVar(*this) += rhs;
+}
+
+const pVar pVar::operator-(const pVar& rhs) const {
+
+}
+
+const pVar pVar::operator*(const pVar& rhs) const {
+
+}
+
+const pVar pVar::operator/(const pVar& rhs) const {
+
+}
+
 
 std::ostream& operator << (std::ostream& os, const pVar& v)
 {

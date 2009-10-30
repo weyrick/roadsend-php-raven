@@ -37,6 +37,8 @@ namespace rphp {
 
 /// signed (fast) integer type (used in pVar)
 typedef signed long pInt;
+#define RPHP_INT_MIN LONG_MIN
+#define RPHP_INT_MAX LONG_MAX
 
 /// signed (arbitrary precision) integer type (used in pVar)
 typedef mpz_class pBigInt;

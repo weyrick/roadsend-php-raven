@@ -90,9 +90,6 @@ public:
 };
 
 
-
-pVar pVar_add(const pVar &lhs, const pVar &rhs);
-
 } /* namespace rphp */
 
 

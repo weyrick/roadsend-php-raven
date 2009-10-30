@@ -472,6 +472,17 @@ public:
         return boost::get<const pVarP&>(pVarData_);
     }
 
+    /// operators
+    pVar& operator+=(const pVar& rhs);
+    pVar& operator-=(const pVar& rhs);
+    pVar& operator*=(const pVar& rhs);
+    pVar& operator/=(const pVar& rhs);
+
+    const pVar operator+(const pVar& v) const;
+    const pVar operator-(const pVar& v) const;
+    const pVar operator*(const pVar& v) const;
+    const pVar operator/(const pVar& v) const;
+
 };
 
 } /* namespace rphp */

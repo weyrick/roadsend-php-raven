@@ -24,22 +24,6 @@
 
 namespace rphp {
 
-pVar pVar_add(const pVar &lhs, const pVar &rhs)
-{
-    pVar result;
-
-    if ( (lhs.getType() == pVarHashType) && (rhs.getType() == pVarHashType) ) {
-        // TODO: array concat
-        result = 0l;
-    }
-    else {
-        // TODO: handle floats, automatic overflow, etc
-        result = lhs.copyAsInt() + rhs.copyAsInt();
-    }
-
-    return result;
-}
-
 
 } /* namespace rphp */
 
