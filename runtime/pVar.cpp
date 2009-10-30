@@ -124,8 +124,8 @@ pVar& pVar::operator+=(const pVar& rhs) {
 
     // we want this to be our fastest case
     if (isInt() && rhs.isInt()) {
-        pInt a(getInt());
-        pInt b(rhs.getInt());
+        const pInt& a(getInt());
+        const pInt& b(rhs.getInt());
         pInt lval(a+b);
         if ( (a & RPHP_INT_MIN) == (b & RPHP_INT_MIN)
           && (a & RPHP_INT_MIN) != (lval & RPHP_INT_MIN) ) {
@@ -149,15 +149,15 @@ pVar& pVar::operator+=(const pVar& rhs) {
 }
 
 pVar& pVar::operator-=(const pVar& rhs) {
-
+    return *this;
 }
 
 pVar& pVar::operator*=(const pVar& rhs) {
-
+    return *this;
 }
 
 pVar& pVar::operator/=(const pVar& rhs) {
-
+    return *this;
 }
 
 const pVar pVar::operator+(const pVar& rhs) const {
@@ -165,15 +165,16 @@ const pVar pVar::operator+(const pVar& rhs) const {
 }
 
 const pVar pVar::operator-(const pVar& rhs) const {
-
+    return pVar(*this) -= rhs;
 }
 
 const pVar pVar::operator*(const pVar& rhs) const {
+    return pVar(*this) *= rhs;
 
 }
 
 const pVar pVar::operator/(const pVar& rhs) const {
-
+    return pVar(*this) /= rhs;
 }
 
 
