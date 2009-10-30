@@ -6,11 +6,14 @@ driver for testing pVars
 */
 
 #include <cppunit/config/SourcePrefix.h>
-#include <iostream>
-#include <unicode/ustream.h>
 
-#include "rphp/runtime/pRuntime.h"
 #include "pvarTestCase.h"
+#include "rphp/runtime/pHash.h"
+#include "rphp/runtime/pObject.h"
+#include "rphp/runtime/pResource.h"
+#include "rphp/runtime/pVar.h"
+
+#include <iostream>
 
 CPPUNIT_TEST_SUITE_REGISTRATION( pvarTestCase );
 

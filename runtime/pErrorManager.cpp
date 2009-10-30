@@ -18,9 +18,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
+
 #include "rphp/runtime/pErrorManager.h"
-#include "rphp/runtime/pRuntime.h"
-#include "rphp/runtime/pVar.h"
+
+#include "rphp/runtime/pRuntimeEngine.h"
+#include "rphp/runtime/pRuntimeError.h"
+
+#include <iostream>
 
 namespace rphp {
 
@@ -95,6 +99,12 @@ void pErrorManager::notify(pUInt level, const pMsgString& msg) {
         std::cerr << msg << std::endl;
     }
 
+}
+
+void pErrorManager::fatalError(const pMsgString& msg) {
+    fatalState_ = true;
+    notify(E_ERROR, msg);
+    throw pRuntimeError(msg);
 }
 
 

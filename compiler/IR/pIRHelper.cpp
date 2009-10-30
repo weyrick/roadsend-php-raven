@@ -21,6 +21,7 @@
 
 #include "rphp/IR/pIRHelper.h"
 
+#include <llvm/LLVMContext.h>
 #include <llvm/Module.h>
 #include <llvm/DerivedTypes.h>
 #include <llvm/Constants.h>

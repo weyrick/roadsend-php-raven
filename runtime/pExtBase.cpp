@@ -20,7 +20,8 @@
 
 #include "rphp/runtime/pExtBase.h"
 
-#include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pRuntimeEngine.h"
+#include "rphp/runtime/pFunctionManager.h"
 
 namespace rphp {
 

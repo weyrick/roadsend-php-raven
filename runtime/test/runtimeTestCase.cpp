@@ -6,9 +6,7 @@ driver for testing functions
 */
 
 #include <cppunit/config/SourcePrefix.h>
-#include <iostream>
 
-#include "rphp/runtime/pRuntime.h"
 #include "rphp/runtime/pOutputBuffer.h"
 #include "runtimeTestCase.h"
 

@@ -19,10 +19,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
  * ***** END LICENSE BLOCK ***** */
 
-#include <iostream>
-#include <unicode/ustream.h>
-
 #include "c-runtime.h"
+
+#include "rphp/runtime/pErrorManager.h"
+#include "rphp/runtime/pFunctionManager.h"
+#include "rphp/runtime/pHash.h"
+#include "rphp/runtime/pObject.h"
+#include "rphp/runtime/pRuntimeError.h"
+
+#include <iostream>
+
 
 using namespace rphp;
 

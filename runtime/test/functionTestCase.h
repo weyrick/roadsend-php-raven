@@ -3,7 +3,8 @@
 #define FUNCTIONTESTCASE_H
 
 #include <cppunit/extensions/HelperMacros.h>
-#include "rphp/runtime/pRuntime.h"
+
+#include "rphp/runtime/pRuntimeEngine.h"
 
 /*
  * A test case for php functions

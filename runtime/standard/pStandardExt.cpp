@@ -20,16 +20,12 @@
 
 #include "rphp/runtime/standard/pStandardExt.h"
 
-#include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pRuntimeEngine.h"
 #include "rphp/runtime/pFunction.h"
+#include "rphp/runtime/pVarOperators.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/range/iterator_range.hpp>
-
-#include <iostream>
-
-using namespace boost;
-using namespace boost::algorithm;
 
 namespace rphp {
  namespace ext {
@@ -88,7 +84,7 @@ void strpos(RPHP_STDFUNC_ARGS, const pVar& haystackV, const pVar& needleV, const
 
     // TODO: use offset
 
-    iterator_range<pBString::iterator> result = find_first(haystack, needle);
+    boost::iterator_range<pBString::iterator> result = boost::algorithm::find_first(haystack, needle);
     if (result.begin() == haystack.end()) {
         *retVal = pNull;
     }

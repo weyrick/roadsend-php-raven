@@ -22,29 +22,19 @@
 #ifndef RPHP_PRUNTIME_H_
 #define RPHP_PRUNTIME_H_
 
-#include "rphp/pConfig.h"
-#include "rphp/pSourceTypes.h"
 #include "rphp/runtime/pRuntimeTypes.h"
-#include "rphp/runtime/pVar.h"
-#include "rphp/runtime/pHash.h"
-#include "rphp/runtime/pObject.h"
-#include "rphp/runtime/pResource.h"
-#include "rphp/runtime/pVarOperators.h"
-
-#include "rphp/runtime/pErrorManager.h"
-#include "rphp/runtime/pFunctionManager.h"
-#include "rphp/runtime/pClassManager.h"
 #include "rphp/runtime/pOutputManager.h"
 
 #include <boost/unordered_map.hpp>
 
 namespace rphp {
 
-// runtime handlers
-typedef void (*pIncludeHandlerFun)(pFileNameString file);
-typedef void (*pEvalHandlerFun)(pSourceString code);
-
+class pConfig;
 class pExtManager;
+class pErrorManager;
+class pFunctionManager;
+class pClassManager;
+
 typedef boost::unordered_map<pIdentString, pVarP> globalRegistryType;
 
 class pRuntimeEngine {

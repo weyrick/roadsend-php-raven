@@ -1,5 +1,6 @@
 
-#include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pHash.h"
+#include "rphp/runtime/pVar.h"
 
 using namespace rphp;
 

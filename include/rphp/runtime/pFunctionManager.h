@@ -21,18 +21,17 @@
 #ifndef RPHP_PFUNCTIONMANAGER
 #define RPHP_PFUNCTIONMANAGER
 
-#include "rphp/runtime/pFunction.h"
 #include "rphp/runtime/pRuntimeTypes.h"
 
 #include <boost/unordered_map.hpp>
 
 namespace rphp {
 
-typedef boost::unordered_map<pIdentString, pFunction*> functionRegistryType;
-
 class pRuntimeEngine;
 class pFunction;
 class pExtBase;
+
+typedef boost::unordered_map<pIdentString, pFunction*> functionRegistryType;
 
 /**
 

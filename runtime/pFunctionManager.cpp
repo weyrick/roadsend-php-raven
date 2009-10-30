@@ -20,7 +20,9 @@
 
 #include "rphp/runtime/pFunctionManager.h"
 
-#include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pFunction.h"
+#include "rphp/runtime/pRuntimeEngine.h"
+#include "rphp/runtime/pErrorManager.h"
 #include "rphp/runtime/pSupport.h"
 
 namespace rphp {

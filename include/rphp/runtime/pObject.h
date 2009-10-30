@@ -22,12 +22,12 @@
 #ifndef RPHP_POBJECT_H_
 #define RPHP_POBJECT_H_
 
-#include <boost/cstdint.hpp>
+#include "rphp/runtime/pHash.h"
+#include "rphp/runtime/pRuntimeTypes.h"
+
 #include <boost/unordered_map.hpp>
 #include <iostream>
 #include <vector>
-#include "rphp/runtime/pHash.h"
-#include "rphp/runtime/pRuntimeTypes.h"
 
 /*
 ; PHP5 case sensitivity:

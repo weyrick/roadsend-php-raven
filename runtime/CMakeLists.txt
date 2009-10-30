@@ -15,7 +15,7 @@ set(RUNTIME_SRC_FILES
   pHash.cpp
   pObject.cpp
   pClass.cpp
-  pRuntime.cpp
+  pRuntimeEngine.cpp
   pOutputBuffer.cpp
   pOutputManager.cpp
   pClassManager.cpp

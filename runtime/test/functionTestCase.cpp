@@ -6,7 +6,6 @@ driver for testing functions
 */
 
 #include <cppunit/config/SourcePrefix.h>
-#include <iostream>
 
 #include "functionTestCase.h"
 #include "rphp/runtime/pFunctionManager.h"

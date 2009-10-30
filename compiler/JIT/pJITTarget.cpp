@@ -21,7 +21,7 @@
 
 #include "rphp/JIT/pJITTarget.h"
 
-#include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pRuntimeEngine.h"
 
 #include <llvm/Module.h>
 #include <llvm/System/DynamicLibrary.h>

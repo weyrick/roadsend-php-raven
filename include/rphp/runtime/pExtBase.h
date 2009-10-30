@@ -21,10 +21,7 @@
 #ifndef PEXTENSIONBASE_H_
 #define PEXTENSIONBASE_H_
 
-#include "rphp/runtime/pVar.h"
-
-#include <boost/bind.hpp>
-#include <string>
+#include "rphp/runtime/pRuntimeTypes.h"
 
 namespace rphp {
 

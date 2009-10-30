@@ -69,11 +69,7 @@ public:
     void notify(pUInt level, const pMsgString& msg);
 
     // fatal error
-    void fatalError(const pMsgString& msg) {
-        fatalState_ = true;
-        notify(E_ERROR, msg);
-        throw pRuntimeError(msg);
-    }
+    void fatalError(const pMsgString& msg);
 
     // XXX exception throw
 

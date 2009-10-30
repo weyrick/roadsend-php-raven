@@ -19,11 +19,18 @@
  * ***** END LICENSE BLOCK ***** */
 
 #include "rphp/runtime/pOutputManager.h"
+#include "rphp/runtime/pOutputBuffer.h"
 
 #include <unicode/ustream.h>
 #include <iostream>
 
 namespace rphp {
+
+pOutputManager::pOutputManager(pRuntimeEngine *r): runtime_(r) {
+    // default output buffer
+    // TODO: check the runtime config for which type of default buffer to use
+    bufferStack_.push(new pOutputBuffer(pOutputBuffer::bufTypeUnicode));
+}
 
 void pOutputManager::flushAndFreeAll() {
     while( !bufferStack_.empty() ) {
@@ -43,6 +50,18 @@ void pOutputManager::freeAll() {
         delete bufferStack_.top();
         bufferStack_.pop();
     }
+}
+
+void pOutputManager::print(const pBString& str) {
+    if (bufferStack_.empty())
+        return;
+    bufferStack_.top()->print(str);
+}
+
+void pOutputManager::print(const pUString& str) {
+    if (bufferStack_.empty())
+        return;
+    bufferStack_.top()->print(str);//.readonlyICUString());
 }
 
 

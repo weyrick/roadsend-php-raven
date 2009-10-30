@@ -21,7 +21,6 @@
 #ifndef RPHP_POUTPUTMANAGER_H_
 #define RPHP_POUTPUTMANAGER_H_
 
-#include "rphp/runtime/pOutputBuffer.h"
 #include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pVar.h"
 
@@ -30,6 +29,7 @@
 namespace rphp {
 
 class pRuntimeEngine;
+class pOutputBuffer;
 
 class pOutputManager {
 
@@ -39,11 +39,7 @@ class pOutputManager {
 public:
 
     // constructors
-    pOutputManager(pRuntimeEngine *r): runtime_(r) {
-        // default output buffer
-        // TODO: check the runtime config for which type of default buffer to use
-        bufferStack_.push(new pOutputBuffer(pOutputBuffer::bufTypeUnicode));
-    }
+    pOutputManager(pRuntimeEngine *r);
 
     ~pOutputManager() {
         flushAndFreeAll();
@@ -73,17 +69,9 @@ public:
         print(p.copyAsBString());
     }
 
-    void print(const pBString& str) {
-        if (bufferStack_.empty())
-            return;
-        bufferStack_.top()->print(str);
-    }
+    void print(const pBString& str);
 
-    void print(const pUString& str) {
-        if (bufferStack_.empty())
-            return;
-        bufferStack_.top()->print(str);//.readonlyICUString());
-    }
+    void print(const pUString& str);
 
 
 };

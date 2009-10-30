@@ -22,7 +22,8 @@
 
 #include "rphp/JIT/pCachedJIT.h"
 
-#include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pRuntimeEngine.h"
+#include "rphp/runtime/pErrorManager.h"
 #include "rphp/IR/pCompileTarget.h"
 #include "rphp/JIT/pJITTarget.h"
 

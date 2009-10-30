@@ -22,9 +22,9 @@
 #define RPHP_PRUNTIMETYPES_H_
 
 #include "rphp/pTypes.h"
+#include "rphp/pSourceTypes.h"
 #include "rphp/runtime/CowPtr.h"
 #include "rphp/runtime/pUString.h"
-#include "rphp/runtime/pRuntimeError.h"
 
 #include <boost/logic/tribool.hpp>
 #include <boost/variant.hpp>
@@ -116,7 +116,6 @@ typedef enum {
 } pVarType;
 
 
-/// php function signature: no arguments
 class pRuntimeEngine;
 
 #define RPHP_STDFUNC_ARGS   pVar* retVal, pRuntimeEngine* runtime
@@ -151,6 +150,10 @@ typedef void (*pMethodPointer4)(RPHP_STDMETHOD_ARGS, const pVar&, const pVar&, c
 typedef void (*pMethodPointer5)(RPHP_STDMETHOD_ARGS, const pVar&, const pVar&, const pVar&, const pVar&, const pVar&);
 /// php method signature: n arguments
 typedef void (*pMethodPointerN)(RPHP_STDMETHOD_ARGS, std::vector<const pVar&>);
+
+// runtime handlers
+typedef void (*pIncludeHandlerFun)(pFileNameString file);
+typedef void (*pEvalHandlerFun)(pSourceString code);
 
 } /* namespace rphp */
 

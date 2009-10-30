@@ -21,8 +21,9 @@
 #ifndef RPHP_PSUPPORT_H_
 #define RPHP_PSUPPORT_H_
 
-#include <boost/foreach.hpp>
 #include "rphp/runtime/pRuntimeTypes.h"
+
+#include <boost/foreach.hpp>
 
 #define foreach         BOOST_FOREACH
 #define reverse_foreach BOOST_REVERSE_FOREACH

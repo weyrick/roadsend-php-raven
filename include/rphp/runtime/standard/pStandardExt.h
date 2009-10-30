@@ -21,7 +21,6 @@
 #ifndef PSTANDARDEXT_H_
 #define PSTANDARDEXT_H_
 
-#include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pExtBase.h"
 
 #define STD_EXT_NAME "standard"

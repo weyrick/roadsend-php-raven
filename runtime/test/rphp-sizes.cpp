@@ -1,6 +1,12 @@
 
-#include "rphp/runtime/pRuntime.h"
+#include "rphp/runtime/pRuntimeTypes.h"
+#include "rphp/runtime/pVar.h"
 #include "rphp/runtime/pFunction.h"
+#include "rphp/runtime/pHash.h"
+#include "rphp/runtime/pObject.h"
+#include "rphp/runtime/pResource.h"
+
+#include <iostream>
 
 using namespace rphp;
 

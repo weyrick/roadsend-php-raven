@@ -22,8 +22,8 @@
 #ifndef RPHP_IRRUNTIME_H_
 #define RPHP_IRRUNTIME_H_
 
-#include "rphp/runtime/pRuntime.h"
-#include "rphp/runtime/pRuntimeTypes.h"
+#include "rphp/runtime/pVar.h"
+#include "rphp/runtime/pRuntimeEngine.h"
 
 extern "C" {
 

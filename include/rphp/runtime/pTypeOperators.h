@@ -21,12 +21,11 @@
 #ifndef RPHP_PTYPEOPERATIONS_H_
 #define RPHP_PTYPEOPERATIONS_H_
 
-#include <boost/lexical_cast.hpp>
-
 #include "rphp/runtime/pRuntimeTypes.h"
 #include "rphp/runtime/pHash.h"
 #include "rphp/runtime/pObject.h"
-#include "rphp/runtime/CowPtr.h"
+
+#include <boost/lexical_cast.hpp>
 
 namespace rphp {
 
@@ -256,7 +255,7 @@ public:
 
     void operator()(const pObjectP &v) {
     	// TODO: needs array_merge like behaviour + name mangling in the pObject strucure.
-    	throw pRuntimeError("cast of an object to an array not implemented yet!");
+    	//throw pRuntimeError("cast of an object to an array not implemented yet!");
     }
 
     void operator()(const pResourceP &v) {
