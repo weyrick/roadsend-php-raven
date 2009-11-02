@@ -28,6 +28,7 @@
 #include "rphp/runtime/pRuntimeError.h"
 
 #include <iostream>
+#include <gmp.h>
 
 
 using namespace rphp;
@@ -74,6 +75,20 @@ extern "C" {
     // create a new pVar from a pInt
     pVar rphp_make_pVar_pInt(pInt v) {
         return pVar(v);
+    }
+
+    // create a new pVar from serialized pBigInt data
+    pVar rphp_make_pVar_pBigInt(const char* intData, size_t len) {
+        // TODO this involves a copy, maybe we can import it in place?
+        mpz_t z;
+        mpz_import(z,
+                   len, /* size of data */
+                   1,  /* most sig 1st */
+                   sizeof(char),  /* bytesized */
+                   1, /* bigendian */
+                   0, /* fullword */
+                   (void*)intData);
+        return pVar(pBigIntP(new pBigInt(z)));
     }
 
     // create a new pVar from a pFloat

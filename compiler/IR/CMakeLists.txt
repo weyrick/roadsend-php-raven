@@ -7,6 +7,7 @@ include_directories (
                      ${RPHP_INCLUDE_DIR}
                      ${LLVM_INCLUDE_DIR}
                      ${Boost_INCLUDE_DIRS}
+                     ${GMP_INCLUDE_DIR}
                      # FIXME: this is for rphp_grammar.h. need a better place
                      ${CMAKE_CURRENT_BINARY_DIR}/../analysis/                     
                     )
@@ -34,6 +35,8 @@ set_source_files_properties( ${GENERATOR_SRC_FILES}
 
 # STATIC
 add_library( rphp-llvm-ir ${GENERATOR_SRC_FILES} )
+
+target_link_libraries( rphp-llvm-ir ${GMP_LIBRARIES} ) 
 
 set_target_properties( rphp-llvm-ir
                         PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}

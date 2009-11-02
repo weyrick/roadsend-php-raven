@@ -22,6 +22,7 @@
 #ifndef RPHP_PIRHELPER_H_
 #define RPHP_PIRHELPER_H_
 
+#include <llvm/ADT/StringRef.h>
 #include <unicode/utypes.h>
 #include <string>
 
@@ -68,6 +69,8 @@ public:
     /// create a string constant in the IR. note the int32_t comes from libicu
     llvm::Constant* stringConstant(const std::string& s, int32_t& finalLen);
     llvm::Constant* stringConstant(const std::wstring& s, int32_t& finalLen);
+
+    llvm::Constant* byteArrayConstant(const llvm::StringRef& s);
 
 };
 

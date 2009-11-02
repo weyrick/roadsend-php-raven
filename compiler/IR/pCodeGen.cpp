@@ -214,6 +214,7 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
 
     updateSourceLocation(n);
 
+    /*
     // TODO: other bases besides 10
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
     ConstantInt* const_int = ConstantInt::get(getGlobalContext(),
@@ -221,12 +222,41 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
                                       StringRef(numLiteral.data(),
 						numLiteral.length()),
                                       10));
+    */
+    std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
+    // this handles all base 2, 8, 10, 16
+    pBigInt bigInt(numLiteral);
 
-    // allocate tmp pVar for return value
+    Constant* const_int;
+    Function* f;
+
     Value* pVarTmp = newVarOnStack("pIntTmp");
-    Function* f = llvmModule_->getFunction("rphp_make_pVar_pInt");
-    assert(f != NULL);
-    currentBlock_.CreateCall2(f, pVarTmp, const_int);
+
+    if (bigInt.fits_slong_p()) {
+        // we can do this with a normal pInt
+        const_int = ConstantInt::get(getGlobalContext(),
+                                     APInt(wordSize_, (uint64_t)bigInt.get_si(), true));
+        f = llvmModule_->getFunction("rphp_make_pVar_pInt");
+        assert(f != NULL);
+        currentBlock_.CreateCall2(f, pVarTmp, const_int);
+    }
+    else {
+        // requires pBigInt
+        size_t bufSize;
+        char* intBuf = (char*)mpz_export(NULL, /* let gmp malloc the buffer */
+                                         &bufSize, /* size of created buffer */
+                                         1/* most sig 1st */,
+                                         sizeof(char)/*bytesized*/,
+                                         1/*big endian*/,
+                                         0/*fullword*/,
+                                         bigInt.get_mpz_t());
+        const_int = IRHelper_.byteArrayConstant(StringRef(intBuf, bufSize));
+        free(intBuf);
+        f = llvmModule_->getFunction("rphp_make_pVar_pBigInt");
+        assert(f != NULL);
+        currentBlock_.CreateCall3(f, pVarTmp, const_int, ConstantInt::get(getGlobalContext(), APInt(wordSize_, bufSize)));
+
+    }
 
     // push to stack
     valueStack_.push(pVarTmp);

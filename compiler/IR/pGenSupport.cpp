@@ -194,6 +194,7 @@ void pGenSupport::dumpIR(Module* llvmModule) {
             name.substr(0, llvmModule->getModuleIdentifier().length()) == llvmModule->getModuleIdentifier() ||
             // global literal strings
             name.substr(0, 5) == ".bstr" ||
+            name.substr(0, 5) == ".barr" ||
             name.substr(0, 5) == ".ustr"
         ) {
             s->getValue()->dump();

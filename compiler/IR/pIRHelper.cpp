@@ -198,6 +198,33 @@ FunctionType* pIRHelper::moduleInitFunType() {
 
 }
 
+llvm::Constant* pIRHelper::byteArrayConstant(const StringRef& s) {
+
+    // global value creation
+    ArrayType* byteArrayType = ArrayType::get(IntegerType::get(getGlobalContext(),8), s.size()+1);
+    GlobalVariable* gVarStr = new GlobalVariable(*mod_,
+                                    /*Type=*/byteArrayType,
+                                    /*isConstant=*/true,
+                                    /*Linkage=*/GlobalValue::InternalLinkage,
+                                    /*Initializer=*/0, // has initializer, specified below
+                                    /*Name=*/".barr"
+                                    );
+
+    // constant definition
+    Constant* constArray = ConstantArray::get(getGlobalContext(), s, true);
+    gVarStr->setInitializer(constArray);
+
+    // get pointer to global str
+    std::vector<Constant*> indices;
+    Constant* nullC = Constant::getNullValue(IntegerType::get(getGlobalContext(),32));
+    indices.push_back(nullC);
+    indices.push_back(nullC);
+
+    return ConstantExpr::getGetElementPtr(gVarStr, &indices[0], indices.size() );
+
+
+}
+
 
 llvm::Constant* pIRHelper::stringConstant(const std::string& s, int32_t& finalLen) {
 
