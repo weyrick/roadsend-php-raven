@@ -47,7 +47,7 @@ extern "C" {
 
     rphp::pVar rphp_make_pVar_pInt(rphp::pInt v);
 
-    rphp::pVar rphp_make_pVar_pBigInt(const char* intData, size_t len);
+    rphp::pVar rphp_make_pVar_pBigInt(const char* intData, size_t len, int neg);
 
     rphp::pVar rphp_make_pVar_pFloat(double v);
 

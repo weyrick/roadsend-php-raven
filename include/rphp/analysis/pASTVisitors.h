@@ -53,6 +53,7 @@ public:
     virtual void visit_functionInvoke(functionInvoke*) { }
     virtual void visit_constructorInvoke(constructorInvoke*) { }
     virtual void visit_emptyStmt(emptyStmt*) { }
+    virtual void visit_unaryArithmeticOp(unaryArithmeticOp*) { }
 
 };
 
@@ -79,6 +80,7 @@ public:
     void visit_var(var*);
     void visit_functionInvoke(functionInvoke*);
     void visit_constructorInvoke(constructorInvoke*);
+    void visit_unaryArithmeticOp(unaryArithmeticOp*);
 
 };
 

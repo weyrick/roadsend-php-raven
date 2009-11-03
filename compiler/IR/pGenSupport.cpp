@@ -190,7 +190,7 @@ void pGenSupport::dumpIR(Module* llvmModule) {
     for(ValueSymbolTable::const_iterator s = sTable.begin(); s != sTable.end(); ++s) {
         name.assign(s->getKeyData());
         if (// functions start with the module identifier name (mangled script file name)
-            name == "main" ||
+            //name == "main" ||
             name.substr(0, llvmModule->getModuleIdentifier().length()) == llvmModule->getModuleIdentifier() ||
             // global literal strings
             name.substr(0, 5) == ".bstr" ||

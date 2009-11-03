@@ -214,18 +214,13 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
 
     updateSourceLocation(n);
 
-    /*
-    // TODO: other bases besides 10
-    std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
-    ConstantInt* const_int = ConstantInt::get(getGlobalContext(),
-                                APInt(wordSize_,
-                                      StringRef(numLiteral.data(),
-						numLiteral.length()),
-                                      10));
-    */
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
     // this handles all base 2, 8, 10, 16
     pBigInt bigInt(numLiteral);
+
+    if (n->negative()) {
+        bigInt = -bigInt;
+    }
 
     Constant* const_int;
     Function* f;
@@ -254,7 +249,12 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
         free(intBuf);
         f = llvmModule_->getFunction("rphp_make_pVar_pBigInt");
         assert(f != NULL);
-        currentBlock_.CreateCall3(f, pVarTmp, const_int, ConstantInt::get(getGlobalContext(), APInt(wordSize_, bufSize)));
+        currentBlock_.CreateCall4(f,
+                                  pVarTmp,
+                                  const_int,
+                                  ConstantInt::get(getGlobalContext(), APInt(wordSize_, bufSize)),
+                                  ConstantInt::get(getGlobalContext(), APInt(32,  (n->negative()) ? "1" : "0", 10))
+                                  );
 
     }
 
@@ -545,6 +545,24 @@ void pCodeGen::visit_ifStmt(AST::ifStmt* n) {
 	ifRecursionDepth_--;
 	if(ifRecursionDepth_)
 		endingIfBlocks_.push(afterCond);
+
+}
+
+void pCodeGen::visit_unaryArithmeticOp(AST::unaryArithmeticOp* n)  {
+
+    updateSourceLocation(n);
+
+    // codegen the expression
+    visit(n->rVal());
+    Value* rVal = valueStack_.top();
+    valueStack_.pop();
+
+    // if this wasn't a simple integer, we may need to arithmetically negate the expression
+    // (if it was a literal int, this is already done during codegen of the literal)
+    if (n->negative() && (n->getKind() != AST::literalIntKind)) {
+        // TODO call to pVar - operator on this expression
+    }
+    valueStack_.push(rVal);
 
 }
 

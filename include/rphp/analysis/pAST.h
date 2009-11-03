@@ -48,7 +48,8 @@ enum nodeKind {
     varKind,
     functionInvokeKind,
     constructorInvokeKind,
-    emptyStmtKind
+    emptyStmtKind,
+    unaryArithmeticOpKind
 };
 
 // statement base class
@@ -187,8 +188,13 @@ public:
 // NODE: literal int
 class literalInt: public literalExpr {
 
+    bool negative_;
+
 public:
-    literalInt(const pSourceRange& v): literalExpr(literalIntKind, v) { }
+    literalInt(const pSourceRange& v): literalExpr(literalIntKind, v), negative_(false) { }
+
+    bool negative(void) const { return negative_; }
+    void setNegative(bool n) { negative_ = n; }
 
 };
 
@@ -270,7 +276,6 @@ public:
     expr* rVal(void) { return rVal_; }
 
 };
-
 
 // NODE: inline html
 class inlineHtml: public literalString {
@@ -374,6 +379,29 @@ class emptyStmt: public stmt {
 public:
 	emptyStmt() : stmt(emptyStmtKind) {}
 };
+
+// NODE: unary arithmetic operator
+class unaryArithmeticOp: public expr {
+
+    expr* rVal_;
+    bool negative_;
+
+public:
+    unaryArithmeticOp(expr* rVal, bool n): expr(unaryArithmeticOpKind), rVal_(rVal), negative_(n) {
+        // if our expression is a simple literal int, flag its sign
+        if (rVal_->getKind() == literalIntKind)
+            dynamic_cast<literalInt*>(rVal)->setNegative(n);
+    }
+    ~unaryArithmeticOp(void) {
+        delete rVal_;
+    }
+
+    expr* rVal(void) { return rVal_; }
+
+    bool negative(void) { return negative_; }
+
+};
+
 
 } } // namespace
 

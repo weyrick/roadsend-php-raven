@@ -290,6 +290,7 @@ expr(A) ::= lval(B). { A = B; }
 expr(A) ::= functionInvoke(B). { A = B; }
 expr(A) ::= constructorInvoke(B). { A = B; }
 expr(A) ::= logicalNot(B). { A = B; }
+expr(A) ::= unaryArithmeticOp(B). { A = B; }
 
 /** LITERALS **/
 %type literal {AST::literalExpr*}
@@ -400,6 +401,19 @@ literal(A) ::= T_ARRAY(ARY) T_LEFTPAREN arrayItemList(B) T_RIGHTPAREN.
     A = new AST::literalArray(B);
     A->setLine(TOKEN_LINE(ARY));
     delete B; // deletes the vector, NOT the exprs in it!
+}
+
+/** UNARY ARITHMETIC OPERATORS **/
+%type unaryArithmeticOp {AST::unaryArithmeticOp*}
+unaryArithmeticOp(A) ::= T_PLUS expr(R).
+{
+    A = new AST::unaryArithmeticOp(R, false);
+    A->setLine(pMod->currentLineNum());
+}
+unaryArithmeticOp(A) ::= T_MINUS expr(R).
+{
+    A = new AST::unaryArithmeticOp(R, true);
+    A->setLine(pMod->currentLineNum());
 }
 
 /** LOGICAL OPERATORS **/

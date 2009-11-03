@@ -78,9 +78,10 @@ extern "C" {
     }
 
     // create a new pVar from serialized pBigInt data
-    pVar rphp_make_pVar_pBigInt(const char* intData, size_t len) {
-        // TODO this involves a copy, maybe we can import it in place?
-        mpz_t z;
+    pVar rphp_make_pVar_pBigInt(const char* intData, size_t len, int neg) {
+        // TODO too many temps?
+        mpz_t z, nz;
+        mpz_init(z);
         mpz_import(z,
                    len, /* size of data */
                    1,  /* most sig 1st */
@@ -88,7 +89,15 @@ extern "C" {
                    1, /* bigendian */
                    0, /* fullword */
                    (void*)intData);
-        return pVar(pBigIntP(new pBigInt(z)));
+        if (neg) {
+            mpz_init(nz);
+            mpz_neg(nz, z);
+            mpz_swap(z, nz);
+            mpz_clear(nz);
+        }
+        pBigIntP b(new pBigInt(z));
+        mpz_clear(z);
+        return pVar(b);
     }
 
     // create a new pVar from a pFloat

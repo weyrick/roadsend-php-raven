@@ -99,6 +99,7 @@ public:
     void visit_var(AST::var*);
     void visit_functionInvoke(AST::functionInvoke*);
     void visit_ifStmt(AST::ifStmt*);
+    void visit_unaryArithmeticOp(AST::unaryArithmeticOp* n);
 
 };
 

@@ -44,7 +44,8 @@ baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_var),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionInvoke),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_constructorInvoke),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_emptyStmt)
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_emptyStmt),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_unaryArithmeticOp)
 };
 
 
@@ -178,6 +179,8 @@ void dumpVisitor::visit_literalInt(literalInt* n)  {
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "literal int: ";
+    if (n->negative())
+        std::wcout << "(negative) ";
     std::wcout << n->getStringVal();
     std::cout << std::endl;
 }
@@ -361,6 +364,19 @@ void dumpVisitor::visit_constructorInvoke(constructorInvoke* n)  {
     std::cout << ")" << std::endl;
 
 }
+
+void dumpVisitor::visit_unaryArithmeticOp(unaryArithmeticOp* n)  {
+    showindent();
+    std::cout << "# line " << n->startLineNum() << std::endl;
+    showindent();
+    std::cout << "(" << ((n->negative()) ? "-" : "+") << std::endl;
+    indent();
+    visit(n->rVal());
+    unindent();
+    showindent();
+    std::cout << ")" << std::endl;
+}
+
 
 } } // namespace
 
