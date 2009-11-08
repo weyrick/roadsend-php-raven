@@ -155,7 +155,7 @@ void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
     else {
         std::cout << "[unicode]: \"";
     }
-    std::wcout << n->getStringVal();
+    std::cout << n->getStringVal();
     std::cout << "\"" << std::endl;
 }
 
@@ -170,7 +170,7 @@ void dumpVisitor::visit_literalString(literalString* n)  {
     else {
         std::cout << "[unicode]: \"";
     }
-    std::wcout << n->getStringVal();
+    std::cout << n->getStringVal();
     std::cout << "\"" << std::endl;
 }
 
@@ -180,8 +180,8 @@ void dumpVisitor::visit_literalInt(literalInt* n)  {
     showindent();
     std::cout << "literal int: ";
     if (n->negative())
-        std::wcout << "(negative) ";
-    std::wcout << n->getStringVal();
+        std::cout << "(negative) ";
+    std::cout << n->getStringVal();
     std::cout << std::endl;
 }
 
@@ -190,7 +190,7 @@ void dumpVisitor::visit_literalFloat(literalFloat* n)  {
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "literal float: ";
-    std::wcout << n->getStringVal();
+    std::cout << n->getStringVal();
     std::cout << std::endl;
 }
 

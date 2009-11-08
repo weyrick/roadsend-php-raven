@@ -47,21 +47,19 @@ pSourceFile::pSourceFile(const pSourceFileDesc& file):
     instream.unsetf(std::ios::skipws);
 
     // first we get a raw bytewise buffer
-    std::string rawBuffer =  std::string(std::istreambuf_iterator<std::string::value_type>(instream.rdbuf()),
-                                         std::istreambuf_iterator<std::string::value_type>());
 
-    if (file_.get<1>() == "ASCII") {
+    if ((file_.get<1>() == "ASCII") || (file_.get<1>() == "UTF8")) {
 
-        // in the basic case we can go directly to wchar which should just zero extend
-        contents_.assign(rawBuffer.begin(), rawBuffer.end());
+        // basic case
+        contents_.assign(std::istreambuf_iterator<std::string::value_type>(instream.rdbuf()),
+                         std::istreambuf_iterator<std::string::value_type>());
 
     }
     else {    
 
         // charset conversion
-
-        // TODO: this uses 4 total buffers during read and conversion. surely there's a faster way.
-        // icu has a file api for reading uchars directly in a given codepage
+        std::string rawBuffer(std::istreambuf_iterator<std::string::value_type>(instream.rdbuf()),
+                              std::istreambuf_iterator<std::string::value_type>());
 
         // charset conversion we leave to UnicodeString
         // note this "pivots" through a 16 bit UChar, but so does the C ucnv_ interface
@@ -73,10 +71,10 @@ pSourceFile::pSourceFile(const pSourceFileDesc& file):
         // finally to wchar_t for lexer
         int32_t bsize = ubuffer.countChar32();
 
-        wchar_t* buffer = new wchar_t[bsize];
+        char* buffer = new char[bsize];
         int32_t newLength;
         UErrorCode errorCode(U_ZERO_ERROR);
-        u_strToWCS(buffer,
+        u_strToUTF8(buffer,
                     ubuffer.countChar32(),
                     &newLength,
                     ubuffer.getBuffer(),

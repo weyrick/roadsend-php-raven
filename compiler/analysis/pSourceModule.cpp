@@ -86,18 +86,18 @@ void pSourceModule::parseError(pSourceRange* r) {
 
     // error line with arrow    
     if (!errorLine.empty()) {
-        std::wcerr << errorLine << std::endl;
-        std::wcerr << pSourceString((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
+        std::cerr << errorLine << std::endl;
+        std::cerr << pSourceString((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
     }
 
     // message
-    std::wcerr << L"parse error: unexpected '"
-                << problem
-                << L"' in ";
+    std::cerr << "parse error: unexpected '"
+               << problem
+               << "' in ";
     std::cerr << source_->fileName();
-    std::wcerr  << L" on line "
-                << currentLineNum()
-                <<  std::endl;
+    std::cerr  << " on line "
+               << currentLineNum()
+               <<  std::endl;
 
     // what now?
     exit(-1);

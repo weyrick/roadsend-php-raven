@@ -72,7 +72,7 @@ void pDumpTarget::dumpPre(void) {
         std::cout << "preprocess failed due to lexer error" << std::endl;
     }
     else {
-        std::wcout << l.contents();
+        std::cout << l.contents();
     }
     delete source;
 

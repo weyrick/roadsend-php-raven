@@ -81,18 +81,21 @@ Function* createCallFunc(Module* mod)
 int main()
 {
 
-        ExecutionEngine *executionEngine;
+    ExecutionEngine *executionEngine;
 
 	InitializeNativeTarget();
 	llvm::DwarfExceptionHandling = true;
 	llvm::UnwindTablesMandatory = true;
+	llvm::JITEmitDebugInfo = true;
 
 	// Load the cpp mock runtime
+	/*
 	std::string lib = std::string("./libcpp-lib")+std::string(LTDL_SHLIB_EXT);
 	if (sys::DynamicLibrary::LoadLibraryPermanently(lib.data())) {
 	  std::cout << "unable to find libcpp-lib\n";
 	  return 1;
 	}
+	*/
 
 	Module* mod = new Module("cppe-mod", getGlobalContext());
 	Function* execFunc = createCallFunc(mod);

@@ -342,13 +342,13 @@ literal(A) ::= T_IDENTIFIER(B).
     // case insensitive checks
     pSourceString ciTmp((*B).begin(), (*B).end());
     transform(ciTmp.begin(), ciTmp.end(), ciTmp.begin(), toupper);
-    if (ciTmp == L"NULL") {
+    if (ciTmp == "NULL") {
         A = new AST::literalNull();
     }
-    else if (ciTmp == L"TRUE") {
+    else if (ciTmp == "TRUE") {
         A = new AST::literalBool(true);
     }
-    else if (ciTmp == L"FALSE") {
+    else if (ciTmp == "FALSE") {
         A = new AST::literalBool(false);
     }
     else {

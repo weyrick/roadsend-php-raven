@@ -29,8 +29,8 @@ namespace rphp {
 
 // string and iterator types used to expose the
 // underlying source input streams
-typedef std::wstring pSourceString;
-typedef std::wstring::iterator pSourceCharIterator;
+typedef std::string pSourceString;
+typedef std::string::iterator pSourceCharIterator;
 
 // iterator pair used as value for matched tokens
 typedef boost::iterator_range<pSourceCharIterator> pSourceRange;
