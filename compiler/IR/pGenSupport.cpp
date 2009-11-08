@@ -88,7 +88,7 @@ void pGenSupport::writeBitcode(Module* m, std::string outFile) {
 }
 
 
-Module* pGenSupport::readBitcode(std::string fileName) {
+Module* pGenSupport::readBitcode(std::string fileName, LLVMContext& context) {
 
     std::string errMsg;
     MemoryBuffer* mb = MemoryBuffer::getFile(fileName.c_str(), &errMsg);
@@ -96,7 +96,7 @@ Module* pGenSupport::readBitcode(std::string fileName) {
         throw pCompileError("error loading runtime IR file [" + fileName + "]: " + errMsg);
     }
 
-    ModuleProvider* mp = getBitcodeModuleProvider(mb, getGlobalContext(), &errMsg);
+    ModuleProvider* mp = getBitcodeModuleProvider(mb, context, &errMsg);
     if (errMsg.length()) {
         throw pCompileError("error parsing bitcode file [" + fileName + "]: " + errMsg);
     }
@@ -111,7 +111,7 @@ Module* pGenSupport::readBitcode(std::string fileName) {
 
 }
 
-Module* pGenSupport::getRuntimeIR() {
+Module* pGenSupport::getRuntimeIR(LLVMContext &c) {
 
     sys::Path irFile;
 
@@ -127,9 +127,9 @@ Module* pGenSupport::getRuntimeIR() {
 
     if (irFile.exists()) {
 #if (LLVM_VERSION >= 2007000)
-        return readBitcode(irFile.str());
+        return readBitcode(irFile.str(), c);
 #else
-        return readBitcode(irFile.toString());
+        return readBitcode(irFile.toString(), c);
 #endif
     }
     else {
@@ -149,7 +149,7 @@ void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFuncti
     args.push_back(irHelper.pVarPointerType()); // retval
     args.push_back(irHelper.runtimeEngineType());
     FunctionType* FT = FunctionType::get(
-    Type::getVoidTy(getGlobalContext()),
+    Type::getVoidTy(llvmModule->getContext()),
     /*Params=*/args,
     /*isVarArg=*/false);
 
@@ -165,8 +165,8 @@ void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFuncti
     // always inline
     main->addFnAttr(Attribute::AlwaysInline);
     
-    IRBuilder<> block(getGlobalContext());
-    block.SetInsertPoint(BasicBlock::Create(getGlobalContext(), "entry", main));
+    IRBuilder<> block(llvmModule->getContext());
+    block.SetInsertPoint(BasicBlock::Create(llvmModule->getContext(), "entry", main));
 
     // call entry function
     Function* entry = llvmModule->getFunction(entryFunctionName);

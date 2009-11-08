@@ -23,7 +23,9 @@
 #define RPHP_PGENSUPPORT_H_
 
 #include "rphp/pTypes.h"
+
 #include <string>
+#include <llvm/LLVMContext.h>
 
 namespace llvm {
     class Module;
@@ -38,8 +40,8 @@ public:
     static std::string mangleInitFunctionName(std::string moduleName);
     static std::string mangleUserFunctionName(std::string moduleName, std::string inName);
     static void writeBitcode(llvm::Module* m, std::string outFile);
-    static llvm::Module* readBitcode(std::string fileName);
-    static llvm::Module* getRuntimeIR();
+    static llvm::Module* readBitcode(std::string fileName, llvm::LLVMContext& c);
+    static llvm::Module* getRuntimeIR(llvm::LLVMContext& c);
     static void createMain(llvm::Module *m, const pIdentString& entryFunctionName);
     static void dumpIR(llvm::Module* llvmModule);
 

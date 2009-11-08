@@ -42,7 +42,7 @@ void pCompileTarget::execute(void) {
 
     pSourceModule  m(inputFile_);
 
-    IR::pGenerator codeGen(m);
+    IR::pGenerator codeGen(m, context_);
     llvmModule_ = codeGen.getIR();
     entryFunctionName_ = codeGen.entryFunctionName();
 

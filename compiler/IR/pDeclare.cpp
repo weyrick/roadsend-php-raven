@@ -78,12 +78,12 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     }
     
     // entry block
-    BasicBlock::Create(getGlobalContext(), "entry", userFun);
+    BasicBlock::Create(llvmModule_->getContext(), "entry", userFun);
 
     // MODULE INITIALIZATION 
     
     // entry block
-    IRBuilder<> block(getGlobalContext());
+    IRBuilder<> block(llvmModule_->getContext());
     block.SetInsertPoint(&initFunction_->getEntryBlock());
 
     Function* registerFun;

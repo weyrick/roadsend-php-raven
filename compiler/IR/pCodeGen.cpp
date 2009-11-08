@@ -40,7 +40,7 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     llvmModule_(mod),
     functionSymbol_(funSym),
     IRHelper_(mod),
-    currentBlock_(getGlobalContext()),
+    currentBlock_(llvmModule_->getContext()),
     runtimeEngine_(NULL),
     thisFunction_(NULL),
     valueStack_(),
@@ -73,12 +73,12 @@ pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
     destructList_.push(valueVectorType());
 
     // The allocBlock should contain all allocas for vars + their constructor calls.
-    allocBlock = BasicBlock::Create(getGlobalContext(), "allocBlock", thisFunction_);
+    allocBlock = BasicBlock::Create(llvmModule_->getContext(), "allocBlock", thisFunction_);
     currentBlock_.CreateBr(allocBlock);
 
     // Go to this at the end of allocBlock.
     // This is the first block wich contains compiled code.
-    beginBlock = BasicBlock::Create(getGlobalContext(), "begin", thisFunction_);
+    beginBlock = BasicBlock::Create(llvmModule_->getContext(), "begin", thisFunction_);
     currentBlock_.SetInsertPoint(beginBlock);
 
 }
@@ -96,7 +96,7 @@ void pCodeGen::finalize(void) {
     Function* destructor = llvmModule_->getFunction("_ZN4rphp4pVarD1Ev");
     assert(destructor != NULL);
 
-    BasicBlock* end = BasicBlock::Create(getGlobalContext(), "end", thisFunction_);
+    BasicBlock* end = BasicBlock::Create(llvmModule_->getContext(), "end", thisFunction_);
     // Branch to the last BasicBlock
     currentBlock_.CreateBr(end);
     currentBlock_.SetInsertPoint(end);
@@ -141,7 +141,7 @@ Value* pCodeGen::newVarOnStack(const char* name) {
 
 BasicBlock* pCodeGen::visitInOwnBlock(AST::stmt* n, const std::string &Name) {
 	BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
-	BasicBlock* block = BasicBlock::Create(getGlobalContext(), Name, thisFunction_);
+	BasicBlock* block = BasicBlock::Create(llvmModule_->getContext(), Name, thisFunction_);
 	if(n) {
 		currentBlock_.SetInsertPoint(block);
 		visit(n);
@@ -165,7 +165,7 @@ void pCodeGen::updateSourceLocation(const AST::stmt* n) {
 
     lastSourceLoc_ = n->getStartLine();
 
-    ConstantInt* lineNo = ConstantInt::get(getGlobalContext(),
+    ConstantInt* lineNo = ConstantInt::get(llvmModule_->getContext(),
             APInt(wordSize_, n->getStartLine()));
 
     Function* f = llvmModule_->getFunction("rphp_setSourceLocation");
@@ -199,7 +199,7 @@ void pCodeGen::visit_literalString(AST::literalString* n) {
     assert(f != NULL);
 
     if (isUnicode) {
-        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(getGlobalContext(), APInt(wordSize_, finalLen)));
+        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(llvmModule_->getContext(), APInt(wordSize_, finalLen)));
     }
     else {
         currentBlock_.CreateCall2(f, pVarTmp, strPtr);
@@ -229,7 +229,7 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
 
     if (bigInt.fits_slong_p()) {
         // we can do this with a normal pInt
-        const_int = ConstantInt::get(getGlobalContext(),
+        const_int = ConstantInt::get(llvmModule_->getContext(),
                                      APInt(wordSize_, (uint64_t)bigInt.get_si(), true));
         f = llvmModule_->getFunction("rphp_make_pVar_pInt");
         assert(f != NULL);
@@ -252,8 +252,8 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
         currentBlock_.CreateCall4(f,
                                   pVarTmp,
                                   const_int,
-                                  ConstantInt::get(getGlobalContext(), APInt(wordSize_, bufSize)),
-                                  ConstantInt::get(getGlobalContext(), APInt(32,  (n->negative()) ? "1" : "0", 10))
+                                  ConstantInt::get(llvmModule_->getContext(), APInt(wordSize_, bufSize)),
+                                  ConstantInt::get(llvmModule_->getContext(), APInt(32,  (n->negative()) ? "1" : "0", 10))
                                   );
 
     }
@@ -268,7 +268,7 @@ void pCodeGen::visit_literalFloat(AST::literalFloat* n) {
     updateSourceLocation(n);
 
     std::string numLiteral(n->getStringVal().begin(), n->getStringVal().end());
-    ConstantFP* const_float = ConstantFP::get(getGlobalContext(), APFloat(APFloat::IEEEdouble,  numLiteral.c_str()));
+    ConstantFP* const_float = ConstantFP::get(llvmModule_->getContext(), APFloat(APFloat::IEEEdouble,  numLiteral.c_str()));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pFloatTmp");
@@ -288,7 +288,7 @@ void pCodeGen::visit_literalBool(AST::literalBool* n) {
     updateSourceLocation(n);
 
     // NOTE even on 64 bit, this is 32 (with g++)
-    ConstantInt* cbool = ConstantInt::get(getGlobalContext(), APInt(32,  (n->getBoolVal()) ? "1" : "0", 10));
+    ConstantInt* cbool = ConstantInt::get(llvmModule_->getContext(), APInt(32,  (n->getBoolVal()) ? "1" : "0", 10));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack("pBoolTmp");
@@ -513,7 +513,7 @@ void pCodeGen::visit_ifStmt(AST::ifStmt* n) {
 	Value* trueValue = ConstantInt::get(evalTo->getReturnType(), 1);
 
 	llvm::Value* condition = currentBlock_.CreateICmpEQ(conditionValue, trueValue, "if-cmp");
-	llvm::BasicBlock* afterCond = BasicBlock::Create(getGlobalContext(), "afterCond", thisFunction_);
+	llvm::BasicBlock* afterCond = BasicBlock::Create(llvmModule_->getContext(), "afterCond", thisFunction_);
 
 	// Branch
 	currentBlock_.CreateCondBr(condition, trueBlock, falseBlock);

@@ -25,6 +25,8 @@
 #include "rphp/pTypes.h"
 #include "rphp/pTarget.h"
 
+#include <llvm/LLVMContext.h>
+
 namespace llvm {
     class Module;
 }
@@ -36,6 +38,7 @@ class pCompileTarget: public pTarget {
 
 protected:
     llvm::Module *llvmModule_;
+    llvm::LLVMContext context_;
     pSourceFileDesc inputFile_;
     std::string projectRoot_;
     pIdentString entryFunctionName_;
@@ -49,6 +52,7 @@ protected:
 public:
     pCompileTarget(const pSourceFileDesc& fileName/*, const std::string& root*/):
         llvmModule_(NULL),
+        context_(),
         inputFile_(fileName),
         projectRoot_(/*root*/),
         entryFunctionName_(),
@@ -67,6 +71,10 @@ public:
     llvm::Module* releaseModuleOwnership(void) {
         ownModule_ = false;
         return llvmModule_;
+    }
+
+    llvm::LLVMContext& getLLVMContext(void) {
+        return context_;
     }
 
     bool createMain(void) const { return createMain_; }

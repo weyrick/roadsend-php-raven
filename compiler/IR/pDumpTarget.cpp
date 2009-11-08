@@ -90,7 +90,7 @@ void pDumpTarget::dumpAST(void) {
 void pDumpTarget::dumpIR(void) {
 
     pSourceModule  m(sourceFile_);
-    IR::pGenerator codeGen(m);
+    IR::pGenerator codeGen(m, llvm::getGlobalContext());
     llvm::Module* ir = codeGen.getIR();
     IR::pGenSupport::dumpIR(ir);
     std::string errMsg;

@@ -22,10 +22,12 @@
 #ifndef RPHP_PGENERATOR_H_
 #define RPHP_PGENERATOR_H_
 
-#include <string>
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/analysis/pASTVisitors.h"
 #include "rphp/IR/pIRHelper.h"
+
+#include <llvm/LLVMContext.h>
+#include <string>
 
 namespace llvm {
     class Module;
@@ -47,7 +49,7 @@ private:
 
 public:
 
-    pGenerator(pSourceModule& mod);
+    pGenerator(pSourceModule& mod, llvm::LLVMContext& c);
     void loadAndLinkRuntimeIR(void);
     void createEntryPoint(void);
     void runPasses();
