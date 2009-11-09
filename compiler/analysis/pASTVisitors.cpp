@@ -168,7 +168,7 @@ void dumpVisitor::visit_literalString(literalString* n)  {
         std::cout << "[binary]: \"";
     }
     else {
-        std::cout << "[unicode]: \"";
+        std::cout << "[utf8]: \"";
     }
     std::cout << n->getStringVal();
     std::cout << "\"" << std::endl;

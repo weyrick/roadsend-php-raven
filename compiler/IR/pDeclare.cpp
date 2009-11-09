@@ -110,10 +110,9 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     
     assert(registerFun != NULL && "function declare doesn't support requested arity");
     
-    int len;
     block.CreateCall3(registerFun, 
                       &(*initFunction_->arg_begin())/* runtime */, 
-                      IRHelper_.stringConstant(n->functionDef()->name(),len), 
+                      IRHelper_.byteArrayConstant(n->functionDef()->name()),
                       userFun);
     
 }

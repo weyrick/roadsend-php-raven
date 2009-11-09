@@ -158,10 +158,10 @@ void pCodeGen::updateSourceLocation(const AST::stmt* n) {
         return;
 
     // TODO check current pConfig, avoid this if optimizing
-    int32_t finalLen(0);
+
     Constant* filestrPtr;
     // TODO we can cache this here since it will never change
-    filestrPtr = IRHelper_.stringConstant(llvmModule_->getModuleIdentifier(), finalLen);
+    filestrPtr = IRHelper_.byteArrayConstant(llvmModule_->getModuleIdentifier());
 
     lastSourceLoc_ = n->getStartLine();
 
@@ -180,16 +180,9 @@ void pCodeGen::visit_literalString(AST::literalString* n) {
     updateSourceLocation(n);
 
     bool isUnicode = !n->isBinary();
-    int32_t finalLen(0);
+    int32_t finalLen(n->getStringVal().length());
 
-    Constant* strPtr;
-    if (isUnicode) {
-        strPtr = IRHelper_.stringConstant(n->getStringVal(), finalLen);
-    }
-    else {
-        // strip unicodeyness
-        strPtr = IRHelper_.stringConstant(std::string(n->getStringVal().begin(), n->getStringVal().end()), finalLen);
-    }
+    Constant* strPtr(IRHelper_.byteArrayConstant(n->getStringVal()));
 
     // allocate tmp pVar for return value
     Value* pVarTmp = newVarOnStack((isUnicode)?"pUStrTmp":"pBStrTmp");
@@ -198,12 +191,7 @@ void pCodeGen::visit_literalString(AST::literalString* n) {
     Function* f = llvmModule_->getFunction((isUnicode)?"rphp_make_pVar_pUString":"rphp_make_pVar_pBString");
     assert(f != NULL);
 
-    if (isUnicode) {
-        currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(llvmModule_->getContext(), APInt(wordSize_, finalLen)));
-    }
-    else {
-        currentBlock_.CreateCall2(f, pVarTmp, strPtr);
-    }
+    currentBlock_.CreateCall3(f, pVarTmp, strPtr, ConstantInt::get(llvmModule_->getContext(), APInt(wordSize_, finalLen)));
 
     // push to stack
     valueStack_.push(pVarTmp);
@@ -376,8 +364,7 @@ void pCodeGen::visit_inlineHtml(AST::inlineHtml* n) {
     Function *f = llvmModule_->getFunction("rphp_print_cstr");
     assert(f != NULL);
 
-    int32_t finalLen(0);
-    currentBlock_.CreateCall2(f, runtimeEngine_, IRHelper_.stringConstant(n->getStringVal(), finalLen));
+    currentBlock_.CreateCall2(f, runtimeEngine_, IRHelper_.byteArrayConstant(n->getStringVal()));
 
 }
 
@@ -473,8 +460,7 @@ void pCodeGen::visit_functionInvoke(AST::functionInvoke* n) {
     std::vector<Value*> callArgList;
     callArgList.push_back(retval);
     callArgList.push_back(runtimeEngine_);
-    int32_t len(0);
-    callArgList.push_back(IRHelper_.stringConstant(n->name(),len));
+    callArgList.push_back(IRHelper_.byteArrayConstant(n->name()));
 
     // visit arguments in reverse order, add to call arg list as we go
     for (AST::expressionList::reverse_iterator i = n->argList().rbegin(); i != n->argList().rend(); ++i) {

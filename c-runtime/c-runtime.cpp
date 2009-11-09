@@ -62,14 +62,13 @@ extern "C" {
     }
 
     // create a new binary string
-    pVar rphp_make_pVar_pBString(const char* str) {
-        return pVar(pBString(str));
+    pVar rphp_make_pVar_pBString(const char* str, size_t len) {
+        return pVar(pBString(str, len));
     }
 
     // create a new unicode string
     pVar rphp_make_pVar_pUString(const char* str, size_t len) {
-        // our code generator always generates UTF-16BE
-        return pVar(pUStringP(new UnicodeString(str, len, "UTF-16BE")));
+        return pVar(pUStringP(new UnicodeString(str, len, "UTF8")));
     }
 
     // create a new pVar from a pInt
