@@ -46,20 +46,27 @@ pSourceFile::pSourceFile(const pSourceFileDesc& file):
     }
     instream.unsetf(std::ios::skipws);
 
-    // first we get a raw bytewise buffer
+    std::istreambuf_iterator<std::string::value_type> startPos(instream.rdbuf());
+    std::istreambuf_iterator<std::string::value_type> endPos;
 
     if ((file_.get<1>() == "ASCII") || (file_.get<1>() == "UTF8")) {
 
-        // basic case
-        contents_.assign(std::istreambuf_iterator<std::string::value_type>(instream.rdbuf()),
-                         std::istreambuf_iterator<std::string::value_type>());
+        // basic case: alreay ascii or utf8
+        // skip possible UTF8 byte-order mark (BOM)
+        std::istreambuf_iterator<std::string::value_type> BOMcheck(startPos);
+        if (((unsigned char)*BOMcheck++ == 0xEF) &&
+            ((unsigned char)*BOMcheck++ == 0xBB) &&
+            ((unsigned char)*BOMcheck++ == 0xBF)) {
+            startPos = BOMcheck;
+        }
+
+        contents_.assign(startPos, endPos);
 
     }
     else {    
 
-        // charset conversion
-        std::string rawBuffer(std::istreambuf_iterator<std::string::value_type>(instream.rdbuf()),
-                              std::istreambuf_iterator<std::string::value_type>());
+        // charset conversion from arbitrary to utf8
+        std::string rawBuffer(startPos, endPos);
 
         // charset conversion we leave to UnicodeString
         // note this "pivots" through a 16 bit UChar, but so does the C ucnv_ interface
@@ -68,22 +75,7 @@ pSourceFile::pSourceFile(const pSourceFileDesc& file):
             throw pParseError("could not perform character conversion in file [" + file_.get<0>() + "] from charset [" + file_.get<1>() + "]");
         }
 
-        // finally to wchar_t for lexer
-        int32_t bsize = ubuffer.countChar32();
-
-        char* buffer = new char[bsize];
-        int32_t newLength;
-        UErrorCode errorCode(U_ZERO_ERROR);
-        u_strToUTF8(buffer,
-                    ubuffer.countChar32(),
-                    &newLength,
-                    ubuffer.getBuffer(),
-                    ubuffer.length(),
-                    &errorCode);
-        assert(U_SUCCESS(errorCode));
-
-        contents_.assign(buffer, newLength);
-        delete buffer;
+        ubuffer.toUTF8String(contents_);
         
     }
     

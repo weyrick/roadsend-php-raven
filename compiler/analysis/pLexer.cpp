@@ -53,6 +53,7 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add_macro ("DIGIT", "[0-9]");
     langRules_.add_macro ("OCTALDIGIT", "[0-7]");
     langRules_.add_macro ("HEXDIGIT", "[0-9a-fA-F]");
+    langRules_.add_macro ("IDCHARS", "[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*");
 
     langRules_.add("INITIAL", "<\\?\\s*|<\\?PHP\\s*", T_OPEN_TAG, "PHP"); // go to PHP state
     langRules_.add("INITIAL", ".+|\\n+", T_INLINE_HTML, ".");
@@ -178,8 +179,8 @@ pLexer::pLexer(const pSourceFile* s):
     langRules_.add("PHP", "\\(object\\)", T_OBJECT_CAST, ".");
     langRules_.add("PHP", "\\((bool|boolean)\\)", T_BOOL_CAST, ".");
     langRules_.add("PHP", "\\(unset\\)", T_UNSET_CAST, ".");
-    langRules_.add("PHP", "[a-zA-Z_][a-zA-Z0-9_]*", T_IDENTIFIER, ".");
-    langRules_.add("PHP", "\\$[a-zA-Z_][a-zA-Z0-9_]*", T_VARIABLE, ".");
+    langRules_.add("PHP", "{IDCHARS}", T_IDENTIFIER, ".");
+    langRules_.add("PHP", "\\${IDCHARS}", T_VARIABLE, ".");
     langRules_.add("PHP", "((0x|0X){HEXDIGIT}+|0{OCTALDIGIT}*|[1-9]{DIGIT}*)", T_LNUMBER, ".");
     langRules_.add("PHP", "([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)", T_DNUMBER, ".");
     langRules_.add("PHP", "[ \\t\\n]+", T_WHITESPACE, ".");
