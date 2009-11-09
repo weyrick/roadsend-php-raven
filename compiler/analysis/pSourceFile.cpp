@@ -53,11 +53,14 @@ pSourceFile::pSourceFile(const pSourceFileDesc& file):
 
         // basic case: alreay ascii or utf8
         // skip possible UTF8 byte-order mark (BOM)
-        std::istreambuf_iterator<std::string::value_type> BOMcheck(startPos);
-        if (((unsigned char)*BOMcheck++ == 0xEF) &&
-            ((unsigned char)*BOMcheck++ == 0xBB) &&
-            ((unsigned char)*BOMcheck++ == 0xBF)) {
-            startPos = BOMcheck;
+        if (((unsigned char)*startPos++ == 0xEF) &&
+            ((unsigned char)*startPos++ == 0xBB) &&
+            ((unsigned char)*startPos++ == 0xBF)) {
+            /* noop */
+        }
+        else {
+            // no BOM: start from beginning
+            instream.seekg(0);
         }
 
         contents_.assign(startPos, endPos);
