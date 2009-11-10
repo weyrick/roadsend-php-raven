@@ -169,6 +169,13 @@ using namespace rphp;
 %type T_PRINT {int}
 %type T_INTERFACE {int}
 
+// double quote parsing
+%type T_DQ_DONE {int}
+%type T_DQ_DQ  {int}
+%type T_DQ_NEWLINE  {int}
+%type T_DQ_VARIABLE  {int}
+%type T_DQ_ESCAPE  {int}
+
 %syntax_error {  
   pMod->parseError(TOKEN);
 }   

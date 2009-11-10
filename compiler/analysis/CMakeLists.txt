@@ -10,7 +10,7 @@ include_directories (
                      ${CMAKE_CURRENT_BINARY_DIR}
                     )
 
-#####
+#### PARSER ####
 
 # lexer, parser generation
 # http://www.cmake.org/pipermail/cmake/2002-September/003028.html
@@ -18,21 +18,6 @@ include_directories (
 add_executable( lemon-pg
                 lemon/lemon.c )
 
-# Create target for the parser
-#ADD_CUSTOM_TARGET(grammarGen echo "Creating rphp_grammar.c")
-
-# NOTE: we'll use this when we generate static lexer
-
-# Create custom command for flex/lex (note the outputs)
-# ADD_CUSTOM_COMMAND(
-# SOURCE ${Foo_SOURCE_DIR}/src/lexer.l
-# COMMAND ${FLEX_EXECUTABLE}
-# ARGS -o${Foo_BINARY_DIR}/src/lexer.c
-#     ${Foo_SOURCE_DIR}/src/lexer.l
-# TARGET FooParser
-# OUTPUTS ${Foo_BINARY_DIR}/src/lexer.c)
-
-# Create custom command for bison/yacc (note the DEPENDS)
 ADD_CUSTOM_COMMAND(
    SOURCE lemon/rphp_grammar.y
    # note we do this copy because lemon will output to the source directory instead of the build
@@ -45,15 +30,41 @@ ADD_CUSTOM_COMMAND(
    ARGS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/lempar.c ${CMAKE_CURRENT_BINARY_DIR}
    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/lemon-pg
    ARGS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.y
-   TARGET rphp-parser
-   DEPENDS lemon
-   OUTPUTS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
+   DEPENDS lemon-pg
+   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
 
 # Since rphp_grammar.c does not exists yet when cmake is run, mark
 # it as generated
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp GENERATED)
 # make grammar depend on template so it regenerates if we change it
-SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/lempar.c)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
+
+#### LEXER ####
+
+add_executable( rphp-lexer-gen
+                lexer/rphp-lexer-gen.cpp )
+
+# we need rphp_grammar.h
+SET_SOURCE_FILES_PROPERTIES(lexer/rphp-lexer-gen.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
+
+ADD_CUSTOM_COMMAND(
+   COMMAND ${CMAKE_CURRENT_BINARY_DIR}/rphp-lexer-gen
+   DEPENDS rphp-lexer-gen
+   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h
+          ${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h
+   )
+
+# Since rphp_lexer.cpp does not exists yet when cmake is run, mark
+# it as generated
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h GENERATED)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h GENERATED)
+# make lexer depend on generator so it regenerates if we change it
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer/rphp-lexer-gen.cpp)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer/rphp-lexer-gen.cpp)
+
+# pLexer depends on generated lexer
+SET_SOURCE_FILES_PROPERTIES(pLexer.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h)
+
 
 ####
 

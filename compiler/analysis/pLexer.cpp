@@ -20,6 +20,7 @@
 */
 
 #include "rphp/analysis/pLexer.h"
+#include "rphp/analysis/pSourceFile.h"
 
 #include <iostream>
 #include <iomanip>
@@ -30,11 +31,6 @@
 namespace rphp { namespace lexer {
 
 pLexer::pLexer(const pSourceFile* s):
-    langRules_((boost::lexer::regex_flags)(boost::lexer::icase | boost::lexer::dot_not_newline)),
-    langState_(),
-    lexInput_(NULL),
-    dqRules_(),
-    dqState_(),
     source_(s),
     // TODO: bad copy here. because we mutate in preprocessor
     contents_(source_->contents()),
@@ -42,160 +38,7 @@ pLexer::pLexer(const pSourceFile* s):
     sourceEnd_ (contents_.end())
 {
 
-    dqRules_.add("INITIAL", "\\\\n", T_DQ_NEWLINE, ".");
-    dqRules_.add("INITIAL", "\\\"", T_DQ_DQ, ".");
-    dqRules_.add("INITIAL", "\\\\\\\"", T_DQ_ESCAPE, ".");
-    dqRules_.add("INITIAL", "\\$[a-zA-Z_][a-zA-Z0-9_]*", T_DQ_VARIABLE, ".");
-    boost::lexer::generator::build (dqRules_, dqState_);
 
-    langRules_.add_state("PHP");
-
-    langRules_.add_macro ("DIGIT", "[0-9]");
-    langRules_.add_macro ("OCTALDIGIT", "[0-7]");
-    langRules_.add_macro ("HEXDIGIT", "[0-9a-fA-F]");
-    langRules_.add_macro ("IDCHARS", "[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*");
-
-    langRules_.add("INITIAL", "<\\?\\s*|<\\?PHP\\s*", T_OPEN_TAG, "PHP"); // go to PHP state
-    langRules_.add("INITIAL", ".+|\\n+", T_INLINE_HTML, ".");
-
-    langRules_.add("PHP", "\\?>", T_CLOSE_TAG, "INITIAL"); // go to HTML state
-
-    langRules_.add("PHP", "\\`", T_TICK, ".");
-    langRules_.add("PHP", "\\~", T_TILDE, ".");
-    langRules_.add("PHP", "\\(", T_LEFTPAREN, ".");
-    langRules_.add("PHP", "\\)", T_RIGHTPAREN, ".");
-    langRules_.add("PHP", "\\{", T_LEFTCURLY, ".");
-    langRules_.add("PHP", "\\}", T_RIGHTCURLY, ".");
-    langRules_.add("PHP", "\\[", T_LEFTSQUARE, ".");
-    langRules_.add("PHP", "\\]", T_RIGHTSQUARE, ".");
-    langRules_.add("PHP", "\\>", T_GREATER_THAN, ".");
-    langRules_.add("PHP", "\\<", T_LESS_THAN, ".");
-    langRules_.add("PHP", "\\=", T_ASSIGN, ".");
-    langRules_.add("PHP", "\\-", T_MINUS, ".");
-    langRules_.add("PHP", "\\+", T_PLUS, ".");
-    langRules_.add("PHP", "\\/", T_DIV, ".");
-    langRules_.add("PHP", "\\%", T_MOD, ".");
-    langRules_.add("PHP", "\\*", T_MULT, ".");
-    langRules_.add("PHP", "\\;", T_SEMI, ".");
-    langRules_.add("PHP", "\\,", T_COMMA, ".");
-    langRules_.add("PHP", "\\|", T_PIPE, ".");
-    langRules_.add("PHP", "\\.", T_DOT, ".");
-    langRules_.add("PHP", "\\!", T_NOT, ".");
-    langRules_.add("PHP", "\\&", T_AND, ".");
-    langRules_.add("PHP", "\\@", T_AT, ".");
-    langRules_.add("PHP", "\\?", T_QUESTION, ".");
-    langRules_.add("PHP", "\\:", T_COLON, ".");
-    langRules_.add("PHP", ">=", T_GREATER_THAN_OR_EQUAL, ".");
-    langRules_.add("PHP", "<=", T_LESS_THAN_OR_EQUAL, ".");
-    langRules_.add("PHP", "<<", T_SL, ".");
-    langRules_.add("PHP", ">>", T_SR, ".");
-    langRules_.add("PHP", "<<=", T_SL_EQUAL, ".");
-    langRules_.add("PHP", ">>=", T_SR_EQUAL, ".");
-    langRules_.add("PHP", "::", T_DBL_COLON, ".");
-    langRules_.add("PHP", "\\+\\+", T_INC, ".");
-    langRules_.add("PHP", "\\-\\-", T_DEC, ".");
-    langRules_.add("PHP", "\\^\\=", T_XOR_EQUAL, ".");
-    langRules_.add("PHP", "\\|\\=", T_OR_EQUAL, ".");
-    langRules_.add("PHP", "\\&\\=", T_AND_EQUAL, ".");
-    langRules_.add("PHP", "\\%\\=", T_MOD_EQUAL, ".");
-    langRules_.add("PHP", "\\.\\=", T_CONCAT_EQUAL, ".");
-    langRules_.add("PHP", "\\/\\=", T_DIV_EQUAL, ".");
-    langRules_.add("PHP", "\\*\\=", T_MUL_EQUAL, ".");
-    langRules_.add("PHP", "\\+\\=", T_PLUS_EQUAL, ".");
-    langRules_.add("PHP", "\\-\\=", T_MINUS_EQUAL, ".");
-    langRules_.add("PHP", "\\!\\=", T_NOTEQUAL, ".");
-    langRules_.add("PHP", "\\.\\=", T_DOTEQUAL, ".");
-    langRules_.add("PHP", "==", T_EQUAL, ".");
-    langRules_.add("PHP", "\\!==", T_NOT_IDENTICAL, ".");
-    langRules_.add("PHP", "===", T_IDENTICAL, ".");
-    langRules_.add("PHP", "\\&\\&", T_BOOLEAN_AND, ".");
-    langRules_.add("PHP", "\\|\\|", T_BOOLEAN_OR, ".");
-    langRules_.add("PHP", "\\?>", T_CLOSE_TAG, ".");
-    langRules_.add("PHP", "=>", T_ARROWKEY, ".");
-    langRules_.add("PHP", "->", T_CLASSDEREF, ".");
-    langRules_.add("PHP", "list", T_LIST, ".");
-    langRules_.add("PHP", "or", T_LOGICAL_OR, ".");
-    langRules_.add("PHP", "and", T_LOGICAL_AND, ".");
-    langRules_.add("PHP", "xor", T_LOGICAL_XOR, ".");
-    langRules_.add("PHP", "if", T_IF, ".");
-    langRules_.add("PHP", "for", T_FOR, ".");
-    langRules_.add("PHP", "endfor", T_ENDFOR, ".");
-    langRules_.add("PHP", "foreach", T_FOREACH, ".");
-    langRules_.add("PHP", "endforeach", T_ENDFOREACH, ".");
-    langRules_.add("PHP", "interface", T_INTERFACE, ".");
-    langRules_.add("PHP", "as", T_AS, ".");
-    langRules_.add("PHP", "exit", T_EXIT, ".");
-    langRules_.add("PHP", "print", T_PRINT, ".");
-    langRules_.add("PHP", "eval", T_EXIT, ".");
-    langRules_.add("PHP", "public", T_PUBLIC, ".");
-    langRules_.add("PHP", "private", T_PRIVATE, ".");
-    langRules_.add("PHP", "protected", T_PROTECTED, ".");
-    langRules_.add("PHP", "extends", T_EXTENDS, ".");
-    langRules_.add("PHP", "return", T_RETURN, ".");
-    langRules_.add("PHP", "global", T_GLOBAL, ".");
-    langRules_.add("PHP", "function", T_FUNCTION, ".");
-    langRules_.add("PHP", "namespace", T_NAMESPACE, ".");
-    langRules_.add("PHP", "isset", T_ISSET, ".");
-    langRules_.add("PHP", "unset", T_UNSET, ".");
-    langRules_.add("PHP", "empty", T_EMPTY, ".");
-    langRules_.add("PHP", "array", T_ARRAY, ".");
-    langRules_.add("PHP", "while", T_WHILE, ".");
-    langRules_.add("PHP", "endwhile", T_ENDWHILE, ".");
-    langRules_.add("PHP", "else", T_ELSE, ".");
-    langRules_.add("PHP", "elseif", T_ELSEIF, ".");
-    langRules_.add("PHP", "echo", T_ECHO, ".");
-    langRules_.add("PHP", "new", T_NEW, ".");
-    langRules_.add("PHP", "var", T_VAR, ".");
-    langRules_.add("PHP", "switch", T_SWITCH, ".");
-    langRules_.add("PHP", "case", T_CASE, ".");
-    langRules_.add("PHP", "break", T_BREAK, ".");
-    langRules_.add("PHP", "continue", T_CONTINUE, ".");
-    langRules_.add("PHP", "default", T_DEFAULT, ".");
-    langRules_.add("PHP", "instanceof", T_INSTANCEOF, ".");
-    langRules_.add("PHP", "class", T_CLASS, ".");
-    langRules_.add("PHP", "clone", T_CLONE, ".");
-    langRules_.add("PHP", "throw", T_THROW, ".");
-    langRules_.add("PHP", "try", T_TRY, ".");
-    langRules_.add("PHP", "catch", T_CATCH, ".");
-    langRules_.add("PHP", "goto", T_GOTO, ".");
-    langRules_.add("PHP", "const", T_CONST, ".");
-    langRules_.add("PHP", "static", T_STATIC, ".");
-    langRules_.add("PHP", "include", T_INCLUDE, ".");
-    langRules_.add("PHP", "include_once", T_INCLUDE_ONCE, ".");
-    langRules_.add("PHP", "require", T_REQUIRE, ".");
-    langRules_.add("PHP", "require_once", T_REQUIRE_ONCE, ".");
-    langRules_.add("PHP", "__FILE__", T_MAGIC_FILE, ".");
-    langRules_.add("PHP", "__LINE__", T_MAGIC_LINE, ".");
-    langRules_.add("PHP", "__CLASS__", T_MAGIC_CLASS, ".");
-    langRules_.add("PHP", "__METHOD__", T_MAGIC_METHOD, ".");
-    langRules_.add("PHP", "__FUNCTION__", T_MAGIC_FUNCTION, ".");
-    langRules_.add("PHP", "__NAMESPACE__", T_MAGIC_NS, ".");
-    langRules_.add("PHP", "\\((int|integer)\\)", T_INT_CAST, ".");
-    langRules_.add("PHP", "\\((real|double|float)\\)", T_FLOAT_CAST, ".");
-    langRules_.add("PHP", "\\(string\\)", T_STRING_CAST, ".");
-    langRules_.add("PHP", "\\(binary\\)", T_BINARY_CAST, ".");
-    langRules_.add("PHP", "\\(unicode\\)", T_UNICODE_CAST, ".");
-    langRules_.add("PHP", "\\(array\\)", T_ARRAY_CAST, ".");
-    langRules_.add("PHP", "\\(object\\)", T_OBJECT_CAST, ".");
-    langRules_.add("PHP", "\\((bool|boolean)\\)", T_BOOL_CAST, ".");
-    langRules_.add("PHP", "\\(unset\\)", T_UNSET_CAST, ".");
-    langRules_.add("PHP", "{IDCHARS}", T_IDENTIFIER, ".");
-    langRules_.add("PHP", "\\${IDCHARS}", T_VARIABLE, ".");
-    langRules_.add("PHP", "((0x|0X){HEXDIGIT}+|0{OCTALDIGIT}*|[1-9]{DIGIT}*)", T_LNUMBER, ".");
-    langRules_.add("PHP", "([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)", T_DNUMBER, ".");
-    langRules_.add("PHP", "[ \\t\\n]+", T_WHITESPACE, ".");
-    langRules_.add("PHP", "\\/\\*\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_DOC_COMMENT, ".");
-    langRules_.add("PHP", "\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_MULTILINE_COMMENT, ".");
-    langRules_.add("PHP", "\\/\\/.*$", T_SINGLELINE_COMMENT, ".");
-    langRules_.add("PHP", "b*[\"](\\\\\\\"|[^\"])*[\"]", T_DQ_STRING, ".");
-    langRules_.add("PHP", "b*[\'](\\\\\\.|[^\'])*[\']", T_SQ_STRING, ".");
-
-    boost::lexer::generator::build (langRules_, langState_);
-    lexInput_ = new boost::lexer::iter_input(&langState_, sourceBegin_, sourceEnd_);
-
-    // dump the state machine
-    //boost::lexer::wgenerator::minimise(langState_);
-    //boost::lexer::wdebug::dump(langState_, std::wcout);
 
 }
 
@@ -216,10 +59,12 @@ bool pLexer::preprocess(void) {
         sequences with their literal equivalents
 
     */
-    pUInt curID = 0;
-    for (pTokenIterator iter = tokBegin(); iter != tokEnd(); ++iter) {
+    pUInt curID(0), dqID(0);
+    std::size_t state(0);
+    pSourceCharIterator tokStart(sourceBegin_);
+    pSourceCharIterator tokEnd(sourceBegin_);
+    while ( (curID = rphp_nextLangToken(state, tokEnd, sourceEnd_)) ) {
 
-        curID = iter->id;
         if ( (curID == boost::lexer::npos) ||
              (curID == 0) ) {
             // eoi or lex error. stop preprocessor and let the main parser
@@ -230,7 +75,7 @@ bool pLexer::preprocess(void) {
         }
         else if ( (curID == T_OPEN_TAG) ||
                   (curID == T_CLOSE_TAG) ) {
-            buffer.append(iter->start, iter->end);
+            buffer.append(tokStart, tokEnd);
         }
         else if (curID == T_DQ_STRING) {
 
@@ -238,13 +83,12 @@ bool pLexer::preprocess(void) {
 
             // we now use the preprocessor lexer to find the tokens within
             // this double quoted string
-            boost::lexer::iter_input* preInput = new boost::lexer::iter_input(&dqState_, iter->start, iter->end);
-            for (pTokenIterator dqIter = preInput->begin();
-                                dqIter != preInput->end();
-                                ++dqIter)
+            pSourceCharIterator dqTokStart(tokStart);
+            pSourceCharIterator dqTokEnd(tokStart);
+            while ( (dqID = rphp_nextDQToken(dqTokEnd, tokEnd)) )
             {
                 // iterate over DQ tokens
-                switch(dqIter->id) {
+                switch(dqID) {
                     case T_DQ_DONE:
                         goto endOfDQ; // omg!
                     case T_DQ_ESCAPE:
@@ -262,20 +106,19 @@ bool pLexer::preprocess(void) {
                     case T_DQ_VARIABLE:
                         // replace with concatination
                         buffer.append("'.");
-                        buffer.append(dqIter->start, dqIter->end);
+                        buffer.append(dqTokStart, dqTokEnd);
                         buffer.append(".'");
                         break;
                     case boost::lexer::npos:
                     default:
                         // passthrough
-                        buffer.append(dqIter->start, dqIter->end);
+                        buffer.append(dqTokStart, dqTokEnd);
                         break;
                 }
 
             }
 
             endOfDQ:
-            delete preInput;
             ;
             // exit processing DQ string
 
@@ -289,8 +132,11 @@ bool pLexer::preprocess(void) {
         }
         else {
             // pass through
-            buffer.append(iter->start, iter->end);
+            buffer.append(tokStart, tokEnd);
         }
+
+        // next token
+        tokStart = tokEnd;
 
     }
 
@@ -301,19 +147,9 @@ bool pLexer::preprocess(void) {
 
     sourceBegin_ = contents_.begin();
     sourceEnd_ = contents_.end();
-    delete lexInput_;
-    lexInput_ = new boost::lexer::iter_input(&langState_, sourceBegin_, sourceEnd_);
 
     return success;
 
-}
-
-pTokenIterator pLexer::tokBegin(void) {
-    return lexInput_->begin();
-}
-
-pTokenIterator pLexer::tokEnd(void) {
-    return lexInput_->end();
 }
 
 const pSourceCharIterator pLexer::sourceBegin(void) const {
@@ -329,10 +165,15 @@ void pLexer::dumpTokens(void) {
     std::string tokID;
     std::stringstream val;
 
-    for (pTokenIterator iter = tokBegin(); iter != tokEnd(); ++iter)
+    pUInt curID(0);
+    std::size_t state(0);
+    pSourceCharIterator tokStart(sourceBegin_);
+    pSourceCharIterator tokEnd(sourceBegin_);
+    while ( (curID = rphp_nextLangToken(state, tokEnd, sourceEnd_)) )
     {
-        if ( (iter->id == boost::lexer::npos) ||
-             (iter->id == 0) ) {
+        std::cout << "tokStart: [" << *tokStart << "] tokEnd [" << *tokEnd << "] sourceEnd [" << *sourceEnd_ << "]\n";
+        if ( (curID == boost::lexer::npos) ||
+             (curID == 0) ) {
             // no match or eoi
             break;
         }
@@ -340,15 +181,18 @@ void pLexer::dumpTokens(void) {
             // matched
             // skip plain newlines in html state
             val.str("");
-            if (iter->id != T_WHITESPACE)
-                val << pSourceString(iter->start, iter->end);
-            if ((iter->state == 0) && (val.str() == "\n"))
+            if (curID != T_WHITESPACE)
+                val << pSourceString(tokStart, tokEnd);
+            if ((state == 0) && (val.str() == "\n"))
                 continue;
-            tokID = getTokenDescription(iter->id);
+            tokID = getTokenDescription(curID);
             if (tokID.size() == 0)
                 tokID = val.str();
             std::cout << val.str() << " " << tokID << std::endl;
         }
+        // next token
+        tokStart = tokEnd;
+
     }
 
 
