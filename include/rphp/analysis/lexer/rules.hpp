@@ -231,6 +231,43 @@ public:
         }
     }
 
+    void add_macros (const basic_rules<CharT> &rules_)
+    {
+        const string_pair_deque &macros_ = rules_.macrodeque ();
+        typename string_pair_deque::const_iterator macro_iter_ =
+            macros_.begin ();
+        typename string_pair_deque::const_iterator macro_end_ =
+            macros_.end ();
+
+        for (; macro_iter_ != macro_end_; ++macro_iter_)
+        {
+            add_macro (macro_iter_->first.c_str (),
+                macro_iter_->second.c_str ());
+        }
+    }
+
+    void merge_macros (const basic_rules<CharT> &rules_)
+    {
+        const string_pair_deque &macros_ = rules_.macrodeque ();
+        typename string_pair_deque::const_iterator macro_iter_ =
+            macros_.begin ();
+        typename string_pair_deque::const_iterator macro_end_ =
+            macros_.end ();
+        typename string_set::const_iterator macro_dest_iter_;
+        typename string_set::const_iterator macro_dest_end_ = _macroset.end ();
+
+        for (; macro_iter_ != macro_end_; ++macro_iter_)
+        {
+            macro_dest_iter_ = _macroset.find (macro_iter_->first);
+
+            if (macro_dest_iter_ == macro_dest_end_)
+            {
+                add_macro (macro_iter_->first.c_str (),
+                    macro_iter_->second.c_str ());
+            }
+        }
+    }
+
     std::size_t add (const CharT *regex_, const std::size_t id_)
     {
         return add (string (regex_), id_);
@@ -293,36 +330,22 @@ public:
         return add (curr_state_, regex_, id_, new_state_, true);
     }
 
-    void add (const CharT *from_, const basic_rules<CharT> &rules_, const CharT *to_)
+    void add (const CharT *source_, const basic_rules<CharT> &rules_,
+        const CharT *dest_, const CharT *to_ = detail::strings<CharT>::dot ())
     {
-        const string_pair_deque &macros_ = rules_.macrodeque ();
-        typename string_pair_deque::const_iterator macro_iter_ =
-            macros_.begin ();
-        typename string_pair_deque::const_iterator macro_end_ =
-            macros_.end ();
-        typename string_set::const_iterator macro_dest_iter_;
-        typename string_set::const_iterator macro_dest_end_ = _macroset.end ();
-        const bool star_ = *from_ == '*' && *(from_ + 1) == 0;
-        const bool dot_ = *to_ == '.' && *(to_ + 1) == 0;
+        const bool star_ = *source_ == '*' && *(source_ + 1) == 0;
+        const bool dest_dot_ = *dest_ == '.' && *(dest_ + 1) == 0;
+        const bool to_dot_ = *to_ == '.' && *(to_ + 1) == 0;
         std::size_t state_ = 0;
         const string_deque_deque &all_regexes_ = rules_.regexes ();
         const id_vector_deque &all_ids_ = rules_.ids ();
         const id_vector_deque &all_unique_ids_ = rules_.unique_ids ();
+        const id_vector_deque &all_states_ = rules_.states ();
         typename string_deque::const_iterator regex_iter_;
         typename string_deque::const_iterator regex_end_;
         typename id_vector::const_iterator id_iter_;
         typename id_vector::const_iterator uid_iter_;
-
-        for (; macro_iter_ != macro_end_; ++macro_iter_)
-        {
-            macro_dest_iter_ = _macroset.find (macro_iter_->first);
-
-            if (macro_dest_iter_ == macro_dest_end_)
-            {
-                add_macro (macro_iter_->first.c_str (),
-                    macro_iter_->second.c_str ());
-            }
-        }
+        typename id_vector::const_iterator state_iter_;
 
         if (star_)
         {
@@ -334,43 +357,48 @@ public:
                 all_ids_.begin ();
             typename id_vector_deque::const_iterator all_uids_iter_ =
                 all_unique_ids_.begin ();
+            typename id_vector_deque::const_iterator all_states_iter_ =
+                all_states_.begin ();
 
             for (; all_regexes_iter_ != all_regexes_end_;
-                ++all_regexes_iter_, ++state_)
+                ++state_, ++all_regexes_iter_, ++all_ids_iter_,
+                ++all_uids_iter_, ++all_states_iter_)
             {
                 regex_iter_ = all_regexes_iter_->begin ();
                 regex_end_ = all_regexes_iter_->end ();
                 id_iter_ = all_ids_iter_->begin ();
                 uid_iter_ = all_uids_iter_->begin ();
+                state_iter_ = all_states_iter_->begin ();
 
                 for (; regex_iter_ != regex_end_; ++regex_iter_, ++id_iter_,
-                    ++uid_iter_)
+                    ++uid_iter_, ++state_iter_)
                 {
-                    // If dot_ then lookup state name from rules_; otherwise
+                    // If ..._dot_ then lookup state name from rules_; otherwise
                     // pass name through.
-                    add (rules_.state (state_), *regex_iter_, *id_iter_, dot_ ?
-                        rules_.state (state_) : to_, true, *uid_iter_);
+                    add (dest_dot_ ? rules_.state (state_) : dest_, *regex_iter_,
+                        *id_iter_, to_dot_ ? rules_.state (*state_iter_) : to_, true,
+                        *uid_iter_);
                 }
             }
         }
         else
         {
-            const CharT *start_ = from_;
+            const CharT *start_ = source_;
             string state_name_;
 
-            while (*from_)
+            while (*source_)
             {
-                while (*from_ && *from_ != ',')
+                while (*source_ && *source_ != ',')
                 {
-                    ++from_;
+                    ++source_;
                 }
 
-                state_name_.assign (start_, from_);
+                state_name_.assign (start_, source_);
 
-                if (*from_)
+                if (*source_)
                 {
-                    ++from_;
-                    start_ = from_;
+                    ++source_;
+                    start_ = source_;
                 }
 
                 state_ = rules_.state (state_name_.c_str ());
@@ -381,11 +409,11 @@ public:
                     std::ostringstream os_;
 
                     os_ << "Unknown state name '";
-                    from_ = state_name_.c_str ();
+                    source_ = state_name_.c_str ();
 
-                    while (*from_)
+                    while (*source_)
                     {
-                        os_ << ss_.narrow (*from_++, ' ');
+                        os_ << ss_.narrow (*source_++, ' ');
                     }
 
                     os_ << "'.";
@@ -396,19 +424,55 @@ public:
                 regex_end_ = all_regexes_[state_].end ();
                 id_iter_ = all_ids_[state_].begin ();
                 uid_iter_ = all_unique_ids_[state_].begin ();
+                state_iter_ = all_states_[state_].begin ();
 
                 for (; regex_iter_ != regex_end_; ++regex_iter_, ++id_iter_,
-                    ++uid_iter_)
+                    ++uid_iter_, ++state_iter_)
                 {
-                    // If dot_ then lookup state name from rules_; otherwise
+                    // If ..._dot_ then lookup state name from rules_; otherwise
                     // pass name through.
-                    add (state_name_.c_str (), *regex_iter_, *id_iter_, dot_ ?
-                        rules_.state (state_) : to_, true, *uid_iter_);
+                    add (dest_dot_ ? state_name_.c_str () : dest_, *regex_iter_,
+                        *id_iter_, to_dot_ ? rules_.state (*state_iter_) : to_, true,
+                        *uid_iter_);
                 }
             }
         }
     }
+/*
+    void add (const CharT *curr_state_, const basic_rules<CharT> &rules_)
+    {
+        const string_deque_deque &regexes_ = rules_.regexes ();
+        const id_vector_deque &ids_ = rules_.ids ();
+        const id_vector_deque &unique_ids_ = rules_.unique_ids ();
+        typename string_deque_deque::const_iterator state_regex_iter_ =
+            regexes_.begin ();
+        typename string_deque_deque::const_iterator state_regex_end_ =
+            regexes_.end ();
+        typename id_vector_deque::const_iterator state_id_iter_ =
+            ids_.begin ();
+        typename id_vector_deque::const_iterator state_uid_iter_ =
+            unique_ids_.begin ();
+        typename string_deque::const_iterator regex_iter_;
+        typename string_deque::const_iterator regex_end_;
+        typename id_vector::const_iterator id_iter_;
+        typename id_vector::const_iterator uid_iter_;
 
+        for (; state_regex_iter_ != state_regex_end_; ++state_regex_iter_)
+        {
+            regex_iter_ = state_regex_iter_->begin ();
+            regex_end_ = state_regex_iter_->end ();
+            id_iter_ = state_id_iter_->begin ();
+            uid_iter_ = state_uid_iter_->begin ();
+
+            for (; regex_iter_ != regex_end_; ++regex_iter_, ++id_iter_,
+                ++uid_iter_)
+            {
+                add (curr_state_, *regex_iter_, *id_iter_, curr_state_, true,
+                    *uid_iter_);
+            }
+        }
+    }
+*/
     const string_size_t_map &statemap () const
     {
         return _statemap;

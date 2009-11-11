@@ -59,12 +59,12 @@ void parseSourceFile(pSourceModule* pMod) {
     pUInt nlCnt(0);
 
     pUInt curID(0);
-    std::size_t state(0);
+    std::size_t state(0), newState(0), uniqueID(0);
     pSourceCharIterator sourceEnd(lexer.sourceEnd());
     pSourceCharIterator tokStart(lexer.sourceBegin());
     pSourceCharIterator tokEnd(lexer.sourceBegin());
 
-    while ( (curID = rphp_nextLangToken(state, tokEnd, sourceEnd)) ) {
+    while ( (curID = rphp_nextLangToken(newState, tokEnd, sourceEnd, uniqueID)) ) {
 
         nlCnt = 0;
 
@@ -116,6 +116,7 @@ void parseSourceFile(pSourceModule* pMod) {
 
         // next token
         tokStart = tokEnd;
+        state = newState;
 
     }
 

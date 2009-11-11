@@ -60,10 +60,10 @@ bool pLexer::preprocess(void) {
 
     */
     pUInt curID(0), dqID(0);
-    std::size_t state(0);
+    std::size_t state(0), newState(0), uniqueID(0), dqUniqueID(0);
     pSourceCharIterator tokStart(sourceBegin_);
     pSourceCharIterator tokEnd(sourceBegin_);
-    while ( (curID = rphp_nextLangToken(state, tokEnd, sourceEnd_)) ) {
+    while ( (curID = rphp_nextLangToken(newState, tokEnd, sourceEnd_, uniqueID)) ) {
 
         if ( (curID == boost::lexer::npos) ||
              (curID == 0) ) {
@@ -85,8 +85,9 @@ bool pLexer::preprocess(void) {
             // this double quoted string
             pSourceCharIterator dqTokStart(tokStart);
             pSourceCharIterator dqTokEnd(tokStart);
-            while ( (dqID = rphp_nextDQToken(dqTokEnd, tokEnd)) )
+            while ( (dqID = rphp_nextDQToken(dqTokEnd, tokEnd, dqUniqueID)) )
             {
+
                 // iterate over DQ tokens
                 switch(dqID) {
                     case T_DQ_DONE:
@@ -116,6 +117,8 @@ bool pLexer::preprocess(void) {
                         break;
                 }
 
+                dqTokStart = dqTokEnd;
+
             }
 
             endOfDQ:
@@ -137,6 +140,7 @@ bool pLexer::preprocess(void) {
 
         // next token
         tokStart = tokEnd;
+        state = newState;
 
     }
 
@@ -166,12 +170,12 @@ void pLexer::dumpTokens(void) {
     std::stringstream val;
 
     pUInt curID(0);
-    std::size_t state(0);
+    std::size_t state(0), newState(0), uniqueID(0);
     pSourceCharIterator tokStart(sourceBegin_);
     pSourceCharIterator tokEnd(sourceBegin_);
-    while ( (curID = rphp_nextLangToken(state, tokEnd, sourceEnd_)) )
+    while ( (curID = rphp_nextLangToken(newState, tokEnd, sourceEnd_, uniqueID)) )
     {
-        std::cout << "tokStart: [" << *tokStart << "] tokEnd [" << *tokEnd << "] sourceEnd [" << *sourceEnd_ << "]\n";
+
         if ( (curID == boost::lexer::npos) ||
              (curID == 0) ) {
             // no match or eoi
@@ -190,8 +194,10 @@ void pLexer::dumpTokens(void) {
                 tokID = val.str();
             std::cout << val.str() << " " << tokID << std::endl;
         }
+
         // next token
         tokStart = tokEnd;
+        state = newState;
 
     }
 
