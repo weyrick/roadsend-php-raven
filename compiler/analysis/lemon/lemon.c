@@ -271,6 +271,7 @@ struct lemon {
   int tablesize;           /* Size of the parse tables */
   int basisflag;           /* Print only basis configurations */
   int has_fallback;        /* True if any %fallback is seen in the grammar */
+  int nolinenosflag;       /* True if #line statements should not be printed */
   char *argv0;             /* Name of the program */
 };
 
@@ -1401,12 +1402,14 @@ char **argv;
   static int quiet = 0;
   static int statistics = 0;
   static int mhflag = 0;
+  static int nolinenosflag = 0;
   static struct s_options options[] = {
     {OPT_FLAG, "b", (char*)&basisflag, "Print only the basis in report."},
     {OPT_FLAG, "c", (char*)&compress, "Don't compress the action table."},
     {OPT_FSTR, "D", (char*)handle_D_option, "Define an %ifdef macro."},
     {OPT_FLAG, "g", (char*)&rpflag, "Print grammar without actions."},
-    {OPT_FLAG, "m", (char*)&mhflag, "Output a makeheaders compatible file"},
+    {OPT_FLAG, "m", (char*)&mhflag, "Output a makeheaders compatible file."},
+    {OPT_FLAG, "l", (char*)&nolinenosflag, "Do not print #line statements."},
     {OPT_FLAG, "q", (char*)&quiet, "(Quiet) Don't print the report file."},
     {OPT_FLAG, "s", (char*)&statistics,
                                    "Print parser stats to standard output."},
@@ -1435,6 +1438,7 @@ char **argv;
   lem.argv0 = argv[0];
   lem.filename = OptArg(0);
   lem.basisflag = basisflag;
+  lem.nolinenosflag = nolinenosflag;
   Symbol_new("$");
   lem.errsym = Symbol_new("error");
   lem.errsym->useCnt = 0;
@@ -2340,7 +2344,7 @@ to follow the previous rule.");
         }
         nOld = lemonStrlen(zOld);
         n = nOld + nNew + 20;
-        addLineMacro = psp->insertLineMacro &&
+        addLineMacro = !psp->gp->nolinenosflag && psp->insertLineMacro &&
                         (psp->decllinenoslot==0 || psp->decllinenoslot[0]!=0);
         if( addLineMacro ){
           for(z=psp->filename, nBack=0; *z; z++){
@@ -3119,18 +3123,18 @@ char *str;
 int *lineno;
 {
   if( str==0 ) return;
-  (*lineno)++;
   while( *str ){
-    if( *str=='\n' ) (*lineno)++;
     putc(*str,out);
+    if( *str=='\n' ) (*lineno)++;
     str++;
   }
   if( str[-1]!='\n' ){
     putc('\n',out);
     (*lineno)++;
   }
-  tplt_linedir(out,*lineno+2,lemp->outname); 
-  (*lineno)+=2;
+  if (!lemp->nolinenosflag) {
+    (*lineno)++; tplt_linedir(out,*lineno,lemp->outname); 
+  }
   return;
 }
 
@@ -3146,7 +3150,6 @@ int *lineno;
 {
  char *cp = 0;
 
- int linecnt = 0;
  if( sp->type==TERMINAL ){
    cp = lemp->tokendest;
    if( cp==0 ) return;
@@ -3154,7 +3157,7 @@ int *lineno;
  }else if( sp->destructor ){
    cp = sp->destructor;
    fprintf(out,"{\n"); (*lineno)++;
-   tplt_linedir(out,sp->destLineno,lemp->filename); (*lineno)++;
+   if (!lemp->nolinenosflag) { (*lineno)++; tplt_linedir(out,sp->destLineno,lemp->filename); }
  }else if( lemp->vardest ){
    cp = lemp->vardest;
    if( cp==0 ) return;
@@ -3168,13 +3171,14 @@ int *lineno;
      cp++;
      continue;
    }
-   if( *cp=='\n' ) linecnt++;
+   if( *cp=='\n' ) (*lineno)++;
    fputc(*cp,out);
  }
- (*lineno) += 3 + linecnt;
- fprintf(out,"\n");
- tplt_linedir(out,*lineno,lemp->outname);
- fprintf(out,"}\n");
+ fprintf(out,"\n"); (*lineno)++;
+ if (!lemp->nolinenosflag) { 
+   (*lineno)++; tplt_linedir(out,*lineno,lemp->outname); 
+ }
+ fprintf(out,"}\n"); (*lineno)++;
  return;
 }
 
@@ -3346,18 +3350,16 @@ struct lemon *lemp;
 int *lineno;
 {
  char *cp;
- int linecnt = 0;
 
  /* Generate code to do the reduce action */
  if( rp->code ){
-   tplt_linedir(out,rp->line,lemp->filename);
+   if (!lemp->nolinenosflag) { (*lineno)++; tplt_linedir(out,rp->line,lemp->filename); }
    fprintf(out,"{%s",rp->code);
    for(cp=rp->code; *cp; cp++){
-     if( *cp=='\n' ) linecnt++;
+     if( *cp=='\n' ) (*lineno)++;
    } /* End loop */
-   (*lineno) += 3 + linecnt;
-   fprintf(out,"}\n");
-   tplt_linedir(out,*lineno,lemp->outname);
+   fprintf(out,"}\n"); (*lineno)++;
+   if (!lemp->nolinenosflag) { (*lineno)++; tplt_linedir(out,*lineno,lemp->outname); }
  } /* End if( rp->code ) */
 
  return;
@@ -3430,7 +3432,7 @@ int mhflag;                 /* True if generating makeheaders output */
     while( *cp ) stddt[j++] = *cp++;
     while( j>0 && isspace(stddt[j-1]) ) j--;
     stddt[j] = 0;
-    if( strcmp(stddt, lemp->tokentype)==0 ){
+    if( lemp->tokentype && strcmp(stddt, lemp->tokentype)==0 ){
       sp->dtnum = 0;
       continue;
     }
@@ -3466,6 +3468,7 @@ int mhflag;                 /* True if generating makeheaders output */
     lemp->tokentype?lemp->tokentype:"void*");  lineno++;
   if( mhflag ){ fprintf(out,"#endif\n"); lineno++; }
   fprintf(out,"typedef union {\n"); lineno++;
+  fprintf(out,"  int yyinit;\n"); lineno++;
   fprintf(out,"  %sTOKENTYPE yy0;\n",name); lineno++;
   for(i=0; i<arraysize; i++){
     if( types[i]==0 ) continue;
@@ -3563,7 +3566,7 @@ int mhflag;     /* Output in makeheaders format if true */
 
   in = tplt_open(lemp);
   if( in==0 ) return;
-  out = file_open(lemp,".cpp","wb");
+  out = file_open(lemp,".c","wb");
   if( out==0 ){
     fclose(in);
     return;
@@ -3596,7 +3599,7 @@ int mhflag;     /* Output in makeheaders format if true */
 
   /* Generate the defines */
   fprintf(out,"#define YYCODETYPE %s\n",
-    minimum_size_type(0, lemp->nsymbol+5)); lineno++;
+    minimum_size_type(0, lemp->nsymbol+1)); lineno++;
   fprintf(out,"#define YYNOCODE %d\n",lemp->nsymbol+1);  lineno++;
   fprintf(out,"#define YYACTIONTYPE %s\n",
     minimum_size_type(0, lemp->nstate+lemp->nrule+5));  lineno++;
@@ -3811,7 +3814,9 @@ int mhflag;     /* Output in makeheaders format if true */
   /* Generate the table of fallback tokens.
   */
   if( lemp->has_fallback ){
-    for(i=0; i<lemp->nterminal; i++){
+    int mx = lemp->nterminal - 1;
+    while( mx>0 && lemp->symbols[mx]->fallback==0 ){ mx--; }
+    for(i=0; i<=mx; i++){
       struct symbol *p = lemp->symbols[i];
       if( p->fallback==0 ){
         fprintf(out, "    0,  /* %10s => nothing */\n", p->name);
@@ -3859,8 +3864,7 @@ int mhflag;     /* Output in makeheaders format if true */
         fprintf(out, "      /* TERMINAL Destructor */\n"); lineno++;
         once = 0;
       }
-      fprintf(out,"    case %d: /* %s */\n",
-              sp->index, sp->name); lineno++;
+      fprintf(out,"    case %d: /* %s */\n", sp->index, sp->name); lineno++;
     }
     for(i=0; i<lemp->nsymbol && lemp->symbols[i]->type!=TERMINAL; i++);
     if( i<lemp->nsymbol ){
@@ -3879,8 +3883,7 @@ int mhflag;     /* Output in makeheaders format if true */
         fprintf(out, "      /* Default NON-TERMINAL Destructor */\n"); lineno++;
         once = 0;
       }
-      fprintf(out,"    case %d: /* %s */\n",
-              sp->index, sp->name); lineno++;
+      fprintf(out,"    case %d: /* %s */\n", sp->index, sp->name); lineno++;
       dflt_sp = sp;
     }
     if( dflt_sp!=0 ){
@@ -3891,8 +3894,7 @@ int mhflag;     /* Output in makeheaders format if true */
   for(i=0; i<lemp->nsymbol; i++){
     struct symbol *sp = lemp->symbols[i];
     if( sp==0 || sp->type==TERMINAL || sp->destructor==0 ) continue;
-    fprintf(out,"    case %d: /* %s */\n",
-            sp->index, sp->name); lineno++;
+    fprintf(out,"    case %d: /* %s */\n", sp->index, sp->name); lineno++;
 
     /* Combine duplicate destructors into a single case */
     for(j=i+1; j<lemp->nsymbol; j++){
@@ -3929,9 +3931,11 @@ int mhflag;     /* Output in makeheaders format if true */
   for(rp=lemp->rule; rp; rp=rp->next){
     translate_code(lemp, rp);
   }
+  /* First output rules other than the default: rule */
   for(rp=lemp->rule; rp; rp=rp->next){
-    struct rule *rp2;
+    struct rule *rp2;               /* Other rules with the same action */
     if( rp->code==0 ) continue;
+    if( rp->code[0]=='\n' && rp->code[1]==0 ) continue; /* Will be default: */
     fprintf(out,"      case %d: /* ", rp->index);
     writeRuleText(out, rp);
     fprintf(out, " */\n"); lineno++;
@@ -3939,13 +3943,25 @@ int mhflag;     /* Output in makeheaders format if true */
       if( rp2->code==rp->code ){
         fprintf(out,"      case %d: /* ", rp2->index);
         writeRuleText(out, rp2);
-        fprintf(out," */\n"); lineno++;
+        fprintf(out," */ yytestcase(yyruleno==%d);\n", rp2->index); lineno++;
         rp2->code = 0;
       }
     }
     emit_code(out,rp,lemp,&lineno);
     fprintf(out,"        break;\n"); lineno++;
+    rp->code = 0;
   }
+  /* Finally, output the default: rule.  We choose as the default: all
+  ** empty actions. */
+  fprintf(out,"      default:\n"); lineno++;
+  for(rp=lemp->rule; rp; rp=rp->next){
+    if( rp->code==0 ) continue;
+    assert( rp->code[0]=='\n' && rp->code[1]==0 );
+    fprintf(out,"      /* (%d) ", rp->index);
+    writeRuleText(out, rp);
+    fprintf(out, " */ yytestcase(yyruleno==%d);\n", rp->index); lineno++;
+  }
+  fprintf(out,"        break;\n"); lineno++;
   tplt_xfer(lemp->name,in,out,&lineno);
 
   /* Generate code which executes if a parse fails */
