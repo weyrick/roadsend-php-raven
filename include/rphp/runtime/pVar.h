@@ -129,6 +129,9 @@ namespace rphp {
 // where our data lives. this macro chooses inner or out data.
 #define PVAR_DATA          (isBoxed() ? getPtr()->pVarData_ : pVarData_)
 
+// fwd
+class pRuntimeEngine;
+
 class pVar {
 
     /**
@@ -337,10 +340,11 @@ public:
        it may convert to a binary or unicode string, depending on runtime settings
        or it's current value, so you must check which it converted to after the conversion
      */
-    void convertToString();
+    void convertToString(const pRuntimeEngine* r);
     /// force convertion to a binary string. if it was a unicode string, the conversion is lossy
     pBString& convertToBString();
     // ustring
+    pUStringP& convertToUString();
     // object
     // resource
 
@@ -353,7 +357,7 @@ public:
     /// cast to pBString, does not mutate
     pBString copyAsBString() const;
     /// cast to string (binary or unicode), does not mutate
-    pVar copyAsString() const;
+    pVar copyAsString(const pRuntimeEngine* r) const;
     pHashP copyAsHash() const;
     // ustring
     // object

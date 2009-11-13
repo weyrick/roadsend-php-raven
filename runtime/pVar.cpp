@@ -20,8 +20,8 @@
 
 
 #include "rphp/runtime/pVar.h"
-
 #include "rphp/runtime/pTypeOperators.h"
+#include "rphp/runtime/pRuntimeEngine.h"
 
 #include <unicode/ustream.h>
 
@@ -79,6 +79,16 @@ pBString& pVar::convertToBString() {
     return getBString();
 }
 
+pUStringP& pVar::convertToUString() {
+    if (!isUString()) {
+        pVarDataType* d = (isBoxed() ? &getPtr()->pVarData_ : &pVarData_);
+        pVar_convertToUStringVisitor cv(*d);
+        boost::apply_visitor(cv, *d);
+    }
+    assert(isUString() && "convertToUString failed to convert");
+    return getUStringP();
+}
+
 pInt pVar::copyAsInt() const {
     pVar v(*this);
     return v.convertToInt();
@@ -105,18 +115,20 @@ bool pVar::evalAsBool() const {
 }
 
 // convert to BString or UString as appropriate
-void pVar::convertToString() {
+void pVar::convertToString(const pRuntimeEngine* r) {
     if (isBString() || isUString())
         return;
-    // TODO: check runtime setting for conversion,
-    // do unicode or binary
-    convertToBString();
+    // do unicode or binary according to runtime
+    if (r->unicode().byDefault())
+        convertToUString();
+    else
+        convertToBString();
 }
 
 // copy as BString or UString as appropriate
-pVar pVar::copyAsString() const {
+pVar pVar::copyAsString(const pRuntimeEngine* r) const {
     pVar v(*this);
-    v.convertToString();
+    v.convertToString(r);
     return v;
 }
 

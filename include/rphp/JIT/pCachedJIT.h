@@ -24,7 +24,7 @@
 
 #include "rphp/pTarget.h"
 #include "rphp/pTypes.h"
-#include <string>
+#include "rphp/pSourceTypes.h"
 
 namespace rphp {
 
@@ -47,7 +47,7 @@ public:
 
     void execute(void) { }
 
-    void cacheAndJITFileOnDisk(const pSourceFileDesc& fileName);
+    void cacheAndJITFileOnDisk(const pSourceFileDesc& sourceFile);
 
 };
 

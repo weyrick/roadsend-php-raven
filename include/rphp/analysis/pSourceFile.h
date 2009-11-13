@@ -38,8 +38,8 @@ public:
 
     pSourceFile(const pSourceFileDesc& file);
 
-    const pFileNameString& fileName(void) const { return file_.get<0>(); }
-    const std::string& encoding(void) const { return file_.get<1>(); }
+    const pFileNameString& fileName(void) const { return file_.fileName(); }
+    const pEncoding& encoding(void) const { return file_.encoding(); }
     const pSourceString& contents(void) const { return contents_; }
 
     // mutator for e.g. the preprocessor

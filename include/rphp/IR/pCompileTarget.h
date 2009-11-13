@@ -23,6 +23,7 @@
 #define RPHP_PCOMPILETARGET_H_
 
 #include "rphp/pTypes.h"
+#include "rphp/pSourceTypes.h"
 #include "rphp/pTarget.h"
 
 #include <llvm/LLVMContext.h>
@@ -63,7 +64,7 @@ public:
 
     virtual void execute(void);
 
-    const std::string& getInputFileName(void) const { return inputFile_.get<0>(); }
+    const std::string& getInputFileName(void) const { return inputFile_.fileName(); }
     const std::string& getProjectRoot(void) const { return projectRoot_; }
 
     void writeToFile(std::string outputFile);

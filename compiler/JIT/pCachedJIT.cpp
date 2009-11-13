@@ -22,6 +22,7 @@
 
 #include "rphp/JIT/pCachedJIT.h"
 
+#include "rphp/pConfig.h"
 #include "rphp/runtime/pRuntimeEngine.h"
 #include "rphp/runtime/pErrorManager.h"
 #include "rphp/IR/pCompileTarget.h"
@@ -42,6 +43,12 @@ pCachedJIT::pCachedJIT(pConfig* config):
     // bind the notify handler to our runtime's error manager
     setNotifyHandler(boost::bind(&pErrorManager::notify, runtime_->errorManager, _1, _2));
 
+    // XXX temporary
+    std::string outputEncoding(config->get("outputEncoding"));
+    if (!outputEncoding.empty()) {
+        runtime_->unicode().setOutputEncoding(outputEncoding);
+    }
+
 }
 
 
@@ -49,9 +56,9 @@ pCachedJIT::~pCachedJIT(void) {
     delete runtime_;
 }
 
-void pCachedJIT::cacheAndJITFileOnDisk(const pSourceFileDesc& fileName) {
+void pCachedJIT::cacheAndJITFileOnDisk(const pSourceFileDesc& sourceFile) {
 
-    pCompileTarget cTarget(fileName);
+    pCompileTarget cTarget(sourceFile);
     cTarget.configureWith(this);
     cTarget.execute();
 

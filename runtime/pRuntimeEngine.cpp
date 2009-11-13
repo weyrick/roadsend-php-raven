@@ -33,6 +33,7 @@ pRuntimeEngine::pRuntimeEngine(pConfig* c) :
                                    ownConfig_(false),
                                    includeHandler_(NULL),
                                    evalHandler_(NULL),
+                                   unicode_(),
                                    errorManager(new pErrorManager(this)),
                                    config(c),
                                    output(this),

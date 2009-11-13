@@ -57,7 +57,7 @@ public:
     // INSPECTION
     const pSourceFile* source() const { return source_; }
     const pFileNameString& fileName() const { return source_->fileName(); }
-    const char* encoding(void) const { return source_->encoding().c_str(); }
+    const char* encoding(void) const { return source_->encoding().value().c_str(); }
 
     // AST TRAVERSAL
     AST::statementList& getAST() { return ast_; }

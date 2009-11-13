@@ -41,5 +41,25 @@ pUString toLowerCopy(const pUString& v) {
     return str.toLower();
 }
 
+char* convertCodepage(const pUString& s, const char* codepage) {
+
+    // we're going from utf-16 to a byte array, thus l*2
+    int32_t newlen(0), len(s.length()*2);
+
+    char* uBuf = new char[len];
+
+    newlen = s.extract(0, len, uBuf, codepage);
+
+    if (newlen != len) {
+        // need resize?
+        delete uBuf;
+        uBuf = new char[newlen];
+        s.extract(0, newlen, uBuf, codepage);
+    }
+
+    return uBuf;
+
+}
+
 }
 

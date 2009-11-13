@@ -67,7 +67,7 @@ void var_dump(RPHP_STDFUNC_ARGS, const pVar& v) {
 }
 
 void strlen(RPHP_STDFUNC_ARGS, const pVar& v) {
-    pVar lv(v.copyAsString());
+    pVar lv(v.copyAsString(runtime));
     if (lv.isBString())
         *retVal = (pInt)lv.getBString().length();
     else

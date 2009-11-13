@@ -40,18 +40,19 @@ pSourceFile::pSourceFile(const pSourceFileDesc& file):
     file_(file)
 {
 
-    std::ifstream instream(file_.get<0>().c_str());
+    std::ifstream instream(file_.fileName().c_str());
     if (!instream.is_open()) {
-        throw pParseError("couldn't open file [" + file_.get<0>() + "]");
+        throw pParseError("couldn't open file [" + file_.fileName() + "]");
     }
     instream.unsetf(std::ios::skipws);
 
     std::istreambuf_iterator<std::string::value_type> startPos(instream.rdbuf());
     std::istreambuf_iterator<std::string::value_type> endPos;
 
-    if ((file_.get<1>() == "ASCII") || (file_.get<1>() == "UTF8")) {
+    // note this fuzzy matches on encoding aliases
+    if (file_.encoding().is88591OrUTF8()) {
 
-        // basic case: alreay ascii or utf8
+        // basic case: already iso-8859-1 or utf8
         // skip possible UTF8 byte-order mark (BOM)
         if (((unsigned char)*startPos++ == 0xEF) &&
             ((unsigned char)*startPos++ == 0xBB) &&
@@ -73,9 +74,9 @@ pSourceFile::pSourceFile(const pSourceFileDesc& file):
 
         // charset conversion we leave to UnicodeString
         // note this "pivots" through a 16 bit UChar, but so does the C ucnv_ interface
-        UnicodeString ubuffer(rawBuffer.data(), rawBuffer.length(), file_.get<1>().c_str());
+        UnicodeString ubuffer(rawBuffer.data(), rawBuffer.length(), file_.encoding().value().c_str());
         if (ubuffer.isBogus()) {
-            throw pParseError("could not perform character conversion in file [" + file_.get<0>() + "] from charset [" + file_.get<1>() + "]");
+            throw pParseError("could not perform character conversion in file [" + file_.fileName() + "] from codepage [" + file_.encoding().value() + "]");
         }
 
         ubuffer.toUTF8String(contents_);

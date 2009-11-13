@@ -38,7 +38,7 @@ void pCompileTarget::execute(void) {
 
     std::string outputFile;
 
-    log(E_COMPILE_DEBUG, "compiling module ["+inputFile_.get<0>()+"] to IR");
+    log(E_COMPILE_DEBUG, "compiling module ["+inputFile_.fileName()+"] to IR");
 
     pSourceModule  m(inputFile_);
 
@@ -57,7 +57,7 @@ void pCompileTarget::execute(void) {
 
 void pCompileTarget::writeToFile(std::string outputFile) {
 
-    log(E_COMPILE_DEBUG, "saving IR from ["+inputFile_.get<0>()+"] to output file ["+outputFile+"]");
+    log(E_COMPILE_DEBUG, "saving IR from ["+inputFile_.fileName()+"] to output file ["+outputFile+"]");
 
     if (llvmModule_)
         IR::pGenSupport::writeBitcode(llvmModule_, outputFile);

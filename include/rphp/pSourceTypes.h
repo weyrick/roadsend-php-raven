@@ -22,6 +22,8 @@
 #ifndef RPHP_PSOURCETYPES_H_
 #define RPHP_PSOURCETYPES_H_
 
+#include "pTypes.h"
+
 #include <string>
 #include <boost/range/iterator_range.hpp>
 
@@ -34,6 +36,28 @@ typedef std::string::iterator pSourceCharIterator;
 
 // iterator pair used as value for matched tokens
 typedef boost::iterator_range<pSourceCharIterator> pSourceRange;
+
+/// source locations: filename/linenum
+typedef boost::tuple<const pFileNameString, const pUInt> pSourceLocation;
+
+/// source locations: filename/startlinenum/endlinenum
+typedef boost::tuple<const pFileNameString, const pUInt, const pUInt> pSourceStartEndLocation;
+
+/// source file description: filename/encoding
+class pSourceFileDesc {
+
+    pFileNameString fileName_;
+    pEncoding encoding_;
+
+public:
+    pSourceFileDesc(const pStringRef& n, const pStringRef& e):
+    fileName_(n),encoding_(e) { }
+
+    const pFileNameString& fileName(void) const { return fileName_; }
+    const pEncoding& encoding(void) const { return encoding_; }
+
+};
+
 
 } // namespace
 

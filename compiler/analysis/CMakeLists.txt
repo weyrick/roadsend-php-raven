@@ -6,6 +6,7 @@ include_directories (
                      ${ICU_INCLUDE_DIRS}
                      ${RPHP_INCLUDE_DIR}
                      ${Boost_INCLUDE_DIRS}
+                     ${LLVM_INCLUDE_DIR}
                      # this one is for rphp_grammar generated files
                      ${CMAKE_CURRENT_BINARY_DIR}
                     )

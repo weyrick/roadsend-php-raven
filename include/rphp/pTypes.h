@@ -31,9 +31,16 @@
 #include <boost/cstdint.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#include <unicode/ucnv.h>
+
 #include <string>
 
+#include <llvm/ADT/StringRef.h>
+
 namespace rphp {
+
+/// string ref, see llvm::StringRef
+typedef llvm::StringRef pStringRef;
 
 /// signed (fast) integer type (used in pVar)
 typedef signed long pInt;
@@ -58,17 +65,43 @@ typedef std::string pFileNameString;
 /// string type used for warning/notice messages
 typedef std::string pMsgString;
 
-/// source file description: filename/encoding
-typedef boost::tuple<const pFileNameString, const std::string> pSourceFileDesc;
-
-/// source locations: filename/linenum
-typedef boost::tuple<const pFileNameString, const pUInt> pSourceLocation;
-
-/// source locations: filename/startlinenum/endlinenum
-typedef boost::tuple<const pFileNameString, const pUInt, const pUInt> pSourceStartEndLocation;
-
 // notifier emit function callback
 typedef boost::function<void (pUInt level, pMsgString msg)> pNotifyEmitFun;
+
+// lightweight character encoding wrapper
+class pEncoding {
+
+    std::string value_;
+
+public:
+    pEncoding(const pStringRef& e):value_(e) { }
+
+    const std::string& value(void) const { return value_; }
+
+    // this matches on aliases, e.g. utf8 == UTF8 and iso-8859-1==latin1
+    bool matches(const pStringRef& e) const {
+        return (ucnv_compareNames(value_.c_str(), e.data()) == 0);
+    }
+
+    bool is88591OrUTF8() const {
+        return (matches("ISO-8859-1") || matches("UTF-8"));
+    }
+
+    // native format stored by libicu
+    bool isNativeICU() const {
+        return (matches("UTF-16"));
+    }
+
+    bool operator==(const pStringRef& e) const {
+        return matches(e);
+    }
+
+    bool operator!=(const pStringRef& e) const {
+        return !matches(e);
+    }
+
+};
+
 
 // notifier log levels
 #define E_ERROR             0x00000001

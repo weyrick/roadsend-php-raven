@@ -202,6 +202,66 @@ public:
 
 };
 
+class pVar_convertToUStringVisitor : public boost::static_visitor<void> {
+protected:
+    pVarDataType &var_;
+
+public:
+    pVar_convertToUStringVisitor(pVarDataType &v) : var_(v) { }
+
+    void operator()(const pTriState &v) {
+        if (pNull(v)) {
+            var_ = pUStringP(new pUString(""));
+        }
+        else {
+            (v) ? var_ = pUStringP(new pUString("1")) : var_ = pUStringP(new pUString("0"));
+        }
+    }
+
+    void operator()(const pInt &v) {
+        // FIXME
+        var_ = pUStringP(new pUString("pInt conversion to pUString"));
+    }
+
+    void operator()(const pBigIntP &v) {
+        // FIXME
+        var_ = pUStringP(new pUString("pBigIntP conversion to pUString"));
+    }
+
+    void operator()(const pFloatP &v) {
+        // FIXME
+        var_ = pUStringP(new pUString("pFloatP conversion to pUString"));
+    }
+
+    void operator()(const pBString &v) {
+        // FIXME
+        var_ = pUStringP(new pUString("pBString conversion to pUString"));
+    }
+
+    void operator()(const pUStringP &v) {
+        /* none */
+    }
+
+    void operator()(const pHashP &v) {
+        var_ = pUStringP(new pUString("array"));
+    }
+
+    void operator()(const pObjectP &v) {
+        // TODO: toString
+        var_ = pUStringP(new pUString("object"));
+    }
+
+    void operator()(const pResourceP &v) {
+        var_ = pUStringP(new pUString("resource"));
+    }
+
+    void operator()(const pVarP &v) const {
+        v->convertToUString();
+    }
+
+};
+
+
 /* a visitor for converting to array, in place */
 class pVar_convertToHashVisitor : public boost::static_visitor<void> {
 

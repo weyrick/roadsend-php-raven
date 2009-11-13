@@ -2,7 +2,6 @@
  * Roadsend PHP Compiler Runtime Libraries
  *
  * Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
- *               2008 Thomas Moenicke <tm@php-qt.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public License
@@ -26,6 +25,7 @@
 #include "rphp/runtime/pOutputManager.h"
 
 #include <boost/unordered_map.hpp>
+#include <string>
 
 namespace rphp {
 
@@ -36,6 +36,43 @@ class pFunctionManager;
 class pClassManager;
 
 typedef boost::unordered_map<pIdentString, pVarP> globalRegistryType;
+
+class unicodeConfigClass {
+
+    bool byDefault_;
+    pEncoding fallbackEncoding_;
+    pEncoding runtimeEncoding_;
+    pEncoding outputEncoding_;
+    pEncoding filenameEncoding_;
+    pEncoding scriptEncoding_;
+
+public:
+    unicodeConfigClass(void):
+        byDefault_(false),
+        fallbackEncoding_("iso-8859-1"),
+        runtimeEncoding_("iso-8859-1"),
+        outputEncoding_("iso-8859-1"),
+        filenameEncoding_("iso-8859-1"),
+        scriptEncoding_("iso-8859-1")
+    {
+
+    }
+
+    bool byDefault(void) const { return byDefault_; }
+    const pEncoding& fallbackEncoding() const { return fallbackEncoding_; }
+    const pEncoding& runtimeEncoding() const { return runtimeEncoding_; }
+    const pEncoding& outputEncoding() const { return outputEncoding_; }
+    const pEncoding& filenameEncoding() const { return filenameEncoding_; }
+    const pEncoding& scriptEncoding() const { return scriptEncoding_; }
+
+    void setByDefault(bool v) { byDefault_ = v; }
+    void setFallbackEncoding(const pStringRef& e)  { fallbackEncoding_ = e; }
+    void setRuntimeEncoding(const pStringRef& e) { runtimeEncoding_ = e; }
+    void setOutputEncoding(const pStringRef& e) { outputEncoding_ = e; }
+    void setFilenameEncoding(const pStringRef& e) { filenameEncoding_ = e; }
+    void setScriptEncoding(const pStringRef& e) { scriptEncoding_ = e; }
+
+};
 
 class pRuntimeEngine {
 
@@ -57,10 +94,17 @@ class pRuntimeEngine {
     pIncludeHandlerFun includeHandler_;
     pEvalHandlerFun evalHandler_;
 
+    // unicode configuration
+    unicodeConfigClass unicode_;
+
+
 public:
 
     pRuntimeEngine(pConfig* c = NULL);
     ~pRuntimeEngine();
+
+    const unicodeConfigClass& unicode(void) const { return unicode_; }
+    unicodeConfigClass& unicode(void) { return unicode_; }
 
     // error manager
     pErrorManager* errorManager;
