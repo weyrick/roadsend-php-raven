@@ -23,6 +23,7 @@
 
 #include "rphp/analysis/pLexer.h"
 #include "rphp/analysis/pSourceModule.h"
+#include "rphp/analysis/pParseContext.h"
 
 #include <boost/pool/object_pool.hpp>
 
@@ -38,6 +39,7 @@ namespace rphp { namespace parser {
 
 void parseSourceFile(pSourceModule* pMod) {
 
+    boost::object_pool<pSourceRange> tokenPool;
     lexer::pLexer lexer(pMod->source());
 
     // prepare source buffer for main parse
@@ -49,12 +51,12 @@ void parseSourceFile(pSourceModule* pMod) {
     //rphpParseTrace(stderr, "trace: ");
 
     // start at begining of source file
-    pMod->incLineNum(); // line 1
-    pMod->setLastToken(pSourceRange(lexer.sourceBegin(),lexer.sourceBegin()));
-    pMod->setLastNewline(lexer.sourceBegin());
+    AST::pParseContext& context = pMod->context();
+    context.incLineNum(); // line 1
+    context.setLastToken(tokenPool.construct(pSourceRange(lexer.sourceBegin(),lexer.sourceBegin())));
+    context.setLastNewline(lexer.sourceBegin());
 
     pSourceRange* curRange;
-    boost::object_pool<pSourceRange> tokenPool;
     pSourceCharIterator lastNL;
     pUInt nlCnt(0);
 
@@ -94,23 +96,23 @@ void parseSourceFile(pSourceModule* pMod) {
                     }
                 }
                 if (nlCnt) {
-                    pMod->incLineNum(nlCnt);
-                    pMod->setLastNewline(lastNL);
+                    context.incLineNum(nlCnt);
+                    context.setLastNewline(lastNL);
                 }
                 // only actually parse T_INLINE_HTML, not whitespace
                 if (curID == T_INLINE_HTML) {
                     curRange = tokenPool.construct(pSourceRange(tokStart, tokEnd));
-                    pMod->setTokenLine(curRange->begin());
+                    context.setTokenLine(curRange);
                     rphpParse(pParser, curID, curRange, pMod);
                 }
-                pMod->setLastToken(pSourceRange(tokStart, tokEnd));
+                context.setLastToken(curRange);
                 break;
             default:
                 // parse
                 curRange = tokenPool.construct(pSourceRange(tokStart, tokEnd));
-                pMod->setTokenLine(curRange->begin());
+                context.setTokenLine(curRange);
                 rphpParse(pParser, curID, curRange, pMod);
-                pMod->setLastToken(pSourceRange(tokStart, tokEnd));
+                context.setLastToken(curRange);
                 break;
         }
 
@@ -121,7 +123,7 @@ void parseSourceFile(pSourceModule* pMod) {
     }
 
     // finish parse
-    pMod->finishParse();
+    context.finishParse();
     rphpParse(pParser, 0, 0, pMod);
     rphpParseFree(pParser, free);
 

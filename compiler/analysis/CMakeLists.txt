@@ -20,7 +20,6 @@ add_executable( lemon-pg
                 lemon/lemon.c )
 
 ADD_CUSTOM_COMMAND(
-   SOURCE lemon/rphp_grammar.y
    # note we do this copy because lemon will output to the source directory instead of the build
    # dir if we don't, so this keeps it tidy.
    # alternative (read: portable) way is to change lemon.c to not include the base directory
@@ -32,13 +31,12 @@ ADD_CUSTOM_COMMAND(
    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/lemon-pg
    ARGS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.y
    DEPENDS lemon-pg
+   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/rphp_grammar.y
    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
 
 # Since rphp_grammar.c does not exists yet when cmake is run, mark
 # it as generated
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp GENERATED)
-# make grammar depend on template so it regenerates if we change it
-SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
 
 #### LEXER ####
 
@@ -71,6 +69,7 @@ SET_SOURCE_FILES_PROPERTIES(pLexer.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR
 
 set(PARSER_SRC_FILES
   ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp
+  pAST.cpp
   pASTVisitors.cpp
   pSourceFile.cpp
   pLexer.cpp
@@ -78,6 +77,9 @@ set(PARSER_SRC_FILES
   pSourceModule.cpp
 )
 
+set_source_files_properties( ${PARSER_SRC_FILES}
+                             PROPERTIES COMPILE_FLAGS ${LLVM_COMPILE_FLAGS}
+                            )
 
 # STATIC
 add_library( rphp-analysis ${PARSER_SRC_FILES} )

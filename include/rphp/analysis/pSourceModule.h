@@ -23,13 +23,12 @@
 #define RPHP_PSOURCEMODULE_H_
 
 #include "rphp/pSourceTypes.h"
-#include "rphp/analysis/pSourceFile.h"
 #include "rphp/analysis/pAST.h"
-
-#include <vector>
-#include <boost/unordered_map.hpp>
+#include "rphp/analysis/pParseContext.h"
 
 namespace rphp {
+
+class pSourceFile;
 
 namespace AST {
     class stmt;
@@ -40,15 +39,8 @@ class pSourceModule {
 
 private:
     const pSourceFile* source_;
-
-    // code generation
     AST::statementList ast_;
-
-    // parsing context
-    pUInt currentLineNum_;
-    pSourceCharIterator lastNewline_;
-    pSourceRange lastToken_;
-    boost::unordered_map<pSourceCharIterator::pointer, pUInt> tokenLineInfo_;
+    AST::pParseContext context_;
 
 public:
     pSourceModule(const pSourceFileDesc& file);
@@ -56,42 +48,18 @@ public:
 
     // INSPECTION
     const pSourceFile* source() const { return source_; }
-    const pFileNameString& fileName() const { return source_->fileName(); }
-    const char* encoding(void) const { return source_->encoding().value().c_str(); }
+    const pFileNameString& fileName() const;
+    const char* encoding(void) const;
+
+    const AST::pParseContext& context(void) const { return context_; }
+    AST::pParseContext& context(void) { return context_; }
 
     // AST TRAVERSAL
     AST::statementList& getAST() { return ast_; }
     void setAST(const AST::statementList* list) { ast_.assign(list->begin(), list->end()); }
     void applyVisitor(AST::baseVisitor* v);
 
-    // PARSING
-    pUInt currentLineNum() const { return currentLineNum_; }
-    void incLineNum(void) { currentLineNum_++; }
-    void incLineNum(pUInt i) { currentLineNum_ +=i; }
-
-    void setLastNewline(pSourceCharIterator i) { lastNewline_ = i; }
-    const pSourceCharIterator& lastNewline(void) const { return lastNewline_; }
-
-    void setLastToken(pSourceRange i) { lastToken_ = i; }
-    const pSourceRange& lastToken(void) const { return lastToken_; }
-
-    void setTokenLine(const pSourceCharIterator& t) {
-        tokenLineInfo_[&(*t)] = currentLineNum_;
-    }
-
-    pUInt getTokenLine(const pSourceCharIterator& t) {
-        boost::unordered_map<pSourceCharIterator::pointer, pUInt>::const_iterator i = tokenLineInfo_.find(&(*t));
-        if (i == tokenLineInfo_.end())
-            return 0;
-        else
-            return (*i).second;
-    }
-
-    void finishParse(void) {
-        currentLineNum_ = 0;
-        tokenLineInfo_.clear();
-    }
-
+    // PARSE ERROR HANDLER
     void parseError(pSourceRange* r);
 
     // DEBUG

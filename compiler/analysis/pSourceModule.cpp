@@ -20,6 +20,7 @@
 */
 
 #include "rphp/analysis/pSourceModule.h"
+#include "rphp/analysis/pSourceFile.h"
 
 #include "rphp/analysis/pASTVisitors.h"
 #include "rphp/analysis/pParser.h"
@@ -31,9 +32,7 @@ namespace rphp {
 pSourceModule::pSourceModule(const pSourceFileDesc& file):
     source_(NULL),
     ast_(),
-    currentLineNum_(0),
-    lastNewline_(),
-    lastToken_()
+    context_()
 {
 
     source_ = new pSourceFile(file);
@@ -42,11 +41,19 @@ pSourceModule::pSourceModule(const pSourceFileDesc& file):
 }
 
 pSourceModule::~pSourceModule() {
-    // free up statements
+    // cleanup AST
     for(AST::statementList::iterator s = ast_.begin(); s != ast_.end(); ++s) {
-        delete *s;
+        (*s)->destroy(context_);
     }
     delete source_;
+}
+
+const pFileNameString& pSourceModule::fileName() const {
+    return source_->fileName();
+}
+
+const char* pSourceModule::encoding(void) const {
+    return source_->encoding().value().c_str();
 }
 
 void pSourceModule::applyVisitor(AST::baseVisitor* v) {
@@ -75,11 +82,11 @@ void pSourceModule::parseError(pSourceRange* r) {
     }
     else {
         probsize = 1;
-        problem.append(lastToken().end(), lastToken().end()+1);
+        problem.append(context_.lastToken()->end(), context_.lastToken()->end()+1);
     }
 
-    pSourceCharIterator eLineStart(lastNewline()+1);
-    pSourceCharIterator eLineStop(lastToken().end()+probsize);
+    pSourceCharIterator eLineStart(context_.lastNewline()+1);
+    pSourceCharIterator eLineStop(context_.lastToken()->end()+probsize);
     pSourceString errorLine;
     if (eLineStop > eLineStart)
         errorLine.append(eLineStart, eLineStop);
@@ -87,7 +94,7 @@ void pSourceModule::parseError(pSourceRange* r) {
     // error line with arrow    
     if (!errorLine.empty()) {
         std::cerr << errorLine << std::endl;
-        std::cerr << pSourceString((lastToken().end()+1)-(lastNewline()+1)-1,' ') << "^" << std::endl;
+        std::cerr << pSourceString((context_.lastToken()->end()+1)-(context_.lastNewline()+1)-1,' ') << "^" << std::endl;
     }
 
     // message
@@ -96,7 +103,7 @@ void pSourceModule::parseError(pSourceRange* r) {
                << "' in ";
     std::cerr << source_->fileName();
     std::cerr  << " on line "
-               << currentLineNum()
+               << context_.currentLineNum()
                <<  std::endl;
 
     // what now?

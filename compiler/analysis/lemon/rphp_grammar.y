@@ -21,19 +21,20 @@
 
 %include {   
 
+#include "rphp/pSourceTypes.h"
+#include "rphp/analysis/pAST.h"
+#include "rphp/analysis/pSourceModule.h"
+
 #include <iostream>
 #include <string>
 #include <cctype> // for toupper
 #include <algorithm>
 #include <unicode/unistr.h>
 
-#include "rphp/pSourceTypes.h"
-#include "rphp/analysis/pAST.h"
-#include "rphp/analysis/pSourceModule.h"
-
 using namespace rphp;
 
-#define TOKEN_LINE(T) pMod->getTokenLine(T->begin())
+#define TOKEN_LINE(T) pMod->context().getTokenLine(T)
+#define CURRENT_LINE  pMod->context().currentLineNum()
 
 }  
 
@@ -200,15 +201,14 @@ statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement(A) ::= ifBlock(B). { A = B; }
 statement(A) ::= T_SEMI.
 {
-	A = new AST::emptyStmt();
+	A = new (pMod->context()) AST::emptyStmt();
 }
 
 // statement block
 %type statementBlock{AST::block*}
 statementBlock(A) ::= T_LEFTCURLY(LC) statement_list(B) T_RIGHTCURLY(RC).
 {
-    A = new AST::block();
-    A->statements.assign(B->begin(), B->end());
+    A = new (pMod->context()) AST::block(pMod->context(), B);
     A->setLine(TOKEN_LINE(LC), TOKEN_LINE(RC));
     delete B;
 }
@@ -217,16 +217,16 @@ statementBlock(A) ::= T_LEFTCURLY(LC) statement_list(B) T_RIGHTCURLY(RC).
 %type echo {AST::echoStmt*}
 echo(A) ::= T_ECHO expr(B).
 {
-    A = new AST::echoStmt(B);
-    A->setLine(pMod->currentLineNum());
+    A = new (pMod->context()) AST::echoStmt(B);
+    A->setLine(CURRENT_LINE);
 }
 
 // inline html
 %type inlineHTML {AST::inlineHtml*}
 inlineHTML(A) ::= T_INLINE_HTML(B).
 {
-    A = new AST::inlineHtml(*B);
-    A->setLine(pMod->currentLineNum());
+    A = new (pMod->context()) AST::inlineHtml(*B);
+    A->setLine(CURRENT_LINE);
 }
 
 // conditionals
@@ -235,14 +235,14 @@ inlineHTML(A) ::= T_INLINE_HTML(B).
 // if with else
 ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY) T_ELSE statementBlock(FALSEBODY).
 {
-	A = new AST::ifStmt(COND, TRUEBODY, FALSEBODY);
+	A = new (pMod->context()) AST::ifStmt(COND, TRUEBODY, FALSEBODY);
 	A->setLine(TOKEN_LINE(IF));
 }
 
 // if without else
 ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY).
 {
-    A = new AST::ifStmt(COND, TRUEBODY, 0);
+    A = new (pMod->context()) AST::ifStmt(COND, TRUEBODY, 0);
     A->setLine(TOKEN_LINE(IF));
 }
 
@@ -285,7 +285,7 @@ functionDecl(A) ::= T_FUNCTION T_IDENTIFIER(NAME) T_LEFTPAREN decl_argList(ARGS)
     }
 	funDef->setParamList(rArgs); // takes ownership of pFunctionParam objs
 	delete ARGS; // free container from parse
-	A = new AST::functionDecl(funDef, BODY);
+	A = new (pMod->context()) AST::functionDecl(funDef, BODY);
 	A->setLine(TOKEN_LINE(NAME));
 }                    
 
@@ -321,26 +321,26 @@ literal(A) ::= T_SQ_STRING(B).
   }
   // substring out the quotes, special case for empty string
   if (++start == (*B).end()) {
-    A = new AST::literalString(binaryString);
+    A = new (pMod->context()) AST::literalString(binaryString);
   }
   else {
-    A = new AST::literalString(pSourceRange(start, --(*B).end()), binaryString);
+    A = new (pMod->context()) AST::literalString(pSourceRange(start, --(*B).end()), binaryString);
   }
-  A->setLine(pMod->currentLineNum());
+  A->setLine(CURRENT_LINE);
 }
 
 // literal integers (decimal)
 literal(A) ::= T_LNUMBER(B).
 {
-    A = new AST::literalInt(*B);
-    A->setLine(pMod->currentLineNum());
+    A = new (pMod->context()) AST::literalInt(*B);
+    A->setLine(CURRENT_LINE);
 }
 
 // literal integers (float)
 literal(A) ::= T_DNUMBER(B).
 {
-    A = new AST::literalFloat(*B);
-    A->setLine(pMod->currentLineNum());    
+    A = new (pMod->context()) AST::literalFloat(*B);
+    A->setLine(CURRENT_LINE);    
 }
 
 // literal identifier: null, true, false or string
@@ -350,19 +350,19 @@ literal(A) ::= T_IDENTIFIER(B).
     pSourceString ciTmp((*B).begin(), (*B).end());
     transform(ciTmp.begin(), ciTmp.end(), ciTmp.begin(), toupper);
     if (ciTmp == "NULL") {
-        A = new AST::literalNull();
+        A = new (pMod->context()) AST::literalNull();
     }
     else if (ciTmp == "TRUE") {
-        A = new AST::literalBool(true);
+        A = new (pMod->context()) AST::literalBool(true);
     }
     else if (ciTmp == "FALSE") {
-        A = new AST::literalBool(false);
+        A = new (pMod->context()) AST::literalBool(false);
     }
     else {
         // default to normal string
-        A = new AST::literalString(*B);
+        A = new (pMod->context()) AST::literalString(*B);
     }
-    A->setLine(pMod->currentLineNum());
+    A->setLine(CURRENT_LINE);
 }
 
 /** LITERAL ARRAY ITEMS **/
@@ -371,13 +371,13 @@ arrayItemList(A) ::= arrayItem(B).
 {
     A = new AST::arrayList();
     A->push_back(*B); // copy item into vector
-    delete B;
+    // note no delete here because it's in ast pool
 }
 arrayItemList(A) ::= arrayItem(B) T_COMMA arrayItemList(C).
 {
     C->push_back(*B); // copy item into vector
     A = C;
-    delete B;
+    // note no delete here because it's in ast pool
 }
 arrayItemList(A) ::= .
 {
@@ -387,25 +387,25 @@ arrayItemList(A) ::= .
 %type arrayItem {AST::arrayItem*}
 arrayItem(A) ::= expr(B).
 {
-    A = new AST::arrayItem(NULL, B);
+    A = new (pMod->context()) AST::arrayItem(NULL, B);
 }
 arrayItem(A) ::= T_REF expr(B).
 {
-    A = new AST::arrayItem(NULL, B);
+    A = new (pMod->context()) AST::arrayItem(NULL, B);
 }
 arrayItem(A) ::= expr(KEY) T_ARROWKEY expr(VAL).
 {
-    A = new AST::arrayItem(KEY, VAL);
+    A = new (pMod->context()) AST::arrayItem(KEY, VAL);
 }
 arrayItem(A) ::= expr(KEY) T_ARROWKEY T_REF expr(VAL).
 {
-    A = new AST::arrayItem(KEY, VAL);
+    A = new (pMod->context()) AST::arrayItem(KEY, VAL);
 }
 
 // literal array
 literal(A) ::= T_ARRAY(ARY) T_LEFTPAREN arrayItemList(B) T_RIGHTPAREN.
 {
-    A = new AST::literalArray(B);
+    A = new (pMod->context()) AST::literalArray(B);
     A->setLine(TOKEN_LINE(ARY));
     delete B; // deletes the vector, NOT the exprs in it!
 }
@@ -414,28 +414,28 @@ literal(A) ::= T_ARRAY(ARY) T_LEFTPAREN arrayItemList(B) T_RIGHTPAREN.
 %type unaryArithmeticOp {AST::unaryArithmeticOp*}
 unaryArithmeticOp(A) ::= T_PLUS expr(R).
 {
-    A = new AST::unaryArithmeticOp(R, false);
-    A->setLine(pMod->currentLineNum());
+    A = new (pMod->context()) AST::unaryArithmeticOp(R, false);
+    A->setLine(CURRENT_LINE);
 }
 unaryArithmeticOp(A) ::= T_MINUS expr(R).
 {
-    A = new AST::unaryArithmeticOp(R, true);
-    A->setLine(pMod->currentLineNum());
+    A = new (pMod->context()) AST::unaryArithmeticOp(R, true);
+    A->setLine(CURRENT_LINE);
 }
 
 /** LOGICAL OPERATORS **/
 %type logicalNot {AST::logicalNot*}
 logicalNot(A) ::= T_NOT expr(R).
 {
-    A = new AST::logicalNot(R);
-    A->setLine(pMod->currentLineNum());
+    A = new (pMod->context()) AST::logicalNot(R);
+    A->setLine(CURRENT_LINE);
 }
 
 /** ASSIGNMENT **/
 %type assignment {AST::assignment*}
 assignment(A) ::= lval(L) T_ASSIGN(EQ_SIGN) expr(R).
 {
-    A = new AST::assignment(L, R);
+    A = new (pMod->context()) AST::assignment(L, R);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 
@@ -447,8 +447,8 @@ lval(A) ::= variable_lVal(B). { A = B; }
 variable_lVal(A) ::= T_VARIABLE(B).
 {
     // strip $
-    A = new AST::var(pSourceRange(++(*B).begin(), (*B).end()));
-    A->setLine(pMod->currentLineNum());
+    A = new (pMod->context()) AST::var(pSourceRange(++(*B).begin(), (*B).end()));
+    A->setLine(CURRENT_LINE);
 }
 
 
@@ -473,25 +473,21 @@ argList(A) ::= .
 %type functionInvoke {AST::functionInvoke*}
 functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
-    A = new AST::functionInvoke(*B, // f name
-                                 C  // expression list: arguments, copied
-                                );
-    A->setLine(pMod->currentLineNum());
-// NOTE: i'm not sure why we don't need to delete C here
-//       it segfaults when we do, and doesn't leak when we don't...
-//    delete C; // deletes the vector, NOT the exprs in it!
+    A = new (pMod->context()) AST::functionInvoke(*B, // f name
+                                                  C  // expression list: arguments, copied
+                                                 );
+    A->setLine(CURRENT_LINE);
+    delete C;
 }
 
 /** CONSTRUCTOR INVOKE **/
 %type constructorInvoke {AST::constructorInvoke*}
 constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
-    A = new AST::constructorInvoke(*B, // f name
-                                    C  // expression list: arguments, copied
-                                   );
-    A->setLine(pMod->currentLineNum());
-// NOTE: i'm not sure why we don't need to delete C here
-//       it segfaults when we do, and doesn't leak when we don't...
-//    delete C; // deletes the vector, NOT the exprs in it!
+    A = new (pMod->context()) AST::constructorInvoke(*B, // f name
+                                                     C  // expression list: arguments, copied
+                                                    );
+    A->setLine(CURRENT_LINE);
+    delete C;
 }
 

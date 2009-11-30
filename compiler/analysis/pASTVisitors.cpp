@@ -58,11 +58,9 @@ void baseVisitor::visit(stmt* s) {
 }
 
 void baseVisitor::visit_block(block* b) {
-    // this essentially duplicates the visit() code above, for efficiency reasons within the loop
-    // also, a statement in the block should never be null, as it may be for visit
-    for (statementList::size_type i=0; i < b->statements.size(); i++) {
-        assert(b->statements[i] && "NULL stmt in block");
-        (this->*dispatchTable_[b->statements[i]->getKind()])(b->statements[i]);
+    for (stmt::child_iterator i = b->child_begin(), e = b->child_end(); i != e; ) {
+        if (stmt* child = *i++)
+            visit(child);
     }
 }
 
