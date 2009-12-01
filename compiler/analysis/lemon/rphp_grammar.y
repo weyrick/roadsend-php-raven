@@ -447,7 +447,7 @@ lval(A) ::= variable_lVal(B). { A = B; }
 variable_lVal(A) ::= T_VARIABLE(B).
 {
     // strip $
-    A = new (pMod->context()) AST::var(pSourceRange(++(*B).begin(), (*B).end()));
+    A = new (pMod->context()) AST::var(pSourceRange(++(*B).begin(), (*B).end()), pMod->context());
     A->setLine(CURRENT_LINE);
 }
 
@@ -474,8 +474,9 @@ argList(A) ::= .
 functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
     A = new (pMod->context()) AST::functionInvoke(*B, // f name
+                                                  pMod->context(),
                                                   C  // expression list: arguments, copied
-                                                 );
+                                                  );
     A->setLine(CURRENT_LINE);
     delete C;
 }
@@ -485,8 +486,9 @@ functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
     A = new (pMod->context()) AST::constructorInvoke(*B, // f name
+                                                     pMod->context(),
                                                      C  // expression list: arguments, copied
-                                                    );
+                                                     );
     A->setLine(CURRENT_LINE);
     delete C;
 }

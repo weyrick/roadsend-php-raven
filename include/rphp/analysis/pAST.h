@@ -39,6 +39,8 @@
 #include <vector>
 #include <iterator>
 
+#include <llvm/Support/StringPool.h>
+
 namespace rphp {
 
 class pSourceModule;
@@ -466,13 +468,16 @@ public:
 // NODE: var
 class var: public expr {
 
-    pIdentString name_;
+    llvm::PooledStringPtr name_;
 
 public:
-    var(const pSourceRange& name): expr(varKind), name_(name.begin(), name.end()) { }
+    var(const pSourceRange& name, pParseContext& C):
+        expr(varKind),
+        name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))) { }
 
     pIdentString name(void) const {
-        return name_;
+        assert(name_);
+        return *name_;
     }
 
     stmt::child_iterator child_begin() { return child_iterator(); }
@@ -504,13 +509,13 @@ public:
 // NODE: function invoke
 class functionInvoke: public expr {
 
-    pIdentString name_;
+    llvm::PooledStringPtr name_;
     expressionList argList_;
 
 public:
-    functionInvoke(const pSourceRange& name, expressionList* argList, nodeKind kind = functionInvokeKind):
+    functionInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList, nodeKind kind = functionInvokeKind):
         expr(kind),
-        name_(name.begin(), name.end()),
+        name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))),
         argList_(*argList) // copy
     {
 
@@ -524,7 +529,8 @@ public:
     }
 
     pIdentString name(void) const {
-        return name_;
+        assert(name_);
+        return *name_;
     }
     expressionList& argList(void) { return argList_; }
     const expressionList& argList(void) const { return argList_; }
@@ -538,8 +544,8 @@ public:
 class constructorInvoke: public functionInvoke {
 
 public:
-    constructorInvoke(const pSourceRange& name, expressionList* argList):
-        functionInvoke(name, argList, constructorInvokeKind)
+    constructorInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList):
+        functionInvoke(name, C, argList, constructorInvokeKind)
     {
 
     }

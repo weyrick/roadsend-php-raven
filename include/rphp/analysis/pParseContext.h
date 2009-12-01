@@ -25,6 +25,7 @@
 #include "rphp/pSourceTypes.h"
 
 #include <llvm/Support/Allocator.h>
+#include <llvm/Support/StringPool.h>
 #include <boost/unordered_map.hpp>
 
 
@@ -46,13 +47,18 @@ private:
     /// Maintains memory of IR during entire analysis and code gen phases
     llvm::BumpPtrAllocator allocator_;
 
+    /// String pool for identifiers to use. Also lives through analysis
+    llvm::StringPool idPool_;
+
 public:
 
     pParseContext(void):
         currentLineNum_(0),
         lastNewline_(),
         lastToken_(NULL),
-        tokenLineInfo_()
+        tokenLineInfo_(),
+        allocator_(),
+        idPool_()
         { }
 
     // MEMORY POOL
@@ -64,6 +70,8 @@ public:
         // note this is a NOOP for bumpptr
         allocator_.Deallocate(Ptr);
     }
+
+    llvm::StringPool& idPool(void) { return idPool_; }
 
     // PARSING
     pUInt currentLineNum() const { return currentLineNum_; }
