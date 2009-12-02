@@ -71,6 +71,7 @@ set(PARSER_SRC_FILES
   ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp
   pAST.cpp
   pASTVisitors.cpp
+  pParseContext.cpp
   pSourceFile.cpp
   pLexer.cpp
   pParser.cpp

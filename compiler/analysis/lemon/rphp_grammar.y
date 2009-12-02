@@ -178,7 +178,7 @@ using namespace rphp;
 %type T_DQ_ESCAPE  {int}
 
 %syntax_error {  
-  pMod->parseError(TOKEN);
+  pMod->context().parseError(TOKEN);
 }   
 %stack_overflow {  
   std::cerr << "Parser stack overflow" << std::endl;

@@ -32,16 +32,15 @@ namespace rphp { namespace lexer {
 
 pLexer::pLexer(const pSourceFile* s):
     source_(s),
-    // TODO: bad copy here. because we mutate in preprocessor
-    contents_(source_->contents()),
-    sourceBegin_(contents_.begin()),
-    sourceEnd_ (contents_.end())
+    sourceBegin_(source_->contents().begin()),
+    sourceEnd_ (source_->contents().end())
 {
 
 
 
 }
 
+/*
 bool pLexer::preprocess(void) {
 
     bool rewrote = false;
@@ -50,7 +49,7 @@ bool pLexer::preprocess(void) {
     pSourceString buffer;
     buffer.reserve(contents_.capacity());
 
-    /*
+    //
 
         The idea of the preprocessor is to prepare the underlying source buffer
         for processing by the main language parser. This mostly means converting
@@ -58,7 +57,7 @@ bool pLexer::preprocess(void) {
         string counterparts, by using concatenation and replacing escape
         sequences with their literal equivalents
 
-    */
+    //
     pUInt curID(0), dqID(0);
     std::size_t state(0), newState(0), uniqueID(0), dqUniqueID(0);
     pSourceCharIterator tokStart(sourceBegin_);
@@ -155,6 +154,7 @@ bool pLexer::preprocess(void) {
     return success;
 
 }
+*/
 
 const pSourceCharIterator pLexer::sourceBegin(void) const {
     return sourceBegin_;

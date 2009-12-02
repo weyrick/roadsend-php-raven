@@ -28,7 +28,6 @@
 // NOTE: these are generated during build, and so live
 // in the build directory (not source directory)
 #include "rphp_grammar.h"
-#include "rphp_dq_lexer.h"
 #include "rphp_lang_lexer.h"
 
 namespace rphp {
@@ -41,7 +40,6 @@ class pLexer {
 
 private:
     const pSourceFile* source_;
-    pSourceString contents_;
 
     pSourceCharIterator sourceBegin_;
     pSourceCharIterator sourceEnd_;
@@ -50,15 +48,11 @@ public:
 
     pLexer(const pSourceFile* s);
 
-    bool preprocess(void);
-
     const pSourceCharIterator sourceBegin(void) const;
     const pSourceCharIterator sourceEnd(void) const;
 
     void dumpTokens(void);
     const char* getTokenDescription(const std::size_t t) const;
-
-    const pSourceString& contents(void) const { return contents_; }
 
 };
 

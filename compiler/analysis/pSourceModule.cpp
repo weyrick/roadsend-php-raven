@@ -25,17 +25,14 @@
 #include "rphp/analysis/pASTVisitors.h"
 #include "rphp/analysis/pParser.h"
 
-#include <iostream>
-
 namespace rphp {
 
 pSourceModule::pSourceModule(const pSourceFileDesc& file):
-    source_(NULL),
+    source_(new pSourceFile(file)),
     ast_(),
-    context_()
+    context_(this)
 {
 
-    source_ = new pSourceFile(file);
     parser::parseSourceFile(this);
 
 }
@@ -66,48 +63,7 @@ void pSourceModule::dumpAST() {
 
     AST::dumpVisitor v;
     applyVisitor(&v);
-
-}
-
-void pSourceModule::parseError(pSourceRange* r) {
-
-    // show the line the error occured on
-    // if it was a lex error, we show 1 character. if it was a parse error,
-    // we show up the length of the problem token
-    pUInt probsize;
-    pSourceString problem;
-    if (r) {
-        probsize = (*r).end()-(*r).begin();
-        problem.append((*r).begin(), (*r).end());
-    }
-    else {
-        probsize = 1;
-        problem.append(context_.lastToken()->end(), context_.lastToken()->end()+1);
-    }
-
-    pSourceCharIterator eLineStart(context_.lastNewline()+1);
-    pSourceCharIterator eLineStop(context_.lastToken()->end()+probsize);
-    pSourceString errorLine;
-    if (eLineStop > eLineStart)
-        errorLine.append(eLineStart, eLineStop);
-
-    // error line with arrow    
-    if (!errorLine.empty()) {
-        std::cerr << errorLine << std::endl;
-        std::cerr << pSourceString((context_.lastToken()->end()+1)-(context_.lastNewline()+1)-1,' ') << "^" << std::endl;
-    }
-
-    // message
-    std::cerr << "parse error: unexpected '"
-               << problem
-               << "' in ";
-    std::cerr << source_->fileName();
-    std::cerr  << " on line "
-               << context_.currentLineNum()
-               <<  std::endl;
-
-    // what now?
-    exit(-1);
+    context_.allocator().PrintStats();
 
 }
 

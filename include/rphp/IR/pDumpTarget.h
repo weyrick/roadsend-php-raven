@@ -31,7 +31,7 @@ class pDumpTarget: public pTarget {
 
 public:
     static const int Tokens = 0;
-    static const int Preprocessor = 1;
+//    static const int Preprocessor = 1;
     static const int AST = 2;
     static const int IR = 3;
 
@@ -41,7 +41,7 @@ protected:
 
     void dumpTokens();
     void dumpAST();
-    void dumpPre();
+    //void dumpPre();
     void dumpIR();
 
 public:

@@ -42,9 +42,6 @@ public:
     const pEncoding& encoding(void) const { return file_.encoding(); }
     const pSourceString& contents(void) const { return contents_; }
 
-    // mutator for e.g. the preprocessor
-    pSourceString& contents(void) { return contents_; }
-
 };
 
 } // namespace

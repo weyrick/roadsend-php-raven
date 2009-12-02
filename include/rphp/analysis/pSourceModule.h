@@ -59,9 +59,6 @@ public:
     void setAST(const AST::statementList* list) { ast_.assign(list->begin(), list->end()); }
     void applyVisitor(AST::baseVisitor* v);
 
-    // PARSE ERROR HANDLER
-    void parseError(pSourceRange* r);
-
     // DEBUG
     void dumpAST();
 

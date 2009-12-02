@@ -39,9 +39,11 @@ void pDumpTarget::execute(void) {
         case Tokens:
             dumpTokens();
             break;
+            /*
         case Preprocessor:
             dumpPre();
             break;
+            */
         case AST:
             dumpAST();
             break;
@@ -63,6 +65,7 @@ void pDumpTarget::dumpTokens(void) {
 }
 
 // preprocess the source file, dump to stdout
+/*
 void pDumpTarget::dumpPre(void) {
 
     pSourceFile* source = new pSourceFile(sourceFile_);
@@ -77,6 +80,7 @@ void pDumpTarget::dumpPre(void) {
     delete source;
 
 }
+*/
 
 // dump the parse tree from the given source file
 void pDumpTarget::dumpAST(void) {

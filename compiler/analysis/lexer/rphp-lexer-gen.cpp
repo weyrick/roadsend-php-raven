@@ -39,6 +39,7 @@ int main(void) {
     boost::lexer::rules langRules_((boost::lexer::regex_flags)(boost::lexer::icase | boost::lexer::dot_not_newline));
     boost::lexer::state_machine langState_;
 
+    /*
     // double quote lexer
     boost::lexer::rules dqRules_;
     boost::lexer::state_machine dqState_;
@@ -58,6 +59,7 @@ int main(void) {
     }
     boost::lexer::generate_cpp (dqState_, outFile, false, true, true, "rphp_nextDQToken");
     outFile.close();
+    */
 
     // language rules
     langRules_.add_state("PHP");
@@ -67,7 +69,7 @@ int main(void) {
     langRules_.add_macro ("HEXDIGIT", "[0-9a-fA-F]");
     langRules_.add_macro ("IDCHARS", "[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*");
 
-    langRules_.add("INITIAL", "<\\?\\s*|<\\?PHP\\s*", T_OPEN_TAG, "PHP"); // go to PHP state
+    langRules_.add("INITIAL", "<\\?|<\\?PHP", T_OPEN_TAG, "PHP"); // go to PHP state
     langRules_.add("INITIAL", ".+|\\n+", T_INLINE_HTML, ".");
 
     langRules_.add("PHP", "\\?>", T_CLOSE_TAG, "INITIAL"); // go to HTML state

@@ -31,6 +31,8 @@
 
 namespace rphp {
 
+class pSourceModule;
+
 namespace AST {
 
 class pParseContext {
@@ -50,15 +52,19 @@ private:
     /// String pool for identifiers to use. Also lives through analysis
     llvm::StringPool idPool_;
 
+    // owning source module
+    const pSourceModule* owner_;
+
 public:
 
-    pParseContext(void):
+    pParseContext(const pSourceModule* o):
         currentLineNum_(0),
         lastNewline_(),
         lastToken_(NULL),
         tokenLineInfo_(),
         allocator_(),
-        idPool_()
+        idPool_(),
+        owner_(o)
         { }
 
     // MEMORY POOL
@@ -102,6 +108,8 @@ public:
         tokenLineInfo_.clear();
     }
 
+    // PARSE ERROR HANDLER
+    void parseError(pSourceRange* r);
 
 };
 

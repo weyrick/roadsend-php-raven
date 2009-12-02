@@ -42,9 +42,6 @@ void parseSourceFile(pSourceModule* pMod) {
     boost::object_pool<pSourceRange> tokenPool;
     lexer::pLexer lexer(pMod->source());
 
-    // prepare source buffer for main parse
-    lexer.preprocess();
-
     void* pParser = rphpParseAlloc(malloc);
 
     // DEBUG
@@ -68,7 +65,8 @@ void parseSourceFile(pSourceModule* pMod) {
 
     while ( (curID = rphp_nextLangToken(newState, tokEnd, sourceEnd, uniqueID)) ) {
 
-        nlCnt = 0;
+        curRange = tokenPool.construct(pSourceRange(tokStart, tokEnd));
+        context.setTokenLine(curRange);
 
         switch (curID) {
             case 0:
@@ -80,7 +78,7 @@ void parseSourceFile(pSourceModule* pMod) {
                 break;
             case boost::lexer::npos:
                 // unmatched token: error
-                pMod->parseError(NULL);
+                pMod->context().parseError(NULL);
                 break;
             case T_WHITESPACE:
             case T_INLINE_HTML:
@@ -101,24 +99,20 @@ void parseSourceFile(pSourceModule* pMod) {
                 }
                 // only actually parse T_INLINE_HTML, not whitespace
                 if (curID == T_INLINE_HTML) {
-                    curRange = tokenPool.construct(pSourceRange(tokStart, tokEnd));
-                    context.setTokenLine(curRange);
                     rphpParse(pParser, curID, curRange, pMod);
                 }
-                context.setLastToken(curRange);
                 break;
             default:
                 // parse
-                curRange = tokenPool.construct(pSourceRange(tokStart, tokEnd));
-                context.setTokenLine(curRange);
                 rphpParse(pParser, curID, curRange, pMod);
-                context.setLastToken(curRange);
                 break;
         }
 
         // next token
+        nlCnt = 0;
         tokStart = tokEnd;
         state = newState;
+        context.setLastToken(curRange);
 
     }
 
