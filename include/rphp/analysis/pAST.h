@@ -40,6 +40,7 @@
 #include <iterator>
 
 #include <llvm/Support/StringPool.h>
+#include <llvm/Support/Casting.h>
 
 namespace rphp {
 
@@ -49,24 +50,28 @@ namespace AST {
 
 // NOTE: if you change this, check static dispatch table in pASTVisitors.cpp!
 enum nodeKind {
+    // stmt
     blockKind,
-    functionDeclKind,
+    emptyStmtKind,
     ifStmtKind,
     echoStmtKind,
-    inlineHtmlKind,
+    // decl (see decl::first and last kind constants)
+    functionDeclKind,
+    // expr (see expr::first and last kind constants)
+    logicalNotKind,
+    assignmentKind,
+    varKind,
+    functionInvokeKind,
+    constructorInvokeKind,
+    unaryArithmeticOpKind,
+    // literal (see literalExpr::first and last kind constants)
     literalStringKind,
     literalIntKind,
     literalFloatKind,
     literalNullKind,
     literalBoolKind,
     literalArrayKind,
-    logicalNotKind,
-    assignmentKind,
-    varKind,
-    functionInvokeKind,
-    constructorInvokeKind,
-    emptyStmtKind,
-    unaryArithmeticOpKind
+    inlineHtmlKind
 };
 
 class stmt;
@@ -202,6 +207,9 @@ public:
     pUInt startLineNum(void) const { return startLineNum_; }
     pUInt endLineNum(void) const { return endLineNum_; }
 
+    // LLVM isa<T> and casting support
+    static bool classof(const stmt* s) { return true; }
+
 };
 
 typedef std::vector<stmt*> statementList;
@@ -222,6 +230,9 @@ public:
     stmt::child_iterator child_begin() { return &block_[0]; }
     stmt::child_iterator child_end() { return &block_[0]+numStmts_; }
 
+    static bool classof(const block* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == blockKind; }
+
 };
 
 
@@ -229,7 +240,16 @@ public:
 class decl: public stmt {
 
 public:
+    static const nodeKind firstDeclKind = functionDeclKind;
+    static const nodeKind lastDeclKind = functionDeclKind;
+
     decl(nodeKind k): stmt(k) { }
+
+    static bool classof(const decl* s) { return true; }
+    static bool classof(const stmt* s) {
+        return s->getKind() >= firstDeclKind &&
+               s->getKind() <= lastDeclKind;
+    }
 
 };
 
@@ -237,7 +257,16 @@ public:
 class expr: public stmt {
 
 public:
+    static const nodeKind firstExprKind = inlineHtmlKind;
+    static const nodeKind lastExprKind = unaryArithmeticOpKind;
+
     expr(nodeKind k): stmt(k) { }
+
+    static bool classof(const expr* s) { return true; }
+    static bool classof(const stmt* s) {
+        return s->getKind() >= firstExprKind &&
+               s->getKind() <= lastExprKind;
+    }
 
 };
 
@@ -267,6 +296,9 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&body_; }
     stmt::child_iterator child_end() { return (stmt**)&body_+1; }
 
+    static bool classof(const functionDecl* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == functionDeclKind; }
+
 };
 
 // if statement
@@ -295,6 +327,9 @@ public:
     block* trueBlock(void) { return static_cast<block*>(children_[TRUEBLOCK]); }
     block* falseBlock(void) { return static_cast<block*>(children_[FALSEBLOCK]); }
 
+    static bool classof(const ifStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == ifStmtKind; }
+
 };
 
 // literal expression base class
@@ -303,6 +338,10 @@ class literalExpr: public expr {
     pSourceString stringVal_;
 
 public:
+
+    static const nodeKind firstLiteralKind = literalStringKind;
+    static const nodeKind lastLiteralKind = inlineHtmlKind;
+
     literalExpr(nodeKind k): expr(k), stringVal_() { }
     literalExpr(nodeKind k, const pSourceRange& v): expr(k), stringVal_(v.begin(), v.end()) { }
 
@@ -312,6 +351,12 @@ public:
 
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
+
+    static bool classof(const literalExpr* s) { return true; }
+    static bool classof(const stmt* s) {
+        return s->getKind() >= firstLiteralKind &&
+               s->getKind() <= lastLiteralKind;
+    }
 
 };
 
@@ -330,6 +375,9 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
+    static bool classof(const literalString* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == literalStringKind; }
+
 };
 
 // NODE: literal int
@@ -346,6 +394,9 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
+    static bool classof(const literalInt* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == literalIntKind; }
+
 };
 
 // NODE: literal float
@@ -356,6 +407,9 @@ public:
 
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
+
+    static bool classof(const literalFloat* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == literalFloatKind; }
 
 };
 
@@ -371,6 +425,9 @@ public:
 
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
+
+    static bool classof(const literalBool* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == literalBoolKind; }
 
 };
 
@@ -409,6 +466,24 @@ public:
     arrayList& itemList(void) { return itemList_; }
     const arrayList& itemList(void) const { return itemList_; }
 
+    static bool classof(const literalArray* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == literalArrayKind; }
+
+};
+
+
+// NODE: inline html
+class inlineHtml: public literalString {
+
+public:
+    inlineHtml(const pSourceRange& v): literalString(v, inlineHtmlKind) { }
+
+    stmt::child_iterator child_begin() { return child_iterator(); }
+    stmt::child_iterator child_end() { return child_iterator(); }
+
+    static bool classof(const inlineHtml* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == inlineHtmlKind; }
+
 };
 
 
@@ -420,6 +495,9 @@ public:
 
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
+
+    static bool classof(const literalNull* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == literalNullKind; }
 
 };
 
@@ -436,17 +514,8 @@ public:
     stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
     stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
 
-
-};
-
-// NODE: inline html
-class inlineHtml: public literalString {
-
-public:
-    inlineHtml(const pSourceRange& v): literalString(v, inlineHtmlKind) { }
-
-    stmt::child_iterator child_begin() { return child_iterator(); }
-    stmt::child_iterator child_end() { return child_iterator(); }
+    static bool classof(const logicalNot* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == logicalNotKind; }
 
 };
 
@@ -462,6 +531,9 @@ public:
     stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
 
     expr* rVal(void) { return rVal_; }
+
+    static bool classof(const echoStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == echoStmtKind; }
 
 };
 
@@ -483,6 +555,9 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
+    static bool classof(const var* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == varKind; }
+
 };
 
 // NODE: assignment
@@ -503,6 +578,9 @@ public:
 
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    static bool classof(const assignment* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == assignmentKind; }
 
 };
 
@@ -538,6 +616,9 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
+    static bool classof(const functionInvoke* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == functionInvokeKind; }
+
 };
 
 // NODE: constructor invoke
@@ -550,6 +631,8 @@ public:
 
     }
 
+    static bool classof(const constructorInvoke* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == constructorInvokeKind; }
 
 };
 
@@ -563,6 +646,9 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
+    static bool classof(const emptyStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == emptyStmtKind; }
+
 };
 
 // NODE: unary arithmetic operator
@@ -574,8 +660,8 @@ class unaryArithmeticOp: public expr {
 public:
     unaryArithmeticOp(expr* rVal, bool n): expr(unaryArithmeticOpKind), rVal_(rVal), negative_(n) {
         // if our expression is a simple literal int, flag its sign
-        if (rVal_->getKind() == literalIntKind)
-            static_cast<literalInt*>(rVal)->setNegative(n);
+        if (literalInt* i = llvm::dyn_cast<literalInt>(rVal))
+            i->setNegative(n);
     }
 
     expr* rVal(void) { return rVal_; }
@@ -584,6 +670,9 @@ public:
     stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
 
     bool negative(void) { return negative_; }
+
+    static bool classof(const unaryArithmeticOp* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == unaryArithmeticOpKind; }
 
 };
 

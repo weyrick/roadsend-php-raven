@@ -27,25 +27,27 @@
 namespace rphp { namespace AST {
 
 baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
+
     // NOTE: requires same order as nodeKind enum in pAST.h
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_block),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionDecl),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_emptyStmt),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_ifStmt),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_echoStmt),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_inlineHtml),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionDecl),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_logicalNot),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_assignment),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_var),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionInvoke),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_constructorInvoke),
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_unaryArithmeticOp),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalString),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalInt),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalFloat),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalNull),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalBool),
     reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalArray),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_logicalNot),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_assignment),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_var),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionInvoke),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_constructorInvoke),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_emptyStmt),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_unaryArithmeticOp)
+    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_inlineHtml)
+
 };
 
 
