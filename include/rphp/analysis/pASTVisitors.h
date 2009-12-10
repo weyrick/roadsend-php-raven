@@ -29,58 +29,63 @@ namespace rphp { namespace AST {
 class baseVisitor {
 private:
     typedef void (baseVisitor::*dispatchFunction)(stmt *);
-    static dispatchFunction dispatchTable_[];
+    static dispatchFunction preDispatchTable_[];
+    static dispatchFunction postDispatchTable_[];
 
 public:
     virtual ~baseVisitor(void) { }
 
-    virtual void visit(stmt*);
+    // root dispatch
+    void visit(stmt*);
 
-    void visit_block(block*);
-    virtual void visit_functionDecl(functionDecl*) { }
-    virtual void visit_ifStmt(ifStmt*) { }
-    virtual void visit_echoStmt(echoStmt*) { }
-    virtual void visit_inlineHtml(inlineHtml*) { }
-    virtual void visit_literalString(literalString*) { }
-    virtual void visit_literalInt(literalInt*) { }
-    virtual void visit_literalFloat(literalFloat*) { }
-    virtual void visit_literalBool(literalBool*) { }
-    virtual void visit_literalArray(literalArray*) { }
-    virtual void visit_literalNull(literalNull*) { }
-    virtual void visit_logicalNot(logicalNot*) { }
-    virtual void visit_assignment(assignment*) { }
-    virtual void visit_var(var*) { }
-    virtual void visit_functionInvoke(functionInvoke*) { }
-    virtual void visit_constructorInvoke(constructorInvoke*) { }
-    virtual void visit_emptyStmt(emptyStmt*) { }
-    virtual void visit_unaryArithmeticOp(unaryArithmeticOp*) { }
+    virtual void visit_pre_stmt(stmt* ) { }
+    virtual void visit_post_stmt(stmt* ) { }
+
+    virtual void visit_pre_decl(decl* ) { }
+    virtual void visit_post_decl(decl* ) { }
+
+    virtual void visit_pre_expr(expr* ) { }
+    virtual void visit_post_expr(expr* ) { }
+
+    // PRE
+#define STMT(CLASS, PARENT) virtual void visit_pre_##CLASS(CLASS *) { }
+#include "rphp/analysis/astNodes.def"
+
+    // POST
+#define STMT(CLASS, PARENT) virtual void visit_post_##CLASS(CLASS *) { }
+#include "rphp/analysis/astNodes.def"
 
 };
 
+
 class dumpVisitor: public baseVisitor {
     int indentLevel_;
-    void indent() { indentLevel_ += 2; }
-    void unindent() { indentLevel_ -= 2; }
     void showindent();
 public:
     dumpVisitor(void): indentLevel_(0) { }
 
-    void visit_functionDecl(functionDecl*);
-    void visit_ifStmt(ifStmt*);
-    void visit_echoStmt(echoStmt*);
-    void visit_inlineHtml(inlineHtml*);
-    void visit_literalString(literalString* n);
-    void visit_literalInt(literalInt*);
-    void visit_literalFloat(literalFloat*);
-    void visit_literalBool(literalBool*);
-    void visit_literalArray(literalArray*);
-    void visit_literalNull(literalNull*);
-    void visit_logicalNot(logicalNot*);
-    void visit_assignment(assignment*);
-    void visit_var(var*);
-    void visit_functionInvoke(functionInvoke*);
-    void visit_constructorInvoke(constructorInvoke*);
-    void visit_unaryArithmeticOp(unaryArithmeticOp*);
+    void visit_pre_stmt(stmt*);
+    void visit_post_stmt(stmt*);
+
+    void visit_pre_expr(expr*);
+    void visit_post_expr(expr*);
+
+    void visit_pre_functionDecl(functionDecl*);
+    void visit_pre_ifStmt(ifStmt*);
+    void visit_pre_echoStmt(echoStmt*);
+    void visit_pre_inlineHtml(inlineHtml*);
+    void visit_pre_literalString(literalString* n);
+    void visit_pre_literalInt(literalInt*);
+    void visit_pre_literalFloat(literalFloat*);
+    void visit_pre_literalBool(literalBool*);
+    void visit_pre_literalArray(literalArray*);
+    void visit_pre_literalNull(literalNull*);
+    void visit_pre_logicalNot(logicalNot*);
+    void visit_pre_assignment(assignment*);
+    void visit_pre_var(var*);
+    void visit_pre_functionInvoke(functionInvoke*);
+    void visit_pre_constructorInvoke(constructorInvoke*);
+    void visit_pre_unaryArithmeticOp(unaryArithmeticOp*);
 
 };
 

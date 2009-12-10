@@ -26,37 +26,90 @@
 
 namespace rphp { namespace AST {
 
-baseVisitor::dispatchFunction baseVisitor::dispatchTable_[] = {
+baseVisitor::dispatchFunction baseVisitor::preDispatchTable_[] = {
 
-    // NOTE: requires same order as nodeKind enum in pAST.h
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_block),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_emptyStmt),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_ifStmt),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_echoStmt),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionDecl),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_logicalNot),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_assignment),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_var),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_functionInvoke),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_constructorInvoke),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_unaryArithmeticOp),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalString),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalInt),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalFloat),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalNull),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalBool),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_literalArray),
-    reinterpret_cast<dispatchFunction>(&baseVisitor::visit_inlineHtml)
+#define STMT(CLASS, PARENT) reinterpret_cast<dispatchFunction>( &baseVisitor::visit_pre_##CLASS ),
+#include "rphp/analysis/astNodes.def"
 
 };
 
+baseVisitor::dispatchFunction baseVisitor::postDispatchTable_[] = {
+
+#define STMT(CLASS, PARENT) reinterpret_cast<dispatchFunction>( &baseVisitor::visit_post_##CLASS ),
+#include "rphp/analysis/astNodes.def"
+
+};
 
 void baseVisitor::visit(stmt* s) {
 
-    if (s) {
-      (this->*dispatchTable_[s->getKind()])(s);
+    // PRE
+    visit_pre_stmt(s);
+    if (expr* n = llvm::dyn_cast<expr>(s))
+        visit_pre_expr(n);
+    else if (decl* n = llvm::dyn_cast<decl>(s))
+        visit_pre_decl(n);
+
+    (this->*preDispatchTable_[s->getKind()])(s);
+
+    // CHILDREN
+    stmt* child(0);
+    for (stmt::child_iterator i = s->child_begin(), e = s->child_end(); i != e; ) {
+      if ( (child = *i++) ) {
+          visit(child);
+      }
     }
 
+    // POST
+    (this->*postDispatchTable_[s->getKind()])(s);
+
+    if (expr* n = llvm::dyn_cast<expr>(s))
+        visit_post_expr(n);
+    else if (decl* n = llvm::dyn_cast<decl>(s))
+        visit_post_decl(n);
+    visit_post_stmt(s);
+
+}
+
+
+/*
+void baseVisitor::visit_stmt(stmt* s) {
+    if (s) {
+        visit_pre_stmt(s);
+        dispatch(s);
+        visit_post_stmt(s);
+    }
+}
+
+void baseVisitor::visit_decl(decl* s) {
+    if (s) {
+        visit_pre_stmt(s);
+        visit_pre_decl(s);
+        dispatch(s);
+        visit_post_decl(s);
+        visit_post_stmt(s);
+    }
+}
+
+void baseVisitor::visit_expr(expr* s) {
+    if (s) {
+        visit_pre_stmt(s);
+        visit_pre_expr(s);
+        dispatch(s);
+        visit_post_expr(s);
+        visit_post_stmt(s);
+    }
+}
+
+void baseVisitor::visit_literalExpr(literalExpr* s) {
+    if (s) {
+        visit_pre_stmt(s);
+        visit_pre_expr(s);
+        visit_pre_literalExpr(s);
+        dispatch(s);
+        visit_post_literalExpr(s);
+        visit_post_expr(s);
+        visit_post_stmt(s);
+    }
 }
 
 void baseVisitor::visit_block(block* b) {
@@ -65,15 +118,39 @@ void baseVisitor::visit_block(block* b) {
             visit(child);
     }
 }
+*/
 
 // ** DUMP VISITOR **
+void dumpVisitor::visit_pre_stmt(stmt* n) {
+    ++indentLevel_;
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_stmt " << n << "\n";
+}
+void dumpVisitor::visit_post_stmt(stmt* n) {
+    --indentLevel_;
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "post_stmt " << n << "\n";
+}
+void dumpVisitor::visit_pre_expr(expr* n) {
+    ++indentLevel_;
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_expr " << n << "\n";
+}
+void dumpVisitor::visit_post_expr(expr* n) {
+    --indentLevel_;
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "post_expr " << n << "\n";
+}
 
 void dumpVisitor::showindent() {
     if (indentLevel_)
         std::cout << std::string(indentLevel_, ' ');
 }
 
-void dumpVisitor::visit_functionDecl(functionDecl* n) {
+void dumpVisitor::visit_pre_functionDecl(functionDecl* n) {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_functionDecl\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -108,9 +185,13 @@ void dumpVisitor::visit_functionDecl(functionDecl* n) {
 
     showindent();
     std::cout << ")" << std::endl;
+    */
 }
 
-void dumpVisitor::visit_ifStmt(ifStmt* n) {
+void dumpVisitor::visit_pre_ifStmt(ifStmt* n) {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_ifStmt\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -126,9 +207,13 @@ void dumpVisitor::visit_ifStmt(ifStmt* n) {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
+    */
 }
 
-void dumpVisitor::visit_echoStmt(echoStmt* n) {
+void dumpVisitor::visit_pre_echoStmt(echoStmt* n) {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_echoStmt\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -138,9 +223,13 @@ void dumpVisitor::visit_echoStmt(echoStmt* n) {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
+    */
 }
 
-void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
+void dumpVisitor::visit_pre_inlineHtml(inlineHtml* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_inlineHtml\n";
+    /*
     // NOTE: newlines are lexed separately, don't dump them here
     if (n->getStringVal().length() == 1 &&
         n->getStringVal().at(0) == '\n')
@@ -157,9 +246,13 @@ void dumpVisitor::visit_inlineHtml(inlineHtml* n)  {
     }
     std::cout << n->getStringVal();
     std::cout << "\"" << std::endl;
+    */
 }
 
-void dumpVisitor::visit_literalString(literalString* n)  {
+void dumpVisitor::visit_pre_literalString(literalString* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_literalString\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -172,9 +265,13 @@ void dumpVisitor::visit_literalString(literalString* n)  {
     }
     std::cout << n->getStringVal();
     std::cout << "\"" << std::endl;
+    */
 }
 
-void dumpVisitor::visit_literalInt(literalInt* n)  {
+void dumpVisitor::visit_pre_literalInt(literalInt* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_literalInt\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -183,18 +280,26 @@ void dumpVisitor::visit_literalInt(literalInt* n)  {
         std::cout << "(negative) ";
     std::cout << n->getStringVal();
     std::cout << std::endl;
+    */
 }
 
-void dumpVisitor::visit_literalFloat(literalFloat* n)  {
+void dumpVisitor::visit_pre_literalFloat(literalFloat* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_literalFloat\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "literal float: ";
     std::cout << n->getStringVal();
     std::cout << std::endl;
+    */
 }
 
-void dumpVisitor::visit_literalBool(literalBool* n)  {
+void dumpVisitor::visit_pre_literalBool(literalBool* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_literalBool\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -204,10 +309,13 @@ void dumpVisitor::visit_literalBool(literalBool* n)  {
     else
         std::cout << "FALSE";
     std::cout << std::endl;
+    */
 }
 
-void dumpVisitor::visit_literalArray(literalArray* n)  {
-
+void dumpVisitor::visit_pre_literalArray(literalArray* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_literalArray\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -244,18 +352,25 @@ void dumpVisitor::visit_literalArray(literalArray* n)  {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
-
+    */
 }
 
 
-void dumpVisitor::visit_literalNull(literalNull* n)  {
+void dumpVisitor::visit_pre_literalNull(literalNull* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_literalNull\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "literal NULL" << std::endl;
+    */
 }
 
-void dumpVisitor::visit_logicalNot(logicalNot* n)  {
+void dumpVisitor::visit_pre_logicalNot(logicalNot* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_literalNot\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -273,10 +388,14 @@ void dumpVisitor::visit_logicalNot(logicalNot* n)  {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
+    */
 }
 
 
-void dumpVisitor::visit_assignment(assignment* n)  {
+void dumpVisitor::visit_pre_assignment(assignment* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_assignment\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -302,19 +421,27 @@ void dumpVisitor::visit_assignment(assignment* n)  {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
+    */
 }
 
-void dumpVisitor::visit_var(var* n)  {
+void dumpVisitor::visit_pre_var(var* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_var\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
     std::cout << "var: $";
     std::cout << n->name();
     std::cout << std::endl;
+    */
 }
 
-void dumpVisitor::visit_functionInvoke(functionInvoke* n)  {
+void dumpVisitor::visit_pre_functionInvoke(functionInvoke* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_finvoke\n";
 
+/*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -336,11 +463,14 @@ void dumpVisitor::visit_functionInvoke(functionInvoke* n)  {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
+    */
 
 }
 
-void dumpVisitor::visit_constructorInvoke(constructorInvoke* n)  {
-
+void dumpVisitor::visit_pre_constructorInvoke(constructorInvoke* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_cinvoke\n";
+/*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -362,10 +492,14 @@ void dumpVisitor::visit_constructorInvoke(constructorInvoke* n)  {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
+    */
 
 }
 
-void dumpVisitor::visit_unaryArithmeticOp(unaryArithmeticOp* n)  {
+void dumpVisitor::visit_pre_unaryArithmeticOp(unaryArithmeticOp* n)  {
+    std::cout << "# line " << n->startLineNum() << "\n";
+    std::cout << "pre_unary\n";
+    /*
     showindent();
     std::cout << "# line " << n->startLineNum() << std::endl;
     showindent();
@@ -375,8 +509,8 @@ void dumpVisitor::visit_unaryArithmeticOp(unaryArithmeticOp* n)  {
     unindent();
     showindent();
     std::cout << ")" << std::endl;
+    */
 }
-
 
 } } // namespace
 

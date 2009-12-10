@@ -50,28 +50,8 @@ namespace AST {
 
 // NOTE: if you change this, check static dispatch table in pASTVisitors.cpp!
 enum nodeKind {
-    // stmt
-    blockKind,
-    emptyStmtKind,
-    ifStmtKind,
-    echoStmtKind,
-    // decl (see decl::first and last kind constants)
-    functionDeclKind,
-    // expr (see expr::first and last kind constants)
-    logicalNotKind,
-    assignmentKind,
-    varKind,
-    functionInvokeKind,
-    constructorInvokeKind,
-    unaryArithmeticOpKind,
-    // literal (see literalExpr::first and last kind constants)
-    literalStringKind,
-    literalIntKind,
-    literalFloatKind,
-    literalNullKind,
-    literalBoolKind,
-    literalArrayKind,
-    inlineHtmlKind
+#define STMT(CLASS, PARENT) CLASS##Kind,
+#include "rphp/analysis/astNodes.def"
 };
 
 class stmt;
@@ -240,6 +220,7 @@ public:
 class decl: public stmt {
 
 public:
+    // see astNodes.def
     static const nodeKind firstDeclKind = functionDeclKind;
     static const nodeKind lastDeclKind = functionDeclKind;
 
@@ -257,8 +238,9 @@ public:
 class expr: public stmt {
 
 public:
-    static const nodeKind firstExprKind = inlineHtmlKind;
-    static const nodeKind lastExprKind = unaryArithmeticOpKind;
+    // see astNodes.def
+    static const nodeKind firstExprKind = logicalNotKind;
+    static const nodeKind lastExprKind = inlineHtmlKind;
 
     expr(nodeKind k): stmt(k) { }
 
@@ -339,6 +321,7 @@ class literalExpr: public expr {
 
 public:
 
+    // see astNodes.def
     static const nodeKind firstLiteralKind = literalStringKind;
     static const nodeKind lastLiteralKind = inlineHtmlKind;
 
