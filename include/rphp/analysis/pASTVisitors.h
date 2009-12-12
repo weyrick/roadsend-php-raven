@@ -28,21 +28,26 @@ namespace rphp { namespace AST {
 
 class baseVisitor {
 private:
+
     typedef void (baseVisitor::*dispatchFunction)(stmt *);
+    typedef bool (baseVisitor::*childDispatchFunction)(stmt *);
+
     static dispatchFunction preDispatchTable_[];
     static dispatchFunction postDispatchTable_[];
+    static childDispatchFunction childrenDispatchTable_[];
+
+protected:
+    static const char* nodeDescTable_[];
 
 public:
     virtual ~baseVisitor(void) { }
 
     // root dispatch
     void visit(stmt*);
+    virtual void visitChildren(stmt*);
 
     virtual void visit_pre_stmt(stmt* ) { }
     virtual void visit_post_stmt(stmt* ) { }
-
-    virtual void visit_pre_decl(decl* ) { }
-    virtual void visit_post_decl(decl* ) { }
 
     virtual void visit_pre_expr(expr* ) { }
     virtual void visit_post_expr(expr* ) { }
@@ -53,6 +58,11 @@ public:
 
     // POST
 #define STMT(CLASS, PARENT) virtual void visit_post_##CLASS(CLASS *) { }
+#include "rphp/analysis/astNodes.def"
+
+    // CHILDREN
+    // for custom children handler, define and return true
+#define STMT(CLASS, PARENT) virtual bool visit_children_##CLASS(CLASS *) { return false; }
 #include "rphp/analysis/astNodes.def"
 
 };
@@ -66,13 +76,15 @@ public:
 
     void visit_pre_stmt(stmt*);
     void visit_post_stmt(stmt*);
+    void visitChildren(stmt*);
 
-    void visit_pre_expr(expr*);
-    void visit_post_expr(expr*);
+    void visit_pre_var(var*);
 
+    /*
     void visit_pre_functionDecl(functionDecl*);
     void visit_pre_ifStmt(ifStmt*);
     void visit_pre_echoStmt(echoStmt*);
+    void visit_post_echoStmt(echoStmt*);
     void visit_pre_inlineHtml(inlineHtml*);
     void visit_pre_literalString(literalString* n);
     void visit_pre_literalInt(literalInt*);
@@ -86,6 +98,7 @@ public:
     void visit_pre_functionInvoke(functionInvoke*);
     void visit_pre_constructorInvoke(constructorInvoke*);
     void visit_pre_unaryArithmeticOp(unaryArithmeticOp*);
+    */
 
 };
 

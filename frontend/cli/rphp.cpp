@@ -12,7 +12,7 @@
 #include "rphp/IR/pStandAloneTargets.h"
 #include "rphp/IR/pCompileAndLinkTarget.h"
 #include "rphp/runtime/pRuntimeError.h"
-#include "rphp/JIT/pCachedJIT.h"
+//#include "rphp/JIT/pCachedJIT.h"
 
 using namespace llvm;
 using namespace rphp;
@@ -69,6 +69,7 @@ int main( int argc, char* argv[] )
     pSourceFileDesc inFile(inputFile, encoding);
 
     // JIT
+    /*
     if (iSF) {
         pCachedJIT engine(config);
 
@@ -92,12 +93,14 @@ int main( int argc, char* argv[] )
         delete config;
         return 0;
     }
+    */
 
 
     // AOT COMPILER
     pTarget* target = NULL;
+    /*
     if (compileModule) {
-        target = new pCompileTarget(inFile/*, "/"*/);
+        target = new pCompileTarget(inFile);
     }
     else if (linkSA) {
         if (outputFile.empty()) {
@@ -116,7 +119,8 @@ int main( int argc, char* argv[] )
             saTarget->addLibSearchPath(libSearchPath);
         target = saTarget;
     }
-    else if (dumpToks) {
+
+    else*/ if (dumpToks) {
         target = new pDumpTarget(inFile, pDumpTarget::Tokens);
     }
     else if (dumpAST) {
@@ -131,6 +135,7 @@ int main( int argc, char* argv[] )
     }
     */
     else {
+        /*
         // default: compile and link single php script to native binary
         std::string oFileName = outputFile;
         if (oFileName.empty()) {
@@ -149,10 +154,11 @@ int main( int argc, char* argv[] )
 
         assert(!oFileName.empty() && "empty output file");
 
-        pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inFile, /*"/",*/ oFileName);
+        pCompileAndLinkTarget* saTarget = new pCompileAndLinkTarget(inFile, oFileName);
         if (!libSearchPath.empty())
             saTarget->addLibSearchPath(libSearchPath);
         target = saTarget;
+        */
     }
 
     if (!target) {

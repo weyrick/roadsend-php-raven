@@ -29,7 +29,7 @@ namespace rphp {
 
 pSourceModule::pSourceModule(const pSourceFileDesc& file):
     source_(new pSourceFile(file)),
-    ast_(),
+    ast_(NULL),
     context_(this)
 {
 
@@ -39,9 +39,12 @@ pSourceModule::pSourceModule(const pSourceFileDesc& file):
 
 pSourceModule::~pSourceModule() {
     // cleanup AST
+    /*
     for(AST::statementList::iterator s = ast_.begin(); s != ast_.end(); ++s) {
         (*s)->destroy(context_);
     }
+    */
+    ast_->destroy(context_);
     delete source_;
 }
 
@@ -53,10 +56,19 @@ const char* pSourceModule::encoding(void) const {
     return source_->encoding().value().c_str();
 }
 
+void pSourceModule::setAST(const AST::statementList* list) {
+    if (ast_)
+        ast_->destroy(context_);
+    ast_ = new (context_) AST::block(context_, list);
+}
+
 void pSourceModule::applyVisitor(AST::baseVisitor* v) {
+    /*
     for(AST::statementList::iterator s = ast_.begin(); s != ast_.end(); ++s) {
         v->visit(*s);
     }
+    */
+    v->visit(ast_);
 }
 
 void pSourceModule::dumpAST() {

@@ -23,8 +23,8 @@
 
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/analysis/pLexer.h"
-#include "rphp/IR/pGenerator.h"
-#include "rphp/IR/pGenSupport.h"
+//#include "rphp/IR/pGenerator.h"
+//#include "rphp/IR/pGenSupport.h"
 
 #include <llvm/Module.h>
 #include <llvm/Analysis/Verifier.h>
@@ -92,7 +92,7 @@ void pDumpTarget::dumpAST(void) {
 
 // dump the generated IR code from the given source file
 void pDumpTarget::dumpIR(void) {
-
+/*
     pSourceModule  m(sourceFile_);
     IR::pGenerator codeGen(m, llvm::getGlobalContext());
     llvm::Module* ir = codeGen.getIR();
@@ -102,7 +102,7 @@ void pDumpTarget::dumpIR(void) {
         std::cout << "*** IR verify failed: " << errMsg << std::endl;
     }
     delete ir;
-
+*/
 }
 
 } // namespace

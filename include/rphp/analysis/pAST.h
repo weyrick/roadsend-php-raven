@@ -44,6 +44,9 @@
 
 namespace rphp {
 
+using llvm::isa;
+using llvm::dyn_cast;
+
 class pSourceModule;
 
 namespace AST {
@@ -643,7 +646,7 @@ class unaryArithmeticOp: public expr {
 public:
     unaryArithmeticOp(expr* rVal, bool n): expr(unaryArithmeticOpKind), rVal_(rVal), negative_(n) {
         // if our expression is a simple literal int, flag its sign
-        if (literalInt* i = llvm::dyn_cast<literalInt>(rVal))
+        if (literalInt* i = dyn_cast<literalInt>(rVal))
             i->setNegative(n);
     }
 

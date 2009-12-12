@@ -34,7 +34,7 @@ set_target_properties( rphp
 #                     )
 
 target_link_libraries( rphp
-                       rphp-llvm-jit
+#                       rphp-llvm-jit
                        rphp-llvm-ir
                        rphp-analysis
                        rphp-runtime

@@ -39,7 +39,7 @@ class pSourceModule {
 
 private:
     const pSourceFile* source_;
-    AST::statementList ast_;
+    AST::block* ast_;
     AST::pParseContext context_;
 
 public:
@@ -55,8 +55,9 @@ public:
     AST::pParseContext& context(void) { return context_; }
 
     // AST TRAVERSAL
-    AST::statementList& getAST() { return ast_; }
-    void setAST(const AST::statementList* list) { ast_.assign(list->begin(), list->end()); }
+    AST::block* getAST() { return ast_; }
+    const AST::block* getAST() const { return ast_; }
+    void setAST(const AST::statementList* list);
     void applyVisitor(AST::baseVisitor* v);
 
     // DEBUG

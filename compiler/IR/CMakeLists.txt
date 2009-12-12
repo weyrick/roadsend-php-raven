@@ -14,17 +14,17 @@ include_directories (
 
 # source files that depend on llvm
 set(GENERATOR_SRC_FILES
-    pGenerator.cpp
-    pGenSupport.cpp
-    pIRHelper.cpp
-    pCodeGen.cpp
-    pDeclare.cpp
+#    pGenerator.cpp
+#    pGenSupport.cpp
+#    pIRHelper.cpp
+#    pCodeGen.cpp
+#    pDeclare.cpp
     # targets
-    pCompileAndLinkTarget.cpp
-    pLinkTarget.cpp
-    pLibTargets.cpp
-    pStandAloneTargets.cpp
-    pCompileTarget.cpp
+#    pCompileAndLinkTarget.cpp
+#    pLinkTarget.cpp
+#    pLibTargets.cpp
+#    pStandAloneTargets.cpp
+#    pCompileTarget.cpp
     pDumpTarget.cpp    
 )
 
