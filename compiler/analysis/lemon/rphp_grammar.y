@@ -296,8 +296,7 @@ expr(A) ::= assignment(B). { A = B; }
 expr(A) ::= lval(B). { A = B; }
 expr(A) ::= functionInvoke(B). { A = B; }
 expr(A) ::= constructorInvoke(B). { A = B; }
-expr(A) ::= logicalNot(B). { A = B; }
-expr(A) ::= unaryArithmeticOp(B). { A = B; }
+expr(A) ::= unaryOp(B). { A = B; }
 
 /** LITERALS **/
 %type literal {AST::literalExpr*}
@@ -387,19 +386,19 @@ arrayItemList(A) ::= .
 %type arrayItem {AST::arrayItem*}
 arrayItem(A) ::= expr(B).
 {
-    A = new (pMod->context()) AST::arrayItem(NULL, B);
+    A = new (pMod->context()) AST::arrayItem(NULL, B, false);
 }
 arrayItem(A) ::= T_REF expr(B).
 {
-    A = new (pMod->context()) AST::arrayItem(NULL, B);
+    A = new (pMod->context()) AST::arrayItem(NULL, B, true);
 }
 arrayItem(A) ::= expr(KEY) T_ARROWKEY expr(VAL).
 {
-    A = new (pMod->context()) AST::arrayItem(KEY, VAL);
+    A = new (pMod->context()) AST::arrayItem(KEY, VAL, false);
 }
 arrayItem(A) ::= expr(KEY) T_ARROWKEY T_REF expr(VAL).
 {
-    A = new (pMod->context()) AST::arrayItem(KEY, VAL);
+    A = new (pMod->context()) AST::arrayItem(KEY, VAL, true);
 }
 
 // literal array
@@ -410,24 +409,21 @@ literal(A) ::= T_ARRAY(ARY) T_LEFTPAREN arrayItemList(B) T_RIGHTPAREN.
     delete B; // deletes the vector, NOT the exprs in it!
 }
 
-/** UNARY ARITHMETIC OPERATORS **/
-%type unaryArithmeticOp {AST::unaryArithmeticOp*}
-unaryArithmeticOp(A) ::= T_PLUS expr(R).
+/** UNARY OPERATORS **/
+%type unaryOp {AST::unaryOp*}
+unaryOp(A) ::= T_PLUS expr(R).
 {
-    A = new (pMod->context()) AST::unaryArithmeticOp(R, false);
+    A = new (pMod->context()) AST::unaryOp(R, AST::unaryOp::POSITIVE);
     A->setLine(CURRENT_LINE);
 }
-unaryArithmeticOp(A) ::= T_MINUS expr(R).
+unaryOp(A) ::= T_MINUS expr(R).
 {
-    A = new (pMod->context()) AST::unaryArithmeticOp(R, true);
+    A = new (pMod->context()) AST::unaryOp(R, AST::unaryOp::NEGATIVE);
     A->setLine(CURRENT_LINE);
 }
-
-/** LOGICAL OPERATORS **/
-%type logicalNot {AST::logicalNot*}
-logicalNot(A) ::= T_NOT expr(R).
+unaryOp(A) ::= T_NOT expr(R).
 {
-    A = new (pMod->context()) AST::logicalNot(R);
+    A = new (pMod->context()) AST::unaryOp(R, AST::unaryOp::LOGICALNOT);
     A->setLine(CURRENT_LINE);
 }
 
@@ -435,7 +431,12 @@ logicalNot(A) ::= T_NOT expr(R).
 %type assignment {AST::assignment*}
 assignment(A) ::= lval(L) T_ASSIGN(EQ_SIGN) expr(R).
 {
-    A = new (pMod->context()) AST::assignment(L, R);
+    A = new (pMod->context()) AST::assignment(L, R, false);
+    A->setLine(TOKEN_LINE(EQ_SIGN));
+}
+assignment(A) ::= lval(L) T_REF T_ASSIGN(EQ_SIGN) expr(R).
+{
+    A = new (pMod->context()) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 
@@ -482,13 +483,13 @@ functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 }
 
 /** CONSTRUCTOR INVOKE **/
-%type constructorInvoke {AST::constructorInvoke*}
+%type constructorInvoke {AST::functionInvoke*}
 constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
-    A = new (pMod->context()) AST::constructorInvoke(*B, // f name
-                                                     pMod->context(),
-                                                     C  // expression list: arguments, copied
-                                                     );
+    A = new (pMod->context()) AST::functionInvoke(*B, // f name
+                                                  pMod->context(),
+                                                  C  // expression list: arguments, copied
+                                                  );
     A->setLine(CURRENT_LINE);
     delete C;
 }

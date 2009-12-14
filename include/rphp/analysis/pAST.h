@@ -51,7 +51,6 @@ class pSourceModule;
 
 namespace AST {
 
-// NOTE: if you change this, check static dispatch table in pASTVisitors.cpp!
 enum nodeKind {
 #define STMT(CLASS, PARENT) CLASS##Kind,
 #include "rphp/analysis/astNodes.def"
@@ -242,8 +241,8 @@ class expr: public stmt {
 
 public:
     // see astNodes.def
-    static const nodeKind firstExprKind = logicalNotKind;
-    static const nodeKind lastExprKind = inlineHtmlKind;
+    static const nodeKind firstExprKind = assignmentKind;
+    static const nodeKind lastExprKind = unaryOpKind;
 
     expr(nodeKind k): stmt(k) { }
 
@@ -421,9 +420,12 @@ public:
 struct arrayItem {
     expr* key;
     expr* val;
-    arrayItem(expr* k, expr* v):
+    bool isRef;
+    arrayItem(expr* k, expr* v, bool r):
      key(k),
-     val(v) { }
+     val(v),
+     isRef(r)
+     { }
 };
 
 typedef std::vector<arrayItem> arrayList;
@@ -487,6 +489,7 @@ public:
 
 };
 
+/*
 // NODE: logical not
 class logicalNot: public expr {
 
@@ -504,6 +507,7 @@ public:
     static bool classof(const stmt* s) { return s->getKind() == logicalNotKind; }
 
 };
+*/
 
 // NODE: echo statement
 class echoStmt: public stmt {
@@ -527,6 +531,8 @@ public:
 class var: public expr {
 
     llvm::PooledStringPtr name_;
+    // TARGET?
+    // EXPR list for array indices
 
 public:
     var(const pSourceRange& name, pParseContext& C):
@@ -551,9 +557,10 @@ class assignment: public expr {
 
     enum { LVAL, RVAL, END_EXPR };
     stmt* children_[END_EXPR];
+    bool isRef_;
 
 public:
-    assignment(expr* lVal, expr* rVal): expr(assignmentKind), children_()
+    assignment(expr* lVal, expr* rVal, bool r): expr(assignmentKind), children_(), isRef_(r)
     {
         children_[LVAL] = static_cast<stmt*>(lVal);
         children_[RVAL] = static_cast<stmt*>(rVal);
@@ -561,6 +568,8 @@ public:
 
     expr* lVal(void) { return static_cast<expr*>(children_[LVAL]); }
     expr* rVal(void) { return static_cast<expr*>(children_[RVAL]); }
+
+    bool isRef(void) const { return isRef_; }
 
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
@@ -573,12 +582,13 @@ public:
 // NODE: function invoke
 class functionInvoke: public expr {
 
+    // TARGET? for methods
     llvm::PooledStringPtr name_;
     expressionList argList_;
 
 public:
-    functionInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList, nodeKind kind = functionInvokeKind):
-        expr(kind),
+    functionInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList):
+        expr(functionInvokeKind),
         name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))),
         argList_(*argList) // copy
     {
@@ -607,6 +617,7 @@ public:
 
 };
 
+/*
 // NODE: constructor invoke
 class constructorInvoke: public functionInvoke {
 
@@ -621,6 +632,8 @@ public:
     static bool classof(const stmt* s) { return s->getKind() == constructorInvokeKind; }
 
 };
+
+*/
 
 // NOP statement such as ;;
 class emptyStmt: public stmt {
@@ -637,17 +650,24 @@ public:
 
 };
 
-// NODE: unary arithmetic operator
-class unaryArithmeticOp: public expr {
-
-    expr* rVal_;
-    bool negative_;
+// NODE: unary operator
+class unaryOp: public expr {
 
 public:
-    unaryArithmeticOp(expr* rVal, bool n): expr(unaryArithmeticOpKind), rVal_(rVal), negative_(n) {
-        // if our expression is a simple literal int, flag its sign
-        if (literalInt* i = dyn_cast<literalInt>(rVal))
-            i->setNegative(n);
+    enum opKind { NEGATIVE, POSITIVE, LOGICALNOT };
+
+private:
+    expr* rVal_;
+    opKind opKind_;
+
+public:
+
+    unaryOp(expr* rVal, opKind k): expr(unaryOpKind), rVal_(rVal), opKind_(k) {
+        if (opKind_ == NEGATIVE) {
+            // if our expression is a simple literal int, flag its sign
+            if (literalInt* i = dyn_cast<literalInt>(rVal))
+                i->setNegative(true);
+        }
     }
 
     expr* rVal(void) { return rVal_; }
@@ -655,10 +675,10 @@ public:
     stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
     stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
 
-    bool negative(void) { return negative_; }
+    opKind opKind(void) const { return opKind_; }
 
-    static bool classof(const unaryArithmeticOp* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == unaryArithmeticOpKind; }
+    static bool classof(const unaryOp* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == unaryOpKind; }
 
 };
 

@@ -124,6 +124,22 @@ void dumpVisitor::visit_pre_var(var* n) {
     std::cout << "name: $" << n->name() << "\n";
 }
 
+void dumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
+    showindent();
+    std::cout << "op type: ";
+    switch (n->opKind()) {
+    case unaryOp::LOGICALNOT:
+        std::cout << "logical not\n";
+        break;
+    case unaryOp::NEGATIVE:
+        std::cout << "negative\n";
+        break;
+    case unaryOp::POSITIVE:
+        std::cout << "positive\n";
+        break;
+    }
+}
+
 //void dumpVisitor::visit_pre_functionDecl(functionDecl* n) {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_functionDecl\n";

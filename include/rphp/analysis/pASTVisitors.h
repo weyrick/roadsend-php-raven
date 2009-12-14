@@ -79,26 +79,7 @@ public:
     void visitChildren(stmt*);
 
     void visit_pre_var(var*);
-
-    /*
-    void visit_pre_functionDecl(functionDecl*);
-    void visit_pre_ifStmt(ifStmt*);
-    void visit_pre_echoStmt(echoStmt*);
-    void visit_post_echoStmt(echoStmt*);
-    void visit_pre_inlineHtml(inlineHtml*);
-    void visit_pre_literalString(literalString* n);
-    void visit_pre_literalInt(literalInt*);
-    void visit_pre_literalFloat(literalFloat*);
-    void visit_pre_literalBool(literalBool*);
-    void visit_pre_literalArray(literalArray*);
-    void visit_pre_literalNull(literalNull*);
-    void visit_pre_logicalNot(logicalNot*);
-    void visit_pre_assignment(assignment*);
-    void visit_pre_var(var*);
-    void visit_pre_functionInvoke(functionInvoke*);
-    void visit_pre_constructorInvoke(constructorInvoke*);
-    void visit_pre_unaryArithmeticOp(unaryArithmeticOp*);
-    */
+    void visit_pre_unaryOp(unaryOp* n);
 
 };
 
