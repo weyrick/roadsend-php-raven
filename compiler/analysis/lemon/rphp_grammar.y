@@ -36,6 +36,31 @@ using namespace rphp;
 #define TOKEN_LINE(T) pMod->context().getTokenLine(T)
 #define CURRENT_LINE  pMod->context().currentLineNum()
 
+AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, bool isSimple) {
+  // binary specifier?
+  bool binaryString = false;
+  pSourceCharIterator start;
+  if ( *(*B).begin() == 'b') {
+      // binary
+      binaryString = true;
+      start = ++(*B).begin();
+  }
+  else {
+      // according to module default
+      start = (*B).begin();
+  }
+  // substring out the quotes, special case for empty string
+  AST::literalString* A;
+  if (++start == (*B).end()) {
+    A = new (pMod->context()) AST::literalString(binaryString);
+  }
+  else {
+    A = new (pMod->context()) AST::literalString(pSourceRange(start, --(*B).end()), binaryString);
+  }
+  A->setIsSimple(isSimple);
+  return A;
+}
+
 }  
 
 %name rphpParse
@@ -302,29 +327,14 @@ expr(A) ::= unaryOp(B). { A = B; }
 %type literal {AST::literalExpr*}
 
 // literal string
-// note, this assumes the preprocessor has been run, and thus we
-// only need to handle single quoted strings
 literal(A) ::= T_SQ_STRING(B).
 {
-  // binary specifier?
-  bool binaryString = false;
-  pSourceCharIterator start;
-  if ( *(*B).begin() == 'b') {
-      // binary
-      binaryString = true;
-      start = ++(*B).begin();
-  }
-  else {
-      // according to module default
-      start = (*B).begin();
-  }
-  // substring out the quotes, special case for empty string
-  if (++start == (*B).end()) {
-    A = new (pMod->context()) AST::literalString(binaryString);
-  }
-  else {
-    A = new (pMod->context()) AST::literalString(pSourceRange(start, --(*B).end()), binaryString);
-  }
+  A = extractLiteralString(B, pMod, true);
+  A->setLine(CURRENT_LINE);
+}
+literal(A) ::= T_DQ_STRING(B).
+{
+  A = extractLiteralString(B, pMod, false);
   A->setLine(CURRENT_LINE);
 }
 

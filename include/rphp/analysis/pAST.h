@@ -349,6 +349,7 @@ public:
 class literalString: public literalExpr {
 
     bool isBinary_;
+    bool isSimple_; // i.e., single quoted
 
 public:
     literalString(bool isBinary): literalExpr(literalStringKind), isBinary_(isBinary) { }
@@ -356,6 +357,12 @@ public:
     literalString(const pSourceRange& v, nodeKind k): literalExpr(k, v), isBinary_(false) { }
 
     bool isBinary(void) const { return isBinary_; }
+
+    void setIsSimple(bool s)  {
+        isSimple_ = s;
+    }
+
+    bool isSimple(void) const { return isSimple_; }
 
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
