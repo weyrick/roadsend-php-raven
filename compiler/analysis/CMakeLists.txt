@@ -70,7 +70,8 @@ SET_SOURCE_FILES_PROPERTIES(pLexer.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR
 set(PARSER_SRC_FILES
   ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp
   pAST.cpp
-  pASTVisitors.cpp
+  pBaseVisitor.cpp
+  pDumpVisitor.cpp
   pParseContext.cpp
   pSourceFile.cpp
   pLexer.cpp

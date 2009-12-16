@@ -19,18 +19,18 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PASTVISITORS_H_
-#define RPHP_PASTVISITORS_H_
+#ifndef RPHP_PBASEVISITOR_H_
+#define RPHP_PBASEVISITOR_H_
 
 #include "rphp/analysis/pAST.h"
 
 namespace rphp { namespace AST {
 
-class baseVisitor {
+class pBaseVisitor {
 private:
 
-    typedef void (baseVisitor::*dispatchFunction)(stmt *);
-    typedef bool (baseVisitor::*childDispatchFunction)(stmt *);
+    typedef void (pBaseVisitor::*dispatchFunction)(stmt *);
+    typedef bool (pBaseVisitor::*childDispatchFunction)(stmt *);
 
     static dispatchFunction preDispatchTable_[];
     static dispatchFunction postDispatchTable_[];
@@ -40,7 +40,7 @@ protected:
     static const char* nodeDescTable_[];
 
 public:
-    virtual ~baseVisitor(void) { }
+    virtual ~pBaseVisitor(void) { }
 
     // root dispatch
     void visit(stmt*);
@@ -68,22 +68,6 @@ public:
 };
 
 
-class dumpVisitor: public baseVisitor {
-    int indentLevel_;
-    void showindent();
-public:
-    dumpVisitor(void): indentLevel_(0) { }
-
-    void visit_pre_stmt(stmt*);
-    void visit_post_stmt(stmt*);
-    void visitChildren(stmt*);
-
-    void visit_pre_var(var*);
-    void visit_pre_unaryOp(unaryOp* n);
-    void visit_pre_literalString(literalString* n);
-
-};
-
 } } // namespace
 
-#endif /* RPHP_PASTVISITORS_H_ */
+#endif /* RPHP_PBASEVISITOR_H_ */

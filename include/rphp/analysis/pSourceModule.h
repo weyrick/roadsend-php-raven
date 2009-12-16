@@ -32,7 +32,7 @@ class pSourceFile;
 
 namespace AST {
     class stmt;
-    class baseVisitor;
+    class pBaseVisitor;
 }
 
 class pSourceModule {
@@ -58,7 +58,7 @@ public:
     AST::block* getAST() { return ast_; }
     const AST::block* getAST() const { return ast_; }
     void setAST(const AST::statementList* list);
-    void applyVisitor(AST::baseVisitor* v);
+    void applyVisitor(AST::pBaseVisitor* v);
 
     // DEBUG
     void dumpAST();

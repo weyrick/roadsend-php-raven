@@ -22,7 +22,8 @@
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/analysis/pSourceFile.h"
 
-#include "rphp/analysis/pASTVisitors.h"
+#include "rphp/analysis/pBaseVisitor.h"
+#include "rphp/analysis/pDumpVisitor.h"
 #include "rphp/analysis/pParser.h"
 
 namespace rphp {
@@ -62,7 +63,7 @@ void pSourceModule::setAST(const AST::statementList* list) {
     ast_ = new (context_) AST::block(context_, list);
 }
 
-void pSourceModule::applyVisitor(AST::baseVisitor* v) {
+void pSourceModule::applyVisitor(AST::pBaseVisitor* v) {
     /*
     for(AST::statementList::iterator s = ast_.begin(); s != ast_.end(); ++s) {
         v->visit(*s);
@@ -73,7 +74,7 @@ void pSourceModule::applyVisitor(AST::baseVisitor* v) {
 
 void pSourceModule::dumpAST() {
 
-    AST::dumpVisitor v;
+    AST::pDumpVisitor v;
     applyVisitor(&v);
     context_.allocator().PrintStats();
 

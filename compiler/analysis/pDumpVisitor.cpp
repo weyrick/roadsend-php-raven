@@ -19,107 +19,44 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include "rphp/analysis/pASTVisitors.h"
+#include "rphp/analysis/pDumpVisitor.h"
 
 #include <iostream>
 #include <unicode/ustream.h>
 
 namespace rphp { namespace AST {
 
-baseVisitor::dispatchFunction baseVisitor::preDispatchTable_[] = {
 
-#define STMT(CLASS, PARENT) reinterpret_cast<dispatchFunction>( &baseVisitor::visit_pre_##CLASS ),
-#include "rphp/analysis/astNodes.def"
-
-};
-
-baseVisitor::dispatchFunction baseVisitor::postDispatchTable_[] = {
-
-#define STMT(CLASS, PARENT) reinterpret_cast<dispatchFunction>( &baseVisitor::visit_post_##CLASS ),
-#include "rphp/analysis/astNodes.def"
-
-};
-
-baseVisitor::childDispatchFunction baseVisitor::childrenDispatchTable_[] = {
-
-#define STMT(CLASS, PARENT) reinterpret_cast<childDispatchFunction>( &baseVisitor::visit_children_##CLASS ),
-#include "rphp/analysis/astNodes.def"
-
-};
-
-const char* baseVisitor::nodeDescTable_[] = {
-#define STMT(CLASS, PARENT) #CLASS,
-#include "rphp/analysis/astNodes.def"
-};
-
-void baseVisitor::visit(stmt* s) {
-
-    // PRE
-    visit_pre_stmt(s);
-    if (expr* n = dyn_cast<expr>(s))
-        visit_pre_expr(n);
-
-    (this->*preDispatchTable_[s->getKind()])(s);
-
-    // CHILDREN
-    // we always try the custom first, and fall back to the standard unless
-    // the custom returns true
-    if ((this->*childrenDispatchTable_[s->getKind()])(s) == false)
-        visitChildren(s);
-
-    // POST
-    (this->*postDispatchTable_[s->getKind()])(s);
-
-    if (expr* n = dyn_cast<expr>(s))
-        visit_post_expr(n);
-    visit_post_stmt(s);
-
-}
-
-void baseVisitor::visitChildren(stmt* s) {
-
-    stmt* child(0);
-    for (stmt::child_iterator i = s->child_begin(), e = s->child_end(); i != e; ) {
-      if ( (child = *i++) ) {
-          visit(child);
-      }
-    }
-
-}
-
-
-// ** DUMP VISITOR **
-
-void dumpVisitor::visit_pre_stmt(stmt* n) {
+void pDumpVisitor::visit_pre_stmt(stmt* n) {
     showindent();
     std::cout << "# line " << n->startLineNum() << "\n";
     showindent();
     std::cout << "(" << nodeDescTable_[n->getKind()] << "\n";
 }
 
-void dumpVisitor::visit_post_stmt(stmt* n) {
+void pDumpVisitor::visit_post_stmt(stmt* n) {
     showindent();
     std::cout << ") <end " << nodeDescTable_[n->getKind()] << ">\n";
 }
 
-void dumpVisitor::visitChildren(stmt* s) {
+void pDumpVisitor::visitChildren(stmt* s) {
     indentLevel_+=4;
-    baseVisitor::visitChildren(s);
+    pBaseVisitor::visitChildren(s);
     indentLevel_-=4;
 }
 
-void dumpVisitor::showindent() {
+void pDumpVisitor::showindent() {
     if (indentLevel_)
         std::cout << std::string(indentLevel_, ' ');
 }
 
-void dumpVisitor::visit_pre_var(var* n) {
+void pDumpVisitor::visit_pre_var(var* n) {
     showindent();
     std::cout << "name: $" << n->name() << "\n";
 }
 
 
-void dumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
+void pDumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
     showindent();
     std::cout << "op type: ";
     switch (n->opKind()) {
@@ -133,6 +70,20 @@ void dumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
         std::cout << "positive\n";
         break;
     }
+}
+
+void pDumpVisitor::visit_pre_literalString(literalString* n)  {
+    showindent();
+    if (n->isBinary()) {
+        std::cout << "[binary]: \"";
+    }
+    else {
+        std::cout << "[utf8]: \"";
+    }
+    std::cout << n->getStringVal();
+    std::cout << "\"\n";
+    showindent();
+    std::cout << "simple? " << (n->isSimple() ? "yes" : "no") << "\n";
 }
 
 //void dumpVisitor::visit_pre_functionDecl(functionDecl* n) {
@@ -221,20 +172,6 @@ void dumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
 //    std::cout << "\"" << std::endl;
 //    */
 //}
-
-void dumpVisitor::visit_pre_literalString(literalString* n)  {    
-    showindent();
-    if (n->isBinary()) {
-        std::cout << "[binary]: \"";
-    }
-    else {
-        std::cout << "[utf8]: \"";
-    }
-    std::cout << n->getStringVal();
-    std::cout << "\"\n";
-    showindent();
-    std::cout << "simple? " << (n->isSimple() ? "yes" : "no") << "\n";
-}
 
 //
 //void dumpVisitor::visit_pre_literalInt(literalInt* n)  {
