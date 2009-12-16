@@ -95,12 +95,6 @@ void dumpVisitor::visit_pre_stmt(stmt* n) {
     std::cout << "# line " << n->startLineNum() << "\n";
     showindent();
     std::cout << "(" << nodeDescTable_[n->getKind()] << "\n";
-    if (literalExpr* l = dyn_cast<literalExpr>(n)) {
-        indentLevel_+=4;
-        showindent();
-        std::cout << "value: " << l->getStringVal() << "\n";
-        indentLevel_-=4;
-    }
 }
 
 void dumpVisitor::visit_post_stmt(stmt* n) {
@@ -123,6 +117,7 @@ void dumpVisitor::visit_pre_var(var* n) {
     showindent();
     std::cout << "name: $" << n->name() << "\n";
 }
+
 
 void dumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
     showindent();
@@ -203,14 +198,6 @@ void dumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
 //    */
 //}
 //
-//void dumpVisitor::visit_pre_echoStmt(echoStmt* n) {
-//    std::cout << "(echoStmt:" << std::endl;
-//}
-//
-//void dumpVisitor::visit_post_echoStmt(echoStmt* n) {
-//    std::cout << ")\n";
-//}
-//
 //
 //void dumpVisitor::visit_pre_inlineHtml(inlineHtml* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
@@ -234,25 +221,21 @@ void dumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
 //    std::cout << "\"" << std::endl;
 //    */
 //}
-//
-//void dumpVisitor::visit_pre_literalString(literalString* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_literalString\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "literal string ";
-//    if (n->isBinary()) {
-//        std::cout << "[binary]: \"";
-//    }
-//    else {
-//        std::cout << "[utf8]: \"";
-//    }
-//    std::cout << n->getStringVal();
-//    std::cout << "\"" << std::endl;
-//    */
-//}
+
+void dumpVisitor::visit_pre_literalString(literalString* n)  {    
+    showindent();
+    if (n->isBinary()) {
+        std::cout << "[binary]: \"";
+    }
+    else {
+        std::cout << "[utf8]: \"";
+    }
+    std::cout << n->getStringVal();
+    std::cout << "\"\n";
+    showindent();
+    std::cout << "simple? " << (n->isSimple() ? "yes" : "no") << "\n";
+}
+
 //
 //void dumpVisitor::visit_pre_literalInt(literalInt* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";

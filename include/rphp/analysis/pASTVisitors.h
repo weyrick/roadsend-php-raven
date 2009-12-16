@@ -80,6 +80,7 @@ public:
 
     void visit_pre_var(var*);
     void visit_pre_unaryOp(unaryOp* n);
+    void visit_pre_literalString(literalString* n);
 
 };
 
