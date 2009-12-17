@@ -29,41 +29,25 @@ namespace rphp { namespace AST {
 class pBaseTransformer {
 private:
 
-    typedef void (pBaseTransformer::*dispatchFunction)(stmt *);
-    typedef bool (pBaseTransformer::*childDispatchFunction)(stmt *);
+    typedef stmt* (pBaseTransformer::*dispatchFunction)(stmt *);
 
     static dispatchFunction preDispatchTable_[];
     static dispatchFunction postDispatchTable_[];
-    static childDispatchFunction childrenDispatchTable_[];
-
-protected:
-    static const char* nodeDescTable_[];
 
 public:
     virtual ~pBaseTransformer(void) { }
 
-    // root dispatch
-    void visit(stmt*);
-    virtual void visitChildren(stmt*);
-
-    virtual void visit_pre_stmt(stmt* ) { }
-    virtual void visit_post_stmt(stmt* ) { }
-
-    virtual void visit_pre_expr(expr* ) { }
-    virtual void visit_post_expr(expr* ) { }
+    // root transform
+    stmt* transform(stmt*);
 
     // PRE
-#define STMT(CLASS, PARENT) virtual void visit_pre_##CLASS(CLASS *) { }
+#define STMT(CLASS, PARENT) virtual PARENT * transform_pre_##CLASS(CLASS *n) { return n; }
 #include "rphp/analysis/astNodes.def"
 
     // POST
-#define STMT(CLASS, PARENT) virtual void visit_post_##CLASS(CLASS *) { }
+#define STMT(CLASS, PARENT) virtual PARENT * transform_post_##CLASS(CLASS *n) { return n; }
 #include "rphp/analysis/astNodes.def"
 
-    // CHILDREN
-    // for custom children handler, define and return true
-#define STMT(CLASS, PARENT) virtual bool visit_children_##CLASS(CLASS *) { return false; }
-#include "rphp/analysis/astNodes.def"
 
 };
 

@@ -28,64 +28,49 @@ namespace rphp { namespace AST {
 
 pBaseTransformer::dispatchFunction pBaseTransformer::preDispatchTable_[] = {
 
-#define STMT(CLASS, PARENT) reinterpret_cast<dispatchFunction>( &pBaseTransformer::visit_pre_##CLASS ),
+#define STMT(CLASS, PARENT) reinterpret_cast<dispatchFunction>( &pBaseTransformer::transform_pre_##CLASS ),
 #include "rphp/analysis/astNodes.def"
 
 };
 
 pBaseTransformer::dispatchFunction pBaseTransformer::postDispatchTable_[] = {
 
-#define STMT(CLASS, PARENT) reinterpret_cast<dispatchFunction>( &pBaseTransformer::visit_post_##CLASS ),
+#define STMT(CLASS, PARENT) reinterpret_cast<dispatchFunction>( &pBaseTransformer::transform_post_##CLASS ),
 #include "rphp/analysis/astNodes.def"
 
 };
 
-pBaseTransformer::childDispatchFunction pBaseTransformer::childrenDispatchTable_[] = {
+stmt* pBaseTransformer::transform(stmt* s) {
 
-#define STMT(CLASS, PARENT) reinterpret_cast<childDispatchFunction>( &pBaseTransformer::visit_children_##CLASS ),
-#include "rphp/analysis/astNodes.def"
-
-};
-
-const char* pBaseTransformer::nodeDescTable_[] = {
-#define STMT(CLASS, PARENT) #CLASS,
-#include "rphp/analysis/astNodes.def"
-};
-
-void pBaseTransformer::visit(stmt* s) {
+    stmt* rNode;
 
     // PRE
-    visit_pre_stmt(s);
-    if (expr* n = dyn_cast<expr>(s))
-        visit_pre_expr(n);
-
-    (this->*preDispatchTable_[s->getKind()])(s);
+    rNode = (this->*preDispatchTable_[s->getKind()])(s);
+    if (rNode != s) {
+        s = rNode;
+    }
 
     // CHILDREN
-    // we always try the custom first, and fall back to the standard unless
-    // the custom returns true
-    if ((this->*childrenDispatchTable_[s->getKind()])(s) == false)
-        visitChildren(s);
-
-    // POST
-    (this->*postDispatchTable_[s->getKind()])(s);
-
-    if (expr* n = dyn_cast<expr>(s))
-        visit_post_expr(n);
-    visit_post_stmt(s);
-
-}
-
-void pBaseTransformer::visitChildren(stmt* s) {
-
     stmt* child(0);
     for (stmt::child_iterator i = s->child_begin(), e = s->child_end(); i != e; ) {
       if ( (child = *i++) ) {
-          visit(child);
+          rNode = transform(child);
+          if (rNode != child) {
+              *i = rNode;
+          }
       }
     }
 
+    // POST
+    rNode = (this->*postDispatchTable_[s->getKind()])(s);
+    if (rNode != s) {
+        s = rNode;
+    }
+
+    return s;
+
 }
+
 
 } } // namespace
 
