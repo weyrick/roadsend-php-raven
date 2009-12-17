@@ -79,6 +79,7 @@ set(PARSER_SRC_FILES
   pParser.cpp
   pSourceModule.cpp
   pPassManager.cpp
+  passes/SimplifyStrings.cpp
 )
 
 set_source_files_properties( ${PARSER_SRC_FILES}
