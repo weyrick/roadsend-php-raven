@@ -23,6 +23,7 @@
 #define RPHP_PTRANSFORMER_H_
 
 #include "rphp/analysis/pAST.h"
+#include "rphp/analysis/pParseContext.h"
 
 namespace rphp { namespace AST {
 
@@ -34,8 +35,11 @@ private:
     static dispatchFunction preDispatchTable_[];
     static dispatchFunction postDispatchTable_[];
 
+    pParseContext& context_;
+
 public:
-    virtual ~pBaseTransformer(void) { }
+    pBaseTransformer(pParseContext& C): context_(C) { }
+    virtual ~pBaseTransformer() { }
 
     // root transform
     stmt* transform(stmt*);
