@@ -209,6 +209,15 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
   std::cerr << "Parser stack overflow" << std::endl;
 }   
 
+/** ASSOCIATIVITY AND PRECEDENCE (low to high) **/
+%left T_COMMA.
+%right T_ASSIGN T_ECHO.
+%left T_REF.
+%left T_PLUS T_MINUS T_DOT.
+%right T_NOT.
+%right T_VARIABLE.
+
+/** GOAL **/
 %type module {int}
 module ::= statement_list(LIST). { pMod->setAST(LIST); delete LIST; }
 
@@ -322,6 +331,7 @@ expr(A) ::= lval(B). { A = B; }
 expr(A) ::= functionInvoke(B). { A = B; }
 expr(A) ::= constructorInvoke(B). { A = B; }
 expr(A) ::= unaryOp(B). { A = B; }
+expr(A) ::= binaryOp(B). { A = B; }
 
 /** LITERALS **/
 %type literal {AST::literalExpr*}
@@ -434,6 +444,14 @@ unaryOp(A) ::= T_MINUS expr(R).
 unaryOp(A) ::= T_NOT expr(R).
 {
     A = new (pMod->context()) AST::unaryOp(R, AST::unaryOp::LOGICALNOT);
+    A->setLine(CURRENT_LINE);
+}
+
+/** BINARY OPERATORS **/
+%type binaryOp {AST::binaryOp*}
+binaryOp(A) ::= expr(L) T_DOT expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::CONCAT);
     A->setLine(CURRENT_LINE);
 }
 

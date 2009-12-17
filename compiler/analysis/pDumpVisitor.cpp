@@ -72,6 +72,16 @@ void pDumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
     }
 }
 
+void pDumpVisitor::visit_pre_binaryOp(binaryOp* n)  {
+    showindent();
+    std::cout << "op type: ";
+    switch (n->opKind()) {
+    case binaryOp::CONCAT:
+        std::cout << "string concat\n";
+        break;
+    }
+}
+
 void pDumpVisitor::visit_pre_literalString(literalString* n)  {
     showindent();
     if (n->isBinary()) {

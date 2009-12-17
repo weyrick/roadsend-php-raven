@@ -496,26 +496,6 @@ public:
 
 };
 
-/*
-// NODE: logical not
-class logicalNot: public expr {
-
-    expr* rVal_;
-
-public:
-    logicalNot(expr* rVal): expr(logicalNotKind), rVal_(rVal) { }
-
-    expr* rVal(void) { return rVal_; }
-
-    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
-    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
-
-    static bool classof(const logicalNot* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == logicalNotKind; }
-
-};
-*/
-
 // NODE: echo statement
 class echoStmt: public stmt {
 
@@ -624,24 +604,6 @@ public:
 
 };
 
-/*
-// NODE: constructor invoke
-class constructorInvoke: public functionInvoke {
-
-public:
-    constructorInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList):
-        functionInvoke(name, C, argList, constructorInvokeKind)
-    {
-
-    }
-
-    static bool classof(const constructorInvoke* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == constructorInvokeKind; }
-
-};
-
-*/
-
 // NOP statement such as ;;
 class emptyStmt: public stmt {
 
@@ -686,6 +648,38 @@ public:
 
     static bool classof(const unaryOp* s) { return true; }
     static bool classof(const stmt* s) { return s->getKind() == unaryOpKind; }
+
+};
+
+// NODE: binary operator
+class binaryOp: public expr {
+
+public:
+    enum opKind { CONCAT };
+
+private:
+    enum { LVAL, RVAL, END_EXPR };
+    stmt* children_[END_EXPR];
+    opKind opKind_;
+
+public:
+
+    binaryOp(expr* lVal, expr* rVal, opKind k): expr(binaryOpKind), children_(), opKind_(k)
+    {
+        children_[LVAL] = static_cast<stmt*>(lVal);
+        children_[RVAL] = static_cast<stmt*>(rVal);
+    }
+
+    expr* lVal(void) { return static_cast<expr*>(children_[LVAL]); }
+    expr* rVal(void) { return static_cast<expr*>(children_[RVAL]); }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    static bool classof(const binaryOp* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == binaryOpKind; }
+
+    opKind opKind(void) const { return opKind_; }
 
 };
 
