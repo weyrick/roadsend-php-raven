@@ -36,57 +36,10 @@ namespace rphp {
 void pDumpTarget::execute(void) {
 
     switch (type_) {
-        case Tokens:
-            dumpTokens();
-            break;
-            /*
-        case Preprocessor:
-            dumpPre();
-            break;
-            */
-        case AST:
-            dumpAST();
-            break;
         case IR:
             dumpIR();
             break;
     }
-
-}
-
-// lex and then dump tokens from the given source file
-void pDumpTarget::dumpTokens(void) {
-
-    pSourceFile* source = new pSourceFile(sourceFile_);
-    lexer::pLexer l(source);
-    l.dumpTokens();
-    delete source;
-
-}
-
-// preprocess the source file, dump to stdout
-/*
-void pDumpTarget::dumpPre(void) {
-
-    pSourceFile* source = new pSourceFile(sourceFile_);
-    lexer::pLexer l(source);
-    bool success = l.preprocess();
-    if (!success) {
-        std::cout << "preprocess failed due to lexer error" << std::endl;
-    }
-    else {
-        std::cout << l.contents();
-    }
-    delete source;
-
-}
-*/
-
-// dump the parse tree from the given source file
-void pDumpTarget::dumpAST(void) {
-
-    pSourceModule m(sourceFile_);
-    m.dumpAST();
 
 }
 

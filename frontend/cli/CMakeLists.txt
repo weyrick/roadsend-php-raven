@@ -9,6 +9,8 @@ include_directories (${CMAKE_SOURCE_DIR}
                      ${Boost_INCLUDE_DIRS}
                      ${LLVM_INCLUDE_DIR}
                      ${GMP_INCLUDE_DIR}
+                     # this one is for rphp_grammar generated files
+                     ${PROJECT_BINARY_DIR}/compiler/analysis
                     )
 
 set(RPHP_SRC_FILES
@@ -21,9 +23,12 @@ set(RPHP_SRC_FILES
 #  ${LLVM_LIBS_JIT_OBJECTS}
 #)
 
+set(RPHP_ANALYSIS_FILES
+    rphp-analyzer.cpp)
+
 add_executable( rphp ${RPHP_SRC_FILES} )
 #add_executable( rphpi ${RPHPI_SRC_FILES} )
-
+add_executable( rphp-analyzer ${RPHP_ANALYSIS_FILES} )
 
 set_target_properties( rphp
                        PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
@@ -32,6 +37,10 @@ set_target_properties( rphp
 #set_target_properties( rphpi
 #                       PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
 #                     )
+
+set_target_properties( rphp-analyzer
+                       PROPERTIES LINK_FLAGS ${LLVM_LDFLAGS}
+                     )
 
 target_link_libraries( rphp
 #                       rphp-llvm-jit
@@ -51,4 +60,8 @@ target_link_libraries( rphp
 #                       ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
 #                       )                       
 
- 
+target_link_libraries ( rphp-analyzer
+                        rphp-analysis
+                       ${LLVM_LIBS_SUPPORT} 
+                       ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
+			)

@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -30,18 +30,12 @@ namespace rphp {
 class pDumpTarget: public pTarget {
 
 public:
-    static const int Tokens = 0;
-//    static const int Preprocessor = 1;
-    static const int AST = 2;
-    static const int IR = 3;
+    static const int IR = 0;
 
 protected:
     pSourceFileDesc sourceFile_;
     int type_;
 
-    void dumpTokens();
-    void dumpAST();
-    //void dumpPre();
     void dumpIR();
 
 public:

@@ -23,10 +23,8 @@
 #include "rphp/analysis/pSourceFile.h"
 
 #include "rphp/analysis/pBaseVisitor.h"
+#include "rphp/analysis/pBaseTransformer.h"
 #include "rphp/analysis/pParser.h"
-
-#include "rphp/analysis/passes/DumpAST.h"
-#include "rphp/analysis/passes/SimplifyStrings.h"
 
 namespace rphp {
 
@@ -42,11 +40,6 @@ pSourceModule::pSourceModule(const pSourceFileDesc& file):
 
 pSourceModule::~pSourceModule() {
     // cleanup AST
-    /*
-    for(AST::statementList::iterator s = ast_.begin(); s != ast_.end(); ++s) {
-        (*s)->destroy(context_);
-    }
-    */
     ast_->destroy(context_);
     delete source_;
 }
@@ -71,21 +64,6 @@ void pSourceModule::applyVisitor(AST::pBaseVisitor* v) {
 
 void pSourceModule::applyTransform(AST::pBaseTransformer* t) {
     t->transform(ast_);
-}
-
-void pSourceModule::dumpAST() {
-
-    AST::Pass::DumpAST v;
-
-    v.run(this);
-
-    AST::Pass::SimplifyStrings s;
-    s.run(this);
-
-    v.run(this);
-
-    context_.allocator().PrintStats();
-
 }
 
 } // namespace

@@ -23,7 +23,18 @@
 #include "rphp/analysis/pPass.h"
 #include "rphp/analysis/pSourceModule.h"
 
-namespace rphp { namespace AST {
+namespace rphp {
+
+pPassManager::~pPassManager(void) {
+
+    // free passes
+    for (queueType::iterator i = passQueue_.begin();
+         i != passQueue_.end();
+         ++i) {
+        delete *i;
+    }
+
+}
 
 void pPassManager::run(pSourceModule* m) {
 
@@ -36,4 +47,4 @@ void pPassManager::run(pSourceModule* m) {
 }
 
 
-} } // namespace
+} // namespace

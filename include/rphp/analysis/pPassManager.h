@@ -29,12 +29,12 @@ namespace rphp {
 class pSourceModule;
 
 namespace AST {
-
 class pPass;
+}
 
 class pPassManager {
 public:
-    typedef std::vector<pPass*> queueType;
+    typedef std::vector<AST::pPass*> queueType;
 
 private:
 
@@ -46,15 +46,23 @@ private:
 public:
 
     pPassManager(void): passQueue_() { }
+    ~pPassManager(void);
 
-    void addPass(pPass* p) {
+    /// add a pass. takes ownership.
+    void addPass(AST::pPass* p) {
         passQueue_.push_back(p);
+    }
+
+    template <typename PassType>
+    void addPass(void) {
+        PassType* P = new PassType();
+        addPass(P);
     }
 
     void run(pSourceModule* m);
 
 };
 
-} } // namespace
+} // namespace
 
 #endif /* RPHP_PPASSMANAGER_H_ */

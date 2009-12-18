@@ -62,9 +62,6 @@ public:
     void applyVisitor(AST::pBaseVisitor* v);
     void applyTransform(AST::pBaseTransformer* t);
 
-    // DEBUG
-    void dumpAST();
-
 };
 
 } // namespace

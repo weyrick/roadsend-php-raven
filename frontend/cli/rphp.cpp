@@ -1,3 +1,23 @@
+/* ***** BEGIN LICENSE BLOCK *****
+;; Roadsend PHP Compiler
+;;
+;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License
+;; as published by the Free Software Foundation; either version 2
+;; of the License, or (at your option) any later version.
+;;
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with this program; if not, write to the Free Software
+;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
+   ***** END LICENSE BLOCK *****
+*/
 
 #include <exception>
 #include <iostream>
@@ -32,10 +52,7 @@ int main( int argc, char* argv[] )
 
     // command line options
     cl::opt<std::string> inputFile(cl::Positional, cl::desc("<input file>"), cl::Required);
-    cl::opt<bool> dumpToks ("dump-toks", cl::desc("Dump tokens from lexer"));
     cl::opt<bool> dumpIR ("dump-ir", cl::desc("Dump IR "));
-    cl::opt<bool> dumpAST ("dump-ast", cl::desc("Dump AST"));
-    //cl::opt<bool> dumpPre ("dump-pre", cl::desc("Preprocess the source file and dump it to stdout"));
     cl::opt<int> verbosity ("v", cl::desc("Verbosity level (0=Silent/1=Info/2=Full/3+=Debug)"));
 
     cl::opt<bool> iSF ("f", cl::desc("Execute source file immediately"));
@@ -120,20 +137,10 @@ int main( int argc, char* argv[] )
         target = saTarget;
     }
 
-    else*/ if (dumpToks) {
-        target = new pDumpTarget(inFile, pDumpTarget::Tokens);
-    }
-    else if (dumpAST) {
-        target = new pDumpTarget(inFile, pDumpTarget::AST);
-    }
-    else if (dumpIR) {
+    else*/
+    if (dumpIR) {
         target = new pDumpTarget(inFile, pDumpTarget::IR);
     }
-    /*
-    else if (dumpPre) {
-        target = new pDumpTarget(inFile, pDumpTarget::Preprocessor);
-    }
-    */
     else {
         /*
         // default: compile and link single php script to native binary
