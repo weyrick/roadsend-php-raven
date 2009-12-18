@@ -26,6 +26,8 @@
 #include <llvm/Support/CommandLine.h>
 #include <llvm/System/Path.h>
 
+#include <boost/algorithm/string.hpp>
+
 #include "rphp/analysis/pPassManager.h"
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/analysis/pSourceFile.h"
@@ -81,7 +83,18 @@ int main( int argc, char* argv[] )
     }
     else if (!passListText.empty()) {
         // custom list of passes
-        std::cout << "Custom pass list\n";
+        std::vector<std::string> passes;
+        boost::split(passes, passListText, boost::is_any_of(","));
+        for (std::vector<std::string>::iterator i = passes.begin();
+             i != passes.end();
+             ++i) {
+            if (*i == "dumpast") {
+                passManager.addPass<AST::Pass::DumpAST>();
+            }
+            else if (*i == "simplifystrings") {
+                passManager.addPass<AST::Pass::SimplifyStrings>();
+            }
+        }
     }
     else {
         std::cout << "no action\n";
