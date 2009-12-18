@@ -28,6 +28,8 @@ namespace rphp { namespace AST { namespace Pass {
 
 class SimplifyStrings: public pBaseTransformer {
 
+    expr* simplifyString(pSourceCharIterator in_b, pSourceCharIterator in_e);
+
 public:
     SimplifyStrings():
             pBaseTransformer("SimplifyStrings","Convert double quoted strings to their more simple counterparts")
