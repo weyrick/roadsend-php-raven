@@ -21,6 +21,12 @@
 
 #include "rphp/analysis/passes/SimplifyStrings.h"
 #include "rphp/analysis/pSourceModule.h"
+#include "rphp/analysis/lexer/consts.hpp"
+
+// NOTE: these are generated during build, and so live
+// in the build directory (not source directory)
+#include "rphp_grammar.h" // token defines
+#include "rphp_dq_lexer.h"
 
 namespace rphp { namespace AST { namespace Pass {
 
@@ -36,6 +42,51 @@ expr* SimplifyStrings::transform_post_literalString(literalString* n) {
     // only work on non-simple strings
     if (!n->isSimple()) {
 
+        pUInt dqID(0);
+        std::size_t dqUniqueID(0);
+        pSourceString buffer;
+
+        // we now use the dq lexer to find the tokens within
+        // this double quoted string
+        pSourceCharIterator dqTokStart(n->getStringVal().begin());
+        pSourceCharIterator dqTokEnd(n->getStringVal().begin());
+        while ( (dqID = rphp_nextDQToken(dqTokEnd, n->getStringVal().end(), dqUniqueID)) )
+        {
+
+            // iterate over DQ tokens
+            switch(dqID) {
+            case T_DQ_DONE:
+                goto endOfDQ; // omg!
+            case T_DQ_ESCAPE:
+                // replace with non escaped dq
+                buffer.push_back('"');
+                break;
+            case T_DQ_DQ:
+                // replace with single
+                buffer.push_back('\'');
+                break;
+            case T_DQ_NEWLINE:
+                // replace newline escape sequence with literal newline
+                buffer.push_back('\n');
+                break;
+            case T_DQ_VARIABLE:
+                // replace with concatination
+                // XXX
+                break;
+            case boost::lexer::npos:
+            default:
+                // passthrough
+                buffer.append(dqTokStart, dqTokEnd);
+                break;
+            }
+
+            dqTokStart = dqTokEnd;
+
+        }
+
+        endOfDQ:
+
+        n->setStringVal(buffer);
         n->setIsSimple(true);
         node = n;
 

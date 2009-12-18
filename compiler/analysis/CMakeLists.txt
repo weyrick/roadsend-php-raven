@@ -50,20 +50,20 @@ ADD_CUSTOM_COMMAND(
    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/rphp-lexer-gen
    DEPENDS rphp-lexer-gen
    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h
-#          ${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h
+          ${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h
    )
 
 # Since rphp_lexer.cpp does not exists yet when cmake is run, mark
 # it as generated
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h GENERATED)
-#SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h GENERATED)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h GENERATED)
 # make lexer depend on generator so it regenerates if we change it
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer_src/rphp-lexer-gen.cpp)
-#SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer_src/rphp-lexer-gen.cpp)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer_src/rphp-lexer-gen.cpp)
 
 # pLexer depends on generated lexer
 SET_SOURCE_FILES_PROPERTIES(pLexer.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h)
-
+SET_SOURCE_FILES_PROPERTIES(passes/SimplifyStrings.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h)
 
 ####
 

@@ -39,7 +39,6 @@ int main(void) {
     boost::lexer::rules langRules_((boost::lexer::regex_flags)(boost::lexer::icase | boost::lexer::dot_not_newline));
     boost::lexer::state_machine langState_;
 
-    /*
     // double quote lexer
     boost::lexer::rules dqRules_;
     boost::lexer::state_machine dqState_;
@@ -59,7 +58,6 @@ int main(void) {
     }
     boost::lexer::generate_cpp (dqState_, outFile, false, true, true, "rphp_nextDQToken");
     outFile.close();
-    */
 
     // language rules
     langRules_.add_state("PHP");
@@ -209,7 +207,7 @@ int main(void) {
 
     std::ofstream outFile2("rphp_lang_lexer.h", std::ios::out|std::ios::trunc);
     if (!outFile2.is_open()) {
-        std::cerr << "unable to open output file rphp_dq_lexer.h" << std::endl;
+        std::cerr << "unable to open output file rphp_lang_lexer.h" << std::endl;
         exit(-1);
     }
     boost::lexer::generate_cpp (langState_, outFile2, false, true, true, "rphp_nextLangToken");
