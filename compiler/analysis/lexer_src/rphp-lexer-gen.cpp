@@ -33,6 +33,8 @@
 #include <iostream>
 #include <fstream>
 
+#define IDCHARS "[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*"
+
 int main(void) {
 
     // language lexer
@@ -44,10 +46,11 @@ int main(void) {
     boost::lexer::state_machine dqState_;
 
     // double quote rules
+    dqRules_.add_macro ("IDCHARS", IDCHARS);
     dqRules_.add("INITIAL", "\\\\n", T_DQ_NEWLINE, ".");
     dqRules_.add("INITIAL", "\\\"", T_DQ_DQ, ".");
     dqRules_.add("INITIAL", "\\\\\\\"", T_DQ_ESCAPE, ".");
-    dqRules_.add("INITIAL", "\\$[a-zA-Z_][a-zA-Z0-9_]*", T_DQ_VARIABLE, ".");
+    dqRules_.add("INITIAL", "\\${IDCHARS}", T_DQ_VARIABLE, ".");
     boost::lexer::generator::build (dqRules_, dqState_);
     boost::lexer::generator::minimise(dqState_);
 
@@ -65,7 +68,7 @@ int main(void) {
     langRules_.add_macro ("DIGIT", "[0-9]");
     langRules_.add_macro ("OCTALDIGIT", "[0-7]");
     langRules_.add_macro ("HEXDIGIT", "[0-9a-fA-F]");
-    langRules_.add_macro ("IDCHARS", "[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*");
+    langRules_.add_macro ("IDCHARS", IDCHARS);
 
     langRules_.add("INITIAL", "<\\?|<\\?PHP", T_OPEN_TAG, "PHP"); // go to PHP state
     langRules_.add("INITIAL", ".+|\\n+", T_INLINE_HTML, ".");
