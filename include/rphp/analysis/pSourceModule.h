@@ -33,6 +33,7 @@ class pSourceFile;
 namespace AST {
     class stmt;
     class pBaseVisitor;
+    class pBaseTransformer;
 }
 
 class pSourceModule {
@@ -54,11 +55,12 @@ public:
     const AST::pParseContext& context(void) const { return context_; }
     AST::pParseContext& context(void) { return context_; }
 
-    // AST TRAVERSAL
+    // AST TRAVERSAL AND TRANSFORM
     AST::block* getAST() { return ast_; }
     const AST::block* getAST() const { return ast_; }
     void setAST(const AST::statementList* list);
     void applyVisitor(AST::pBaseVisitor* v);
+    void applyTransform(AST::pBaseTransformer* t);
 
     // DEBUG
     void dumpAST();

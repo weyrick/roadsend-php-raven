@@ -8,7 +8,7 @@
 ;; as published by the Free Software Foundation; either version 2
 ;; of the License, or (at your option) any later version.
 ;;
-;; This program is distributed in the hope that it will be useful,
+;; This program is distributed in the hope that it will be u    seful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
@@ -23,8 +23,10 @@
 #include "rphp/analysis/pSourceFile.h"
 
 #include "rphp/analysis/pBaseVisitor.h"
-#include "rphp/analysis/pDumpVisitor.h"
 #include "rphp/analysis/pParser.h"
+
+#include "rphp/analysis/passes/DumpAST.h"
+#include "rphp/analysis/passes/SimplifyStrings.h"
 
 namespace rphp {
 
@@ -64,18 +66,24 @@ void pSourceModule::setAST(const AST::statementList* list) {
 }
 
 void pSourceModule::applyVisitor(AST::pBaseVisitor* v) {
-    /*
-    for(AST::statementList::iterator s = ast_.begin(); s != ast_.end(); ++s) {
-        v->visit(*s);
-    }
-    */
     v->visit(ast_);
+}
+
+void pSourceModule::applyTransform(AST::pBaseTransformer* t) {
+    t->transform(ast_);
 }
 
 void pSourceModule::dumpAST() {
 
-    AST::pDumpVisitor v;
-    applyVisitor(&v);
+    AST::Pass::DumpAST v;
+
+    v.run(this);
+
+    AST::Pass::SimplifyStrings s;
+    s.run(this);
+
+    v.run(this);
+
     context_.allocator().PrintStats();
 
 }

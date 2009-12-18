@@ -24,10 +24,11 @@
 
 #include "rphp/analysis/pAST.h"
 #include "rphp/analysis/pParseContext.h"
+#include "rphp/analysis/pPass.h"
 
 namespace rphp { namespace AST {
 
-class pBaseTransformer {
+class pBaseTransformer: public pPass {
 private:
 
     typedef stmt* (pBaseTransformer::*dispatchFunction)(stmt *);
@@ -35,11 +36,24 @@ private:
     static dispatchFunction preDispatchTable_[];
     static dispatchFunction postDispatchTable_[];
 
-    pParseContext& context_;
+    pParseContext* context_;
 
 public:
-    pBaseTransformer(pParseContext& C): context_(C) { }
+    pBaseTransformer(const char* name, const char* desc): pPass(name,desc), context_(0) { }
     virtual ~pBaseTransformer() { }
+
+    void setContext(pParseContext* c) {
+        context_ = c;
+    }
+
+    pParseContext* context(void)
+    {
+        assert(context_ != 0 && "context was never set!");
+        return context_;
+    }
+
+    // pass
+    void run(pSourceModule* m);
 
     // root transform
     stmt* transform(stmt*);

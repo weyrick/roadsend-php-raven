@@ -20,6 +20,7 @@
 */
 
 #include "rphp/analysis/pBaseTransformer.h"
+#include "rphp/analysis/pSourceModule.h"
 
 #include <iostream>
 #include <unicode/ustream.h>
@@ -40,6 +41,11 @@ pBaseTransformer::dispatchFunction pBaseTransformer::postDispatchTable_[] = {
 
 };
 
+void pBaseTransformer::run(pSourceModule* m) {
+    setContext(&m->context());
+    m->applyTransform(this);
+}
+
 stmt* pBaseTransformer::transform(stmt* s) {
 
     stmt* rNode;
@@ -47,7 +53,7 @@ stmt* pBaseTransformer::transform(stmt* s) {
     // PRE
     rNode = (this->*preDispatchTable_[s->getKind()])(s);
     if (rNode != s) {
-        s->destroy(context_);
+        s->destroy(*context_);
         s = rNode;
     }
 
@@ -57,7 +63,7 @@ stmt* pBaseTransformer::transform(stmt* s) {
       if ( (child = *i++) ) {
           rNode = transform(child);
           if (rNode != child) {
-              (*i)->destroy(context_);
+              (*i)->destroy(*context_);
               *i = rNode;
           }
       }
@@ -66,7 +72,7 @@ stmt* pBaseTransformer::transform(stmt* s) {
     // POST
     rNode = (this->*postDispatchTable_[s->getKind()])(s);
     if (rNode != s) {
-        s->destroy(context_);
+        s->destroy(*context_);
         s = rNode;
     }
 

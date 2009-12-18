@@ -319,6 +319,7 @@ public:
 // literal expression base class
 class literalExpr: public expr {
 
+protected:
     pSourceString stringVal_;
 
 public:
@@ -330,7 +331,7 @@ public:
     literalExpr(nodeKind k): expr(k), stringVal_() { }
     literalExpr(nodeKind k, const pSourceRange& v): expr(k), stringVal_(v.begin(), v.end()) { }
 
-    const pSourceString& getStringVal(void) const {
+    virtual const pSourceString& getStringVal(void) const {
         return stringVal_;
     }
 
@@ -351,15 +352,62 @@ class literalString: public literalExpr {
     bool isBinary_;
     bool isSimple_; // i.e., single quoted
 
+    // this is storage for a string that was artificially created
+    // during a pass and therefore doesn't exist in the original source
+    pSourceString* artificial_;
+
 public:
-    literalString(bool isBinary): literalExpr(literalStringKind), isBinary_(isBinary) { }
-    literalString(const pSourceRange& v, bool isBinary): literalExpr(literalStringKind, v), isBinary_(isBinary) { }
-    literalString(const pSourceRange& v, nodeKind k): literalExpr(k, v), isBinary_(false) { }
+
+    // empty source string
+    literalString(bool isBinary):
+            literalExpr(literalStringKind),
+            isBinary_(isBinary),
+            isSimple_(true),
+            artificial_(0) { }
+
+    // normal source string
+    literalString(const pSourceRange& v, bool isBinary):
+            literalExpr(literalStringKind, v),
+            isBinary_(isBinary),
+            isSimple_(true),
+            artificial_(0) { }
+
+    // extending string (inline html)
+    literalString(const pSourceRange& v, nodeKind k):
+            literalExpr(k, v),
+            isBinary_(false),
+            isSimple_(true),
+            artificial_(0) { }
+
+    // artificial constructor (creates storage space)
+    literalString(llvm::StringRef r):
+            literalExpr(literalStringKind),
+            isBinary_(true),
+            isSimple_(true),
+            artificial_(new pSourceString(r)) { }
+
+    ~literalString(void) {
+        if (artificial_)
+            delete artificial_;
+    }
 
     bool isBinary(void) const { return isBinary_; }
 
     void setIsSimple(bool s)  {
         isSimple_ = s;
+    }
+
+    void setStringVal(llvm::StringRef s) {
+        if (artificial_)
+            delete artificial_;
+        artificial_ = new pSourceString(s);
+    }
+
+    const pSourceString& getStringVal(void) const {
+        if (artificial_)
+            return *artificial_;
+        else
+            return stringVal_;
     }
 
     bool isSimple(void) const { return isSimple_; }

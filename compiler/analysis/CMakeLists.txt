@@ -17,7 +17,7 @@ include_directories (
 # http://www.cmake.org/pipermail/cmake/2002-September/003028.html
 
 add_executable( lemon-pg
-                lemon/lemon.c )
+                grammar_src/lemon.c )
 
 ADD_CUSTOM_COMMAND(
    # note we do this copy because lemon will output to the source directory instead of the build
@@ -25,13 +25,13 @@ ADD_CUSTOM_COMMAND(
    # alternative (read: portable) way is to change lemon.c to not include the base directory
    # when outputing the generating parser files, but instead strip it and use current working
    COMMAND cp
-   ARGS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/rphp_grammar.y ${CMAKE_CURRENT_BINARY_DIR}
+   ARGS ${CMAKE_CURRENT_SOURCE_DIR}/grammar_src/rphp_grammar.y ${CMAKE_CURRENT_BINARY_DIR}
    COMMAND cp
-   ARGS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/lempar.c ${CMAKE_CURRENT_BINARY_DIR}
+   ARGS ${CMAKE_CURRENT_SOURCE_DIR}/grammar_src/lempar.c ${CMAKE_CURRENT_BINARY_DIR}
    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/lemon-pg
    ARGS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.y
    DEPENDS lemon-pg
-   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lemon/rphp_grammar.y
+   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/grammar_src/rphp_grammar.y
    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
 
 # Since rphp_grammar.c does not exists yet when cmake is run, mark
@@ -41,10 +41,10 @@ SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp GENERAT
 #### LEXER ####
 
 add_executable( rphp-lexer-gen
-                lexer/rphp-lexer-gen.cpp )
+                lexer_src/rphp-lexer-gen.cpp )
 
 # we need rphp_grammar.h
-SET_SOURCE_FILES_PROPERTIES(lexer/rphp-lexer-gen.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
+SET_SOURCE_FILES_PROPERTIES(lexer_src/rphp-lexer-gen.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
 
 ADD_CUSTOM_COMMAND(
    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/rphp-lexer-gen
@@ -58,8 +58,8 @@ ADD_CUSTOM_COMMAND(
 SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h GENERATED)
 #SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h GENERATED)
 # make lexer depend on generator so it regenerates if we change it
-SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer/rphp-lexer-gen.cpp)
-#SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer/rphp-lexer-gen.cpp)
+SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer_src/rphp-lexer-gen.cpp)
+#SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_BINARY_DIR}/rphp_dq_lexer.h OBJECT_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/lexer_src/rphp-lexer-gen.cpp)
 
 # pLexer depends on generated lexer
 SET_SOURCE_FILES_PROPERTIES(pLexer.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_lang_lexer.h)
@@ -72,7 +72,6 @@ set(PARSER_SRC_FILES
   pAST.cpp
   pBaseVisitor.cpp
   pBaseTransformer.cpp
-  pDumpVisitor.cpp
   pParseContext.cpp
   pSourceFile.cpp
   pLexer.cpp
@@ -80,6 +79,7 @@ set(PARSER_SRC_FILES
   pSourceModule.cpp
   pPassManager.cpp
   passes/SimplifyStrings.cpp
+  passes/DumpAST.cpp
 )
 
 set_source_files_properties( ${PARSER_SRC_FILES}

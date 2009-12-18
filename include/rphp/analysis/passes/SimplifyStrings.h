@@ -22,16 +22,19 @@
 #ifndef RPHP_SIMPLIFYSTRINGS_H_
 #define RPHP_SIMPLIFYSTRINGS_H_
 
-#include "rphp/analysis/pPass.h"
 #include "rphp/analysis/pBaseTransformer.h"
 
 namespace rphp { namespace AST { namespace Pass {
 
-class SimplifyStrings: public pBaseTransformer, pPass {
+class SimplifyStrings: public pBaseTransformer {
 
 public:
+    SimplifyStrings():
+            pBaseTransformer("SimplifyStrings","Convert double quoted strings to their more simple counterparts")
+    {
+    }
 
-    expr* transform_pre_binaryOp(binaryOp* n);
+    expr* transform_post_literalString(literalString* n);
 
 };
 

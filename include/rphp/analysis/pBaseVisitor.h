@@ -23,10 +23,11 @@
 #define RPHP_PBASEVISITOR_H_
 
 #include "rphp/analysis/pAST.h"
+#include "rphp/analysis/pPass.h"
 
 namespace rphp { namespace AST {
 
-class pBaseVisitor {
+class pBaseVisitor: public pPass {
 private:
 
     typedef void (pBaseVisitor::*dispatchFunction)(stmt *);
@@ -40,7 +41,11 @@ protected:
     static const char* nodeDescTable_[];
 
 public:
+    pBaseVisitor(const char* name, const char* desc): pPass(name,desc) { }
     virtual ~pBaseVisitor(void) { }
+
+    // pass
+    void run(pSourceModule* m);
 
     // root dispatch
     void visit(stmt*);

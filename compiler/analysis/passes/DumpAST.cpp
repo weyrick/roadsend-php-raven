@@ -19,44 +19,44 @@
    ***** END LICENSE BLOCK *****
 */
 
-#include "rphp/analysis/pDumpVisitor.h"
+#include "rphp/analysis/passes/DumpAST.h"
 
 #include <iostream>
 #include <unicode/ustream.h>
 
-namespace rphp { namespace AST {
+namespace rphp { namespace AST { namespace Pass {
 
 
-void pDumpVisitor::visit_pre_stmt(stmt* n) {
+void DumpAST::visit_pre_stmt(stmt* n) {
     showindent();
     std::cout << "# line " << n->startLineNum() << "\n";
     showindent();
     std::cout << "(" << nodeDescTable_[n->getKind()] << "\n";
 }
 
-void pDumpVisitor::visit_post_stmt(stmt* n) {
+void DumpAST::visit_post_stmt(stmt* n) {
     showindent();
     std::cout << ") <end " << nodeDescTable_[n->getKind()] << ">\n";
 }
 
-void pDumpVisitor::visitChildren(stmt* s) {
+void DumpAST::visitChildren(stmt* s) {
     indentLevel_+=4;
     pBaseVisitor::visitChildren(s);
     indentLevel_-=4;
 }
 
-void pDumpVisitor::showindent() {
+void DumpAST::showindent() {
     if (indentLevel_)
         std::cout << std::string(indentLevel_, ' ');
 }
 
-void pDumpVisitor::visit_pre_var(var* n) {
+void DumpAST::visit_pre_var(var* n) {
     showindent();
     std::cout << "name: $" << n->name() << "\n";
 }
 
 
-void pDumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
+void DumpAST::visit_pre_unaryOp(unaryOp* n)  {
     showindent();
     std::cout << "op type: ";
     switch (n->opKind()) {
@@ -72,7 +72,7 @@ void pDumpVisitor::visit_pre_unaryOp(unaryOp* n)  {
     }
 }
 
-void pDumpVisitor::visit_pre_binaryOp(binaryOp* n)  {
+void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
     showindent();
     std::cout << "op type: ";
     switch (n->opKind()) {
@@ -82,7 +82,7 @@ void pDumpVisitor::visit_pre_binaryOp(binaryOp* n)  {
     }
 }
 
-void pDumpVisitor::visit_pre_literalString(literalString* n)  {
+void DumpAST::visit_pre_literalString(literalString* n)  {
     showindent();
     if (n->isBinary()) {
         std::cout << "[binary]: \"";
@@ -96,7 +96,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
     std::cout << "simple? " << (n->isSimple() ? "yes" : "no") << "\n";
 }
 
-//void dumpVisitor::visit_pre_functionDecl(functionDecl* n) {
+//void DumpAST::visit_pre_functionDecl(functionDecl* n) {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_functionDecl\n";
 //    /*
@@ -137,7 +137,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //    */
 //}
 //
-//void dumpVisitor::visit_pre_ifStmt(ifStmt* n) {
+//void DumpAST::visit_pre_ifStmt(ifStmt* n) {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_ifStmt\n";
 //    /*
@@ -160,7 +160,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //}
 //
 //
-//void dumpVisitor::visit_pre_inlineHtml(inlineHtml* n)  {
+//void DumpAST::visit_pre_inlineHtml(inlineHtml* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_inlineHtml\n";
 //    /*
@@ -184,7 +184,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //}
 
 //
-//void dumpVisitor::visit_pre_literalInt(literalInt* n)  {
+//void DumpAST::visit_pre_literalInt(literalInt* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_literalInt\n";
 //    /*
@@ -199,7 +199,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //    */
 //}
 //
-//void dumpVisitor::visit_pre_literalFloat(literalFloat* n)  {
+//void DumpAST::visit_pre_literalFloat(literalFloat* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_literalFloat\n";
 //    /*
@@ -212,7 +212,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //    */
 //}
 //
-//void dumpVisitor::visit_pre_literalBool(literalBool* n)  {
+//void DumpAST::visit_pre_literalBool(literalBool* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_literalBool\n";
 //    /*
@@ -228,7 +228,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //    */
 //}
 //
-//void dumpVisitor::visit_pre_literalArray(literalArray* n)  {
+//void DumpAST::visit_pre_literalArray(literalArray* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_literalArray\n";
 //    /*
@@ -272,7 +272,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //}
 //
 //
-//void dumpVisitor::visit_pre_literalNull(literalNull* n)  {
+//void DumpAST::visit_pre_literalNull(literalNull* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_literalNull\n";
 //    /*
@@ -283,7 +283,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //    */
 //}
 //
-//void dumpVisitor::visit_pre_logicalNot(logicalNot* n)  {
+//void DumpAST::visit_pre_logicalNot(logicalNot* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_literalNot\n";
 //    /*
@@ -308,7 +308,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //}
 //
 //
-//void dumpVisitor::visit_pre_assignment(assignment* n)  {
+//void DumpAST::visit_pre_assignment(assignment* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_assignment\n";
 //    /*
@@ -340,7 +340,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //    */
 //}
 //
-//void dumpVisitor::visit_pre_var(var* n)  {
+//void DumpAST::visit_pre_var(var* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_var\n";
 //    /*
@@ -353,7 +353,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //    */
 //}
 //
-//void dumpVisitor::visit_pre_functionInvoke(functionInvoke* n)  {
+//void DumpAST::visit_pre_functionInvoke(functionInvoke* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_finvoke\n";
 //
@@ -383,7 +383,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //
 //}
 //
-//void dumpVisitor::visit_pre_constructorInvoke(constructorInvoke* n)  {
+//void DumpAST::visit_pre_constructorInvoke(constructorInvoke* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_cinvoke\n";
 ///*
@@ -412,7 +412,7 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //
 //}
 //
-//void dumpVisitor::visit_pre_unaryArithmeticOp(unaryArithmeticOp* n)  {
+//void DumpAST::visit_pre_unaryArithmeticOp(unaryArithmeticOp* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_unary\n";
 //    /*
@@ -428,5 +428,5 @@ void pDumpVisitor::visit_pre_literalString(literalString* n)  {
 //    */
 //}
 
-} } // namespace
+} } } // namespace
 

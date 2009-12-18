@@ -19,19 +19,21 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PDUMPVISITOR_H_
-#define RPHP_PDUMPVISITOR_H_
+#ifndef RPHP_DUMPAST_H_
+#define RPHP_DUMPAST_H_
 
 #include "rphp/analysis/pAST.h"
 #include "rphp/analysis/pBaseVisitor.h"
 
-namespace rphp { namespace AST {
+namespace rphp { namespace AST { namespace Pass {
 
-class pDumpVisitor: public pBaseVisitor {
+class DumpAST: public pBaseVisitor {
     int indentLevel_;
     void showindent();
 public:
-    pDumpVisitor(void): indentLevel_(0) { }
+    DumpAST(void):
+            pBaseVisitor("AST Dump","Basic dump of the AST"),
+            indentLevel_(0) { }
 
     void visit_pre_stmt(stmt*);
     void visit_post_stmt(stmt*);
@@ -44,6 +46,6 @@ public:
 
 };
 
-} } // namespace
+} } } // namespace
 
-#endif /* RPHP_PDUMPVISITOR_H_ */
+#endif /* RPHP_DUMPAST_H_ */

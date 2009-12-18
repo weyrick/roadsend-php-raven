@@ -20,12 +20,32 @@
 */
 
 #include "rphp/analysis/passes/SimplifyStrings.h"
+#include "rphp/analysis/pSourceModule.h"
 
 namespace rphp { namespace AST { namespace Pass {
 
-expr* SimplifyStrings::transform_pre_binaryOp(binaryOp* n) {
 
-    return n;
+/**
+ * Simplify double quoted strings by parsing them according to double quote
+ * rules and creating child nodes concatinated together
+ */
+expr* SimplifyStrings::transform_post_literalString(literalString* n) {
+
+    expr* node;
+
+    // only work on non-simple strings
+    if (!n->isSimple()) {
+
+        n->setIsSimple(true);
+        node = n;
+
+    }
+    else {
+        // no transform
+        node = n;
+    }
+
+    return node;
 
 }
 

@@ -31,7 +31,7 @@ STMT(echoStmt,  stmt)
 
 // decl (see decl::first and last kind constants)
 // FIRST DECL
-STMT(functionDecl, decl)
+STMT(functionDecl, stmt)
 // LAST DECL
 
 // expr (see expr::first and last kind constants)
@@ -44,13 +44,13 @@ EXPR(unaryOp,        expr)
 
 // literal (see literalExpr::first and last kind constants)
 // FIRST LITERALEXPR
-EXPR(literalString, literalExpr)
-EXPR(literalInt,    literalExpr)
-EXPR(literalFloat,  literalExpr)
-EXPR(literalNull,   literalExpr)
-EXPR(literalBool,   literalExpr)
-EXPR(literalArray,  literalExpr)
-EXPR(inlineHtml,    literalExpr)
+EXPR(literalString, expr)
+EXPR(literalInt,    expr)
+EXPR(literalFloat,  expr)
+EXPR(literalNull,   expr)
+EXPR(literalBool,   expr)
+EXPR(literalArray,  expr)
+EXPR(inlineHtml,    expr)
 // LAST LITERALEXPR
 // LAST EXPR
 

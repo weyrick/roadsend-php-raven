@@ -20,6 +20,8 @@
 */
 
 #include "rphp/analysis/pBaseVisitor.h"
+#include "rphp/analysis/pSourceModule.h"
+
 
 #include <iostream>
 #include <unicode/ustream.h>
@@ -51,6 +53,10 @@ const char* pBaseVisitor::nodeDescTable_[] = {
 #define STMT(CLASS, PARENT) #CLASS,
 #include "rphp/analysis/astNodes.def"
 };
+
+void pBaseVisitor::run(pSourceModule* m) {
+    m->applyVisitor(this);
+}
 
 void pBaseVisitor::visit(stmt* s) {
 
