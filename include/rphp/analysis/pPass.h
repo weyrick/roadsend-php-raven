@@ -32,19 +32,23 @@ namespace AST {
 
 class pPass {
 
-    std::string passName_;
-    std::string passDesc_;
-
+private:
     // no copy constructor
     pPass(const pPass& p) { }
 
+protected:
+    std::string passName_;
+    std::string passDesc_;
+
+    pSourceModule* module_;
+
 public:
 
-    pPass(const char* n, const char* d): passName_(n), passDesc_(d) { }
+    pPass(const char* n, const char* d, pSourceModule* m): passName_(n), passDesc_(d), module_(m) { }
 
     virtual ~pPass(void) { }
 
-    virtual void run(pSourceModule* m) = 0;
+    virtual void run(void) = 0;
 
 
 };

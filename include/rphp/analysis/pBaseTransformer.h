@@ -36,24 +36,12 @@ private:
     static dispatchFunction preDispatchTable_[];
     static dispatchFunction postDispatchTable_[];
 
-    pParseContext* context_;
-
 public:
-    pBaseTransformer(const char* name, const char* desc): pPass(name,desc), context_(0) { }
+    pBaseTransformer(const char* name, const char* desc, pSourceModule* m): pPass(name,desc,m) { }
     virtual ~pBaseTransformer() { }
 
-    void setContext(pParseContext* c) {
-        context_ = c;
-    }
-
-    pParseContext* context(void)
-    {
-        assert(context_ != 0 && "context was never set!");
-        return context_;
-    }
-
     // pass
-    void run(pSourceModule* m);
+    void run(void);
 
     // root transform
     stmt* transform(stmt*);

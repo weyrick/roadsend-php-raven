@@ -41,11 +41,11 @@ protected:
     static const char* nodeDescTable_[];
 
 public:
-    pBaseVisitor(const char* name, const char* desc): pPass(name,desc) { }
+    pBaseVisitor(const char* name, const char* desc, pSourceModule* m): pPass(name,desc,m) { }
     virtual ~pBaseVisitor(void) { }
 
     // pass
-    void run(pSourceModule* m);
+    void run(void);
 
     // root dispatch
     void visit(stmt*);

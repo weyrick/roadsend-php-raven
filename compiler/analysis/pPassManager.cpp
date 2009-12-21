@@ -36,12 +36,12 @@ pPassManager::~pPassManager(void) {
 
 }
 
-void pPassManager::run(pSourceModule* m) {
+void pPassManager::run(void) {
 
     for (queueType::iterator i = passQueue_.begin();
          i != passQueue_.end();
          ++i) {
-        (*i)->run(m);
+        (*i)->run();
     }
 
 }

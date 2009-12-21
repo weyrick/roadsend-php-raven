@@ -28,10 +28,6 @@
 #include "rphp_grammar.h" // token defines
 #include "rphp_dq_lexer.h"
 
-
-// XXX debug
-#include<iostream>
-
 namespace rphp { namespace AST { namespace Pass {
 
 
@@ -84,16 +80,19 @@ expr* SimplifyStrings::simplifyString(pSourceCharIterator in_b, pSourceCharItera
             if (buffer.empty()) {
                 // if the buffer is empty, then the lVal of out concat is var
                 // and the rVal is the result of a recurse on the rest of the inbuf (without variable)
-                AST::var* v = new (context()) AST::var(pSourceRange(dqTokStart, dqTokEnd), *context());
-                returnNode = new (context()) AST::binaryOp(v, simplifyString(dqTokEnd, in_e), binaryOp::CONCAT);
+                AST::var* v = new (module_->context()) AST::var(pSourceRange(dqTokStart+1, dqTokEnd), module_->context());
+                if(dqTokEnd == in_e)
+                    returnNode = v;
+                else
+                    returnNode = new (module_->context()) AST::binaryOp(v, simplifyString(dqTokEnd, in_e), binaryOp::CONCAT);
                 goto endOfDQ;
             }
             else {
                 // if the buffer is not empty, the lVal is the buffer (already simple) and rVal
                 // is the result of a recurse on the rest of the inbuf (with variable)
-                s = new (context()) AST::literalString(buffer);
+                s = new (module_->context()) AST::literalString(buffer);
                 s->setIsSimple(true);
-                returnNode = new (context()) AST::binaryOp(s, simplifyString(dqTokStart, in_e), binaryOp::CONCAT);
+                returnNode = new (module_->context()) AST::binaryOp(s, simplifyString(dqTokStart, in_e), binaryOp::CONCAT);
                 goto endOfDQ;
             }
 
@@ -111,7 +110,7 @@ expr* SimplifyStrings::simplifyString(pSourceCharIterator in_b, pSourceCharItera
 
     // if we get here, then we have a simple string left in buffer. make that the return value as a literal
     // note that this will copy and store buffer
-    s = new (context()) AST::literalString(buffer);
+    s = new (module_->context()) AST::literalString(buffer);
     s->setIsSimple(true);
     returnNode = s;
 
@@ -128,7 +127,6 @@ expr* SimplifyStrings::transform_post_literalString(literalString* n) {
     // only work on non-simple strings
     if (!n->isSimple()) {
         node = simplifyString(n->getStringVal().begin(), n->getStringVal().end());
-        //n->destroy(*context());
     }
     else {
         // no transform

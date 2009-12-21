@@ -41,9 +41,8 @@ pBaseTransformer::dispatchFunction pBaseTransformer::postDispatchTable_[] = {
 
 };
 
-void pBaseTransformer::run(pSourceModule* m) {
-    setContext(&m->context());
-    m->applyTransform(this);
+void pBaseTransformer::run(void) {
+    module_->applyTransform(this);
 }
 
 stmt* pBaseTransformer::transform(stmt* s) {
@@ -53,26 +52,27 @@ stmt* pBaseTransformer::transform(stmt* s) {
     // PRE
     rNode = (this->*preDispatchTable_[s->getKind()])(s);
     if (rNode != s) {
-        s->destroy(*context_);
+        s->destroy(module_->context());
         s = rNode;
     }
 
     // CHILDREN
     stmt* child(0);
     for (stmt::child_iterator i = s->child_begin(), e = s->child_end(); i != e; ) {
-      if ( (child = *i++) ) {
+      if ( (child = *i) ) {
           rNode = transform(child);
           if (rNode != child) {
-              (*i)->destroy(*context_);
+              // note that destruction of children happens in pre or post, not here
               *i = rNode;
           }
       }
+      ++i;
     }
 
     // POST
     rNode = (this->*postDispatchTable_[s->getKind()])(s);
     if (rNode != s) {
-        s->destroy(*context_);
+        s->destroy(module_->context());
         s = rNode;
     }
 

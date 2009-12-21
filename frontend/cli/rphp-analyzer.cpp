@@ -67,7 +67,7 @@ int main( int argc, char* argv[] )
 
     pSourceFileDesc inFile(inputFile, encoding);
     pSourceModule unit(inFile);
-    pPassManager passManager;
+    pPassManager passManager(&unit);
 
     if (dumpToks) {
         // no pass, just a token dump
@@ -102,7 +102,7 @@ int main( int argc, char* argv[] )
     }
 
     // run selected passes
-    passManager.run(&unit);
+    passManager.run();
 
     return 0;
 

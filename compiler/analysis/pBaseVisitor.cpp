@@ -54,8 +54,8 @@ const char* pBaseVisitor::nodeDescTable_[] = {
 #include "rphp/analysis/astNodes.def"
 };
 
-void pBaseVisitor::run(pSourceModule* m) {
-    m->applyVisitor(this);
+void pBaseVisitor::run(void) {
+    module_->applyVisitor(this);
 }
 
 void pBaseVisitor::visit(stmt* s) {

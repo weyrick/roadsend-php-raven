@@ -31,8 +31,8 @@ class SimplifyStrings: public pBaseTransformer {
     expr* simplifyString(pSourceCharIterator in_b, pSourceCharIterator in_e);
 
 public:
-    SimplifyStrings():
-            pBaseTransformer("SimplifyStrings","Convert double quoted strings to their more simple counterparts")
+    SimplifyStrings(pSourceModule *m):
+            pBaseTransformer("SimplifyStrings","Convert double quoted strings to their more simple counterparts", m)
     {
     }
 

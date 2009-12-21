@@ -31,8 +31,8 @@ class DumpAST: public pBaseVisitor {
     int indentLevel_;
     void showindent();
 public:
-    DumpAST(void):
-            pBaseVisitor("AST Dump","Basic dump of the AST"),
+    DumpAST(pSourceModule* m):
+            pBaseVisitor("AST Dump","Basic dump of the AST", m),
             indentLevel_(0) { }
 
     void visit_pre_stmt(stmt*);
