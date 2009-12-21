@@ -181,8 +181,6 @@ public:
 
     nodeKind getKind(void) const { return kind_; }
 
-    pUInt getStartLine(void) const { return startLineNum_; }
-
     void setLine(pUInt start) { startLineNum_ = start; endLineNum_ = start; }
     void setLine(pUInt start, pUInt end) { startLineNum_ = start; endLineNum_ = end; }
 

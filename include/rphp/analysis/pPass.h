@@ -48,7 +48,9 @@ public:
 
     virtual ~pPass(void) { }
 
+    virtual void pre_run(void) { }
     virtual void run(void) = 0;
+    virtual void post_run(void)  { }
 
 
 };

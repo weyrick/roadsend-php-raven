@@ -41,7 +41,9 @@ void pPassManager::run(void) {
     for (queueType::iterator i = passQueue_.begin();
          i != passQueue_.end();
          ++i) {
+        (*i)->pre_run();
         (*i)->run();
+        (*i)->post_run();
     }
 
 }

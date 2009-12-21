@@ -20,80 +20,78 @@
 */
 
 #include "rphp/analysis/passes/DumpAST.h"
+#include "rphp/analysis/pSourceModule.h"
+
+#include "tinyxml.h"
 
 #include <iostream>
 #include <unicode/ustream.h>
 
 namespace rphp { namespace AST { namespace Pass {
 
+void DumpAST::pre_run(void) {
+    doc_ = new TiXmlDocument();
+    TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "", "" );
+    doc_->LinkEndChild(decl);
+
+    currentElement_ = new TiXmlElement( "PHP_source" );
+    currentElement_->SetAttribute("file", module_->fileName());
+    doc_->LinkEndChild(currentElement_);
+}
+
+void DumpAST::post_run(void) {
+    TiXmlPrinter printer;
+    printer.SetIndent( "    " );
+    doc_->Accept( &printer );
+    std::cout << printer.CStr();
+    delete doc_;
+}
 
 void DumpAST::visit_pre_stmt(stmt* n) {
-    showindent();
-    std::cout << "# line " << n->startLineNum() << "\n";
-    showindent();
-    std::cout << "(" << nodeDescTable_[n->getKind()] << "\n";
+    TiXmlElement* node = new TiXmlElement(nodeDescTable_[n->getKind()]);
+    currentElement_->LinkEndChild(node);
+    currentElement_ = node;
+    currentElement_->SetAttribute("start_line", n->startLineNum());
+    currentElement_->SetAttribute("end_line", n->endLineNum());
 }
 
 void DumpAST::visit_post_stmt(stmt* n) {
-    showindent();
-    std::cout << ") <end " << nodeDescTable_[n->getKind()] << ">\n";
-}
-
-void DumpAST::visitChildren(stmt* s) {
-    indentLevel_+=4;
-    pBaseVisitor::visitChildren(s);
-    indentLevel_-=4;
-}
-
-void DumpAST::showindent() {
-    if (indentLevel_)
-        std::cout << std::string(indentLevel_, ' ');
+    TiXmlNode* xnode = currentElement_->Parent();
+    currentElement_ = static_cast<TiXmlElement*>(xnode);
 }
 
 void DumpAST::visit_pre_var(var* n) {
-    showindent();
-    std::cout << "name: $" << n->name() << "\n";
+    currentElement_->SetAttribute("id",n->name());
 }
 
 
 void DumpAST::visit_pre_unaryOp(unaryOp* n)  {
-    showindent();
-    std::cout << "op type: ";
     switch (n->opKind()) {
     case unaryOp::LOGICALNOT:
-        std::cout << "logical not\n";
+        currentElement_->SetAttribute("op", "LOGICALNOT");
         break;
     case unaryOp::NEGATIVE:
-        std::cout << "negative\n";
+        currentElement_->SetAttribute("op", "NEGATIVE");
         break;
     case unaryOp::POSITIVE:
-        std::cout << "positive\n";
+        currentElement_->SetAttribute("op", "POSITIVE");
         break;
     }
 }
 
 void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
-    showindent();
-    std::cout << "op type: ";
     switch (n->opKind()) {
     case binaryOp::CONCAT:
-        std::cout << "string concat\n";
+        currentElement_->SetAttribute("op", "CONCAT");
         break;
     }
 }
 
 void DumpAST::visit_pre_literalString(literalString* n)  {
-    showindent();
-    if (n->isBinary()) {
-        std::cout << "[binary]: \"";
-    }
-    else {
-        std::cout << "[utf8]: \"";
-    }
-    std::cout << n->getStringVal();
-    std::cout << "\"\n";
-    showindent();
-    std::cout << "simple? " << (n->isSimple() ? "yes" : "no") << "\n";
+    currentElement_->SetAttribute("type", (n->isBinary() ? "binary" : "utf8"));
+    currentElement_->SetAttribute("simple", (n->isSimple() ? "yes" : "no"));
+    TiXmlText * text = new TiXmlText( n->getStringVal() );
+    currentElement_->LinkEndChild( text );
 }
 
 //void DumpAST::visit_pre_functionDecl(functionDecl* n) {

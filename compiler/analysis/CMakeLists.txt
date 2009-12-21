@@ -7,6 +7,7 @@ include_directories (
                      ${RPHP_INCLUDE_DIR}
                      ${Boost_INCLUDE_DIRS}
                      ${LLVM_INCLUDE_DIR}
+		     ${TINYXML_INCLUDE_DIR} # dumpast
                      # this one is for rphp_grammar generated files
                      ${CMAKE_CURRENT_BINARY_DIR}
                     )
@@ -81,6 +82,9 @@ set(PARSER_SRC_FILES
   passes/SimplifyStrings.cpp
   passes/DumpAST.cpp
 )
+
+# PASSES
+add_definitions("-DTIXML_USE_STL")
 
 set_source_files_properties( ${PARSER_SRC_FILES}
                              PROPERTIES COMPILE_FLAGS ${LLVM_COMPILE_FLAGS}

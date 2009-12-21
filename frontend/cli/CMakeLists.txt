@@ -62,6 +62,7 @@ target_link_libraries( rphp
 
 target_link_libraries ( rphp-analyzer
                         rphp-analysis
+                        tinyxml
                        ${LLVM_LIBS_SUPPORT} 
                        ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
 			)

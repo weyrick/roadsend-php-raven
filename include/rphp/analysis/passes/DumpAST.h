@@ -25,19 +25,28 @@
 #include "rphp/analysis/pAST.h"
 #include "rphp/analysis/pBaseVisitor.h"
 
+class TiXmlDocument;
+class TiXmlElement;
+
 namespace rphp { namespace AST { namespace Pass {
 
 class DumpAST: public pBaseVisitor {
-    int indentLevel_;
-    void showindent();
+
+    TiXmlDocument*doc_;
+    TiXmlElement* currentElement_;
+
 public:
     DumpAST(pSourceModule* m):
             pBaseVisitor("AST Dump","Basic dump of the AST", m),
-            indentLevel_(0) { }
+            doc_(NULL),
+            currentElement_(NULL)
+            { }
+
+    void pre_run(void);
+    void post_run(void);
 
     void visit_pre_stmt(stmt*);
     void visit_post_stmt(stmt*);
-    void visitChildren(stmt*);
 
     void visit_pre_var(var*);
     void visit_pre_unaryOp(unaryOp* n);

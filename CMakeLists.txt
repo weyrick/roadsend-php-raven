@@ -42,11 +42,14 @@ Find_Package(GMP REQUIRED)
 Find_Package(CppUnit) # optional
 Find_Package(Doxygen) # optional
 
+set(TINYXML_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/tinyxml")
+
 IF( LLVM_VERSION LESS ${LLVM_MIN_VERSION} )
   MESSAGE(FATAL_ERROR "LLVM version ${LLVM_STRING_VERSION} too old, please install ${LLVM_MIN_VERSION_TEXT} of greater!")
 ENDIF( LLVM_VERSION LESS ${LLVM_MIN_VERSION} )
 add_definitions(-DLLVM_VERSION=${LLVM_VERSION})
 
+add_subdirectory(3rdparty)
 add_subdirectory(runtime)
 add_subdirectory(c-runtime)
 add_subdirectory(compiler)
