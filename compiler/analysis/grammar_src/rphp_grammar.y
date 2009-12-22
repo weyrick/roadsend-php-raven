@@ -233,6 +233,7 @@ statement(A) ::= functionDecl(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement(A) ::= ifBlock(B). { A = B; }
+statement(A) ::= return(B). { A = B; }
 statement(A) ::= T_SEMI.
 {
 	A = new (pMod->context()) AST::emptyStmt();
@@ -252,6 +253,14 @@ statementBlock(A) ::= T_LEFTCURLY(LC) statement_list(B) T_RIGHTCURLY(RC).
 echo(A) ::= T_ECHO expr(B).
 {
     A = new (pMod->context()) AST::echoStmt(B);
+    A->setLine(CURRENT_LINE);
+}
+
+// return
+%type return {AST::returnStmt*}
+return(A) ::= T_RETURN expr(B).
+{
+    A = new (pMod->context()) AST::returnStmt(B);
     A->setLine(CURRENT_LINE);
 }
 

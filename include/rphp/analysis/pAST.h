@@ -314,6 +314,25 @@ public:
 
 };
 
+// return statement
+class returnStmt: public stmt {
+    expr* rVal_;
+public:
+    returnStmt(expr* rVal): stmt(returnStmtKind), rVal_(rVal)
+    {
+
+    }
+
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
+
+    expr* rVal(void) { return rVal_; }
+
+    static bool classof(const returnStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == returnStmtKind; }
+
+};
+
 // literal expression base class
 class literalExpr: public expr {
 
