@@ -184,6 +184,7 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
             return "T_PROTECTED";
         case T_NOTEQUAL:
             return "T_IS_NOT_EQUA";
+            /*
         case T_INCLUDE:
             return "T_INCLUDE";
         case T_INCLUDE_ONCE:
@@ -192,10 +193,11 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
             return "T_REQUIRE";
         case T_REQUIRE_ONCE:
             return "T_REQUIRE_ONCE";
+            */
         case T_IDENTICAL:
-            return "T_IS_IDENTICA";
+            return "T_IS_IDENTICAL";
         case T_NOT_IDENTICAL:
-            return "T_IS_NOT_IDENTICA";
+            return "T_IS_NOT_IDENTICAL";
         case T_DBL_COLON:
             return "T_DOUBLE_COLON";
         case T_INC:

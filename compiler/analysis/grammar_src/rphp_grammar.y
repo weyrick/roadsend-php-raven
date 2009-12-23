@@ -124,10 +124,10 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_PRIVATE {int}
 %type T_PROTECTED {int}
 %type T_NOTEQUAL {int}
-%type T_INCLUDE {int}
-%type T_INCLUDE_ONCE {int}
-%type T_REQUIRE {int}
-%type T_REQUIRE_ONCE {int}
+//%type T_INCLUDE {int}
+//%type T_INCLUDE_ONCE {int}
+//%type T_REQUIRE {int}
+//%type T_REQUIRE_ONCE {int}
 %type T_IDENTICAL {int}
 %type T_NOT_IDENTICAL {int}
 %type T_QUESTION {int}
