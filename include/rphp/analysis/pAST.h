@@ -684,35 +684,33 @@ public:
 // NODE: function invoke
 class functionInvoke: public expr {
 
-    // TARGET? for methods
     llvm::PooledStringPtr name_;
-    expressionList argList_;
+
+    // TARGET? for methods
+
+    stmt** args_;
+    pUInt numArgs_;
 
 public:
     functionInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList):
         expr(functionInvokeKind),
         name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))),
-        argList_(*argList) // copy
+        args_(NULL),
+        numArgs_(argList->size())
     {
-
-    }
-
-    virtual void doDestroy(pParseContext& C) {
-        for (expressionList::iterator i = argList_.begin(); i != argList_.end(); ++i) {
-            (*i)->destroy(C);
+        if (numArgs_) {
+            args_ = new (C) stmt*[numArgs_];
+            memcpy(args_, &(argList->front()), numArgs_ * sizeof(*args_));
         }
-        stmt::doDestroy(C);
     }
 
     pIdentString name(void) const {
         assert(name_);
         return *name_;
     }
-    expressionList& argList(void) { return argList_; }
-    const expressionList& argList(void) const { return argList_; }
 
-    stmt::child_iterator child_begin() { return child_iterator(); }
-    stmt::child_iterator child_end() { return child_iterator(); }
+    stmt::child_iterator child_begin() { return &args_[0]; }
+    stmt::child_iterator child_end() { return &args_[0]+numArgs_; }
 
     static bool classof(const functionInvoke* s) { return true; }
     static bool classof(const stmt* s) { return s->getKind() == functionInvokeKind; }

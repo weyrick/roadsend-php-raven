@@ -192,35 +192,9 @@ void DumpAST::visit_pre_literalArray(literalArray* n)  {
 }
 
 
-//void DumpAST::visit_pre_functionInvoke(functionInvoke* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_finvoke\n";
-//
-///*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "(function invoke: ";
-//    std::cout << n->name() << std::endl;
-//
-//    indent();
-//    showindent();
-//    std::cout << "(arguments: " << std::endl;
-//    indent();
-//    for (expressionList::size_type i = 0; i < n->argList().size(); i++) {
-//        showindent();
-//        std::cout << i+1 << ": " << std::endl;
-//        visit(n->argList()[i]);
-//    }
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    */
-//
-//}
+void DumpAST::visit_pre_functionInvoke(functionInvoke* n) {
+    currentElement_->SetAttribute("id",n->name());
+}
 
 } } } // namespace
 

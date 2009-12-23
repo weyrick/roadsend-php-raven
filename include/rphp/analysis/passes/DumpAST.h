@@ -48,7 +48,7 @@ public:
     void visit_pre_stmt(stmt*);
     void visit_post_stmt(stmt*);
 
-    void visit_pre_var(var*);
+    void visit_pre_var(var* n);
     void visit_pre_unaryOp(unaryOp* n);
     void visit_pre_binaryOp(binaryOp* n);
     void visit_pre_literalString(literalString* n);
@@ -57,6 +57,7 @@ public:
     void visit_pre_literalFloat(literalFloat* n);
     void visit_pre_literalBool(literalBool* n);
     void visit_pre_literalArray(literalArray* n);
+    void visit_pre_functionInvoke(functionInvoke* n);
 
 };
 
