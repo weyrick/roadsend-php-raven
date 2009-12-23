@@ -314,6 +314,30 @@ public:
 
 };
 
+typedef std::vector<stmt*> globalItemList;
+
+// global
+class globalStmt: public stmt {
+    stmt** varList_;
+    pUInt numVars_;
+public:
+
+    globalStmt(pParseContext& C, const globalItemList* s): stmt(globalStmtKind), varList_(0), numVars_(s->size()) {
+        if (numVars_) {
+            varList_ = new (C) stmt*[numVars_];
+            memcpy(varList_, &(s->front()), numVars_ * sizeof(*varList_));
+        }
+    }
+
+    stmt::child_iterator child_begin() { return &varList_[0]; }
+    stmt::child_iterator child_end() { return &varList_[0]+numVars_; }
+
+    static bool classof(const globalStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->getKind() == globalStmtKind; }
+
+};
+
+
 // return statement
 class returnStmt: public stmt {
     expr* rVal_;

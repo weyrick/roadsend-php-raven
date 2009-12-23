@@ -51,8 +51,13 @@ void DumpAST::visit_pre_stmt(stmt* n) {
     TiXmlElement* node = new TiXmlElement(nodeDescTable_[n->getKind()]);
     currentElement_->LinkEndChild(node);
     currentElement_ = node;
-    currentElement_->SetAttribute("start_line", n->startLineNum());
-    currentElement_->SetAttribute("end_line", n->endLineNum());
+    if (n->startLineNum() != n->endLineNum()) {
+        currentElement_->SetAttribute("start_line", n->startLineNum());
+        currentElement_->SetAttribute("end_line", n->endLineNum());
+    }
+    else if (n->startLineNum() != 0) {
+        currentElement_->SetAttribute("line", n->startLineNum());
+    }
 }
 
 void DumpAST::visit_post_stmt(stmt* n) {
@@ -92,6 +97,22 @@ void DumpAST::visit_pre_literalString(literalString* n)  {
     currentElement_->SetAttribute("simple", (n->isSimple() ? "yes" : "no"));
     TiXmlText * text = new TiXmlText( n->getStringVal() );
     currentElement_->LinkEndChild( text );
+}
+
+void DumpAST::visit_pre_inlineHtml(inlineHtml* n)  {
+    visit_pre_literalString(static_cast<literalString*>(n));
+}
+
+void DumpAST::visit_pre_literalInt(literalInt* n)  {
+    currentElement_->SetAttribute("value", n->getStringVal());
+}
+
+void DumpAST::visit_pre_literalFloat(literalFloat* n)  {
+    currentElement_->SetAttribute("value", n->getStringVal());
+}
+
+void DumpAST::visit_pre_literalBool(literalBool* n)  {
+    currentElement_->SetAttribute("value", (n->getBoolVal() ? "true" : "false") );
 }
 
 //void DumpAST::visit_pre_functionDecl(functionDecl* n) {
@@ -135,222 +156,43 @@ void DumpAST::visit_pre_literalString(literalString* n)  {
 //    */
 //}
 //
-//void DumpAST::visit_pre_ifStmt(ifStmt* n) {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_ifStmt\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "(if:" << std::endl;
-//    std::cout << " cond:" << std::endl;
-//    indent();
-//    visit(n->condition());
-//    unindent();
-//    showindent();
-//    std::cout << " true:" << std::endl;
-//    indent();
-//    visit(n->trueBlock());
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    */
-//}
-//
-//
-//void DumpAST::visit_pre_inlineHtml(inlineHtml* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_inlineHtml\n";
-//    /*
-//    // NOTE: newlines are lexed separately, don't dump them here
-//    if (n->getStringVal().length() == 1 &&
-//        n->getStringVal().at(0) == '\n')
-//        return;
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "inline HTML ";
-//    if (n->isBinary()) {
-//        std::cout << "[binary]: \"";
-//    }
-//    else {
-//        std::cout << "[unicode]: \"";
-//    }
-//    std::cout << n->getStringVal();
-//    std::cout << "\"" << std::endl;
-//    */
-//}
 
-//
-//void DumpAST::visit_pre_literalInt(literalInt* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_literalInt\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "literal int: ";
-//    if (n->negative())
-//        std::cout << "(negative) ";
-//    std::cout << n->getStringVal();
-//    std::cout << std::endl;
-//    */
-//}
-//
-//void DumpAST::visit_pre_literalFloat(literalFloat* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_literalFloat\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "literal float: ";
-//    std::cout << n->getStringVal();
-//    std::cout << std::endl;
-//    */
-//}
-//
-//void DumpAST::visit_pre_literalBool(literalBool* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_literalBool\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "literal bool: ";
-//    if (n->getBoolVal())
-//        std::cout << "TRUE";
-//    else
-//        std::cout << "FALSE";
-//    std::cout << std::endl;
-//    */
-//}
-//
-//void DumpAST::visit_pre_literalArray(literalArray* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_literalArray\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "(literal array: " << std::endl;
-//
-//    indent();
-//    showindent();
-//    std::cout << "(contents: " << std::endl;
-//    indent();
-//    for (arrayList::reverse_iterator i = n->itemList().rbegin();
-//        i != n->itemList().rend();
-//        ++i)
-//    {
-//        showindent();
-//        std::cout << "key: " << std::endl;
-//        indent();
-//        if ((*i).key) {
-//            visit((*i).key);
-//        }
-//        else {
-//            showindent();
-//            std::cout << "<NEXT>" << std::endl;
-//        }
-//        unindent();
-//        showindent();
-//        std::cout << "val: " << std::endl;
-//        indent();
-//        visit((*i).val);
-//        unindent();
-//    }
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    */
-//}
-//
-//
-//void DumpAST::visit_pre_literalNull(literalNull* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_literalNull\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "literal NULL" << std::endl;
-//    */
-//}
-//
-//void DumpAST::visit_pre_logicalNot(logicalNot* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_literalNot\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "(logical NOT:" << std::endl;
-//    indent();
-//
-//    showindent();
-//    std::cout << "(rval: " << std::endl;
-//    indent();
-//    visit(n->rVal());
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    */
-//}
-//
-//
-//void DumpAST::visit_pre_assignment(assignment* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_assignment\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "(assignment:" << std::endl;
-//    indent();
-//
-//    showindent();
-//    std::cout << "(lval: " << std::endl;
-//    indent();
-//    visit(n->lVal());
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//
-//    showindent();
-//    std::cout << "(rval: " << std::endl;
-//    indent();
-//    visit(n->rVal());
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    */
-//}
-//
-//void DumpAST::visit_pre_var(var* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_var\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "var: $";
-//    std::cout << n->name();
-//    std::cout << std::endl;
-//    */
-//}
-//
+void DumpAST::visit_pre_literalArray(literalArray* n)  {
+
+    TiXmlElement* element(NULL);
+    TiXmlElement* key(NULL);
+    TiXmlElement* value(NULL);
+    TiXmlElement* arrayNode(currentElement_);
+
+    for (arrayList::reverse_iterator i = n->itemList().rbegin();
+        i != n->itemList().rend();
+        ++i)
+    {
+        element = new TiXmlElement("element");
+        arrayNode->LinkEndChild(element);
+        key = new TiXmlElement("key");
+        element->LinkEndChild(key);
+/*
+        if ((*i).key) {
+            currentElement_ = key;
+            visit((*i).key);
+        }
+        else {
+            key->SetAttribute("next","true");
+        }
+*/
+        value = new TiXmlElement("value");
+        element->LinkEndChild(key);
+        /*
+        currentElement_ = value;
+        visit((*i).val);
+        currentElement_ = arrayNode;
+        */
+    }
+    currentElement_ = arrayNode;
+}
+
+
 //void DumpAST::visit_pre_functionInvoke(functionInvoke* n)  {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_finvoke\n";
@@ -379,51 +221,6 @@ void DumpAST::visit_pre_literalString(literalString* n)  {
 //    std::cout << ")" << std::endl;
 //    */
 //
-//}
-//
-//void DumpAST::visit_pre_constructorInvoke(constructorInvoke* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_cinvoke\n";
-///*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "(constructor invoke: ";
-//    std::cout << n->name() << std::endl;
-//
-//    indent();
-//    showindent();
-//    std::cout << "(arguments: " << std::endl;
-//    indent();
-//    for (expressionList::size_type i = 0; i < n->argList().size(); i++) {
-//        showindent();
-//        std::cout << i+1 << ": " << std::endl;
-//        visit(n->argList()[i]);
-//    }
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    */
-//
-//}
-//
-//void DumpAST::visit_pre_unaryArithmeticOp(unaryArithmeticOp* n)  {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_unary\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "(" << ((n->negative()) ? "-" : "+") << std::endl;
-//    indent();
-//    visit(n->rVal());
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    */
 //}
 
 } } } // namespace

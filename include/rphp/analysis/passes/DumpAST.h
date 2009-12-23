@@ -52,6 +52,11 @@ public:
     void visit_pre_unaryOp(unaryOp* n);
     void visit_pre_binaryOp(binaryOp* n);
     void visit_pre_literalString(literalString* n);
+    void visit_pre_inlineHtml(inlineHtml* n);
+    void visit_pre_literalInt(literalInt* n);
+    void visit_pre_literalFloat(literalFloat* n);
+    void visit_pre_literalBool(literalBool* n);
+    void visit_pre_literalArray(literalArray* n);
 
 };
 

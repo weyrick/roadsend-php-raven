@@ -29,6 +29,7 @@ STMT(emptyStmt,  stmt)
 STMT(ifStmt,     stmt)
 STMT(echoStmt,   stmt)
 STMT(returnStmt, stmt)
+STMT(globalStmt, stmt)
 
 // decl (see decl::first and last kind constants)
 // FIRST DECL

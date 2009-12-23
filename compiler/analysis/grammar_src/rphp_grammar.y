@@ -234,6 +234,7 @@ statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement(A) ::= ifBlock(B). { A = B; }
 statement(A) ::= return(B). { A = B; }
+statement(A) ::= global(B). { A = B; }
 statement(A) ::= T_SEMI.
 {
 	A = new (pMod->context()) AST::emptyStmt();
@@ -255,6 +256,11 @@ echo(A) ::= T_ECHO expr(B).
     A = new (pMod->context()) AST::echoStmt(B);
     A->setLine(CURRENT_LINE);
 }
+echo(A) ::= T_PRINT expr(B).
+{
+    A = new (pMod->context()) AST::echoStmt(B);
+    A->setLine(CURRENT_LINE);
+}
 
 // return
 %type return {AST::returnStmt*}
@@ -262,6 +268,27 @@ return(A) ::= T_RETURN expr(B).
 {
     A = new (pMod->context()) AST::returnStmt(B);
     A->setLine(CURRENT_LINE);
+}
+
+// global
+%type global {AST::globalStmt*}
+global(A) ::= T_GLOBAL globalItemList(B).
+{
+    A = new (pMod->context()) AST::globalStmt(pMod->context(), B);
+    A->setLine(CURRENT_LINE);
+    delete B;
+}
+
+%type globalItemList {AST::globalItemList*}
+globalItemList(A) ::= lval(B).
+{
+    A = new AST::globalItemList();
+    A->push_back(static_cast<AST::stmt*>(B)); // copy item into vector
+}
+globalItemList(A) ::= lval(B) T_COMMA globalItemList(C).
+{
+    C->push_back(static_cast<AST::stmt*>(B)); // copy item into vector
+    A = C;
 }
 
 // inline html
@@ -318,7 +345,7 @@ decl_argList(A) ::= .
 %type functionDecl {AST::functionDecl*}
 functionDecl(A) ::= T_FUNCTION T_IDENTIFIER(NAME) T_LEFTPAREN decl_argList(ARGS) T_RIGHTPAREN statementBlock(BODY).
 {
-	pFunction* funDef = new pFunction(pIdentString((*NAME).begin(), (*NAME).end()), pFunction::pUserFunType);
+    pFunction* funDef = new pFunction(pIdentString((*NAME).begin(), (*NAME).end()), pFunction::pUserFunType);
     // reverse params
     pFunction::paramListType rArgs;
     for (pFunction::paramListType::reverse_iterator a = (*ARGS).rbegin();
@@ -326,10 +353,10 @@ functionDecl(A) ::= T_FUNCTION T_IDENTIFIER(NAME) T_LEFTPAREN decl_argList(ARGS)
          ++a) {
         rArgs.push_back(*a);
     }
-	funDef->setParamList(rArgs); // takes ownership of pFunctionParam objs
-	delete ARGS; // free container from parse
-	A = new (pMod->context()) AST::functionDecl(funDef, BODY);
-	A->setLine(TOKEN_LINE(NAME));
+    funDef->setParamList(rArgs); // takes ownership of pFunctionParam objs
+    delete ARGS; // free container from parse
+    A = new (pMod->context()) AST::functionDecl(funDef, BODY);
+    A->setLine(TOKEN_LINE(NAME));
 }                    
 
 /****** EXPRESSIONS *********/
