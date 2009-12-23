@@ -41,11 +41,19 @@
 
 #include <llvm/Support/StringPool.h>
 #include <llvm/Support/Casting.h>
+#include <llvm/ADT/SmallVector.h>
 
 namespace rphp {
 
 using llvm::isa;
 using llvm::dyn_cast;
+
+// These define how big our SmallVectors are, which means
+// this should be a good average length we expect to parse
+
+// global declaration
+#define RPHP_GLOBAL_VECTOR_SIZE 5
+
 
 class pSourceModule;
 
@@ -314,7 +322,7 @@ public:
 
 };
 
-typedef std::vector<stmt*> globalItemList;
+typedef llvm::SmallVector<stmt*,RPHP_GLOBAL_VECTOR_SIZE> globalItemList;
 
 // global
 class globalStmt: public stmt {
@@ -607,21 +615,39 @@ public:
 class var: public expr {
 
     llvm::PooledStringPtr name_;
+
     // TARGET?
-    // EXPR list for array indices
+
+    stmt** indices_;
+    pUInt numIndices_;
 
 public:
     var(const pSourceRange& name, pParseContext& C):
         expr(varKind),
-        name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))) { }
+        name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))),
+        indices_(NULL),
+        numIndices_(0)
+    { }
+
+    var(const pSourceRange& name, pParseContext& C, expressionList* indices):
+        expr(varKind),
+        name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))),
+        indices_(NULL),
+        numIndices_(indices->size())
+    {
+        if (numIndices_) {
+            indices_ = new (C) stmt*[numIndices_];
+            memcpy(indices_, &(indices->front()), numIndices_ * sizeof(*indices_));
+        }
+    }
 
     pIdentString name(void) const {
         assert(name_);
         return *name_;
     }
 
-    stmt::child_iterator child_begin() { return child_iterator(); }
-    stmt::child_iterator child_end() { return child_iterator(); }
+    stmt::child_iterator child_begin() { return &indices_[0]; }
+    stmt::child_iterator child_end() { return &indices_[0]+numIndices_; }
 
     static bool classof(const var* s) { return true; }
     static bool classof(const stmt* s) { return s->getKind() == varKind; }

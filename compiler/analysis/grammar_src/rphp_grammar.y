@@ -507,6 +507,7 @@ assignment(A) ::= lval(L) T_REF T_ASSIGN(EQ_SIGN) expr(R).
 /** LVALS **/
 %type lval {AST::expr*}
 lval(A) ::= variable_lVal(B). { A = B; }
+lval(A) ::= array_lVal(B). { A = B; }
 
 %type variable_lVal {AST::var*}
 variable_lVal(A) ::= T_VARIABLE(B).
@@ -516,6 +517,14 @@ variable_lVal(A) ::= T_VARIABLE(B).
     A->setLine(CURRENT_LINE);
 }
 
+%type array_lVal {AST::var*}
+array_lVal(A) ::= T_VARIABLE(B) arrayIndices(C).
+{
+    // strip $
+    A = new (pMod->context()) AST::var(pSourceRange(++(*B).begin(), (*B).end()), pMod->context(), C);
+    A->setLine(CURRENT_LINE);
+    delete C;
+}
 
 /** ARGLIST **/
 %type argList {AST::expressionList*}
@@ -532,6 +541,31 @@ argList(A) ::= expr(B) T_COMMA argList(C).
 argList(A) ::= .
 {
     A = new AST::expressionList();
+}
+
+/** ARRAY INDICES **/
+%type arrayIndices {AST::expressionList*}
+arrayIndices(A) ::= T_LEFTSQUARE expr(B) T_RIGHTSQUARE.
+{
+    A = new AST::expressionList();
+    A->push_back(B);
+}
+arrayIndices(A) ::= arrayIndices(B) T_LEFTSQUARE expr(C) T_RIGHTSQUARE.
+{
+    B->push_back(C);
+    A = B;
+}
+arrayIndices(A) ::= T_LEFTSQUARE T_RIGHTSQUARE.
+{
+    A = new AST::expressionList();    
+    AST::stmt* noop = new (pMod->context()) AST::emptyStmt();
+    A->push_back(static_cast<AST::expr*>(noop));
+}
+arrayIndices(A) ::= arrayIndices(B) T_LEFTSQUARE T_RIGHTSQUARE.
+{
+    AST::stmt* noop = new (pMod->context()) AST::emptyStmt();
+    B->push_back(static_cast<AST::expr*>(noop));
+    A = B;
 }
 
 /** FUNCTION INVOKE **/

@@ -69,7 +69,6 @@ void DumpAST::visit_pre_var(var* n) {
     currentElement_->SetAttribute("id",n->name());
 }
 
-
 void DumpAST::visit_pre_unaryOp(unaryOp* n)  {
     switch (n->opKind()) {
     case unaryOp::LOGICALNOT:
