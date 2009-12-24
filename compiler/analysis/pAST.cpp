@@ -25,6 +25,7 @@ namespace rphp { namespace AST {
 
 void stmt::destroyChildren(pParseContext &C) {
     for (child_iterator i = child_begin(), e = child_end(); i != e; ) {
+        // NOTE: it's valid for some children to be NULL
         if (stmt* child = *i++)
             child->destroy(C);
     }
