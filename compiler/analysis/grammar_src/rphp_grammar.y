@@ -510,10 +510,17 @@ lval(A) ::= variable_lVal(B). { A = B; }
 lval(A) ::= array_lVal(B). { A = B; }
 
 %type variable_lVal {AST::var*}
+// $foo
 variable_lVal(A) ::= T_VARIABLE(B).
 {
     // strip $
     A = new (pMod->context()) AST::var(pSourceRange(++(*B).begin(), (*B).end()), pMod->context());
+    A->setLine(CURRENT_LINE);
+}
+// $foo->bar
+variable_lVal(A) ::= lval(LVAL) T_CLASSDEREF T_IDENTIFIER(ID).
+{
+    A = new (pMod->context()) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), pMod->context(), LVAL);
     A->setLine(CURRENT_LINE);
 }
 
@@ -568,17 +575,30 @@ arrayIndices(A) ::= arrayIndices(B) T_LEFTSQUARE T_RIGHTSQUARE.
     A = B;
 }
 
-/** FUNCTION INVOKE **/
+/** FUNCTION/METHOD INVOKE **/
 %type functionInvoke {AST::functionInvoke*}
-functionInvoke(A) ::= T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
+// foo()
+functionInvoke(A) ::= T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
 {
-    A = new (pMod->context()) AST::functionInvoke(*B, // f name
+    A = new (pMod->context()) AST::functionInvoke(*ID, // f name
                                                   pMod->context(),
-                                                  C  // expression list: arguments, copied
+                                                  ARGS  // expression list: arguments, copied
                                                   );
     A->setLine(CURRENT_LINE);
-    delete C;
+    delete ARGS;
 }
+// $foo->bar()
+functionInvoke(A) ::= lval(LVAL) T_CLASSDEREF T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
+{
+    A = new (pMod->context()) AST::functionInvoke(*ID, // f name
+                                                  pMod->context(),
+                                                  ARGS,  // expression list: arguments, copied
+                                                  LVAL
+                                                  );
+    A->setLine(CURRENT_LINE);
+    delete ARGS;
+}
+
 
 /** CONSTRUCTOR INVOKE **/
 %type constructorInvoke {AST::functionInvoke*}

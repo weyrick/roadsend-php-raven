@@ -187,7 +187,7 @@ public:
       return const_child_iterator(const_cast<stmt*>(this)->child_end());
     }
 
-    nodeKind getKind(void) const { return kind_; }
+    nodeKind kind(void) const { return kind_; }
 
     void setLine(pUInt start) { startLineNum_ = start; endLineNum_ = start; }
     void setLine(pUInt start, pUInt end) { startLineNum_ = start; endLineNum_ = end; }
@@ -219,7 +219,7 @@ public:
     stmt::child_iterator child_end() { return &block_[0]+numStmts_; }
 
     static bool classof(const block* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == blockKind; }
+    static bool classof(const stmt* s) { return s->kind() == blockKind; }
 
 };
 
@@ -236,8 +236,8 @@ public:
 
     static bool classof(const decl* s) { return true; }
     static bool classof(const stmt* s) {
-        return s->getKind() >= firstDeclKind &&
-               s->getKind() <= lastDeclKind;
+        return s->kind() >= firstDeclKind &&
+               s->kind() <= lastDeclKind;
     }
 
 };
@@ -254,8 +254,8 @@ public:
 
     static bool classof(const expr* s) { return true; }
     static bool classof(const stmt* s) {
-        return s->getKind() >= firstExprKind &&
-               s->getKind() <= lastExprKind;
+        return s->kind() >= firstExprKind &&
+               s->kind() <= lastExprKind;
     }
 
 };
@@ -287,7 +287,7 @@ public:
     stmt::child_iterator child_end() { return (stmt**)&body_+1; }
 
     static bool classof(const functionDecl* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == functionDeclKind; }
+    static bool classof(const stmt* s) { return s->kind() == functionDeclKind; }
 
 };
 
@@ -318,7 +318,7 @@ public:
     block* falseBlock(void) { return static_cast<block*>(children_[FALSEBLOCK]); }
 
     static bool classof(const ifStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == ifStmtKind; }
+    static bool classof(const stmt* s) { return s->kind() == ifStmtKind; }
 
 };
 
@@ -341,7 +341,7 @@ public:
     stmt::child_iterator child_end() { return &varList_[0]+numVars_; }
 
     static bool classof(const globalStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == globalStmtKind; }
+    static bool classof(const stmt* s) { return s->kind() == globalStmtKind; }
 
 };
 
@@ -361,7 +361,7 @@ public:
     expr* rVal(void) { return rVal_; }
 
     static bool classof(const returnStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == returnStmtKind; }
+    static bool classof(const stmt* s) { return s->kind() == returnStmtKind; }
 
 };
 
@@ -389,8 +389,8 @@ public:
 
     static bool classof(const literalExpr* s) { return true; }
     static bool classof(const stmt* s) {
-        return s->getKind() >= firstLiteralKind &&
-               s->getKind() <= lastLiteralKind;
+        return s->kind() >= firstLiteralKind &&
+               s->kind() <= lastLiteralKind;
     }
 
 };
@@ -465,7 +465,7 @@ public:
     stmt::child_iterator child_end() { return child_iterator(); }
 
     static bool classof(const literalString* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == literalStringKind; }
+    static bool classof(const stmt* s) { return s->kind() == literalStringKind; }
 
 };
 
@@ -484,7 +484,7 @@ public:
     stmt::child_iterator child_end() { return child_iterator(); }
 
     static bool classof(const literalInt* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == literalIntKind; }
+    static bool classof(const stmt* s) { return s->kind() == literalIntKind; }
 
 };
 
@@ -498,7 +498,7 @@ public:
     stmt::child_iterator child_end() { return child_iterator(); }
 
     static bool classof(const literalFloat* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == literalFloatKind; }
+    static bool classof(const stmt* s) { return s->kind() == literalFloatKind; }
 
 };
 
@@ -516,7 +516,7 @@ public:
     stmt::child_iterator child_end() { return child_iterator(); }
 
     static bool classof(const literalBool* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == literalBoolKind; }
+    static bool classof(const stmt* s) { return s->kind() == literalBoolKind; }
 
 };
 
@@ -559,7 +559,7 @@ public:
     const arrayList& itemList(void) const { return itemList_; }
 
     static bool classof(const literalArray* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == literalArrayKind; }
+    static bool classof(const stmt* s) { return s->kind() == literalArrayKind; }
 
 };
 
@@ -574,7 +574,7 @@ public:
     stmt::child_iterator child_end() { return child_iterator(); }
 
     static bool classof(const inlineHtml* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == inlineHtmlKind; }
+    static bool classof(const stmt* s) { return s->kind() == inlineHtmlKind; }
 
 };
 
@@ -589,7 +589,7 @@ public:
     stmt::child_iterator child_end() { return child_iterator(); }
 
     static bool classof(const literalNull* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == literalNullKind; }
+    static bool classof(const stmt* s) { return s->kind() == literalNullKind; }
 
 };
 
@@ -607,7 +607,7 @@ public:
     expr* rVal(void) { return rVal_; }
 
     static bool classof(const echoStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == echoStmtKind; }
+    static bool classof(const stmt* s) { return s->kind() == echoStmtKind; }
 
 };
 
@@ -650,7 +650,7 @@ public:
         return *name_;
     }
 
-    expr* getTarget(void) {
+    expr* target(void) {
         assert((children_[0] == NULL || isa<expr>(children_[0])) && "unknown object in target");
         return static_cast<expr*>(children_[0]);
     }
@@ -664,7 +664,7 @@ public:
     stmt::child_iterator indices_end() { return &children_[1]+(numChildren_-1); }
 
     static bool classof(const var* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == varKind; }
+    static bool classof(const stmt* s) { return s->kind() == varKind; }
 
 };
 
@@ -691,7 +691,7 @@ public:
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
     static bool classof(const assignment* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == assignmentKind; }
+    static bool classof(const stmt* s) { return s->kind() == assignmentKind; }
 
 };
 
@@ -724,7 +724,7 @@ public:
         return *name_;
     }
 
-    expr* getTarget(void) {
+    expr* target(void) {
         assert((children_[0] == NULL || isa<expr>(children_[0])) && "unknown object in target");
         return static_cast<expr*>(children_[0]);
     }
@@ -738,7 +738,7 @@ public:
     stmt::child_iterator args_end() { return &children_[1]+(numChildren_-1); }
 
     static bool classof(const functionInvoke* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == functionInvokeKind; }
+    static bool classof(const stmt* s) { return s->kind() == functionInvokeKind; }
 
 };
 
@@ -753,7 +753,7 @@ public:
     stmt::child_iterator child_end() { return child_iterator(); }
 
     static bool classof(const emptyStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == emptyStmtKind; }
+    static bool classof(const stmt* s) { return s->kind() == emptyStmtKind; }
 
 };
 
@@ -785,7 +785,7 @@ public:
     opKind opKind(void) const { return opKind_; }
 
     static bool classof(const unaryOp* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == unaryOpKind; }
+    static bool classof(const stmt* s) { return s->kind() == unaryOpKind; }
 
 };
 
@@ -815,7 +815,7 @@ public:
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
     static bool classof(const binaryOp* s) { return true; }
-    static bool classof(const stmt* s) { return s->getKind() == binaryOpKind; }
+    static bool classof(const stmt* s) { return s->kind() == binaryOpKind; }
 
     opKind opKind(void) const { return opKind_; }
 

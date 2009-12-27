@@ -48,7 +48,7 @@ void DumpAST::post_run(void) {
 }
 
 void DumpAST::visit_pre_stmt(stmt* n) {
-    TiXmlElement* node = new TiXmlElement(nodeDescTable_[n->getKind()]);
+    TiXmlElement* node = new TiXmlElement(nodeDescTable_[n->kind()]);
     currentElement_->LinkEndChild(node);
     currentElement_ = node;
     if (n->startLineNum() != n->endLineNum()) {
@@ -188,7 +188,7 @@ void DumpAST::visit_pre_literalArray(literalArray* n)  {
 }
 
 
-void DumpAST::visit_pre_functionInvoke(functionInvoke* n) {
+void DumpAST::visit_pre_functionInvoke(functionInvoke* n) {    
     currentElement_->SetAttribute("id",n->name());
 }
 

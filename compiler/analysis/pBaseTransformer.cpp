@@ -50,7 +50,7 @@ stmt* pBaseTransformer::transform(stmt* s) {
     stmt* rNode;
 
     // PRE
-    rNode = (this->*preDispatchTable_[s->getKind()])(s);
+    rNode = (this->*preDispatchTable_[s->kind()])(s);
     if (rNode != s) {
         s->destroy(module_->context());
         s = rNode;
@@ -70,7 +70,7 @@ stmt* pBaseTransformer::transform(stmt* s) {
     }
 
     // POST
-    rNode = (this->*postDispatchTable_[s->getKind()])(s);
+    rNode = (this->*postDispatchTable_[s->kind()])(s);
     if (rNode != s) {
         s->destroy(module_->context());
         s = rNode;

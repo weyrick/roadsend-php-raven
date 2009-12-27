@@ -65,16 +65,16 @@ void pBaseVisitor::visit(stmt* s) {
     if (expr* n = dyn_cast<expr>(s))
         visit_pre_expr(n);
 
-    (this->*preDispatchTable_[s->getKind()])(s);
+    (this->*preDispatchTable_[s->kind()])(s);
 
     // CHILDREN
     // we always try the custom first, and fall back to the standard unless
     // the custom returns true
-    if ((this->*childrenDispatchTable_[s->getKind()])(s) == false)
+    if ((this->*childrenDispatchTable_[s->kind()])(s) == false)
         visitChildren(s);
 
     // POST
-    (this->*postDispatchTable_[s->getKind()])(s);
+    (this->*postDispatchTable_[s->kind()])(s);
 
     if (expr* n = dyn_cast<expr>(s))
         visit_post_expr(n);
