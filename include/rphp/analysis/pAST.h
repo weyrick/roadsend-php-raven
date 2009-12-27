@@ -658,8 +658,10 @@ public:
     stmt::child_iterator child_begin() { return &children_[0]; }
     stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
 
+    pUInt numIndices(void) const { return numChildren_-1; }
+
     stmt::child_iterator indices_begin() { return &children_[1]; }
-    stmt::child_iterator indices_end() { return &children_[1]+numChildren_; }
+    stmt::child_iterator indices_end() { return &children_[1]+(numChildren_-1); }
 
     static bool classof(const var* s) { return true; }
     static bool classof(const stmt* s) { return s->getKind() == varKind; }
@@ -698,21 +700,22 @@ class functionInvoke: public expr {
 
     llvm::PooledStringPtr name_;
 
-    // TARGET? for methods
-
-    stmt** args_;
-    pUInt numArgs_;
+    // children_[0] is always target, which may be null. the rest will be array indices
+    // numChildren_ is always 1 + number of indices
+    stmt** children_;
+    pUInt numChildren_;
 
 public:
-    functionInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList):
+    functionInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList, expr* target = NULL):
         expr(functionInvokeKind),
         name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))),
-        args_(NULL),
-        numArgs_(argList->size())
+        children_(NULL),
+        numChildren_(1+argList->size())
     {
-        if (numArgs_) {
-            args_ = new (C) stmt*[numArgs_];
-            memcpy(args_, &(argList->front()), numArgs_ * sizeof(*args_));
+        children_ = new (C) stmt*[numChildren_];
+        children_[0] = target;
+        if (numChildren_ > 1) {
+            memcpy(children_+1, &(argList->front()), (numChildren_-1) * sizeof(stmt*));
         }
     }
 
@@ -721,8 +724,18 @@ public:
         return *name_;
     }
 
-    stmt::child_iterator child_begin() { return &args_[0]; }
-    stmt::child_iterator child_end() { return &args_[0]+numArgs_; }
+    expr* getTarget(void) {
+        assert((children_[0] == NULL || isa<expr>(children_[0])) && "unknown object in target");
+        return static_cast<expr*>(children_[0]);
+    }
+
+    pUInt numArgs(void) const { return numChildren_-1; }
+
+    stmt::child_iterator child_begin() { return &children_[0]; }
+    stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
+
+    stmt::child_iterator args_begin() { return &children_[1]; }
+    stmt::child_iterator args_end() { return &children_[1]+(numChildren_-1); }
 
     static bool classof(const functionInvoke* s) { return true; }
     static bool classof(const stmt* s) { return s->getKind() == functionInvokeKind; }

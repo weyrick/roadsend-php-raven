@@ -101,8 +101,14 @@ int main( int argc, char* argv[] )
         return 1;
     }
 
-    // run selected passes
-    passManager.run();
+    try {
+        // run selected passes
+        passManager.run();
+    }
+    catch (std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 
