@@ -171,7 +171,6 @@ void DumpAST::visit_pre_literalArray(literalArray* n)  {
         arrayNode->LinkEndChild(element);
         key = new TiXmlElement("key");
         element->LinkEndChild(key);
-/*
         if ((*i).key) {
             currentElement_ = key;
             visit((*i).key);
@@ -179,14 +178,11 @@ void DumpAST::visit_pre_literalArray(literalArray* n)  {
         else {
             key->SetAttribute("next","true");
         }
-*/
         value = new TiXmlElement("value");
-        element->LinkEndChild(key);
-        /*
+        element->LinkEndChild(value);
         currentElement_ = value;
         visit((*i).val);
         currentElement_ = arrayNode;
-        */
     }
     currentElement_ = arrayNode;
 }
