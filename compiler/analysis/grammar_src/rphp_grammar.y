@@ -212,7 +212,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 /** ASSOCIATIVITY AND PRECEDENCE (low to high) **/
 %left T_COMMA.
 %right T_ASSIGN T_ECHO.
-%left T_REF.
+%left T_AND.
 %left T_PLUS T_MINUS T_DOT.
 %right T_NOT.
 %right T_VARIABLE.
@@ -305,8 +305,8 @@ inlineHTML(A) ::= T_INLINE_HTML(B).
 // if with else
 ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY) T_ELSE statementBlock(FALSEBODY).
 {
-	A = new (pMod->context()) AST::ifStmt(COND, TRUEBODY, FALSEBODY);
-	A->setLine(TOKEN_LINE(IF));
+    A = new (pMod->context()) AST::ifStmt(COND, TRUEBODY, FALSEBODY);
+    A->setLine(TOKEN_LINE(IF));
 }
 
 // if without else
@@ -320,43 +320,69 @@ ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEB
 
 /** DECLARATIONS **/
 
-/** DECLARATION ARGLIST **/
-%type decl_argList {pFunction::paramListType*}
-decl_argList(A) ::= T_VARIABLE(NAMED_PARAM).
+/** FUNCTION FORMAL PARAMS **/
+%type formalParam {AST::formalParam*}
+formalParam(A) ::= T_VARIABLE(PARAM).
 {
-	A = new pFunction::paramListType();
-	pFunctionParam*p = new pFunctionParam();
-	p->setName(pIdentString(++(*NAMED_PARAM).begin(), (*NAMED_PARAM).end()));
-	A->push_back(p);
+    A = new (pMod->context()) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
+                              pMod->context(), false/*ref*/);
+    A->setLine(TOKEN_LINE(PARAM));
 }
-decl_argList(A) ::= T_VARIABLE(NAMED_PARAM) T_COMMA decl_argList(C).
+formalParam(A) ::= T_AND T_VARIABLE(PARAM).
 {
-	pFunctionParam*p = new pFunctionParam();
-	p->setName(pIdentString(++(*NAMED_PARAM).begin(), (*NAMED_PARAM).end()));
-	C->push_back(p);
-	A = C;
+    A = new (pMod->context()) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
+                              pMod->context(), true/*ref*/);
+    A->setLine(TOKEN_LINE(PARAM));
 }
-decl_argList(A) ::= .
+formalParam(A) ::= T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
 {
-	A = new pFunction::paramListType();
+    A = new (pMod->context()) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
+                              pMod->context(), false/*ref*/, DEF);
+    A->setLine(TOKEN_LINE(PARAM));
+}
+formalParam(A) ::= T_AND T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
+{
+    A = new (pMod->context()) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
+                              pMod->context(), true/*ref*/, DEF);
+    A->setLine(TOKEN_LINE(PARAM));
 }
 
-// function declaration
-%type functionDecl {AST::functionDecl*}
-functionDecl(A) ::= T_FUNCTION T_IDENTIFIER(NAME) T_LEFTPAREN decl_argList(ARGS) T_RIGHTPAREN statementBlock(BODY).
+
+%type formalParamList {AST::formalParamList*}
+formalParamList(A) ::= formalParam(PARAM).
 {
-    pFunction* funDef = new pFunction(pIdentString((*NAME).begin(), (*NAME).end()), pFunction::pUserFunType);
-    // reverse params
-    pFunction::paramListType rArgs;
-    for (pFunction::paramListType::reverse_iterator a = (*ARGS).rbegin();
-         a != (*ARGS).rend();
-         ++a) {
-        rArgs.push_back(*a);
-    }
-    funDef->setParamList(rArgs); // takes ownership of pFunctionParam objs
-    delete ARGS; // free container from parse
-    A = new (pMod->context()) AST::functionDecl(funDef, BODY);
+    A = new AST::formalParamList();
+    A->push_back(PARAM);
+}
+formalParamList(A) ::= formalParam(PARAM) T_COMMA formalParamList(C).
+{
+    C->push_back(PARAM);
+    A = C;
+}
+formalParamList(A) ::= .
+{
+    A = new AST::formalParamList();
+}
+
+/** FUNCTION DECL **/
+%type signature {AST::signature*}
+signature(A) ::= T_IDENTIFIER(NAME) T_LEFTPAREN formalParamList(PARAMS) T_RIGHTPAREN.
+{
+    A = new (pMod->context()) AST::signature(*NAME, pMod->context(), PARAMS, false/*ref*/);
     A->setLine(TOKEN_LINE(NAME));
+    delete PARAMS;
+}
+signature(A) ::= T_AND T_IDENTIFIER(NAME) T_LEFTPAREN formalParamList(PARAMS) T_RIGHTPAREN.
+{
+    A = new (pMod->context()) AST::signature(*NAME, pMod->context(), PARAMS, true/*ref*/);
+    A->setLine(TOKEN_LINE(NAME));
+    delete PARAMS;
+}
+
+%type functionDecl {AST::functionDecl*}
+functionDecl(A) ::= T_FUNCTION signature(SIG) statementBlock(BODY).
+{
+    A = new (pMod->context()) AST::functionDecl(SIG, BODY);
 }                    
 
 /****** EXPRESSIONS *********/
@@ -444,7 +470,7 @@ arrayItem(A) ::= expr(B).
 {
     A = new (pMod->context()) AST::arrayItem(NULL, B, false);
 }
-arrayItem(A) ::= T_REF expr(B).
+arrayItem(A) ::= T_AND expr(B).
 {
     A = new (pMod->context()) AST::arrayItem(NULL, B, true);
 }
@@ -452,7 +478,7 @@ arrayItem(A) ::= expr(KEY) T_ARROWKEY expr(VAL).
 {
     A = new (pMod->context()) AST::arrayItem(KEY, VAL, false);
 }
-arrayItem(A) ::= expr(KEY) T_ARROWKEY T_REF expr(VAL).
+arrayItem(A) ::= expr(KEY) T_ARROWKEY T_AND expr(VAL).
 {
     A = new (pMod->context()) AST::arrayItem(KEY, VAL, true);
 }
@@ -498,7 +524,7 @@ assignment(A) ::= lval(L) T_ASSIGN(EQ_SIGN) expr(R).
     A = new (pMod->context()) AST::assignment(L, R, false);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-assignment(A) ::= lval(L) T_REF T_ASSIGN(EQ_SIGN) expr(R).
+assignment(A) ::= lval(L) T_AND T_ASSIGN(EQ_SIGN) expr(R).
 {
     A = new (pMod->context()) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));

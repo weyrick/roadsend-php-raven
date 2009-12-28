@@ -33,7 +33,9 @@ STMT(globalStmt, stmt)
 
 // decl (see decl::first and last kind constants)
 // FIRST DECL
-STMT(functionDecl, stmt)
+STMT(formalParam,     stmt)
+STMT(signature,       stmt)
+STMT(functionDecl,    stmt)
 // LAST DECL
 
 // expr (see expr::first and last kind constants)

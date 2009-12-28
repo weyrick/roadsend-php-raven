@@ -48,6 +48,9 @@ public:
     void visit_pre_stmt(stmt*);
     void visit_post_stmt(stmt*);
 
+    void visit_pre_signature(signature* n);
+    void visit_pre_formalParam(formalParam* n);
+
     void visit_pre_var(var* n);
     void visit_pre_unaryOp(unaryOp* n);
     void visit_pre_binaryOp(binaryOp* n);

@@ -53,7 +53,7 @@ using llvm::dyn_cast;
 
 // global declaration
 #define RPHP_GLOBAL_VECTOR_SIZE 5
-
+#define RPHP_FORMAL_PARAM_VECTOR_SIZE 5
 
 class pSourceModule;
 
@@ -229,7 +229,7 @@ class decl: public stmt {
 
 public:
     // see astNodes.def
-    static const nodeKind firstDeclKind = functionDeclKind;
+    static const nodeKind firstDeclKind = formalParamKind;
     static const nodeKind lastDeclKind = functionDeclKind;
 
     decl(nodeKind k): stmt(k) { }
@@ -262,29 +262,112 @@ public:
 
 typedef std::vector<expr*> expressionList;
 
+class formalParam: public decl {
+
+    enum { byRefBit=1, arrayHintBit=2 };
+
+    llvm::PooledStringPtr name_;
+    llvm::PooledStringPtr classHint_;
+    pUInt flags_;
+    stmt* default_;
+
+public:
+    formalParam(const pSourceRange& name, pParseContext& C, bool ref, expr* def=NULL):
+        decl(formalParamKind),
+        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
+        classHint_(),
+        flags_(0),
+        default_(def)
+    {
+        if (ref) {
+            flags_ ^= byRefBit;
+        }
+    }
+
+    bool byRef(void) const { return flags_ & byRefBit; }
+
+    bool arrayHint(void) const { return flags_ & arrayHintBit; }
+
+    bool optional(void) const {  return default_ != NULL; }
+
+    void setClassHint(const pSourceRange& name, pParseContext& C) {
+        classHint_ = C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())));
+    }
+
+    pIdentString name(void) const {
+        assert(name_);
+        return *name_;
+    }
+
+    stmt::child_iterator child_begin() { return &default_; }
+    stmt::child_iterator child_end() { return &default_+1; }
+
+    static bool classof(const formalParam* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == formalParamKind; }
+
+};
+
+typedef llvm::SmallVector<formalParam*,RPHP_FORMAL_PARAM_VECTOR_SIZE> formalParamList;
+
+class signature: public decl {
+
+    llvm::PooledStringPtr name_;
+    stmt** formalParamList_;
+    pUInt numParams_;
+    bool returnByRef_;
+
+public:
+    signature(const pSourceRange& name,
+              pParseContext& C,
+              const formalParamList* s,
+              bool returnByRef=false):
+            decl(signatureKind),
+            name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
+            formalParamList_(0),
+            numParams_(s->size()),
+            returnByRef_(returnByRef)
+    {
+        if (numParams_) {
+            formalParamList_ = new (C) stmt*[numParams_];
+            memcpy(formalParamList_, &(s->front()), numParams_ * sizeof(*formalParamList_));
+        }
+    }
+
+    pIdentString name(void) const {
+        assert(name_);
+        return *name_;
+    }
+
+    bool returnByRef(void) const { return returnByRef_; }
+
+    stmt::child_iterator child_begin() { return &formalParamList_[0]; }
+    stmt::child_iterator child_end() { return &formalParamList_[0]+numParams_; }
+
+    static bool classof(const signature* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == signatureKind; }
+
+};
+
 // function declaration
 class functionDecl: public decl {
 
-    pFunction* functionDef_;
-    block* body_;
+    enum { SIG, BODY, END_EXPR };
+    stmt* children_[END_EXPR];
 
 public:
-
-    functionDecl(pFunction* def, block* body):
+    functionDecl(signature* sig, block* body):
         decl(functionDeclKind),
-        functionDef_(def),
-        body_(body) { }
-
-    virtual void doDestroy(pParseContext& C) {
-        delete functionDef_;
-        stmt::doDestroy(C);
+        children_()
+    {
+        children_[SIG] = sig;
+        children_[BODY] = body;
     }
 
-    const pFunction* functionDef(void) const { return functionDef_; }
-    block* body(void) { return body_; }
+    signature* sig(void) { return static_cast<signature*>(children_[SIG]); }
+    block* body(void) { return static_cast<block*>(children_[BODY]); }
 
-    stmt::child_iterator child_begin() { return (stmt**)&body_; }
-    stmt::child_iterator child_end() { return (stmt**)&body_+1; }
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
     static bool classof(const functionDecl* s) { return true; }
     static bool classof(const stmt* s) { return s->kind() == functionDeclKind; }
@@ -429,7 +512,7 @@ public:
             artificial_(0) { }
 
     // artificial constructor (creates storage space)
-    literalString(llvm::StringRef r):
+    literalString(pStringRef r):
             literalExpr(literalStringKind),
             isBinary_(true),
             isSimple_(true),
@@ -446,7 +529,7 @@ public:
         isSimple_ = s;
     }
 
-    void setStringVal(llvm::StringRef s) {
+    void setStringVal(pStringRef s) {
         if (artificial_)
             delete artificial_;
         artificial_ = new pSourceString(s);
@@ -624,7 +707,7 @@ class var: public expr {
 public:
     var(const pSourceRange& name, pParseContext& C, expr* target = NULL):
         expr(varKind),
-        name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))),
+        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
         children_(NULL),
         numChildren_(1)
     {
@@ -634,7 +717,7 @@ public:
 
     var(const pSourceRange& name, pParseContext& C, expressionList* indices, expr* target = NULL):
         expr(varKind),
-        name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))),
+        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
         children_(NULL),
         numChildren_(1+indices->size())
     {
@@ -708,7 +791,7 @@ class functionInvoke: public expr {
 public:
     functionInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList, expr* target = NULL):
         expr(functionInvokeKind),
-        name_(C.idPool().intern(llvm::StringRef(name.begin().base(), (name.end()-name.begin())))),
+        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
         children_(NULL),
         numChildren_(1+argList->size())
     {
