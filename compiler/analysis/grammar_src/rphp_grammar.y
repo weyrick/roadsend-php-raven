@@ -235,6 +235,7 @@ statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement(A) ::= ifBlock(B). { A = B; }
 statement(A) ::= return(B). { A = B; }
 statement(A) ::= global(B). { A = B; }
+statement(A) ::= forEach(B). { A = B; }
 statement(A) ::= T_SEMI.
 {
 	A = new (pMod->context()) AST::emptyStmt();
@@ -316,7 +317,50 @@ ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEB
     A->setLine(TOKEN_LINE(IF));
 }
 
-
+// foreach
+%type forEach {AST::forEach*}
+// foreach($expr as $val)
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
+{
+    A = new (pMod->context()) AST::forEach(RVAL,
+                                           BODY,
+                                           pMod->context(),
+                                           *VAL,
+                                           false /*by ref*/ );
+    A->setLine(TOKEN_LINE(F));
+}
+// foreach($expr as $key => $val)
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
+{
+    A = new (pMod->context()) AST::forEach(RVAL,
+                                           BODY,
+                                           pMod->context(),
+                                           *VAL,
+                                           false /*by ref*/,
+                                           KEY);
+    A->setLine(TOKEN_LINE(F));
+}
+// foreach($expr as &$val)
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_AND T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
+{
+    A = new (pMod->context()) AST::forEach(RVAL,
+                                           BODY,
+                                           pMod->context(),
+                                           *VAL,
+                                           true /*by ref*/ );
+    A->setLine(TOKEN_LINE(F));
+}
+// foreach($expr as $key => &$val)
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_AND T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
+{
+    A = new (pMod->context()) AST::forEach(RVAL,
+                                           BODY,
+                                           pMod->context(),
+                                           *VAL,
+                                           true /*by ref*/,
+                                           KEY);
+    A->setLine(TOKEN_LINE(F));
+}
 
 /** DECLARATIONS **/
 
@@ -514,6 +558,16 @@ unaryOp(A) ::= T_NOT expr(R).
 binaryOp(A) ::= expr(L) T_DOT expr(R).
 {
     A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::CONCAT);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_BOOLEAN_AND expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_AND);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_BOOLEAN_OR expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_OR);
     A->setLine(CURRENT_LINE);
 }
 

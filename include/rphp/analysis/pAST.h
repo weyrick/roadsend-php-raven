@@ -405,6 +405,63 @@ public:
 
 };
 
+// foreach statement
+class forEach: public stmt {
+
+    enum { RVAL, BODY, END_EXPR };
+    stmt* children_[END_EXPR];
+
+    llvm::PooledStringPtr value_;
+    llvm::PooledStringPtr key_; // may be empty
+    bool byRef_;
+
+public:
+    forEach(expr* rVal,
+            block* body,
+            pParseContext& C,
+            const pSourceRange& val,            
+            bool byRef,
+            const pSourceRange* key=NULL):
+    stmt(forEachKind),
+    children_(),
+    value_(C.idPool().intern(pStringRef(val.begin().base(), (val.end()-val.begin())))),
+    key_(),
+    byRef_(byRef)
+    {
+
+        children_[RVAL] = static_cast<stmt*>(rVal);
+        children_[BODY] = static_cast<stmt*>(body);
+        if (key) {
+            key_ = C.idPool().intern(pStringRef(key->begin().base(), (key->end()-key->begin())));
+        }
+
+    }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    expr* rVal(void) { return static_cast<expr*>(children_[RVAL]); }
+    block* body(void) { return static_cast<block*>(children_[BODY]); }
+
+    bool hasKey(void) const { return key_; }
+
+    pIdentString key(void) const {
+        if (key_)
+            return *key_;
+        else
+            return pIdentString();
+    }
+
+    pIdentString value(void) const {
+        assert(value_);
+        return *value_;
+    }
+
+    static bool classof(const forEach* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == forEachKind; }
+
+};
+
 typedef llvm::SmallVector<stmt*,RPHP_GLOBAL_VECTOR_SIZE> globalItemList;
 
 // global
@@ -876,7 +933,7 @@ public:
 class binaryOp: public expr {
 
 public:
-    enum opKind { CONCAT };
+    enum opKind { CONCAT, BOOLEAN_AND, BOOLEAN_OR };
 
 private:
     enum { LVAL, RVAL, END_EXPR };

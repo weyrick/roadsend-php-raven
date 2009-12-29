@@ -88,6 +88,12 @@ void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
     case binaryOp::CONCAT:
         currentElement_->SetAttribute("op", "CONCAT");
         break;
+    case binaryOp::BOOLEAN_AND:
+        currentElement_->SetAttribute("op", "BOOOLEAN_AND");
+        break;
+    case binaryOp::BOOLEAN_OR:
+        currentElement_->SetAttribute("op", "BOOLEAN_OR");
+        break;
     }
 }
 
