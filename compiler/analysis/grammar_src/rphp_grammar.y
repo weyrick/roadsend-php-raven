@@ -642,12 +642,12 @@ variable_lVal(A) ::= T_VARIABLE(B).
     A->setLine(CURRENT_LINE);
 }
 // $foo->bar
-variable_lVal(A) ::= lval(LVAL) T_CLASSDEREF T_IDENTIFIER(ID).
+variable_lVal(A) ::= lval(TARGET) T_CLASSDEREF T_IDENTIFIER(ID).
 {
-    A = new (pMod->context()) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), pMod->context(), LVAL);
+    A = new (pMod->context()) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), pMod->context(), TARGET);
     A->setLine(CURRENT_LINE);
 }
-
+// $foo[]
 %type array_lVal {AST::var*}
 array_lVal(A) ::= T_VARIABLE(B) arrayIndices(C).
 {
@@ -655,6 +655,12 @@ array_lVal(A) ::= T_VARIABLE(B) arrayIndices(C).
     A = new (pMod->context()) AST::var(pSourceRange(++(*B).begin(), (*B).end()), pMod->context(), C);
     A->setLine(CURRENT_LINE);
     delete C;
+}
+// $foo->bar[]
+variable_lVal(A) ::= lval(TARGET) T_CLASSDEREF T_IDENTIFIER(ID) arrayIndices(INDICES).
+{
+    A = new (pMod->context()) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), pMod->context(), INDICES, TARGET);
+    A->setLine(CURRENT_LINE);
 }
 
 /** ARGLIST **/
