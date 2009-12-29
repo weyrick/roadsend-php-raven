@@ -47,6 +47,7 @@ EXPR(builtin,        expr)
 EXPR(opAssignment,   expr)
 EXPR(var,            expr)
 EXPR(functionInvoke, expr)
+EXPR(typeCast,       expr)
 EXPR(binaryOp,       expr)
 EXPR(unaryOp,        expr)
 

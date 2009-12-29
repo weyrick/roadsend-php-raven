@@ -518,6 +518,31 @@ public:
 
 };
 
+// type cast
+class typeCast: public expr {
+public:
+    enum castKindType { STRING, BINARY, UNICODE, INT, REAL, BOOL, UNSET, ARRAY, OBJECT };
+
+private:
+    expr* rVal_;
+    castKindType castKind_;
+
+public:
+    typeCast(castKindType kind, expr* rVal): expr(typeCastKind), rVal_(rVal), castKind_(kind)
+    {
+
+    }
+
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
+
+    expr* rVal(void) { return rVal_; }
+    castKindType castKind(void) const { return castKind_; }
+
+    static bool classof(const typeCast* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == typeCastKind; }
+
+};
 
 // return statement
 class returnStmt: public stmt {

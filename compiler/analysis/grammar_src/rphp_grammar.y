@@ -219,6 +219,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %right T_NOT.
 %right T_VARIABLE.
 %right T_LOGICAL_NOT.
+%right T_FLOAT_CAST T_STRING_CAST T_BINARY_CAST T_UNICODE_CAST T_ARRAY_CAST T_OBJECT_CAST T_INT_CAST T_BOOL_CAST T_UNSET_CAST.
 %left T_NEW.
 %left T_ELSE T_ELSEIF.
 
@@ -468,6 +469,7 @@ expr(A) ::= constructorInvoke(B). { A = B; }
 expr(A) ::= unaryOp(B). { A = B; }
 expr(A) ::= binaryOp(B). { A = B; }
 expr(A) ::= builtin(B). { A = B; }
+expr(A) ::= typeCast(B). { A = B; }
 
 /** BUILTINS **/
 %type builtin {AST::builtin*}
@@ -492,6 +494,55 @@ builtin(A) ::= T_EMPTY T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
     delete rval;
     A->setLine(CURRENT_LINE);
 }
+
+/** TYPECASTS **/
+%type typeCast {AST::typeCast*}
+typeCast(A) ::= T_FLOAT_CAST expr(rVal).
+{
+    A = new (pMod->context()) AST::typeCast(AST::typeCast::REAL, rVal);
+    A->setLine(CURRENT_LINE);
+}
+typeCast(A) ::= T_INT_CAST expr(rVal).
+{
+    A = new (pMod->context()) AST::typeCast(AST::typeCast::INT, rVal);
+    A->setLine(CURRENT_LINE);
+}
+typeCast(A) ::= T_STRING_CAST expr(rVal).
+{
+    A = new (pMod->context()) AST::typeCast(AST::typeCast::STRING, rVal);
+    A->setLine(CURRENT_LINE);
+}
+typeCast(A) ::= T_BINARY_CAST expr(rVal).
+{
+    A = new (pMod->context()) AST::typeCast(AST::typeCast::BINARY, rVal);
+    A->setLine(CURRENT_LINE);
+}
+typeCast(A) ::= T_UNICODE_CAST expr(rVal).
+{
+    A = new (pMod->context()) AST::typeCast(AST::typeCast::UNICODE, rVal);
+    A->setLine(CURRENT_LINE);
+}
+typeCast(A) ::= T_ARRAY_CAST expr(rVal).
+{
+    A = new (pMod->context()) AST::typeCast(AST::typeCast::ARRAY, rVal);
+    A->setLine(CURRENT_LINE);
+}
+typeCast(A) ::= T_OBJECT_CAST expr(rVal).
+{
+    A = new (pMod->context()) AST::typeCast(AST::typeCast::OBJECT, rVal);
+    A->setLine(CURRENT_LINE);
+}
+typeCast(A) ::= T_UNSET_CAST expr(rVal).
+{
+    A = new (pMod->context()) AST::typeCast(AST::typeCast::UNSET, rVal);
+    A->setLine(CURRENT_LINE);
+}
+typeCast(A) ::= T_BOOL_CAST expr(rVal).
+{
+    A = new (pMod->context()) AST::typeCast(AST::typeCast::BOOL, rVal);
+    A->setLine(CURRENT_LINE);
+}
+
 
 /** LITERALS **/
 %type literal {AST::literalExpr*}
