@@ -42,6 +42,7 @@ STMT(functionDecl,    stmt)
 // expr (see expr::first and last kind constants)
 // FIRST EXPR
 EXPR(assignment,     expr)
+EXPR(opAssignment,   expr)
 EXPR(var,            expr)
 EXPR(functionInvoke, expr)
 EXPR(binaryOp,       expr)

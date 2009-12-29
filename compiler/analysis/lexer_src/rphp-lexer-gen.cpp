@@ -119,7 +119,6 @@ int main(void) {
     langRules_.add("PHP", "\\+\\=", T_PLUS_EQUAL, ".");
     langRules_.add("PHP", "\\-\\=", T_MINUS_EQUAL, ".");
     langRules_.add("PHP", "\\!\\=", T_NOTEQUAL, ".");
-    langRules_.add("PHP", "\\.\\=", T_DOTEQUAL, ".");
     langRules_.add("PHP", "==", T_EQUAL, ".");
     langRules_.add("PHP", "\\!==", T_NOT_IDENTICAL, ".");
     langRules_.add("PHP", "===", T_IDENTICAL, ".");

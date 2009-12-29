@@ -433,6 +433,7 @@ functionDecl(A) ::= T_FUNCTION signature(SIG) statementBlock(BODY).
 %type expr {AST::expr*}
 expr(A) ::= literal(B). { A = B; }
 expr(A) ::= assignment(B). { A = B; }
+expr(A) ::= opAssignment(B). { A = B; }
 expr(A) ::= lval(B). { A = B; }
 expr(A) ::= functionInvoke(B). { A = B; }
 expr(A) ::= constructorInvoke(B). { A = B; }
@@ -582,6 +583,12 @@ assignment(A) ::= lval(L) T_AND T_ASSIGN(EQ_SIGN) expr(R).
 {
     A = new (pMod->context()) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));
+}
+%type opAssignment {AST::opAssignment*}
+opAssignment(A) ::= lval(L) T_CONCAT_EQUAL(OP) expr(R).
+{
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::CONCAT);
+    A->setLine(TOKEN_LINE(OP));
 }
 
 /** LVALS **/

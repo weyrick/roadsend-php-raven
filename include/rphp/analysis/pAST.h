@@ -835,6 +835,37 @@ public:
 
 };
 
+// NODE: op assignment
+class opAssignment: public expr {
+
+public:
+    enum opKind { CONCAT };
+
+private:
+    enum { LVAL, RVAL, END_EXPR };
+    stmt* children_[END_EXPR];
+    opKind opKind_;
+
+public:
+    opAssignment(expr* lVal, expr* rVal, opKind op): expr(assignmentKind), children_(), opKind_(op)
+    {
+        children_[LVAL] = static_cast<stmt*>(lVal);
+        children_[RVAL] = static_cast<stmt*>(rVal);
+    }
+
+    expr* lVal(void) { return static_cast<expr*>(children_[LVAL]); }
+    expr* rVal(void) { return static_cast<expr*>(children_[RVAL]); }
+
+    opKind opKind(void) const { return opKind_; }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    static bool classof(const opAssignment* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == opAssignmentKind; }
+
+};
+
 // NODE: function invoke
 class functionInvoke: public expr {
 
