@@ -316,9 +316,15 @@ ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEB
 }
 
 // if without else
+ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN expr(TRUE).
+{
+    AST::block* b = new (pMod->context()) AST::block(pMod->context(), TRUE);
+    A = new (pMod->context()) AST::ifStmt(COND, b, NULL);
+    A->setLine(TOKEN_LINE(IF));
+}
 ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY).
 {
-    A = new (pMod->context()) AST::ifStmt(COND, TRUEBODY, 0);
+    A = new (pMod->context()) AST::ifStmt(COND, TRUEBODY, NULL);
     A->setLine(TOKEN_LINE(IF));
 }
 

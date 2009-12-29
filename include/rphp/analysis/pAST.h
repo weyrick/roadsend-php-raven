@@ -202,11 +202,37 @@ public:
 
 typedef std::vector<stmt*> statementList;
 
+// expression base class
+class expr: public stmt {
+
+public:
+    // see astNodes.def
+    static const nodeKind firstExprKind = assignmentKind;
+    static const nodeKind lastExprKind = unaryOpKind;
+
+    expr(nodeKind k): stmt(k) { }
+
+    static bool classof(const expr* s) { return true; }
+    static bool classof(const stmt* s) {
+        return s->kind() >= firstExprKind &&
+               s->kind() <= lastExprKind;
+    }
+
+};
+
+typedef std::vector<expr*> expressionList;
+
 // a block of statements
 class block: public stmt {
     stmt** block_;
     pUInt numStmts_;
 public:
+
+    // build a block with a single expression
+    block(pParseContext& C, expr* s): stmt(blockKind), block_(0), numStmts_(1) {
+        block_ = new (C) stmt*[numStmts_];
+        block_[0] = s;
+    }
 
     block(pParseContext& C, const statementList* s): stmt(blockKind), block_(0), numStmts_(s->size()) {
         if (numStmts_) {
@@ -241,26 +267,6 @@ public:
     }
 
 };
-
-// expression base class
-class expr: public stmt {
-
-public:
-    // see astNodes.def
-    static const nodeKind firstExprKind = assignmentKind;
-    static const nodeKind lastExprKind = unaryOpKind;
-
-    expr(nodeKind k): stmt(k) { }
-
-    static bool classof(const expr* s) { return true; }
-    static bool classof(const stmt* s) {
-        return s->kind() >= firstExprKind &&
-               s->kind() <= lastExprKind;
-    }
-
-};
-
-typedef std::vector<expr*> expressionList;
 
 class formalParam: public decl {
 
