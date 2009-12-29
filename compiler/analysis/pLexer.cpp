@@ -170,8 +170,6 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
             return "T_AS";
         case T_RETURN:
             return "T_RETURN";
-        case T_DOTEQUAL:
-            return "T_CONCAT_EQUA";
         case T_LIST:
             return "T_LIST";
         case T_EXTENDS:
@@ -183,7 +181,7 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
         case T_PROTECTED:
             return "T_PROTECTED";
         case T_NOTEQUAL:
-            return "T_IS_NOT_EQUA";
+            return "T_IS_NOT_EQUAL";
             /*
         case T_INCLUDE:
             return "T_INCLUDE";

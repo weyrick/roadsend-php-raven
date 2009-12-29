@@ -505,6 +505,39 @@ public:
 
 };
 
+// builtins: exit, isset, unset, empty
+class builtin: public expr {
+public:
+    enum opKind { EXIT, ISSET, UNSET, EMPTY };
+
+private:
+    stmt** children_;
+    pUInt numChildren_;
+    opKind opKind_;
+
+public:
+
+    builtin(pParseContext& C, opKind op, const expressionList* s=NULL):
+            expr(builtinKind),
+            children_(0),
+            numChildren_(0),
+            opKind_(op)
+    {
+        if (s) {
+            numChildren_ = s->size();
+            children_ = new (C) stmt*[numChildren_];
+            memcpy(children_, &(s->front()), numChildren_ * sizeof(*children_));
+        }
+    }
+
+    stmt::child_iterator child_begin() { return &children_[0]; }
+    stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
+
+    static bool classof(const builtin* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == builtinKind; }
+
+};
+
 // literal expression base class
 class literalExpr: public expr {
 

@@ -113,7 +113,6 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_AS {int}
 %type T_RETURN {int}
 %type T_DOT {int}
-%type T_DOTEQUAL {int}
 %type T_GREATER_THAN {int}
 %type T_LESS_THAN {int}
 %type T_GREATER_THAN_OR_EQUAL {int}
@@ -213,9 +212,15 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %left T_COMMA.
 %right T_ASSIGN T_ECHO.
 %left T_AND.
+%left T_CONCAT_EQUAL.
+%left T_BOOLEAN_AND T_BOOLEAN_OR.
+%left T_REF.
 %left T_PLUS T_MINUS T_DOT.
 %right T_NOT.
 %right T_VARIABLE.
+%right T_LOGICAL_NOT.
+%left T_NEW.
+%left T_ELSE T_ELSEIF.
 
 /** GOAL **/
 %type module {int}
@@ -439,6 +444,31 @@ expr(A) ::= functionInvoke(B). { A = B; }
 expr(A) ::= constructorInvoke(B). { A = B; }
 expr(A) ::= unaryOp(B). { A = B; }
 expr(A) ::= binaryOp(B). { A = B; }
+expr(A) ::= builtin(B). { A = B; }
+
+/** BUILTINS **/
+%type builtin {AST::builtin*}
+builtin(A) ::= T_EXIT.
+{
+    A = new (pMod->context()) AST::builtin(pMod->context(), AST::builtin::EXIT);
+    A->setLine(CURRENT_LINE);
+}
+builtin(A) ::= T_EXIT T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
+{
+    AST::expressionList* rval = new AST::expressionList();
+    rval->push_back(RVAL);
+    A = new (pMod->context()) AST::builtin(pMod->context(), AST::builtin::EXIT, rval);
+    delete rval;
+    A->setLine(CURRENT_LINE);
+}
+builtin(A) ::= T_EMPTY T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
+{
+    AST::expressionList* rval = new AST::expressionList();
+    rval->push_back(RVAL);
+    A = new (pMod->context()) AST::builtin(pMod->context(), AST::builtin::EMPTY, rval);
+    delete rval;
+    A->setLine(CURRENT_LINE);
+}
 
 /** LITERALS **/
 %type literal {AST::literalExpr*}
@@ -590,6 +620,7 @@ opAssignment(A) ::= lval(L) T_CONCAT_EQUAL(OP) expr(R).
     A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::CONCAT);
     A->setLine(TOKEN_LINE(OP));
 }
+
 
 /** LVALS **/
 %type lval {AST::expr*}
