@@ -268,6 +268,33 @@ public:
 
 };
 
+class staticDecl: public decl {
+
+    llvm::PooledStringPtr name_;
+    stmt* default_;
+
+public:
+    staticDecl(const pSourceRange& name, pParseContext& C, expr* def=NULL):
+        decl(staticDeclKind),
+        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
+        default_(def)
+    {
+    }
+
+    pIdentString name(void) const {
+        assert(name_);
+        return *name_;
+    }
+
+    stmt::child_iterator child_begin() { return &default_; }
+    stmt::child_iterator child_end() { return &default_+1; }
+
+    static bool classof(const staticDecl* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == staticDeclKind; }
+
+};
+
+
 class formalParam: public decl {
 
     enum { byRefBit=1, arrayHintBit=2 };

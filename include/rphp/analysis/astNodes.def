@@ -36,6 +36,7 @@ STMT(globalStmt, stmt)
 // FIRST DECL
 STMT(formalParam,     stmt)
 STMT(signature,       stmt)
+STMT(staticDecl,      stmt)
 STMT(functionDecl,    stmt)
 // LAST DECL
 

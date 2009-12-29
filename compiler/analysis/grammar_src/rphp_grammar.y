@@ -234,6 +234,7 @@ statement_list(A) ::= statement_list(B) statement(C). { B->push_back(C); A = B; 
 %type statement {AST::stmt*}
 statement(A) ::= statementBlock(B). { A = B; }
 statement(A) ::= inlineHTML(B). { A = B; }
+statement(A) ::= staticDecl(B). { A = B; }
 statement(A) ::= functionDecl(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
@@ -374,6 +375,22 @@ forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWK
 }
 
 /** DECLARATIONS **/
+
+/** STATIC **/
+%type staticDecl {AST::staticDecl*}
+staticDecl(A) ::= T_STATIC T_VARIABLE(ID).
+{
+    A = new (pMod->context()) AST::staticDecl(pSourceRange(++(*ID).begin(), (*ID).end()), pMod->context());
+    A->setLine(CURRENT_LINE);
+}
+
+staticDecl(A) ::= T_STATIC T_VARIABLE(ID) T_ASSIGN literal(DEF).
+{
+    A = new (pMod->context()) AST::staticDecl(pSourceRange(++(*ID).begin(), (*ID).end()),
+    pMod->context(), DEF);
+    A->setLine(CURRENT_LINE);
+}
+
 
 /** FUNCTION FORMAL PARAMS **/
 %type formalParam {AST::formalParam*}
