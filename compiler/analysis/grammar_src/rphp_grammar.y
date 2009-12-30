@@ -209,6 +209,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 }   
 
 /** ASSOCIATIVITY AND PRECEDENCE (low to high) **/
+%right T_LEFTPAREN.
 %left T_COMMA.
 %right T_ASSIGN T_ECHO.
 %left T_AND.
@@ -216,6 +217,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %left T_BOOLEAN_AND T_BOOLEAN_OR.
 %left T_REF.
 %left T_PLUS T_MINUS T_DOT.
+%left T_DIV T_MOD T_MULT.
 %right T_NOT.
 %right T_VARIABLE.
 %right T_LOGICAL_NOT.
@@ -470,6 +472,7 @@ expr(A) ::= unaryOp(B). { A = B; }
 expr(A) ::= binaryOp(B). { A = B; }
 expr(A) ::= builtin(B). { A = B; }
 expr(A) ::= typeCast(B). { A = B; }
+expr(A) ::= T_LEFTPAREN expr(B) T_RIGHTPAREN. { A = B; }
 
 /** BUILTINS **/
 %type builtin {AST::builtin*}
@@ -673,6 +676,31 @@ binaryOp(A) ::= expr(L) T_BOOLEAN_AND expr(R).
 binaryOp(A) ::= expr(L) T_BOOLEAN_OR expr(R).
 {
     A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_OR);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_DIV expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::DIV);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_MOD expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::MOD);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_MULT expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::MULT);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_PLUS expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::ADD);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_MINUS expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::SUB);
     A->setLine(CURRENT_LINE);
 }
 
