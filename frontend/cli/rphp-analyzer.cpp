@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2009-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -34,6 +34,7 @@
 #include "rphp/analysis/pLexer.h"
 
 #include "rphp/analysis/passes/DumpAST.h"
+#include "rphp/analysis/passes/DumpStats.h"
 #include "rphp/analysis/passes/SimplifyStrings.h"
 
 using namespace llvm;
@@ -80,6 +81,7 @@ int main( int argc, char* argv[] )
     else if (dumpAST) {
         passManager.addPass<AST::Pass::SimplifyStrings>();
         passManager.addPass<AST::Pass::DumpAST>();
+        passManager.addPass<AST::Pass::DumpStats>();
     }
     else if (!passListText.empty()) {
         // custom list of passes

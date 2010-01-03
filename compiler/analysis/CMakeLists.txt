@@ -79,8 +79,10 @@ set(PARSER_SRC_FILES
   pParser.cpp
   pSourceModule.cpp
   pPassManager.cpp
+  # passes
   passes/SimplifyStrings.cpp
   passes/DumpAST.cpp
+  passes/DumpStats.cpp
 )
 
 # PASSES

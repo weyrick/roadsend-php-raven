@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -54,6 +54,8 @@ public:
 
     const AST::pParseContext& context(void) const { return context_; }
     AST::pParseContext& context(void) { return context_; }
+
+    void dumpContextStats(void) { context_.allocator().PrintStats(); }
 
     // AST TRAVERSAL AND TRANSFORM
     AST::block* getAST() { return ast_; }

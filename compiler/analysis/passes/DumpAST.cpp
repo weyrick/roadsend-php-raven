@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -93,6 +93,21 @@ void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
         break;
     case binaryOp::BOOLEAN_OR:
         currentElement_->SetAttribute("op", "BOOLEAN_OR");
+        break;
+    case binaryOp::DIV:
+        currentElement_->SetAttribute("op", "DIV");
+        break;
+    case binaryOp::MOD:
+        currentElement_->SetAttribute("op", "MOD");
+        break;
+    case binaryOp::MULT:
+        currentElement_->SetAttribute("op", "MULT");
+        break;
+    case binaryOp::ADD:
+        currentElement_->SetAttribute("op", "ADD");
+        break;
+    case binaryOp::SUB:
+        currentElement_->SetAttribute("op", "SUB");
         break;
     }
 }
