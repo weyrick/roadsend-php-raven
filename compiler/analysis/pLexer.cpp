@@ -240,9 +240,9 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
             return "T_STATIC";
         case T_CONST:
             return "T_CONST";
-        case T_GREATER_THAN_OR_EQUAL:
+        case T_GREATER_OR_EQUAL:
             return "T_IS_GREATER_OR_EQUAL";
-        case T_LESS_THAN_OR_EQUAL:
+        case T_LESS_OR_EQUAL:
             return "T_IS_SMALLER_OR_EQUAL";
         case T_LOGICAL_OR:
             return "T_LOGICAL_OR";

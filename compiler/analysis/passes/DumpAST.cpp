@@ -109,6 +109,18 @@ void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
     case binaryOp::SUB:
         currentElement_->SetAttribute("op", "SUB");
         break;
+    case binaryOp::GREATER_THAN:
+        currentElement_->SetAttribute("op", "GREATER_THAN");
+        break;
+    case binaryOp::LESS_THAN:
+        currentElement_->SetAttribute("op", "LESS_THAN");
+        break;
+    case binaryOp::GREATER_OR_EQUAL:
+        currentElement_->SetAttribute("op", "GREATER_OR_EQUAL");
+        break;
+    case binaryOp::LESS_OR_EQUAL:
+        currentElement_->SetAttribute("op", "LESS_OR_EQUAL");
+        break;
     }
 }
 

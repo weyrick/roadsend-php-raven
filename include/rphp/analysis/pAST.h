@@ -1055,7 +1055,19 @@ public:
 class binaryOp: public expr {
 
 public:
-    enum opKind { CONCAT, BOOLEAN_AND, BOOLEAN_OR, DIV, MOD, MULT, ADD, SUB };
+    enum opKind { CONCAT,
+                  BOOLEAN_AND,
+                  BOOLEAN_OR,
+                  DIV,
+                  MOD,
+                  MULT,
+                  ADD,
+                  SUB,
+                  GREATER_THAN,
+                  LESS_THAN,
+                  GREATER_OR_EQUAL,
+                  LESS_OR_EQUAL
+              };
 
 private:
     enum { LVAL, RVAL, END_EXPR };

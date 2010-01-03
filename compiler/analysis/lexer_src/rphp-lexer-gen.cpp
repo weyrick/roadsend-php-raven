@@ -101,8 +101,8 @@ int main(void) {
     langRules_.add("PHP", "\\@", T_AT, ".");
     langRules_.add("PHP", "\\?", T_QUESTION, ".");
     langRules_.add("PHP", "\\:", T_COLON, ".");
-    langRules_.add("PHP", ">=", T_GREATER_THAN_OR_EQUAL, ".");
-    langRules_.add("PHP", "<=", T_LESS_THAN_OR_EQUAL, ".");
+    langRules_.add("PHP", ">=", T_GREATER_OR_EQUAL, ".");
+    langRules_.add("PHP", "<=", T_LESS_OR_EQUAL, ".");
     langRules_.add("PHP", "<<", T_SL, ".");
     langRules_.add("PHP", ">>", T_SR, ".");
     langRules_.add("PHP", "<<=", T_SL_EQUAL, ".");
@@ -119,7 +119,7 @@ int main(void) {
     langRules_.add("PHP", "\\*\\=", T_MUL_EQUAL, ".");
     langRules_.add("PHP", "\\+\\=", T_PLUS_EQUAL, ".");
     langRules_.add("PHP", "\\-\\=", T_MINUS_EQUAL, ".");
-    langRules_.add("PHP", "\\!\\=", T_NOTEQUAL, ".");
+    langRules_.add("PHP", "\\!\\=", T_NOT_EQUAL, ".");
     langRules_.add("PHP", "==", T_EQUAL, ".");
     langRules_.add("PHP", "\\!==", T_NOT_IDENTICAL, ".");
     langRules_.add("PHP", "===", T_IDENTICAL, ".");

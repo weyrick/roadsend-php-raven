@@ -115,8 +115,8 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_DOT {int}
 %type T_GREATER_THAN {int}
 %type T_LESS_THAN {int}
-%type T_GREATER_THAN_OR_EQUAL {int}
-%type T_LESS_THAN_OR_EQUAL {int}
+%type T_GREATER_OR_EQUAL {int}
+%type T_LESS_OR_EQUAL {int}
 %type T_LIST {int}
 %type T_EXTENDS {int}
 %type T_PUBLIC {int}
@@ -209,20 +209,20 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 }   
 
 /** ASSOCIATIVITY AND PRECEDENCE (low to high) **/
-%right T_LEFTPAREN.
 %left T_COMMA.
-%right T_ASSIGN T_ECHO.
-%left T_AND.
-%left T_CONCAT_EQUAL.
+%right T_ECHO.
+%left T_CONCAT_EQUAL T_ASSIGN.
+%left T_AND. // i.e. reference
 %left T_BOOLEAN_AND T_BOOLEAN_OR.
 %left T_REF.
+%nonassoc T_EQUAL T_NOT_EQUAL T_IDENTICAL T_NOT_IDENTICAL.
+%nonassoc T_GREATER_THAN T_LESS_THAN T_GREATER_OR_EQUAL T_LESS_OR_EQUAL.
 %left T_PLUS T_MINUS T_DOT.
 %left T_DIV T_MOD T_MULT.
 %right T_NOT.
-%right T_VARIABLE.
 %right T_LOGICAL_NOT.
 %right T_FLOAT_CAST T_STRING_CAST T_BINARY_CAST T_UNICODE_CAST T_ARRAY_CAST T_OBJECT_CAST T_INT_CAST T_BOOL_CAST T_UNSET_CAST.
-%left T_NEW.
+%nonassoc T_NEW.
 %left T_ELSE T_ELSEIF.
 
 /** GOAL **/
@@ -701,6 +701,26 @@ binaryOp(A) ::= expr(L) T_PLUS expr(R).
 binaryOp(A) ::= expr(L) T_MINUS expr(R).
 {
     A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::SUB);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_GREATER_THAN expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::GREATER_THAN);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_LESS_THAN expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::LESS_THAN);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_GREATER_OR_EQUAL expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::GREATER_OR_EQUAL);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_LESS_OR_EQUAL expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::LESS_OR_EQUAL);
     A->setLine(CURRENT_LINE);
 }
 
