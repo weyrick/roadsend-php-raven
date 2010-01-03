@@ -38,7 +38,7 @@
 int main(void) {
 
     // language lexer
-    boost::lexer::rules langRules_((boost::lexer::regex_flags)(boost::lexer::icase | boost::lexer::dot_not_newline));
+    boost::lexer::rules langRules_((boost::lexer::regex_flags)(boost::lexer::icase/* | boost::lexer::dot_not_newline*/));
     boost::lexer::state_machine langState_;
 
     // double quote lexer
@@ -69,9 +69,10 @@ int main(void) {
     langRules_.add_macro ("OCTALDIGIT", "[0-7]");
     langRules_.add_macro ("HEXDIGIT", "[0-9a-fA-F]");
     langRules_.add_macro ("IDCHARS", IDCHARS);
+    langRules_.add_macro ("ANY", "[^]");
+    langRules_.add_macro ("NEWLINE", "(\\r|\\n|\\r\\n)");
 
-    langRules_.add("INITIAL", "<\\?|<\\?PHP", T_OPEN_TAG, "PHP"); // go to PHP state
-    langRules_.add("INITIAL", ".+|\\n+", T_INLINE_HTML, ".");
+    langRules_.add("INITIAL", "(<\\?|<\\?PHP)([ \\t]|{NEWLINE})", T_OPEN_TAG, "PHP"); // go to PHP state
 
     langRules_.add("PHP", "\\?>", T_CLOSE_TAG, "INITIAL"); // go to HTML state
 
@@ -199,7 +200,7 @@ int main(void) {
     langRules_.add("PHP", "\\${IDCHARS}", T_VARIABLE, ".");
     langRules_.add("PHP", "((0x|0X){HEXDIGIT}+|0{OCTALDIGIT}*|[1-9]{DIGIT}*)", T_LNUMBER, ".");
     langRules_.add("PHP", "([0-9]*[\\.][0-9]+)|([0-9]+[\\.][0-9]*)", T_DNUMBER, ".");
-    langRules_.add("PHP", "[ \\t\\n]+", T_WHITESPACE, ".");
+    langRules_.add("PHP", "([ \\t]|{NEWLINE})+", T_WHITESPACE, ".");
     langRules_.add("PHP", "\\/\\*\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_DOC_COMMENT, ".");
     langRules_.add("PHP", "\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_MULTILINE_COMMENT, ".");
     langRules_.add("PHP", "\\/\\/.*$", T_SINGLELINE_COMMENT, ".");

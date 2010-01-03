@@ -65,8 +65,12 @@ void parseSourceFile(pSourceModule* pMod) {
 
     while ( (curID = rphp_nextLangToken(newState, tokEnd, sourceEnd, uniqueID)) ) {
 
-        curRange = tokenPool.construct(pSourceRange(tokStart, tokEnd));
-        context.setTokenLine(curRange);
+        // always make a range unless the scanner didn't match, in which case
+        // we handle separately below
+        if (curID != boost::lexer::npos) {
+            curRange = tokenPool.construct(pSourceRange(tokStart, tokEnd));
+            context.setTokenLine(curRange);
+        }
 
         switch (curID) {
             case 0:
@@ -77,8 +81,25 @@ void parseSourceFile(pSourceModule* pMod) {
                 // state change (no parse)
                 break;
             case boost::lexer::npos:
-                // unmatched token: error
-                pMod->context().parseError(NULL);
+                // if state is HTML, collect characters for INLINE HTML token
+                if (state == 0) {
+                    // we go until a single < is found, or end of input
+                    // this potentially breaks up inline htmls
+                    // at tags that don't turn out to be php open tags,
+                    // but that way we let the lexer handle the matching
+                    // and limit the special handler code here
+                    while ((*tokEnd != '<') && (tokEnd != sourceEnd)) {
+                        tokEnd++;
+                    }
+                    curID = T_INLINE_HTML;
+                    curRange = tokenPool.construct(pSourceRange(tokStart, tokEnd));
+                    context.setTokenLine(curRange);
+                    goto handleNewlines;
+                }
+                else {
+                    // unmatched token: error
+                    pMod->context().parseError(NULL);
+                }
                 break;
             case T_WHITESPACE:
             case T_INLINE_HTML:
@@ -86,7 +107,7 @@ void parseSourceFile(pSourceModule* pMod) {
             case T_MULTILINE_COMMENT:
             case T_SINGLELINE_COMMENT:
                 // handle newlines
-                // O(n)
+                handleNewlines:
                 for (pSourceCharIterator i = tokStart; i != tokEnd; ++i) {
                     if (*i == '\n') {
                         nlCnt++;

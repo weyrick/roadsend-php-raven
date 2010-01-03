@@ -60,10 +60,22 @@ void pLexer::dumpTokens(void) {
     while ( (curID = rphp_nextLangToken(newState, tokEnd, sourceEnd_, uniqueID)) )
     {
 
-        if ( (curID == boost::lexer::npos) ||
-             (curID == 0) ) {
-            // no match or eoi
+        if (curID == 0) {
+            // end of input
             break;
+        }
+        else if (curID == boost::lexer::npos) {
+            // if state is HTML, collect characters for INLINE HTML token
+            if (state == 0) {                
+                while ((*tokEnd != '<') && (tokEnd != sourceEnd_)) {
+                    tokEnd++;
+                }
+                std::cout << pSourceString(tokStart, tokEnd) << " " << getTokenDescription(T_INLINE_HTML) << std::endl;
+            }
+            else {
+                // unmatched character in PHP state
+                break;
+            }
         }
         else {
             // matched
@@ -97,7 +109,7 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
         case T_WHITESPACE:
             return "T_WHITESPACE";
         case T_INLINE_HTML:
-            return "T_INLINE_HTM";
+            return "T_INLINE_HTML";
         case T_ECHO:
             return "T_ECHO";
         case T_ARROWKEY:
@@ -135,7 +147,7 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
         case T_DOC_COMMENT:
             return "T_DOC_COMMENT";
         case T_GLOBAL:
-            return "T_GLOBA";
+            return "T_GLOBAL";
         case T_FUNCTION:
             return "T_FUNCTION";
         case T_EMPTY:
@@ -145,7 +157,7 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
         case T_BOOLEAN_OR:
             return "T_BOOLEAN_OR";
         case T_EQUAL:
-            return "T_IS_EQUA";
+            return "T_IS_EQUAL";
         case T_ISSET:
             return "T_ISSET";
         case T_UNSET:
@@ -229,9 +241,9 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
         case T_CONST:
             return "T_CONST";
         case T_GREATER_THAN_OR_EQUAL:
-            return "T_IS_GREATER_OR_EQUA";
+            return "T_IS_GREATER_OR_EQUAL";
         case T_LESS_THAN_OR_EQUAL:
-            return "T_IS_SMALLER_OR_EQUA";
+            return "T_IS_SMALLER_OR_EQUAL";
         case T_LOGICAL_OR:
             return "T_LOGICAL_OR";
         case T_LOGICAL_XOR:
@@ -239,33 +251,33 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
         case T_LOGICAL_AND:
             return "T_LOGICAL_AND";
         case T_PLUS_EQUAL:
-            return "T_PLUS_EQUA";
+            return "T_PLUS_EQUAL";
         case T_MINUS_EQUAL:
-            return "T_MINUS_EQUA";
+            return "T_MINUS_EQUAL";
         case T_SR:
             return "T_SR";
         case T_SL:
             return "T_S";
         case T_SR_EQUAL:
-            return "T_SR_EQUA";
+            return "T_SR_EQUAL";
         case T_SL_EQUAL:
-            return "T_SL_EQUA";
+            return "T_SL_EQUAL";
         case T_EVAL:
             return "T_EVA";
         case T_XOR_EQUAL:
-            return "T_XOR_EQUA";
+            return "T_XOR_EQUAL";
         case T_OR_EQUAL:
-            return "T_OR_EQUA";
+            return "T_OR_EQUAL";
         case T_AND_EQUAL:
-            return "T_AND_EQUA";
+            return "T_AND_EQUAL";
         case T_MOD_EQUAL:
-            return "T_MOD_EQUA";
+            return "T_MOD_EQUAL";
         case T_CONCAT_EQUAL:
-            return "T_CONCAT_EQUA";
+            return "T_CONCAT_EQUAL";
         case T_DIV_EQUAL:
-            return "T_DIV_EQUA";
+            return "T_DIV_EQUAL";
         case T_MUL_EQUAL:
-            return "T_MUL_EQUA";
+            return "T_MUL_EQUAL";
         case T_NAMESPACE:
             return "T_NAMESPACE";
         case T_INT_CAST:

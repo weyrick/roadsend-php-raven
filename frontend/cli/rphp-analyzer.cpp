@@ -67,18 +67,19 @@ int main( int argc, char* argv[] )
     assert(!inputFile.empty() && "empty input file");
 
     pSourceFileDesc inFile(inputFile, encoding);
-    pSourceModule unit(inFile);
-    pPassManager passManager(&unit);
 
     if (dumpToks) {
         // no pass, just a token dump
-        pSourceFile* source = new pSourceFile(inFile);
-        lexer::pLexer l(source);
+        pSourceFile source(inFile);
+        lexer::pLexer l(&source);
         l.dumpTokens();
-        delete source;
         return 0;
     }
-    else if (dumpAST) {
+
+    pSourceModule unit(inFile);
+    pPassManager passManager(&unit);
+
+    if (dumpAST) {
         passManager.addPass<AST::Pass::SimplifyStrings>();
         passManager.addPass<AST::Pass::DumpAST>();
         passManager.addPass<AST::Pass::DumpStats>();
