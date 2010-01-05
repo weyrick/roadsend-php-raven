@@ -310,25 +310,40 @@ inlineHTML(A) ::= T_INLINE_HTML(B).
 }
 
 // conditionals
+%type elseSingle {AST::stmt*}
+// empty else
+elseSingle(A) ::= . { A = NULL; }
+// simple else
+elseSingle(A) ::= T_ELSE statement(BODY).
+{
+    A = BODY;
+}
+
+// else series
+%type elseSeries{AST::stmt*}
+// elseif with (potential) single statement
+elseSeries(A) ::=  T_ELSEIF(EIF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSingle(ELSE).
+{
+    A = new (pMod->context()) AST::ifStmt(COND, TRUE, ELSE);
+    A->setLine(TOKEN_LINE(EIF));
+}
+// elseif series
+elseSeries(A) ::=  T_ELSEIF(EIF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSeries(ELSE).
+{
+    A = new (pMod->context()) AST::ifStmt(COND, TRUE, ELSE);
+    A->setLine(TOKEN_LINE(EIF));
+}
+
+// if
 %type ifBlock {AST::ifStmt*}
-
-// if with else
-ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY) T_ELSE statementBlock(FALSEBODY).
+ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSeries(ELSE).
 {
-    A = new (pMod->context()) AST::ifStmt(COND, TRUEBODY, FALSEBODY);
+    A = new (pMod->context()) AST::ifStmt(COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(IF));
 }
-
-// if without else
-ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN expr(TRUE).
+ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSingle(ELSE).
 {
-    AST::block* b = new (pMod->context()) AST::block(pMod->context(), TRUE);
-    A = new (pMod->context()) AST::ifStmt(COND, b, NULL);
-    A->setLine(TOKEN_LINE(IF));
-}
-ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(TRUEBODY).
-{
-    A = new (pMod->context()) AST::ifStmt(COND, TRUEBODY, NULL);
+    A = new (pMod->context()) AST::ifStmt(COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(IF));
 }
 
