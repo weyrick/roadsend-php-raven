@@ -415,14 +415,14 @@ class ifStmt: public stmt {
 
 public:
     ifStmt(expr* cond,
-           block* trueBlock,
-           block* falseBlock):
+           stmt* trueBlock,
+           stmt* falseBlock):
                stmt(ifStmtKind),
                children_() {
 
         children_[CONDITION] = static_cast<stmt*>(cond);
-        children_[TRUEBLOCK] = static_cast<stmt*>(trueBlock);
-        children_[FALSEBLOCK] = static_cast<stmt*>(falseBlock);
+        children_[TRUEBLOCK] = trueBlock;
+        children_[FALSEBLOCK] = falseBlock;
 
     }
 
@@ -430,8 +430,8 @@ public:
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
     expr* condition(void) { return static_cast<expr*>(children_[CONDITION]); }
-    block* trueBlock(void) { return static_cast<block*>(children_[TRUEBLOCK]); }
-    block* falseBlock(void) { return static_cast<block*>(children_[FALSEBLOCK]); }
+    stmt* trueBlock(void) { return children_[TRUEBLOCK]; }
+    stmt* falseBlock(void) { return children_[FALSEBLOCK]; }
 
     static bool classof(const ifStmt* s) { return true; }
     static bool classof(const stmt* s) { return s->kind() == ifStmtKind; }
