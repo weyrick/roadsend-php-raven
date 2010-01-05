@@ -46,7 +46,7 @@ void parseSourceFile(pSourceModule* pMod, bool debug=false) {
 
     // DEBUG
     if (debug)
-        rphpParseTrace(stderr, "trace: ");
+        rphpParseTrace(stderr, (char*)"trace: ");
 
     // start at begining of source file
     AST::pParseContext& context = pMod->context();

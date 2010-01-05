@@ -66,6 +66,11 @@ void pParseContext::parseError(pSourceRange* r) {
 
     // error line with arrow
     if (!errorLine.empty()) {
+        // convert tabs to spaces so arrow lines up
+        for (unsigned i=0; i != errorLine.length(); i++) {
+            if (errorLine[i] == '\t')
+                errorLine[i] = ' ';
+        }
         errorMsg << errorLine << std::endl;
         errorMsg << pSourceString((lastToken_->end()+1)-(lastNewline_+1)-1,'-') << "^" << std::endl;
     }
