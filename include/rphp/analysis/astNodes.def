@@ -49,6 +49,8 @@ EXPR(var,            expr)
 EXPR(functionInvoke, expr)
 EXPR(typeCast,       expr)
 EXPR(binaryOp,       expr)
+EXPR(preOp,          expr)
+EXPR(postOp,         expr)
 EXPR(unaryOp,        expr)
 
 // literal (see literalExpr::first and last kind constants)

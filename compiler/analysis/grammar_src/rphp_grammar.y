@@ -222,7 +222,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %left T_DIV T_MOD T_MULT.
 %right T_NOT.
 %right T_LOGICAL_NOT.
-%right T_FLOAT_CAST T_STRING_CAST T_BINARY_CAST T_UNICODE_CAST T_ARRAY_CAST T_OBJECT_CAST T_INT_CAST T_BOOL_CAST T_UNSET_CAST.
+%right T_INC T_DEC T_FLOAT_CAST T_STRING_CAST T_BINARY_CAST T_UNICODE_CAST T_ARRAY_CAST T_OBJECT_CAST T_INT_CAST T_BOOL_CAST T_UNSET_CAST.
 %nonassoc T_NEW.
 %left T_ELSE T_ELSEIF.
 
@@ -248,7 +248,7 @@ statement(A) ::= global(B). { A = B; }
 statement(A) ::= forEach(B). { A = B; }
 statement(A) ::= T_SEMI.
 {
-	A = new (pMod->context()) AST::emptyStmt();
+    A = new (pMod->context()) AST::emptyStmt();
 }
 
 // statement block
@@ -488,6 +488,8 @@ expr(A) ::= unaryOp(B). { A = B; }
 expr(A) ::= binaryOp(B). { A = B; }
 expr(A) ::= builtin(B). { A = B; }
 expr(A) ::= typeCast(B). { A = B; }
+expr(A) ::= preOp(B). { A = B; }
+expr(A) ::= postOp(B). { A = B; }
 expr(A) ::= T_LEFTPAREN expr(B) T_RIGHTPAREN. { A = B; }
 
 /** BUILTINS **/
@@ -757,6 +759,30 @@ binaryOp(A) ::= expr(L) T_IDENTICAL expr(R).
 binaryOp(A) ::= expr(L) T_NOT_IDENTICAL expr(R).
 {
     A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::NOT_IDENTICAL);
+    A->setLine(CURRENT_LINE);
+}
+
+/** PRE/POST OP **/
+%type preOp {AST::preOp*}
+preOp(A) ::= T_INC lval(R).
+{
+    A = new (pMod->context()) AST::preOp(R, AST::preOp::INC);
+    A->setLine(CURRENT_LINE);
+}
+preOp(A) ::= T_DEC lval(R).
+{
+    A = new (pMod->context()) AST::preOp(R, AST::preOp::DEC);
+    A->setLine(CURRENT_LINE);
+}
+%type postOp {AST::postOp*}
+postOp(A) ::= lval(R) T_INC.
+{
+    A = new (pMod->context()) AST::postOp(R, AST::postOp::INC);
+    A->setLine(CURRENT_LINE);
+}
+postOp(A) ::= lval(R) T_DEC.
+{
+    A = new (pMod->context()) AST::postOp(R, AST::postOp::DEC);
     A->setLine(CURRENT_LINE);
 }
 

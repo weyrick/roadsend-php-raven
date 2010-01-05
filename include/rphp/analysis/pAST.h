@@ -1051,6 +1051,63 @@ public:
 
 };
 
+// NODE: pre operator
+class preOp: public expr {
+
+public:
+    enum opKind { INC, DEC };
+
+private:
+    expr* rVal_;
+    opKind opKind_;
+
+public:
+
+    preOp(expr* rVal, opKind k): expr(preOpKind), rVal_(rVal), opKind_(k)
+    {
+    }
+
+    expr* rVal(void) { return rVal_; }
+
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
+
+    opKind opKind(void) const { return opKind_; }
+
+    static bool classof(const preOp* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == preOpKind; }
+
+};
+
+// NODE: post operator
+class postOp: public expr {
+
+public:
+    enum opKind { INC, DEC };
+
+private:
+    expr* rVal_;
+    opKind opKind_;
+
+public:
+
+    postOp(expr* rVal, opKind k): expr(postOpKind), rVal_(rVal), opKind_(k)
+    {
+    }
+
+    expr* rVal(void) { return rVal_; }
+
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
+
+    opKind opKind(void) const { return opKind_; }
+
+    static bool classof(const postOp* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == postOpKind; }
+
+};
+
+
 // NODE: binary operator
 class binaryOp: public expr {
 
