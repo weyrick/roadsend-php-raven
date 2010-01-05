@@ -101,6 +101,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_FUNCTION {int}
 %type T_EMPTY {int}
 %type T_EQUAL {int}
+%type T_NOT_EQUAL {int}
 %type T_ISSET {int}
 %type T_UNSET {int}
 %type T_VAR {int}
@@ -736,6 +737,26 @@ binaryOp(A) ::= expr(L) T_GREATER_OR_EQUAL expr(R).
 binaryOp(A) ::= expr(L) T_LESS_OR_EQUAL expr(R).
 {
     A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::LESS_OR_EQUAL);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_EQUAL expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::EQUAL);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_NOT_EQUAL expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::NOT_EQUAL);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_IDENTICAL expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::IDENTICAL);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_NOT_IDENTICAL expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::NOT_IDENTICAL);
     A->setLine(CURRENT_LINE);
 }
 
