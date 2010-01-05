@@ -37,7 +37,7 @@ void  rphpParseTrace(FILE *, char *);
 
 namespace rphp { namespace parser {
 
-void parseSourceFile(pSourceModule* pMod) {
+void parseSourceFile(pSourceModule* pMod, bool debug=false) {
 
     boost::object_pool<pSourceRange> tokenPool;
     lexer::pLexer lexer(pMod->source());
@@ -45,7 +45,8 @@ void parseSourceFile(pSourceModule* pMod) {
     void* pParser = rphpParseAlloc(malloc);
 
     // DEBUG
-    //rphpParseTrace(stderr, "trace: ");
+    if (debug)
+        rphpParseTrace(stderr, "trace: ");
 
     // start at begining of source file
     AST::pParseContext& context = pMod->context();
@@ -78,8 +79,8 @@ void parseSourceFile(pSourceModule* pMod) {
                 break;
             case T_OPEN_TAG:
             case T_CLOSE_TAG:
-                // state change (no parse)
-                break;
+                // state change (no parse), but count newlines from OPEN tag
+                goto handleNewlines;
             case boost::lexer::npos:
                 // if state is HTML, collect characters for INLINE HTML token
                 if (state == 0) {

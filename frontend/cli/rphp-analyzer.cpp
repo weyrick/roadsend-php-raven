@@ -49,69 +49,81 @@ int main( int argc, char* argv[] )
 {
 
     // command line options
-    cl::opt<std::string> inputFile(cl::Positional, cl::desc("<input file>"), cl::Required);
+    cl::list<std::string> inputFiles(cl::Positional, cl::desc("<input files>"), cl::OneOrMore);
+
     cl::opt<bool> dumpToks ("dump-toks", cl::desc("Dump tokens from lexer"));
     cl::opt<bool> dumpAST ("dump-ast", cl::desc("Dump AST"));
+    cl::opt<bool> debugParse ("debug-parse", cl::desc("Debug output from parser"));
 
     cl::opt<std::string> passListText ("passes", cl::desc("List of passes to run"));
 
-    cl::opt<std::string> encoding ("encoding",cl::desc("Character encoding of the source file"));
+    cl::opt<std::string> encoding ("encoding",cl::desc("Character encoding of the source file"), cl::init("UTF-8"));
 
     cl::SetVersionPrinter(&rphpVersion);
     cl::ParseCommandLineOptions(argc, argv, "Roadsend PHP Analyzer");
 
-    // default encoding
-    if (encoding.empty())
-        encoding = "UTF-8";
+    pSourceModule* unit(0);
 
-    assert(!inputFile.empty() && "empty input file");
+    for (unsigned i = 0; i != inputFiles.size(); ++i) {
 
-    pSourceFileDesc inFile(inputFile, encoding);
+        pSourceFileDesc inFile(inputFiles[i], encoding);
 
-    if (dumpToks) {
-        // no pass, just a token dump
-        pSourceFile source(inFile);
-        lexer::pLexer l(&source);
-        l.dumpTokens();
-        return 0;
-    }
+        if (dumpToks) {
+            // no pass, just a token dump
+            pSourceFile source(inFile);
+            lexer::pLexer l(&source);
+            l.dumpTokens();
+        }
 
-    pSourceModule unit(inFile);
-    pPassManager passManager(&unit);
+        try {
+            // catch parse errors
+            unit = new pSourceModule(inFile);
+            unit->parse(debugParse);
+        }
+        catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            continue;
+        }
 
-    if (dumpAST) {
-        passManager.addPass<AST::Pass::SimplifyStrings>();
-        passManager.addPass<AST::Pass::DumpAST>();
-        passManager.addPass<AST::Pass::DumpStats>();
-    }
-    else if (!passListText.empty()) {
-        // custom list of passes
-        std::vector<std::string> passes;
-        boost::split(passes, passListText, boost::is_any_of(","));
-        for (std::vector<std::string>::iterator i = passes.begin();
-             i != passes.end();
-             ++i) {
-            if (*i == "dumpast") {
-                passManager.addPass<AST::Pass::DumpAST>();
-            }
-            else if (*i == "simplifystrings") {
-                passManager.addPass<AST::Pass::SimplifyStrings>();
+        pPassManager passManager(unit);
+
+        if (dumpAST) {
+            passManager.addPass<AST::Pass::SimplifyStrings>();
+            passManager.addPass<AST::Pass::DumpAST>();
+            passManager.addPass<AST::Pass::DumpStats>();
+        }
+        else if (!passListText.empty()) {
+            // custom list of passes
+            std::vector<std::string> passes;
+            boost::split(passes, passListText, boost::is_any_of(","));
+            for (std::vector<std::string>::iterator i = passes.begin();
+            i != passes.end();
+            ++i) {
+                if (*i == "dumpast") {
+                    passManager.addPass<AST::Pass::DumpAST>();
+                }
+                else if (*i == "simplifystrings") {
+                    passManager.addPass<AST::Pass::SimplifyStrings>();
+                }
             }
         }
-    }
-    else {
-        std::cout << "no action\n";
-        return 1;
-    }
+        else {
+            std::cout << "no action\n";
+            return 1;
+        }
 
-    try {
-        // run selected passes
-        passManager.run();
-    }
-    catch (std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return 1;
-    }
+        try {
+            // run selected passes
+            passManager.run();
+        }
+        catch (std::exception& e) {
+            std::cerr << e.what() << std::endl;
+        }
+
+        // free for next input file
+        delete unit;
+
+    } // input file loop
 
     return 0;
 

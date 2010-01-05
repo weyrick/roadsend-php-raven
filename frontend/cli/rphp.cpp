@@ -60,7 +60,7 @@ int main( int argc, char* argv[] )
     cl::opt<std::string> outputFile ("o",cl::desc("Output file name"));
     cl::opt<std::string> mainFile ("main-file",cl::desc("Main entry script for stand alone programs"));
 
-    cl::opt<std::string> encoding ("encoding",cl::desc("Character encoding of the source file"));
+    cl::opt<std::string> encoding ("encoding",cl::desc("Character encoding of the source file"), cl::init("UTF-8"));
     cl::opt<std::string> outputEncoding("output-encoding",cl::desc("Character encoding of final output"));
 
     cl::opt<std::string> libSearchPath ("L",cl::desc("Add directory to linker search path"));
@@ -70,10 +70,6 @@ int main( int argc, char* argv[] )
 
     cl::SetVersionPrinter(&rphpVersion);
     cl::ParseCommandLineOptions(argc, argv, "Roadsend PHP");
-
-    // default encoding
-    if (encoding.empty())
-        encoding = "UTF-8";
 
     assert(!inputFile.empty() && "empty input file");
 

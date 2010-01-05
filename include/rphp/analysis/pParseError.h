@@ -43,9 +43,7 @@ public:
     ~pParseError(void) throw() { }
 
     const char* what() const throw() {
-        std::string fullMsg;
-        fullMsg = "parse error: " + msg_;
-        return fullMsg.c_str();
+        return msg_.c_str();
     } 
 
 };

@@ -23,8 +23,10 @@
 #include "rphp/analysis/pParseContext.h"
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/analysis/pSourceFile.h"
+#include "rphp/analysis/pParseError.h"
 
 #include <iostream>
+#include <sstream>
 
 namespace rphp {
 
@@ -37,6 +39,8 @@ void pParseContext::parseError(pSourceRange* r) {
     // we show up the length of the problem token
     pUInt probsize;
     pSourceString problem;
+    std::stringstream errorMsg;
+
     if (r) {
         probsize = (*r).end()-(*r).begin();
         problem.append((*r).begin(), (*r).end());
@@ -62,21 +66,20 @@ void pParseContext::parseError(pSourceRange* r) {
 
     // error line with arrow
     if (!errorLine.empty()) {
-        std::cerr << errorLine << std::endl;
-        std::cerr << pSourceString((lastToken_->end()+1)-(lastNewline_+1)-1,'-') << "^" << std::endl;
+        errorMsg << errorLine << std::endl;
+        errorMsg << pSourceString((lastToken_->end()+1)-(lastNewline_+1)-1,'-') << "^" << std::endl;
     }
 
     // message
-    std::cerr << "parse error: unexpected '"
-               << problem
-               << "' in ";
-    std::cerr << owner_->source()->fileName();
-    std::cerr  << " on line "
-               << currentLineNum_
-               <<  std::endl;
+    errorMsg  << "parse error: unexpected '"
+              << problem
+              << "' in ";
+    errorMsg  << owner_->source()->fileName();
+    errorMsg  << " on line "
+              << currentLineNum_
+              <<  std::endl;
 
-    // what now?
-    exit(-1);
+    throw pParseError(errorMsg.str());
 
 }
 

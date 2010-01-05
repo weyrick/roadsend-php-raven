@@ -30,7 +30,7 @@ class pSourceModule;
 
 namespace parser {
 
-void parseSourceFile(pSourceModule* pMod);
+void parseSourceFile(pSourceModule* pMod, bool debug);
 
 } } // namespace
 

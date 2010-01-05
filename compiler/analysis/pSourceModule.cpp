@@ -34,7 +34,12 @@ pSourceModule::pSourceModule(const pSourceFileDesc& file):
     context_(this)
 {
 
-    parser::parseSourceFile(this);
+
+}
+
+void pSourceModule::parse(bool debug=false) {
+
+    parser::parseSourceFile(this,debug);
 
 }
 

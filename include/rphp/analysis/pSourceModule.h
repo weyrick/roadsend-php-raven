@@ -42,10 +42,13 @@ private:
     const pSourceFile* source_;
     AST::block* ast_;
     AST::pParseContext context_;
+    bool parsed_;
 
 public:
     pSourceModule(const pSourceFileDesc& file);
     ~pSourceModule();
+
+    void parse(bool debug);
 
     // INSPECTION
     const pSourceFile* source() const { return source_; }
