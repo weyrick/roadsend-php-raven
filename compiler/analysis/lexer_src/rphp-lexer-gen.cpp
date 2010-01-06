@@ -97,6 +97,7 @@ int main(void) {
     langRules_.add("PHP", "\\|", T_PIPE, ".");
     langRules_.add("PHP", "\\.", T_DOT, ".");
     langRules_.add("PHP", "\\!", T_NOT, ".");
+    langRules_.add("PHP", "\\^", T_CARET, ".");
     langRules_.add("PHP", "\\&", T_AND, ".");
     langRules_.add("PHP", "\\@", T_AT, ".");
     langRules_.add("PHP", "\\?", T_QUESTION, ".");
@@ -203,7 +204,7 @@ int main(void) {
     langRules_.add("PHP", "([ \\t]|{NEWLINE})+", T_WHITESPACE, ".");
     langRules_.add("PHP", "\\/\\*\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_DOC_COMMENT, ".");
     langRules_.add("PHP", "\\/\\*[^*]*\\*+([^/*][^*]*\\*+)*\\/", T_MULTILINE_COMMENT, ".");
-    langRules_.add("PHP", "\\/\\/.*$", T_SINGLELINE_COMMENT, ".");
+    langRules_.add("PHP", "(\\/\\/|#).*$", T_SINGLELINE_COMMENT, ".");
     langRules_.add("PHP", "b*[\"](\\\\\\\"|[^\"])*[\"]", T_DQ_STRING, ".");
     langRules_.add("PHP", "b*[\'](\\\\\\.|[^\'])*[\']", T_SQ_STRING, ".");
 

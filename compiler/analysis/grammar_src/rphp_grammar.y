@@ -192,6 +192,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_TICK {int}
 %type T_TILDE {int}
 %type T_PIPE {int}
+%type T_CARET {int}
 %type T_PRINT {int}
 %type T_INTERFACE {int}
 
@@ -211,11 +212,13 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 
 /** ASSOCIATIVITY AND PRECEDENCE (low to high) **/
 %left T_COMMA.
+// or, xor, and
 %right T_ECHO.
-%left T_CONCAT_EQUAL T_ASSIGN.
-%left T_AND. // i.e. reference
+%left T_ASSIGN T_CONCAT_EQUAL T_AND_EQUAL.
 %left T_BOOLEAN_AND T_BOOLEAN_OR.
-%left T_REF.
+%left T_PIPE.
+%left T_CARET.
+%left T_AND.
 %nonassoc T_EQUAL T_NOT_EQUAL T_IDENTICAL T_NOT_IDENTICAL.
 %nonassoc T_GREATER_THAN T_LESS_THAN T_GREATER_OR_EQUAL T_LESS_OR_EQUAL.
 %left T_PLUS T_MINUS T_DOT.
@@ -761,6 +764,21 @@ binaryOp(A) ::= expr(L) T_NOT_IDENTICAL expr(R).
     A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::NOT_IDENTICAL);
     A->setLine(CURRENT_LINE);
 }
+binaryOp(A) ::= expr(L) T_CARET expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BIT_XOR);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_PIPE expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BIT_OR);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_AND expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BIT_AND);
+    A->setLine(CURRENT_LINE);
+}
 
 /** PRE/POST OP **/
 %type preOp {AST::preOp*}
@@ -793,12 +811,18 @@ assignment(A) ::= lval(L) T_ASSIGN(EQ_SIGN) expr(R).
     A = new (pMod->context()) AST::assignment(L, R, false);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-assignment(A) ::= lval(L) T_AND T_ASSIGN(EQ_SIGN) expr(R).
+assignment(A) ::= lval(L) T_ASSIGN T_AND(EQ_SIGN) lval(R).
 {
     A = new (pMod->context()) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
+
 %type opAssignment {AST::opAssignment*}
+opAssignment(A) ::= lval(L) T_AND_EQUAL(EQ_SIGN) expr(R).
+{
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::REF);
+    A->setLine(TOKEN_LINE(EQ_SIGN));
+}
 opAssignment(A) ::= lval(L) T_CONCAT_EQUAL(OP) expr(R).
 {
     A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::CONCAT);

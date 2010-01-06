@@ -930,7 +930,8 @@ public:
 class opAssignment: public expr {
 
 public:
-    enum opKind { CONCAT };
+    enum opKind { CONCAT,
+                  REF };
 
 private:
     enum { LVAL, RVAL, END_EXPR };
@@ -1127,7 +1128,10 @@ public:
                   EQUAL,
                   NOT_EQUAL,
                   IDENTICAL,
-                  NOT_IDENTICAL
+                  NOT_IDENTICAL,
+                  BIT_OR,
+                  BIT_AND,
+                  BIT_XOR
               };
 
 private:

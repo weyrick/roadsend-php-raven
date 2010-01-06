@@ -121,6 +121,27 @@ void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
     case binaryOp::LESS_OR_EQUAL:
         currentElement_->SetAttribute("op", "LESS_OR_EQUAL");
         break;
+    case binaryOp::EQUAL:
+        currentElement_->SetAttribute("op", "EQUAL");
+        break;
+    case binaryOp::NOT_EQUAL:
+        currentElement_->SetAttribute("op", "NOT_EQUAL");
+        break;
+    case binaryOp::IDENTICAL:
+        currentElement_->SetAttribute("op", "IDENTICAL");
+        break;
+    case binaryOp::NOT_IDENTICAL:
+        currentElement_->SetAttribute("op", "NOT_IDENTICAL");
+        break;
+    case binaryOp::BIT_OR:
+        currentElement_->SetAttribute("op", "BIT_OR");
+        break;
+    case binaryOp::BIT_AND:
+        currentElement_->SetAttribute("op", "BIT_AND");
+        break;
+    case binaryOp::BIT_XOR:
+        currentElement_->SetAttribute("op", "BIT_XOR");
+        break;
     }
 }
 
