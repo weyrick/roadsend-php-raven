@@ -495,6 +495,41 @@ public:
 
 };
 
+// for statement
+class forStmt: public stmt {
+
+    enum { INIT, COND, INC, BODY, END_EXPR };
+    stmt* children_[END_EXPR];
+
+public:
+    forStmt(expr* init,
+            expr* cond,
+            expr* inc,
+            block* body):
+    stmt(forEachKind),
+    children_()
+    {
+
+        children_[INIT] = static_cast<stmt*>(init);
+        children_[COND] = static_cast<stmt*>(cond);
+        children_[INC] = static_cast<stmt*>(inc);
+        children_[BODY] = static_cast<stmt*>(body);
+
+    }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    expr* init(void) { return static_cast<expr*>(children_[INIT]); }
+    expr* condition(void) { return static_cast<expr*>(children_[COND]); }
+    expr* increment(void) { return static_cast<expr*>(children_[INC]); }
+    block* body(void) { return static_cast<block*>(children_[BODY]); }
+
+    static bool classof(const forStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == forStmtKind; }
+
+};
+
 typedef llvm::SmallVector<stmt*,RPHP_GLOBAL_VECTOR_SIZE> globalItemList;
 
 // global
@@ -560,6 +595,44 @@ public:
 
     static bool classof(const returnStmt* s) { return true; }
     static bool classof(const stmt* s) { return s->kind() == returnStmtKind; }
+
+};
+
+// break statement
+class breakStmt: public stmt {
+    expr* rVal_;
+public:
+    breakStmt(expr* rVal): stmt(breakStmtKind), rVal_(rVal)
+    {
+
+    }
+
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
+
+    expr* rVal(void) { return rVal_; }
+
+    static bool classof(const breakStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == breakStmtKind; }
+
+};
+
+// continue statement
+class continueStmt: public stmt {
+    expr* rVal_;
+public:
+    continueStmt(expr* rVal): stmt(continueStmtKind), rVal_(rVal)
+    {
+
+    }
+
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
+
+    expr* rVal(void) { return rVal_; }
+
+    static bool classof(const continueStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == continueStmtKind; }
 
 };
 
@@ -1131,7 +1204,8 @@ public:
                   NOT_IDENTICAL,
                   BIT_OR,
                   BIT_AND,
-                  BIT_XOR
+                  BIT_XOR,
+                  EXPR_LIST // used in forExpr, a simple sequence
               };
 
 private:

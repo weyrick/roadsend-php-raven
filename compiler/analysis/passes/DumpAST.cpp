@@ -142,6 +142,9 @@ void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
     case binaryOp::BIT_XOR:
         currentElement_->SetAttribute("op", "BIT_XOR");
         break;
+    case binaryOp::EXPR_LIST:
+        currentElement_->SetAttribute("op", "EXPR_LIST");
+        break;
     }
 }
 

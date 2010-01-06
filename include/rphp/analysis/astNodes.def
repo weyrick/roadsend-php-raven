@@ -24,13 +24,16 @@
 #  define EXPR(Type, Base) STMT(Type, Base)
 #endif
 
-STMT(block,      stmt)
-STMT(emptyStmt,  stmt)
-STMT(ifStmt,     stmt)
-STMT(echoStmt,   stmt)
-STMT(returnStmt, stmt)
-STMT(forEach,    stmt)
-STMT(globalStmt, stmt)
+STMT(block,        stmt)
+STMT(emptyStmt,    stmt)
+STMT(ifStmt,       stmt)
+STMT(echoStmt,     stmt)
+STMT(returnStmt,   stmt)
+STMT(breakStmt,    stmt)
+STMT(continueStmt, stmt)
+STMT(forStmt,      stmt)
+STMT(forEach,      stmt)
+STMT(globalStmt,   stmt)
 
 // decl (see decl::first and last kind constants)
 // FIRST DECL

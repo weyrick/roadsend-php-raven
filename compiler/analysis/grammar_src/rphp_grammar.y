@@ -243,12 +243,15 @@ statement(A) ::= statementBlock(B). { A = B; }
 statement(A) ::= inlineHTML(B). { A = B; }
 statement(A) ::= staticDecl(B). { A = B; }
 statement(A) ::= functionDecl(B). { A = B; }
+statement(A) ::= ifBlock(B). { A = B; }
+statement(A) ::= forEach(B). { A = B; }
+statement(A) ::= forStmt(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
-statement(A) ::= ifBlock(B). { A = B; }
-statement(A) ::= return(B). { A = B; }
-statement(A) ::= global(B). { A = B; }
-statement(A) ::= forEach(B). { A = B; }
+statement(A) ::= return(B) T_SEMI. { A = B; }
+statement(A) ::= break(B) T_SEMI. { A = B; }
+statement(A) ::= continue(B) T_SEMI. { A = B; }
+statement(A) ::= global(B) T_SEMI. { A = B; }
 statement(A) ::= T_SEMI.
 {
     A = new (pMod->context()) AST::emptyStmt();
@@ -278,9 +281,38 @@ echo(A) ::= T_PRINT expr(B).
 
 // return
 %type return {AST::returnStmt*}
+return(A) ::= T_RETURN.
+{
+    A = new (pMod->context()) AST::returnStmt(NULL);
+    A->setLine(CURRENT_LINE);
+}
 return(A) ::= T_RETURN expr(B).
 {
     A = new (pMod->context()) AST::returnStmt(B);
+    A->setLine(CURRENT_LINE);
+}
+// break
+%type break {AST::breakStmt*}
+break(A) ::= T_BREAK.
+{
+    A = new (pMod->context()) AST::breakStmt(NULL);
+    A->setLine(CURRENT_LINE);
+}
+break(A) ::= T_BREAK expr(B).
+{
+    A = new (pMod->context()) AST::breakStmt(B);
+    A->setLine(CURRENT_LINE);
+}
+// continue
+%type continue {AST::continueStmt*}
+continue(A) ::= T_CONTINUE.
+{
+    A = new (pMod->context()) AST::continueStmt(NULL);
+    A->setLine(CURRENT_LINE);
+}
+continue(A) ::= T_CONTINUE expr(B).
+{
+    A = new (pMod->context()) AST::continueStmt(B);
     A->setLine(CURRENT_LINE);
 }
 
@@ -394,6 +426,39 @@ forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWK
                                            true /*by ref*/,
                                            KEY);
     A->setLine(TOKEN_LINE(F));
+}
+
+// for
+%type forStmt {AST::forStmt*}
+forStmt(A) ::= T_FOR(F) T_LEFTPAREN forExpr(INIT) T_SEMI forExpr(COND) T_SEMI forExpr(INC) T_RIGHTPAREN statementBlock(BODY).
+{
+    A = new (pMod->context()) AST::forStmt(INIT,
+                                           COND,
+                                           INC,
+                                           BODY);
+    A->setLine(TOKEN_LINE(F));
+}
+
+%type forExpr {AST::expr*}
+forExpr(A) ::= .
+{
+    A = NULL;
+}
+forExpr(A) ::= nonEmptyForExpr(B).
+{
+    A = B;
+}
+%type nonEmptyForExpr {AST::expr*}
+nonEmptyForExpr(A) ::= expr(B).
+{
+    A = B;
+}
+nonEmptyForExpr(A) ::= nonEmptyForExpr(LVAL) T_COMMA expr(RVAL).
+{
+    A = new (pMod->context()) AST::binaryOp(LVAL,
+                                            RVAL,
+                                            AST::binaryOp::EXPR_LIST);
+    A->setLine(CURRENT_LINE);
 }
 
 /** DECLARATIONS **/
