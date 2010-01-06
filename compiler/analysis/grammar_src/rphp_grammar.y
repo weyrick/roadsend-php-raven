@@ -246,6 +246,8 @@ statement(A) ::= functionDecl(B). { A = B; }
 statement(A) ::= ifBlock(B). { A = B; }
 statement(A) ::= forEach(B). { A = B; }
 statement(A) ::= forStmt(B). { A = B; }
+statement(A) ::= doStmt(B). { A = B; }
+statement(A) ::= whileStmt(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement(A) ::= return(B) T_SEMI. { A = B; }
@@ -458,6 +460,22 @@ nonEmptyForExpr(A) ::= nonEmptyForExpr(LVAL) T_COMMA expr(RVAL).
     A = new (pMod->context()) AST::binaryOp(LVAL,
                                             RVAL,
                                             AST::binaryOp::EXPR_LIST);
+    A->setLine(CURRENT_LINE);
+}
+
+// do
+%type doStmt {AST::doStmt*}
+doStmt(A) ::= T_DO statementBlock(BODY) T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPAREN.
+{
+    A = new (pMod->context()) AST::doStmt(COND, BODY);
+    A->setLine(CURRENT_LINE);
+}
+
+// while
+%type whileStmt {AST::whileStmt*}
+whileStmt(A) ::= T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(BODY).
+{
+    A = new (pMod->context()) AST::whileStmt(COND, BODY);
     A->setLine(CURRENT_LINE);
 }
 

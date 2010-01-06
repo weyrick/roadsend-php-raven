@@ -530,6 +530,65 @@ public:
 
 };
 
+// do statement
+class doStmt: public stmt {
+
+    enum { COND, BODY, END_EXPR };
+    stmt* children_[END_EXPR];
+
+public:
+    doStmt(expr* cond,
+          block* body):
+    stmt(doStmtKind),
+    children_()
+    {
+
+        children_[COND] = static_cast<stmt*>(cond);
+        children_[BODY] = static_cast<stmt*>(body);
+
+    }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    expr* condition(void) { return static_cast<expr*>(children_[COND]); }
+    block* body(void) { return static_cast<block*>(children_[BODY]); }
+
+    static bool classof(const doStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == doStmtKind; }
+
+};
+
+// while statement
+class whileStmt: public stmt {
+
+    enum { COND, BODY, END_EXPR };
+    stmt* children_[END_EXPR];
+
+public:
+    whileStmt(expr* cond,
+              block* body):
+    stmt(whileStmtKind),
+    children_()
+    {
+
+        children_[COND] = static_cast<stmt*>(cond);
+        children_[BODY] = static_cast<stmt*>(body);
+
+    }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    expr* condition(void) { return static_cast<expr*>(children_[COND]); }
+    block* body(void) { return static_cast<block*>(children_[BODY]); }
+
+    static bool classof(const whileStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == whileStmtKind; }
+
+};
+
+
 typedef llvm::SmallVector<stmt*,RPHP_GLOBAL_VECTOR_SIZE> globalItemList;
 
 // global
