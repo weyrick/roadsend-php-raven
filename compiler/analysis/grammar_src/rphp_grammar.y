@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -214,7 +214,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %left T_COMMA.
 // or, xor, and
 %right T_ECHO.
-%left T_ASSIGN T_CONCAT_EQUAL T_AND_EQUAL.
+%left T_ASSIGN T_CONCAT_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_PLUS_EQUAL T_MINUS_EQUAL T_MOD_EQUAL T_DIV_EQUAL T_MUL_EQUAL.
 %left T_BOOLEAN_AND T_BOOLEAN_OR.
 %left T_PIPE.
 %left T_CARET.
@@ -885,12 +885,47 @@ assignment(A) ::= lval(L) T_ASSIGN T_AND(EQ_SIGN) lval(R).
 %type opAssignment {AST::opAssignment*}
 opAssignment(A) ::= lval(L) T_AND_EQUAL(EQ_SIGN) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::REF);
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::AND);
+    A->setLine(TOKEN_LINE(EQ_SIGN));
+}
+opAssignment(A) ::= lval(L) T_OR_EQUAL(EQ_SIGN) expr(R).
+{
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::OR);
+    A->setLine(TOKEN_LINE(EQ_SIGN));
+}
+opAssignment(A) ::= lval(L) T_XOR_EQUAL(EQ_SIGN) expr(R).
+{
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::XOR);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 opAssignment(A) ::= lval(L) T_CONCAT_EQUAL(OP) expr(R).
 {
     A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::CONCAT);
+    A->setLine(TOKEN_LINE(OP));
+}
+opAssignment(A) ::= lval(L) T_DIV_EQUAL(OP) expr(R).
+{
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::DIV);
+    A->setLine(TOKEN_LINE(OP));
+}
+opAssignment(A) ::= lval(L) T_MUL_EQUAL(OP) expr(R).
+{
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::MULT);
+    A->setLine(TOKEN_LINE(OP));
+}
+opAssignment(A) ::= lval(L) T_PLUS_EQUAL(OP) expr(R).
+{
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::ADD);
+    A->setLine(TOKEN_LINE(OP));
+}
+opAssignment(A) ::= lval(L) T_MINUS_EQUAL(OP) expr(R).
+{
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::SUB);
+    A->setLine(TOKEN_LINE(OP));
+}
+opAssignment(A) ::= lval(L) T_MOD_EQUAL(OP) expr(R).
+{
+    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::MOD);
     A->setLine(TOKEN_LINE(OP));
 }
 

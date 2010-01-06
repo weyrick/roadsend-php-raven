@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -1004,7 +1004,15 @@ class opAssignment: public expr {
 
 public:
     enum opKind { CONCAT,
-                  REF };
+                  DIV,
+                  MOD,
+                  MULT,
+                  ADD,
+                  SUB,
+                  OR,
+                  XOR,
+                  AND
+                };
 
 private:
     enum { LVAL, RVAL, END_EXPR };
