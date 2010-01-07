@@ -192,8 +192,6 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
             return "T_PRIVATE";
         case T_PROTECTED:
             return "T_PROTECTED";
-        case T_NOTEQUAL:
-            return "T_IS_NOT_EQUAL";
             /*
         case T_INCLUDE:
             return "T_INCLUDE";
@@ -244,11 +242,11 @@ const char* pLexer::getTokenDescription(const std::size_t t) const {
             return "T_IS_GREATER_OR_EQUAL";
         case T_LESS_OR_EQUAL:
             return "T_IS_SMALLER_OR_EQUAL";
-        case T_LOGICAL_OR:
+        case T_BOOLEAN_OR_LIT:
             return "T_LOGICAL_OR";
-        case T_LOGICAL_XOR:
+        case T_BOOLEAN_XOR_LIT:
             return "T_LOGICAL_XOR";
-        case T_LOGICAL_AND:
+        case T_BOOLEAN_AND_LIT:
             return "T_LOGICAL_AND";
         case T_PLUS_EQUAL:
             return "T_PLUS_EQUAL";

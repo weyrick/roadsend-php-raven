@@ -93,9 +93,14 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_AND {int}
 %type T_ASSIGN {int}
 %type T_DQ_STRING {int}
-%type T_NOT {int}
+//We need _LIT versions here for 'and', 'or' and 'xor' because these have another precedence than '&&' and  '||'
+//but finally we want them to look like the normal ast nodes.
 %type T_BOOLEAN_AND {int}
+%type T_BOOLEAN_AND_LIT {int}
 %type T_BOOLEAN_OR {int}
+%type T_BOOLEAN_OR_LIT {int}
+%type T_BOOLEAN_XOR_LIT {int}
+%type T_BOOLEAN_NOT {int}
 %type T_IDENTIFIER {int}
 %type T_GLOBAL {int}
 %type T_FUNCTION {int}
@@ -123,7 +128,6 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_PUBLIC {int}
 %type T_PRIVATE {int}
 %type T_PROTECTED {int}
-%type T_NOTEQUAL {int}
 //%type T_INCLUDE {int}
 //%type T_INCLUDE_ONCE {int}
 //%type T_REQUIRE {int}
@@ -155,9 +159,6 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_CONST {int}
 %type T_AT {int}
 %type T_INSTANCEOF {int}
-%type T_LOGICAL_OR {int}
-%type T_LOGICAL_AND {int}
-%type T_LOGICAL_XOR {int}
 %type T_PLUS_EQUAL {int}
 %type T_MINUS_EQUAL {int}
 %type T_EVAL {int}
@@ -212,7 +213,9 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 
 /** ASSOCIATIVITY AND PRECEDENCE (low to high) **/
 %left T_COMMA.
-// or, xor, and
+%left T_BOOLEAN_OR_LIT.
+%left T_BOOLEAN_XOR_LIT.
+%left T_BOOLEAN_AND_LIT.
 %right T_ECHO.
 %left T_ASSIGN T_CONCAT_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_PLUS_EQUAL T_MINUS_EQUAL T_MOD_EQUAL T_DIV_EQUAL T_MUL_EQUAL.
 %left T_BOOLEAN_AND T_BOOLEAN_OR.
@@ -223,8 +226,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %nonassoc T_GREATER_THAN T_LESS_THAN T_GREATER_OR_EQUAL T_LESS_OR_EQUAL.
 %left T_PLUS T_MINUS T_DOT.
 %left T_DIV T_MOD T_MULT.
-%right T_NOT.
-%right T_LOGICAL_NOT.
+%right T_BOOLEAN_NOT.
 %right T_INC T_DEC T_FLOAT_CAST T_STRING_CAST T_BINARY_CAST T_UNICODE_CAST T_ARRAY_CAST T_OBJECT_CAST T_INT_CAST T_BOOL_CAST T_UNSET_CAST.
 %nonassoc T_NEW.
 %left T_ELSE T_ELSEIF.
@@ -760,7 +762,7 @@ unaryOp(A) ::= T_MINUS expr(R).
     A = new (pMod->context()) AST::unaryOp(R, AST::unaryOp::NEGATIVE);
     A->setLine(CURRENT_LINE);
 }
-unaryOp(A) ::= T_NOT expr(R).
+unaryOp(A) ::= T_BOOLEAN_NOT expr(R).
 {
     A = new (pMod->context()) AST::unaryOp(R, AST::unaryOp::LOGICALNOT);
     A->setLine(CURRENT_LINE);
@@ -778,9 +780,24 @@ binaryOp(A) ::= expr(L) T_BOOLEAN_AND expr(R).
     A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_AND);
     A->setLine(CURRENT_LINE);
 }
+binaryOp(A) ::= expr(L) T_BOOLEAN_AND_LIT expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_AND);
+    A->setLine(CURRENT_LINE);
+}
 binaryOp(A) ::= expr(L) T_BOOLEAN_OR expr(R).
 {
     A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_OR);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_BOOLEAN_OR_LIT expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_OR);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_BOOLEAN_XOR_LIT expr(R).
+{
+    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_XOR);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_DIV expr(R).

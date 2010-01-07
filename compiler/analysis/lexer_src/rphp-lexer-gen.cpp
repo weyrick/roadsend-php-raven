@@ -96,7 +96,6 @@ int main(void) {
     langRules_.add("PHP", "\\,", T_COMMA, ".");
     langRules_.add("PHP", "\\|", T_PIPE, ".");
     langRules_.add("PHP", "\\.", T_DOT, ".");
-    langRules_.add("PHP", "\\!", T_NOT, ".");
     langRules_.add("PHP", "\\^", T_CARET, ".");
     langRules_.add("PHP", "\\&", T_AND, ".");
     langRules_.add("PHP", "\\@", T_AT, ".");
@@ -126,13 +125,14 @@ int main(void) {
     langRules_.add("PHP", "===", T_IDENTICAL, ".");
     langRules_.add("PHP", "\\&\\&", T_BOOLEAN_AND, ".");
     langRules_.add("PHP", "\\|\\|", T_BOOLEAN_OR, ".");
+    langRules_.add("PHP", "\\!", T_BOOLEAN_NOT, ".");
+    langRules_.add("PHP", "and", T_BOOLEAN_AND_LIT, ".");
+    langRules_.add("PHP", "or", T_BOOLEAN_OR_LIT, ".");
+    langRules_.add("PHP", "xor", T_BOOLEAN_XOR_LIT, ".");
     langRules_.add("PHP", "\\?>", T_CLOSE_TAG, ".");
     langRules_.add("PHP", "=>", T_ARROWKEY, ".");
     langRules_.add("PHP", "->", T_CLASSDEREF, ".");
     langRules_.add("PHP", "list", T_LIST, ".");
-    langRules_.add("PHP", "or", T_LOGICAL_OR, ".");
-    langRules_.add("PHP", "and", T_LOGICAL_AND, ".");
-    langRules_.add("PHP", "xor", T_LOGICAL_XOR, ".");
     langRules_.add("PHP", "if", T_IF, ".");
     langRules_.add("PHP", "for", T_FOR, ".");
     langRules_.add("PHP", "endfor", T_ENDFOR, ".");

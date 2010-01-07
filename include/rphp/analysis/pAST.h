@@ -1256,6 +1256,7 @@ public:
     enum opKind { CONCAT,
                   BOOLEAN_AND,
                   BOOLEAN_OR,
+                  BOOLEAN_XOR,
                   DIV,
                   MOD,
                   MULT,
