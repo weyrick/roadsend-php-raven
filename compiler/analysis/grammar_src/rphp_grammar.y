@@ -282,10 +282,11 @@ echo(A) ::= T_PRINT expr(B).
 }
 
 // return
+// A return statement without variable always returns NULL.
 %type return {AST::returnStmt*}
 return(A) ::= T_RETURN.
 {
-    A = new (pMod->context()) AST::returnStmt(NULL);
+    A = new (pMod->context()) AST::returnStmt(new (pMod->context()) AST::literalNull());
     A->setLine(CURRENT_LINE);
 }
 return(A) ::= T_RETURN expr(B).
