@@ -27,7 +27,6 @@
 STMT(block,        stmt)
 STMT(emptyStmt,    stmt)
 STMT(ifStmt,       stmt)
-STMT(echoStmt,     stmt)
 STMT(returnStmt,   stmt)
 STMT(breakStmt,    stmt)
 STMT(continueStmt, stmt)

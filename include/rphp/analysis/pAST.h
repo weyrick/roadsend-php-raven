@@ -240,12 +240,19 @@ class block: public stmt {
 public:
 
     // build a block with a single expression
-    block(pParseContext& C, expr* s): stmt(blockKind), block_(0), numStmts_(1) {
+    block(pParseContext& C, stmt* s): stmt(blockKind), block_(0), numStmts_(1) {
         block_ = new (C) stmt*[numStmts_];
         block_[0] = s;
     }
 
     block(pParseContext& C, const statementList* s): stmt(blockKind), block_(0), numStmts_(s->size()) {
+        if (numStmts_) {
+            block_ = new (C) stmt*[numStmts_];
+            memcpy(block_, &(s->front()), numStmts_ * sizeof(*block_));
+        }
+    }
+
+    block(pParseContext& C, const expressionList* s): stmt(blockKind), block_(0), numStmts_(s->size()) {
         if (numStmts_) {
             block_ = new (C) stmt*[numStmts_];
             memcpy(block_, &(s->front()), numStmts_ * sizeof(*block_));
@@ -519,7 +526,7 @@ class forEach: public stmt {
 
 public:
     forEach(expr* rVal,
-            block* body,
+            stmt* body,
             pParseContext& C,
             const pSourceRange& val,            
             bool byRef,
@@ -530,6 +537,11 @@ public:
     key_(),
     byRef_(byRef)
     {
+
+        // enfore a block for body to ease later traversal
+        if (!isa<block>(body)) {
+            body = new (C) block(C, body);
+        }
 
         children_[RVAL] = static_cast<stmt*>(rVal);
         children_[BODY] = static_cast<stmt*>(body);
@@ -571,17 +583,23 @@ class forStmt: public stmt {
     stmt* children_[END_EXPR];
 
 public:
-    forStmt(expr* init,
-            expr* cond,
-            expr* inc,
-            block* body):
+    forStmt(pParseContext& C,
+            stmt* init,
+            stmt* cond,
+            stmt* inc,
+            stmt* body):
     stmt(forEachKind),
     children_()
     {
 
-        children_[INIT] = static_cast<stmt*>(init);
-        children_[COND] = static_cast<stmt*>(cond);
-        children_[INC] = static_cast<stmt*>(inc);
+        // enfore a block for body to ease later traversal
+        if (!isa<block>(body)) {
+            body = new (C) block(C, body);
+        }
+
+        children_[INIT] = init; // may be block or expr
+        children_[COND] = cond; // may be block or expr
+        children_[INC] = inc; // may be block or expr
         children_[BODY] = static_cast<stmt*>(body);
 
     }
@@ -589,9 +607,9 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
-    expr* init(void) { return static_cast<expr*>(children_[INIT]); }
-    expr* condition(void) { return static_cast<expr*>(children_[COND]); }
-    expr* increment(void) { return static_cast<expr*>(children_[INC]); }
+    stmt* init(void) { return children_[INIT]; }
+    stmt* condition(void) { return children_[COND]; }
+    stmt* increment(void) { return children_[INC]; }
     block* body(void) { return static_cast<block*>(children_[BODY]); }
 
     static bool classof(const forStmt* s) { return true; }
@@ -606,11 +624,17 @@ class doStmt: public stmt {
     stmt* children_[END_EXPR];
 
 public:
-    doStmt(expr* cond,
-          block* body):
+    doStmt(pParseContext& C,
+           expr* cond,
+           stmt* body):
     stmt(doStmtKind),
     children_()
     {
+
+        // enfore a block for body to ease later traversal
+        if (!isa<block>(body)) {
+            body = new (C) block(C, body);
+        }
 
         children_[COND] = static_cast<stmt*>(cond);
         children_[BODY] = static_cast<stmt*>(body);
@@ -635,11 +659,17 @@ class whileStmt: public stmt {
     stmt* children_[END_EXPR];
 
 public:
-    whileStmt(expr* cond,
-              block* body):
+    whileStmt(pParseContext& C,
+              expr* cond,
+              stmt* body):
     stmt(whileStmtKind),
     children_()
     {
+
+        // enfore a block for body to ease later traversal
+        if (!isa<block>(body)) {
+            body = new (C) block(C, body);
+        }
 
         children_[COND] = static_cast<stmt*>(cond);
         children_[BODY] = static_cast<stmt*>(body);
@@ -764,10 +794,18 @@ public:
 
 };
 
-// builtins: exit, isset, unset, empty
+// builtins: language constructs that seem like function calls, but aren't.
+// exit, isset, unset, empty, echo, print, include, require
 class builtin: public expr {
 public:
-    enum opKind { EXIT, ISSET, UNSET, EMPTY };
+    enum opKind {
+                  EXIT,
+                  ISSET,
+                  UNSET,
+                  EMPTY,
+                  PRINT, // expr
+                  ECHO   // statement, not an expr (unlike print)
+                };
 
 private:
     stmt** children_;
@@ -1025,23 +1063,6 @@ public:
 
 };
 
-// NODE: echo statement
-class echoStmt: public stmt {
-
-    expr* rVal_;
-
-public:
-    echoStmt(expr* v): stmt(echoStmtKind), rVal_(v) { }
-
-    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&rVal_); }
-    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
-
-    expr* rVal(void) { return rVal_; }
-
-    static bool classof(const echoStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == echoStmtKind; }
-
-};
 
 // NODE: var
 class var: public expr {
@@ -1365,8 +1386,7 @@ public:
                   NOT_IDENTICAL,
                   BIT_OR,
                   BIT_AND,
-                  BIT_XOR,
-                  EXPR_LIST // used in forExpr, a simple sequence
+                  BIT_XOR
               };
 
 private:

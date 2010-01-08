@@ -140,6 +140,7 @@ int main(void) {
     langRules_.add("PHP", "endforeach", T_ENDFOREACH, ".");
     langRules_.add("PHP", "interface", T_INTERFACE, ".");
     langRules_.add("PHP", "as", T_AS, ".");
+    langRules_.add("PHP", "do", T_DO, ".");
     langRules_.add("PHP", "exit", T_EXIT, ".");
     langRules_.add("PHP", "print", T_PRINT, ".");
     langRules_.add("PHP", "eval", T_EXIT, ".");
@@ -151,9 +152,9 @@ int main(void) {
     langRules_.add("PHP", "global", T_GLOBAL, ".");
     langRules_.add("PHP", "function", T_FUNCTION, ".");
     langRules_.add("PHP", "namespace", T_NAMESPACE, ".");
-    //langRules_.add("PHP", "isset", T_ISSET, ".");
-    //langRules_.add("PHP", "unset", T_UNSET, ".");
-    //langRules_.add("PHP", "empty", T_EMPTY, ".");
+    langRules_.add("PHP", "isset", T_ISSET, ".");
+    langRules_.add("PHP", "unset", T_UNSET, ".");
+    langRules_.add("PHP", "empty", T_EMPTY, ".");
     langRules_.add("PHP", "array", T_ARRAY, ".");
     langRules_.add("PHP", "while", T_WHILE, ".");
     langRules_.add("PHP", "endwhile", T_ENDWHILE, ".");

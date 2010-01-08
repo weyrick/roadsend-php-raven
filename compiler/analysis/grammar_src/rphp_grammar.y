@@ -217,7 +217,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %left T_BOOLEAN_OR_LIT.
 %left T_BOOLEAN_XOR_LIT.
 %left T_BOOLEAN_AND_LIT.
-%right T_ECHO.
+%right T_PRINT.
 %left T_ASSIGN T_CONCAT_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_PLUS_EQUAL T_MINUS_EQUAL T_MOD_EQUAL T_DIV_EQUAL T_MUL_EQUAL.
 %left T_BOOLEAN_AND T_BOOLEAN_OR.
 %left T_PIPE.
@@ -273,16 +273,12 @@ statementBlock(A) ::= T_LEFTCURLY(LC) statement_list(B) T_RIGHTCURLY(RC).
 }
 
 // echo
-%type echo {AST::echoStmt*}
-echo(A) ::= T_ECHO expr(B).
+%type echo {AST::builtin*}
+echo(A) ::= T_ECHO commaExprList(EXPRS).
 {
-    A = new (CTXT) AST::echoStmt(B);
-    A->setLine(CURRENT_LINE);
-}
-echo(A) ::= T_PRINT expr(B).
-{
-    A = new (CTXT) AST::echoStmt(B);
-    A->setLine(CURRENT_LINE);
+   A = new (CTXT) AST::builtin(CTXT, AST::builtin::ECHO, EXPRS);
+   A->setLine(CURRENT_LINE);
+   delete EXPRS;
 }
 
 // return
@@ -392,94 +388,68 @@ ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) else
 // foreach
 %type forEach {AST::forEach*}
 // foreach($expr as $val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::forEach(RVAL,
-                                           BODY,
-                                           CTXT,
-                                           *VAL,
-                                           false /*by ref*/ );
+    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, false /*by ref*/ );
     A->setLine(TOKEN_LINE(F));
 }
 // foreach($expr as $key => $val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::forEach(RVAL,
-                                           BODY,
-                                           CTXT,
-                                           *VAL,
-                                           false /*by ref*/,
-                                           KEY);
+    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, false /*by ref*/, KEY);
     A->setLine(TOKEN_LINE(F));
 }
 // foreach($expr as &$val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_AND T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_AND T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::forEach(RVAL,
-                                           BODY,
-                                           CTXT,
-                                           *VAL,
-                                           true /*by ref*/ );
+    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, true /*by ref*/);
     A->setLine(TOKEN_LINE(F));
 }
 // foreach($expr as $key => &$val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_AND T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_AND T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::forEach(RVAL,
-                                           BODY,
-                                           CTXT,
-                                           *VAL,
-                                           true /*by ref*/,
-                                           KEY);
+    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, true /*by ref*/, KEY);
     A->setLine(TOKEN_LINE(F));
 }
 
 // for
 %type forStmt {AST::forStmt*}
-forStmt(A) ::= T_FOR(F) T_LEFTPAREN forExpr(INIT) T_SEMI forExpr(COND) T_SEMI forExpr(INC) T_RIGHTPAREN statementBlock(BODY).
+forStmt(A) ::= T_FOR(F) T_LEFTPAREN forExpr(INIT) T_SEMI forExpr(COND) T_SEMI forExpr(INC) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::forStmt(INIT,
-                                           COND,
-                                           INC,
-                                           BODY);
+    A = new (CTXT) AST::forStmt(CTXT, INIT, COND, INC, BODY);
     A->setLine(TOKEN_LINE(F));
 }
 
-%type forExpr {AST::expr*}
+%type forExpr {AST::stmt*}
 forExpr(A) ::= .
 {
     A = NULL;
 }
-forExpr(A) ::= nonEmptyForExpr(B).
+forExpr(A) ::= commaExprList(B).
 {
-    A = B;
-}
-%type nonEmptyForExpr {AST::expr*}
-nonEmptyForExpr(A) ::= expr(B).
-{
-    A = B;
-}
-nonEmptyForExpr(A) ::= nonEmptyForExpr(LVAL) T_COMMA expr(RVAL).
-{
-    A = new (CTXT) AST::binaryOp(LVAL,
-                                            RVAL,
-                                            AST::binaryOp::EXPR_LIST);
-    A->setLine(CURRENT_LINE);
+    assert(B->size());
+    if (B->size() == 1) {
+        A = static_cast<AST::stmt*>( B->at(0) );
+    }
+    else {
+        A = new (CTXT) AST::block(CTXT, B);
+    }
+    delete B;
 }
 
 // do
 %type doStmt {AST::doStmt*}
-doStmt(A) ::= T_DO statementBlock(BODY) T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPAREN.
+doStmt(A) ::= T_DO statement(BODY) T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPAREN.
 {
-    A = new (CTXT) AST::doStmt(COND, BODY);
+    A = new (CTXT) AST::doStmt(CTXT, COND, BODY);
     A->setLine(CURRENT_LINE);
 }
 
 // while
 %type whileStmt {AST::whileStmt*}
-whileStmt(A) ::= T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(BODY).
+whileStmt(A) ::= T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::whileStmt(COND, BODY);
+    A = new (CTXT) AST::whileStmt(CTXT, COND, BODY);
     A->setLine(CURRENT_LINE);
 }
 
@@ -645,7 +615,13 @@ expr(A) ::= T_LEFTPAREN expr(B) T_RIGHTPAREN. { A = B; }
 
 /** BUILTINS **/
 %type builtin {AST::builtin*}
+// exit
 builtin(A) ::= T_EXIT.
+{
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::EXIT);
+    A->setLine(CURRENT_LINE);
+}
+builtin(A) ::= T_EXIT T_LEFTPAREN T_RIGHTPAREN.
 {
     A = new (CTXT) AST::builtin(CTXT, AST::builtin::EXIT);
     A->setLine(CURRENT_LINE);
@@ -658,13 +634,61 @@ builtin(A) ::= T_EXIT T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
     delete rval;
     A->setLine(CURRENT_LINE);
 }
-builtin(A) ::= T_EMPTY T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
+// empty
+builtin(A) ::= T_EMPTY T_LEFTPAREN lval(RVAL) T_RIGHTPAREN.
 {
     AST::expressionList* rval = new AST::expressionList();
     rval->push_back(RVAL);
     A = new (CTXT) AST::builtin(CTXT, AST::builtin::EMPTY, rval);
     delete rval;
     A->setLine(CURRENT_LINE);
+}
+// isset
+ builtin(A) ::= T_ISSET T_LEFTPAREN commaVarList(VARS) T_RIGHTPAREN.
+{
+   A = new (CTXT) AST::builtin(CTXT, AST::builtin::ISSET, VARS);
+   A->setLine(CURRENT_LINE);
+   delete VARS;
+}
+// unset
+builtin(A) ::= T_UNSET T_LEFTPAREN commaVarList(VARS) T_RIGHTPAREN.
+{
+   A = new (CTXT) AST::builtin(CTXT, AST::builtin::UNSET, VARS);
+   A->setLine(CURRENT_LINE);
+   delete VARS;
+}
+// print
+builtin(A) ::= T_PRINT expr(RVAL).
+{
+    AST::expressionList* rval = new AST::expressionList();
+    rval->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::PRINT, rval);
+    delete rval;
+    A->setLine(CURRENT_LINE);
+}
+
+%type commaVarList {AST::expressionList*}
+commaVarList(A) ::= lval(VAR).
+{
+    A = new AST::expressionList();
+    A->push_back(VAR);
+}
+commaVarList(A) ::= commaVarList(LIST) T_COMMA lval(VAR).
+{
+    LIST->push_back(VAR);
+    A = LIST;
+}
+
+%type commaExprList {AST::expressionList*}
+commaExprList(A) ::= expr(E).
+{
+    A = new AST::expressionList();
+    A->push_back(E);
+}
+commaExprList(A) ::= commaExprList(LIST) T_COMMA expr(E).
+{
+    LIST->push_back(E);
+    A = LIST;
 }
 
 /** TYPECASTS **/
