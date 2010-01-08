@@ -38,6 +38,7 @@
 
 #include <vector>
 #include <iterator>
+#include <boost/range/iterator_range.hpp>
 
 #include <llvm/Support/StringPool.h>
 #include <llvm/Support/Casting.h>
@@ -176,6 +177,9 @@ public:
 
     typedef stmtIterator       child_iterator;
     typedef constStmtIterator  const_child_iterator;
+    typedef boost::iterator_range<child_iterator> child_range;
+    typedef boost::iterator_range<const_child_iterator> const_child_range;
+
 
     virtual child_iterator child_begin() = 0;
     virtual child_iterator child_end()   = 0;
@@ -186,6 +190,12 @@ public:
 
     const_child_iterator child_end() const {
       return const_child_iterator(const_cast<stmt*>(this)->child_end());
+    }
+    child_range children() {
+        return child_range(child_begin(), child_end());
+    }
+    const_child_range children() const {
+        return const_child_range(child_begin(), child_end());
     }
 
     nodeKind kind(void) const { return kind_; }
@@ -1162,6 +1172,8 @@ public:
 
     stmt::child_iterator args_begin() { return &children_[1]; }
     stmt::child_iterator args_end() { return &children_[1]+(numChildren_-1); }
+
+    stmt::child_range args() { return stmt::child_range(args_begin(), args_end()); }
 
     static bool classof(const functionInvoke* s) { return true; }
     static bool classof(const stmt* s) { return s->kind() == functionInvokeKind; }
