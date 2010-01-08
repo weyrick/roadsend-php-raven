@@ -33,8 +33,9 @@
 
 using namespace rphp;
 
-#define TOKEN_LINE(T) pMod->context().getTokenLine(T)
-#define CURRENT_LINE  pMod->context().currentLineNum()
+#define CTXT          pMod->context()
+#define TOKEN_LINE(T) CTXT.getTokenLine(T)
+#define CURRENT_LINE  CTXT.currentLineNum()
 
 AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, bool isSimple) {
   // binary specifier?
@@ -52,10 +53,10 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
   // substring out the quotes, special case for empty string
   AST::literalString* A;
   if (++start == (*B).end()) {
-    A = new (pMod->context()) AST::literalString(binaryString);
+    A = new (CTXT) AST::literalString(binaryString);
   }
   else {
-    A = new (pMod->context()) AST::literalString(pSourceRange(start, --(*B).end()), binaryString);
+    A = new (CTXT) AST::literalString(pSourceRange(start, --(*B).end()), binaryString);
   }
   A->setIsSimple(isSimple);
   return A;
@@ -205,7 +206,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_DQ_ESCAPE  {int}
 
 %syntax_error {  
-  pMod->context().parseError(TOKEN);
+  CTXT.parseError(TOKEN);
 }   
 %stack_overflow {  
   std::cerr << "Parser stack overflow" << std::endl;
@@ -250,6 +251,7 @@ statement(A) ::= forEach(B). { A = B; }
 statement(A) ::= forStmt(B). { A = B; }
 statement(A) ::= doStmt(B). { A = B; }
 statement(A) ::= whileStmt(B). { A = B; }
+statement(A) ::= switchStmt(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement(A) ::= return(B) T_SEMI. { A = B; }
@@ -258,14 +260,14 @@ statement(A) ::= continue(B) T_SEMI. { A = B; }
 statement(A) ::= global(B) T_SEMI. { A = B; }
 statement(A) ::= T_SEMI.
 {
-    A = new (pMod->context()) AST::emptyStmt();
+    A = new (CTXT) AST::emptyStmt();
 }
 
 // statement block
 %type statementBlock{AST::block*}
 statementBlock(A) ::= T_LEFTCURLY(LC) statement_list(B) T_RIGHTCURLY(RC).
 {
-    A = new (pMod->context()) AST::block(pMod->context(), B);
+    A = new (CTXT) AST::block(CTXT, B);
     A->setLine(TOKEN_LINE(LC), TOKEN_LINE(RC));
     delete B;
 }
@@ -274,12 +276,12 @@ statementBlock(A) ::= T_LEFTCURLY(LC) statement_list(B) T_RIGHTCURLY(RC).
 %type echo {AST::echoStmt*}
 echo(A) ::= T_ECHO expr(B).
 {
-    A = new (pMod->context()) AST::echoStmt(B);
+    A = new (CTXT) AST::echoStmt(B);
     A->setLine(CURRENT_LINE);
 }
 echo(A) ::= T_PRINT expr(B).
 {
-    A = new (pMod->context()) AST::echoStmt(B);
+    A = new (CTXT) AST::echoStmt(B);
     A->setLine(CURRENT_LINE);
 }
 
@@ -287,36 +289,36 @@ echo(A) ::= T_PRINT expr(B).
 %type return {AST::returnStmt*}
 return(A) ::= T_RETURN.
 {
-    A = new (pMod->context()) AST::returnStmt(NULL);
+    A = new (CTXT) AST::returnStmt(NULL);
     A->setLine(CURRENT_LINE);
 }
 return(A) ::= T_RETURN expr(B).
 {
-    A = new (pMod->context()) AST::returnStmt(B);
+    A = new (CTXT) AST::returnStmt(B);
     A->setLine(CURRENT_LINE);
 }
 // break
 %type break {AST::breakStmt*}
 break(A) ::= T_BREAK.
 {
-    A = new (pMod->context()) AST::breakStmt(NULL);
+    A = new (CTXT) AST::breakStmt(NULL);
     A->setLine(CURRENT_LINE);
 }
 break(A) ::= T_BREAK expr(B).
 {
-    A = new (pMod->context()) AST::breakStmt(B);
+    A = new (CTXT) AST::breakStmt(B);
     A->setLine(CURRENT_LINE);
 }
 // continue
 %type continue {AST::continueStmt*}
 continue(A) ::= T_CONTINUE.
 {
-    A = new (pMod->context()) AST::continueStmt(NULL);
+    A = new (CTXT) AST::continueStmt(NULL);
     A->setLine(CURRENT_LINE);
 }
 continue(A) ::= T_CONTINUE expr(B).
 {
-    A = new (pMod->context()) AST::continueStmt(B);
+    A = new (CTXT) AST::continueStmt(B);
     A->setLine(CURRENT_LINE);
 }
 
@@ -324,7 +326,7 @@ continue(A) ::= T_CONTINUE expr(B).
 %type global {AST::globalStmt*}
 global(A) ::= T_GLOBAL globalItemList(B).
 {
-    A = new (pMod->context()) AST::globalStmt(pMod->context(), B);
+    A = new (CTXT) AST::globalStmt(CTXT, B);
     A->setLine(CURRENT_LINE);
     delete B;
 }
@@ -345,7 +347,7 @@ globalItemList(A) ::= lval(B) T_COMMA globalItemList(C).
 %type inlineHTML {AST::inlineHtml*}
 inlineHTML(A) ::= T_INLINE_HTML(B).
 {
-    A = new (pMod->context()) AST::inlineHtml(*B);
+    A = new (CTXT) AST::inlineHtml(*B);
     A->setLine(CURRENT_LINE);
 }
 
@@ -364,13 +366,13 @@ elseSingle(A) ::= T_ELSE statement(BODY).
 // elseif with (potential) single statement
 elseSeries(A) ::=  T_ELSEIF(EIF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSingle(ELSE).
 {
-    A = new (pMod->context()) AST::ifStmt(COND, TRUE, ELSE);
+    A = new (CTXT) AST::ifStmt(COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(EIF));
 }
 // elseif series
 elseSeries(A) ::=  T_ELSEIF(EIF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSeries(ELSE).
 {
-    A = new (pMod->context()) AST::ifStmt(COND, TRUE, ELSE);
+    A = new (CTXT) AST::ifStmt(COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(EIF));
 }
 
@@ -378,12 +380,12 @@ elseSeries(A) ::=  T_ELSEIF(EIF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(T
 %type ifBlock {AST::ifStmt*}
 ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSeries(ELSE).
 {
-    A = new (pMod->context()) AST::ifStmt(COND, TRUE, ELSE);
+    A = new (CTXT) AST::ifStmt(COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(IF));
 }
 ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSingle(ELSE).
 {
-    A = new (pMod->context()) AST::ifStmt(COND, TRUE, ELSE);
+    A = new (CTXT) AST::ifStmt(COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(IF));
 }
 
@@ -392,9 +394,9 @@ ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) else
 // foreach($expr as $val)
 forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
 {
-    A = new (pMod->context()) AST::forEach(RVAL,
+    A = new (CTXT) AST::forEach(RVAL,
                                            BODY,
-                                           pMod->context(),
+                                           CTXT,
                                            *VAL,
                                            false /*by ref*/ );
     A->setLine(TOKEN_LINE(F));
@@ -402,9 +404,9 @@ forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(VAL) T_RIGHTP
 // foreach($expr as $key => $val)
 forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
 {
-    A = new (pMod->context()) AST::forEach(RVAL,
+    A = new (CTXT) AST::forEach(RVAL,
                                            BODY,
-                                           pMod->context(),
+                                           CTXT,
                                            *VAL,
                                            false /*by ref*/,
                                            KEY);
@@ -413,9 +415,9 @@ forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWK
 // foreach($expr as &$val)
 forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_AND T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
 {
-    A = new (pMod->context()) AST::forEach(RVAL,
+    A = new (CTXT) AST::forEach(RVAL,
                                            BODY,
-                                           pMod->context(),
+                                           CTXT,
                                            *VAL,
                                            true /*by ref*/ );
     A->setLine(TOKEN_LINE(F));
@@ -423,9 +425,9 @@ forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_AND T_VARIABLE(VAL) T_
 // foreach($expr as $key => &$val)
 forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_AND T_VARIABLE(VAL) T_RIGHTPAREN statementBlock(BODY).
 {
-    A = new (pMod->context()) AST::forEach(RVAL,
+    A = new (CTXT) AST::forEach(RVAL,
                                            BODY,
-                                           pMod->context(),
+                                           CTXT,
                                            *VAL,
                                            true /*by ref*/,
                                            KEY);
@@ -436,7 +438,7 @@ forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWK
 %type forStmt {AST::forStmt*}
 forStmt(A) ::= T_FOR(F) T_LEFTPAREN forExpr(INIT) T_SEMI forExpr(COND) T_SEMI forExpr(INC) T_RIGHTPAREN statementBlock(BODY).
 {
-    A = new (pMod->context()) AST::forStmt(INIT,
+    A = new (CTXT) AST::forStmt(INIT,
                                            COND,
                                            INC,
                                            BODY);
@@ -459,7 +461,7 @@ nonEmptyForExpr(A) ::= expr(B).
 }
 nonEmptyForExpr(A) ::= nonEmptyForExpr(LVAL) T_COMMA expr(RVAL).
 {
-    A = new (pMod->context()) AST::binaryOp(LVAL,
+    A = new (CTXT) AST::binaryOp(LVAL,
                                             RVAL,
                                             AST::binaryOp::EXPR_LIST);
     A->setLine(CURRENT_LINE);
@@ -469,7 +471,7 @@ nonEmptyForExpr(A) ::= nonEmptyForExpr(LVAL) T_COMMA expr(RVAL).
 %type doStmt {AST::doStmt*}
 doStmt(A) ::= T_DO statementBlock(BODY) T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPAREN.
 {
-    A = new (pMod->context()) AST::doStmt(COND, BODY);
+    A = new (CTXT) AST::doStmt(COND, BODY);
     A->setLine(CURRENT_LINE);
 }
 
@@ -477,9 +479,70 @@ doStmt(A) ::= T_DO statementBlock(BODY) T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPA
 %type whileStmt {AST::whileStmt*}
 whileStmt(A) ::= T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(BODY).
 {
-    A = new (pMod->context()) AST::whileStmt(COND, BODY);
+    A = new (CTXT) AST::whileStmt(COND, BODY);
     A->setLine(CURRENT_LINE);
 }
+
+// switch
+%type switchStmt {AST::switchStmt*}
+switchStmt(A) ::= T_SWITCH T_LEFTPAREN expr(RVAL) T_RIGHTPAREN switchCaseList(CASES).
+{
+    A = new (CTXT) AST::switchStmt(RVAL, CASES);
+    A->setLine(CURRENT_LINE);
+}
+
+%type switchCaseList {AST::block*}
+switchCaseList(A) ::= T_LEFTCURLY(LC) caseList(CASES) T_RIGHTCURLY(RC).
+{
+    A = new (CTXT) AST::block(CTXT, CASES);
+    A->setLine(TOKEN_LINE(LC), TOKEN_LINE(RC));
+    delete CASES;
+}
+switchCaseList(A) ::= T_LEFTCURLY(LC) T_SEMI caseList(CASES) T_RIGHTCURLY(RC).
+{
+    A = new (CTXT) AST::block(CTXT, CASES);
+    A->setLine(TOKEN_LINE(LC), TOKEN_LINE(RC));
+    delete CASES;
+}
+switchCaseList(A) ::= T_COLON(LC) caseList(CASES) T_ENDSWITCH(RC).
+{
+    A = new (CTXT) AST::block(CTXT, CASES);
+    A->setLine(TOKEN_LINE(LC), TOKEN_LINE(RC));
+    delete CASES;
+}
+switchCaseList(A) ::= T_COLON(LC) T_SEMI caseList(CASES) T_ENDSWITCH(RC).
+{
+    A = new (CTXT) AST::block(CTXT, CASES);
+    A->setLine(TOKEN_LINE(LC), TOKEN_LINE(RC));
+    delete CASES;
+}
+
+%type caseList {AST::statementList*} //  root nodes here must be switchCase* casted to stmt*
+caseList(A) ::= .
+{
+    A = new AST::statementList();
+}
+caseList(A) ::= caseList(LIST) T_CASE expr(COND) caseSeparator statement_list(STMTS).
+{
+    AST::switchCase* c = new (CTXT) AST::switchCase(COND,
+                                                    new (CTXT) AST::block(CTXT, STMTS));
+    c->setLine(CURRENT_LINE);
+    LIST->push_back(static_cast<AST::stmt*>(c));
+    delete STMTS;
+    A = LIST;
+}
+caseList(A) ::= caseList(LIST) T_DEFAULT caseSeparator statement_list(STMTS).
+{
+    AST::switchCase* c = new (CTXT) AST::switchCase(NULL,
+                                                     new (CTXT) AST::block(CTXT, STMTS));
+    c->setLine(CURRENT_LINE);
+    LIST->push_back(static_cast<AST::stmt*>(c));
+    delete STMTS;
+    A = LIST;
+}
+
+caseSeparator ::= T_COLON.
+caseSeparator ::= T_SEMI.
 
 /** DECLARATIONS **/
 
@@ -487,14 +550,14 @@ whileStmt(A) ::= T_WHILE T_LEFTPAREN expr(COND) T_RIGHTPAREN statementBlock(BODY
 %type staticDecl {AST::staticDecl*}
 staticDecl(A) ::= T_STATIC T_VARIABLE(ID).
 {
-    A = new (pMod->context()) AST::staticDecl(pSourceRange(++(*ID).begin(), (*ID).end()), pMod->context());
+    A = new (CTXT) AST::staticDecl(pSourceRange(++(*ID).begin(), (*ID).end()), CTXT);
     A->setLine(CURRENT_LINE);
 }
 
 staticDecl(A) ::= T_STATIC T_VARIABLE(ID) T_ASSIGN literal(DEF).
 {
-    A = new (pMod->context()) AST::staticDecl(pSourceRange(++(*ID).begin(), (*ID).end()),
-    pMod->context(), DEF);
+    A = new (CTXT) AST::staticDecl(pSourceRange(++(*ID).begin(), (*ID).end()),
+    CTXT, DEF);
     A->setLine(CURRENT_LINE);
 }
 
@@ -503,26 +566,26 @@ staticDecl(A) ::= T_STATIC T_VARIABLE(ID) T_ASSIGN literal(DEF).
 %type formalParam {AST::formalParam*}
 formalParam(A) ::= T_VARIABLE(PARAM).
 {
-    A = new (pMod->context()) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
-                              pMod->context(), false/*ref*/);
+    A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
+                              CTXT, false/*ref*/);
     A->setLine(TOKEN_LINE(PARAM));
 }
 formalParam(A) ::= T_AND T_VARIABLE(PARAM).
 {
-    A = new (pMod->context()) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
-                              pMod->context(), true/*ref*/);
+    A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
+                              CTXT, true/*ref*/);
     A->setLine(TOKEN_LINE(PARAM));
 }
 formalParam(A) ::= T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
 {
-    A = new (pMod->context()) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
-                              pMod->context(), false/*ref*/, DEF);
+    A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
+                              CTXT, false/*ref*/, DEF);
     A->setLine(TOKEN_LINE(PARAM));
 }
 formalParam(A) ::= T_AND T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
 {
-    A = new (pMod->context()) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
-                              pMod->context(), true/*ref*/, DEF);
+    A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
+                              CTXT, true/*ref*/, DEF);
     A->setLine(TOKEN_LINE(PARAM));
 }
 
@@ -547,13 +610,13 @@ formalParamList(A) ::= .
 %type signature {AST::signature*}
 signature(A) ::= T_IDENTIFIER(NAME) T_LEFTPAREN formalParamList(PARAMS) T_RIGHTPAREN.
 {
-    A = new (pMod->context()) AST::signature(*NAME, pMod->context(), PARAMS, false/*ref*/);
+    A = new (CTXT) AST::signature(*NAME, CTXT, PARAMS, false/*ref*/);
     A->setLine(TOKEN_LINE(NAME));
     delete PARAMS;
 }
 signature(A) ::= T_AND T_IDENTIFIER(NAME) T_LEFTPAREN formalParamList(PARAMS) T_RIGHTPAREN.
 {
-    A = new (pMod->context()) AST::signature(*NAME, pMod->context(), PARAMS, true/*ref*/);
+    A = new (CTXT) AST::signature(*NAME, CTXT, PARAMS, true/*ref*/);
     A->setLine(TOKEN_LINE(NAME));
     delete PARAMS;
 }
@@ -561,7 +624,7 @@ signature(A) ::= T_AND T_IDENTIFIER(NAME) T_LEFTPAREN formalParamList(PARAMS) T_
 %type functionDecl {AST::functionDecl*}
 functionDecl(A) ::= T_FUNCTION signature(SIG) statementBlock(BODY).
 {
-    A = new (pMod->context()) AST::functionDecl(SIG, BODY);
+    A = new (CTXT) AST::functionDecl(SIG, BODY);
 }                    
 
 /****** EXPRESSIONS *********/
@@ -584,14 +647,14 @@ expr(A) ::= T_LEFTPAREN expr(B) T_RIGHTPAREN. { A = B; }
 %type builtin {AST::builtin*}
 builtin(A) ::= T_EXIT.
 {
-    A = new (pMod->context()) AST::builtin(pMod->context(), AST::builtin::EXIT);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::EXIT);
     A->setLine(CURRENT_LINE);
 }
 builtin(A) ::= T_EXIT T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
 {
     AST::expressionList* rval = new AST::expressionList();
     rval->push_back(RVAL);
-    A = new (pMod->context()) AST::builtin(pMod->context(), AST::builtin::EXIT, rval);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::EXIT, rval);
     delete rval;
     A->setLine(CURRENT_LINE);
 }
@@ -599,7 +662,7 @@ builtin(A) ::= T_EMPTY T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
 {
     AST::expressionList* rval = new AST::expressionList();
     rval->push_back(RVAL);
-    A = new (pMod->context()) AST::builtin(pMod->context(), AST::builtin::EMPTY, rval);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::EMPTY, rval);
     delete rval;
     A->setLine(CURRENT_LINE);
 }
@@ -608,47 +671,47 @@ builtin(A) ::= T_EMPTY T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
 %type typeCast {AST::typeCast*}
 typeCast(A) ::= T_FLOAT_CAST expr(rVal).
 {
-    A = new (pMod->context()) AST::typeCast(AST::typeCast::REAL, rVal);
+    A = new (CTXT) AST::typeCast(AST::typeCast::REAL, rVal);
     A->setLine(CURRENT_LINE);
 }
 typeCast(A) ::= T_INT_CAST expr(rVal).
 {
-    A = new (pMod->context()) AST::typeCast(AST::typeCast::INT, rVal);
+    A = new (CTXT) AST::typeCast(AST::typeCast::INT, rVal);
     A->setLine(CURRENT_LINE);
 }
 typeCast(A) ::= T_STRING_CAST expr(rVal).
 {
-    A = new (pMod->context()) AST::typeCast(AST::typeCast::STRING, rVal);
+    A = new (CTXT) AST::typeCast(AST::typeCast::STRING, rVal);
     A->setLine(CURRENT_LINE);
 }
 typeCast(A) ::= T_BINARY_CAST expr(rVal).
 {
-    A = new (pMod->context()) AST::typeCast(AST::typeCast::BINARY, rVal);
+    A = new (CTXT) AST::typeCast(AST::typeCast::BINARY, rVal);
     A->setLine(CURRENT_LINE);
 }
 typeCast(A) ::= T_UNICODE_CAST expr(rVal).
 {
-    A = new (pMod->context()) AST::typeCast(AST::typeCast::UNICODE, rVal);
+    A = new (CTXT) AST::typeCast(AST::typeCast::UNICODE, rVal);
     A->setLine(CURRENT_LINE);
 }
 typeCast(A) ::= T_ARRAY_CAST expr(rVal).
 {
-    A = new (pMod->context()) AST::typeCast(AST::typeCast::ARRAY, rVal);
+    A = new (CTXT) AST::typeCast(AST::typeCast::ARRAY, rVal);
     A->setLine(CURRENT_LINE);
 }
 typeCast(A) ::= T_OBJECT_CAST expr(rVal).
 {
-    A = new (pMod->context()) AST::typeCast(AST::typeCast::OBJECT, rVal);
+    A = new (CTXT) AST::typeCast(AST::typeCast::OBJECT, rVal);
     A->setLine(CURRENT_LINE);
 }
 typeCast(A) ::= T_UNSET_CAST expr(rVal).
 {
-    A = new (pMod->context()) AST::typeCast(AST::typeCast::UNSET, rVal);
+    A = new (CTXT) AST::typeCast(AST::typeCast::UNSET, rVal);
     A->setLine(CURRENT_LINE);
 }
 typeCast(A) ::= T_BOOL_CAST expr(rVal).
 {
-    A = new (pMod->context()) AST::typeCast(AST::typeCast::BOOL, rVal);
+    A = new (CTXT) AST::typeCast(AST::typeCast::BOOL, rVal);
     A->setLine(CURRENT_LINE);
 }
 
@@ -671,14 +734,14 @@ literal(A) ::= T_DQ_STRING(B).
 // literal integers (decimal)
 literal(A) ::= T_LNUMBER(B).
 {
-    A = new (pMod->context()) AST::literalInt(*B);
+    A = new (CTXT) AST::literalInt(*B);
     A->setLine(CURRENT_LINE);
 }
 
 // literal integers (float)
 literal(A) ::= T_DNUMBER(B).
 {
-    A = new (pMod->context()) AST::literalFloat(*B);
+    A = new (CTXT) AST::literalFloat(*B);
     A->setLine(CURRENT_LINE);    
 }
 
@@ -689,17 +752,17 @@ literal(A) ::= T_IDENTIFIER(B).
     pSourceString ciTmp((*B).begin(), (*B).end());
     transform(ciTmp.begin(), ciTmp.end(), ciTmp.begin(), toupper);
     if (ciTmp == "NULL") {
-        A = new (pMod->context()) AST::literalNull();
+        A = new (CTXT) AST::literalNull();
     }
     else if (ciTmp == "TRUE") {
-        A = new (pMod->context()) AST::literalBool(true);
+        A = new (CTXT) AST::literalBool(true);
     }
     else if (ciTmp == "FALSE") {
-        A = new (pMod->context()) AST::literalBool(false);
+        A = new (CTXT) AST::literalBool(false);
     }
     else {
         // default to normal string
-        A = new (pMod->context()) AST::literalString(*B);
+        A = new (CTXT) AST::literalString(*B);
     }
     A->setLine(CURRENT_LINE);
 }
@@ -726,25 +789,25 @@ arrayItemList(A) ::= .
 %type arrayItem {AST::arrayItem*}
 arrayItem(A) ::= expr(B).
 {
-    A = new (pMod->context()) AST::arrayItem(NULL, B, false);
+    A = new (CTXT) AST::arrayItem(NULL, B, false);
 }
 arrayItem(A) ::= T_AND expr(B).
 {
-    A = new (pMod->context()) AST::arrayItem(NULL, B, true);
+    A = new (CTXT) AST::arrayItem(NULL, B, true);
 }
 arrayItem(A) ::= expr(KEY) T_ARROWKEY expr(VAL).
 {
-    A = new (pMod->context()) AST::arrayItem(KEY, VAL, false);
+    A = new (CTXT) AST::arrayItem(KEY, VAL, false);
 }
 arrayItem(A) ::= expr(KEY) T_ARROWKEY T_AND expr(VAL).
 {
-    A = new (pMod->context()) AST::arrayItem(KEY, VAL, true);
+    A = new (CTXT) AST::arrayItem(KEY, VAL, true);
 }
 
 // literal array
 literal(A) ::= T_ARRAY(ARY) T_LEFTPAREN arrayItemList(B) T_RIGHTPAREN.
 {
-    A = new (pMod->context()) AST::literalArray(B);
+    A = new (CTXT) AST::literalArray(B);
     A->setLine(TOKEN_LINE(ARY));
     delete B; // deletes the vector, NOT the exprs in it!
 }
@@ -753,17 +816,17 @@ literal(A) ::= T_ARRAY(ARY) T_LEFTPAREN arrayItemList(B) T_RIGHTPAREN.
 %type unaryOp {AST::unaryOp*}
 unaryOp(A) ::= T_PLUS expr(R).
 {
-    A = new (pMod->context()) AST::unaryOp(R, AST::unaryOp::POSITIVE);
+    A = new (CTXT) AST::unaryOp(R, AST::unaryOp::POSITIVE);
     A->setLine(CURRENT_LINE);
 }
 unaryOp(A) ::= T_MINUS expr(R).
 {
-    A = new (pMod->context()) AST::unaryOp(R, AST::unaryOp::NEGATIVE);
+    A = new (CTXT) AST::unaryOp(R, AST::unaryOp::NEGATIVE);
     A->setLine(CURRENT_LINE);
 }
 unaryOp(A) ::= T_BOOLEAN_NOT expr(R).
 {
-    A = new (pMod->context()) AST::unaryOp(R, AST::unaryOp::LOGICALNOT);
+    A = new (CTXT) AST::unaryOp(R, AST::unaryOp::LOGICALNOT);
     A->setLine(CURRENT_LINE);
 }
 
@@ -771,112 +834,112 @@ unaryOp(A) ::= T_BOOLEAN_NOT expr(R).
 %type binaryOp {AST::binaryOp*}
 binaryOp(A) ::= expr(L) T_DOT expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::CONCAT);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::CONCAT);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_BOOLEAN_AND expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_AND);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_AND);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_BOOLEAN_AND_LIT expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_AND);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_AND);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_BOOLEAN_OR expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_OR);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_OR);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_BOOLEAN_OR_LIT expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_OR);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_OR);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_BOOLEAN_XOR_LIT expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_XOR);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BOOLEAN_XOR);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_DIV expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::DIV);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::DIV);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_MOD expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::MOD);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::MOD);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_MULT expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::MULT);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::MULT);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_PLUS expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::ADD);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::ADD);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_MINUS expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::SUB);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::SUB);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_GREATER_THAN expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::GREATER_THAN);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::GREATER_THAN);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_LESS_THAN expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::LESS_THAN);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::LESS_THAN);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_GREATER_OR_EQUAL expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::GREATER_OR_EQUAL);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::GREATER_OR_EQUAL);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_LESS_OR_EQUAL expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::LESS_OR_EQUAL);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::LESS_OR_EQUAL);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_EQUAL expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::EQUAL);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::EQUAL);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_NOT_EQUAL expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::NOT_EQUAL);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::NOT_EQUAL);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_IDENTICAL expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::IDENTICAL);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::IDENTICAL);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_NOT_IDENTICAL expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::NOT_IDENTICAL);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::NOT_IDENTICAL);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_CARET expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BIT_XOR);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BIT_XOR);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_PIPE expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BIT_OR);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BIT_OR);
     A->setLine(CURRENT_LINE);
 }
 binaryOp(A) ::= expr(L) T_AND expr(R).
 {
-    A = new (pMod->context()) AST::binaryOp(L, R, AST::binaryOp::BIT_AND);
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BIT_AND);
     A->setLine(CURRENT_LINE);
 }
 
@@ -884,23 +947,23 @@ binaryOp(A) ::= expr(L) T_AND expr(R).
 %type preOp {AST::preOp*}
 preOp(A) ::= T_INC lval(R).
 {
-    A = new (pMod->context()) AST::preOp(R, AST::preOp::INC);
+    A = new (CTXT) AST::preOp(R, AST::preOp::INC);
     A->setLine(CURRENT_LINE);
 }
 preOp(A) ::= T_DEC lval(R).
 {
-    A = new (pMod->context()) AST::preOp(R, AST::preOp::DEC);
+    A = new (CTXT) AST::preOp(R, AST::preOp::DEC);
     A->setLine(CURRENT_LINE);
 }
 %type postOp {AST::postOp*}
 postOp(A) ::= lval(R) T_INC.
 {
-    A = new (pMod->context()) AST::postOp(R, AST::postOp::INC);
+    A = new (CTXT) AST::postOp(R, AST::postOp::INC);
     A->setLine(CURRENT_LINE);
 }
 postOp(A) ::= lval(R) T_DEC.
 {
-    A = new (pMod->context()) AST::postOp(R, AST::postOp::DEC);
+    A = new (CTXT) AST::postOp(R, AST::postOp::DEC);
     A->setLine(CURRENT_LINE);
 }
 
@@ -908,59 +971,59 @@ postOp(A) ::= lval(R) T_DEC.
 %type assignment {AST::assignment*}
 assignment(A) ::= lval(L) T_ASSIGN(EQ_SIGN) expr(R).
 {
-    A = new (pMod->context()) AST::assignment(L, R, false);
+    A = new (CTXT) AST::assignment(L, R, false);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 assignment(A) ::= lval(L) T_ASSIGN T_AND(EQ_SIGN) lval(R).
 {
-    A = new (pMod->context()) AST::assignment(L, R, true);
+    A = new (CTXT) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 
 %type opAssignment {AST::opAssignment*}
 opAssignment(A) ::= lval(L) T_AND_EQUAL(EQ_SIGN) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::AND);
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::AND);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 opAssignment(A) ::= lval(L) T_OR_EQUAL(EQ_SIGN) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::OR);
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::OR);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 opAssignment(A) ::= lval(L) T_XOR_EQUAL(EQ_SIGN) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::XOR);
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::XOR);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 opAssignment(A) ::= lval(L) T_CONCAT_EQUAL(OP) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::CONCAT);
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::CONCAT);
     A->setLine(TOKEN_LINE(OP));
 }
 opAssignment(A) ::= lval(L) T_DIV_EQUAL(OP) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::DIV);
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::DIV);
     A->setLine(TOKEN_LINE(OP));
 }
 opAssignment(A) ::= lval(L) T_MUL_EQUAL(OP) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::MULT);
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::MULT);
     A->setLine(TOKEN_LINE(OP));
 }
 opAssignment(A) ::= lval(L) T_PLUS_EQUAL(OP) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::ADD);
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::ADD);
     A->setLine(TOKEN_LINE(OP));
 }
 opAssignment(A) ::= lval(L) T_MINUS_EQUAL(OP) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::SUB);
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::SUB);
     A->setLine(TOKEN_LINE(OP));
 }
 opAssignment(A) ::= lval(L) T_MOD_EQUAL(OP) expr(R).
 {
-    A = new (pMod->context()) AST::opAssignment(L, R, AST::opAssignment::MOD);
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::MOD);
     A->setLine(TOKEN_LINE(OP));
 }
 
@@ -975,13 +1038,13 @@ lval(A) ::= array_lVal(B). { A = B; }
 variable_lVal(A) ::= T_VARIABLE(B).
 {
     // strip $
-    A = new (pMod->context()) AST::var(pSourceRange(++(*B).begin(), (*B).end()), pMod->context());
+    A = new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT);
     A->setLine(CURRENT_LINE);
 }
 // $foo->bar
 variable_lVal(A) ::= lval(TARGET) T_CLASSDEREF T_IDENTIFIER(ID).
 {
-    A = new (pMod->context()) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), pMod->context(), TARGET);
+    A = new (CTXT) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), CTXT, TARGET);
     A->setLine(CURRENT_LINE);
 }
 // $foo[]
@@ -989,14 +1052,14 @@ variable_lVal(A) ::= lval(TARGET) T_CLASSDEREF T_IDENTIFIER(ID).
 array_lVal(A) ::= T_VARIABLE(B) arrayIndices(C).
 {
     // strip $
-    A = new (pMod->context()) AST::var(pSourceRange(++(*B).begin(), (*B).end()), pMod->context(), C);
+    A = new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT, C);
     A->setLine(CURRENT_LINE);
     delete C;
 }
 // $foo->bar[]
 variable_lVal(A) ::= lval(TARGET) T_CLASSDEREF T_IDENTIFIER(ID) arrayIndices(INDICES).
 {
-    A = new (pMod->context()) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), pMod->context(), INDICES, TARGET);
+    A = new (CTXT) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), CTXT, INDICES, TARGET);
     A->setLine(CURRENT_LINE);
 }
 
@@ -1032,12 +1095,12 @@ arrayIndices(A) ::= arrayIndices(B) T_LEFTSQUARE expr(C) T_RIGHTSQUARE.
 arrayIndices(A) ::= T_LEFTSQUARE T_RIGHTSQUARE.
 {
     A = new AST::expressionList();    
-    AST::stmt* noop = new (pMod->context()) AST::emptyStmt();
+    AST::stmt* noop = new (CTXT) AST::emptyStmt();
     A->push_back(static_cast<AST::expr*>(noop));
 }
 arrayIndices(A) ::= arrayIndices(B) T_LEFTSQUARE T_RIGHTSQUARE.
 {
-    AST::stmt* noop = new (pMod->context()) AST::emptyStmt();
+    AST::stmt* noop = new (CTXT) AST::emptyStmt();
     B->push_back(static_cast<AST::expr*>(noop));
     A = B;
 }
@@ -1047,8 +1110,8 @@ arrayIndices(A) ::= arrayIndices(B) T_LEFTSQUARE T_RIGHTSQUARE.
 // foo()
 functionInvoke(A) ::= T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
 {
-    A = new (pMod->context()) AST::functionInvoke(*ID, // f name
-                                                  pMod->context(),
+    A = new (CTXT) AST::functionInvoke(*ID, // f name
+                                                  CTXT,
                                                   ARGS  // expression list: arguments, copied
                                                   );
     A->setLine(CURRENT_LINE);
@@ -1057,8 +1120,8 @@ functionInvoke(A) ::= T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
 // $foo->bar()
 functionInvoke(A) ::= lval(LVAL) T_CLASSDEREF T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
 {
-    A = new (pMod->context()) AST::functionInvoke(*ID, // f name
-                                                  pMod->context(),
+    A = new (CTXT) AST::functionInvoke(*ID, // f name
+                                                  CTXT,
                                                   ARGS,  // expression list: arguments, copied
                                                   LVAL
                                                   );
@@ -1071,8 +1134,8 @@ functionInvoke(A) ::= lval(LVAL) T_CLASSDEREF T_IDENTIFIER(ID) T_LEFTPAREN argLi
 %type constructorInvoke {AST::functionInvoke*}
 constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
-    A = new (pMod->context()) AST::functionInvoke(*B, // f name
-                                                  pMod->context(),
+    A = new (CTXT) AST::functionInvoke(*B, // f name
+                                                  CTXT,
                                                   C  // expression list: arguments, copied
                                                   );
     A->setLine(CURRENT_LINE);

@@ -449,6 +449,64 @@ public:
 
 };
 
+// switch case
+class switchCase: public stmt {
+
+    enum { COND, BODY, END_EXPR };
+    stmt* children_[END_EXPR];
+
+public:
+    switchCase(expr* cond,
+               block* body):
+    stmt(switchCaseKind),
+    children_()
+    {
+
+        children_[COND] = static_cast<stmt*>(cond);
+        children_[BODY] = static_cast<stmt*>(body);
+
+    }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    // note if condition is null, this is a default: case
+    expr* condition(void) { return static_cast<expr*>(children_[COND]); }
+    block* body(void) { return static_cast<block*>(children_[BODY]); }
+
+    static bool classof(const switchCase* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == switchCaseKind; }
+
+};
+
+// switch statement
+class switchStmt: public stmt {
+
+    enum { RVAL, CASEBLOCK, END_EXPR };
+    stmt* children_[END_EXPR];
+
+public:
+    switchStmt(expr* rVal,
+               block* caseBlock):
+    stmt(switchStmtKind),
+    children_() {
+
+        children_[RVAL] = static_cast<stmt*>(rVal);
+        children_[CASEBLOCK] = caseBlock;
+
+    }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    expr* rVal(void) { return static_cast<expr*>(children_[RVAL]); }
+    block* caseBlock(void) { return static_cast<block*>(children_[CASEBLOCK]); }
+
+    static bool classof(const switchStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == switchStmtKind; }
+
+};
+
 // foreach statement
 class forEach: public stmt {
 

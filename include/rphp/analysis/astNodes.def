@@ -35,6 +35,8 @@ STMT(doStmt,       stmt)
 STMT(whileStmt,    stmt)
 STMT(forStmt,      stmt)
 STMT(forEach,      stmt)
+STMT(switchCase,   stmt)
+STMT(switchStmt,   stmt)
 STMT(globalStmt,   stmt)
 
 // decl (see decl::first and last kind constants)

@@ -163,6 +163,7 @@ int main(void) {
     langRules_.add("PHP", "new", T_NEW, ".");
     langRules_.add("PHP", "var", T_VAR, ".");
     langRules_.add("PHP", "switch", T_SWITCH, ".");
+    langRules_.add("PHP", "endswitch", T_ENDSWITCH, ".");
     langRules_.add("PHP", "case", T_CASE, ".");
     langRules_.add("PHP", "break", T_BREAK, ".");
     langRules_.add("PHP", "continue", T_CONTINUE, ".");
