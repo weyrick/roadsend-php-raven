@@ -1122,6 +1122,28 @@ public:
             memcpy(children_+1, &(argList->front()), (numChildren_-1) * sizeof(stmt*));
         }
     }
+    functionInvoke(const pIdentString& name, pParseContext& C, expressionList* argList, expr* target = NULL):
+        expr(functionInvokeKind),
+        name_(C.idPool().intern(pStringRef(name))),
+        children_(NULL),
+        numChildren_(1+argList->size())
+    {
+    	children_ = new (C) stmt*[numChildren_];
+        children_[0] = target;
+        if (numChildren_ > 1) {
+            memcpy(children_+1, &(argList->front()), (numChildren_-1) * sizeof(stmt*));
+    	}
+    }
+    functionInvoke(const pIdentString& name, pParseContext& C, expr* arg1, expr* target = NULL):
+        expr(functionInvokeKind),
+        name_(C.idPool().intern(pStringRef(name))),
+        children_(NULL),
+        numChildren_(2)
+    {
+        children_ = new (C) stmt*[numChildren_];
+        children_[0] = target;
+        memcpy(children_+1, &arg1, sizeof(stmt*));
+    }
 
     pIdentString name(void) const {
         assert(name_);
