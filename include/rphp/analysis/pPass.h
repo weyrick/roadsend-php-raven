@@ -22,11 +22,10 @@
 #ifndef RPHP_PPASS_H_
 #define RPHP_PPASS_H_
 
-#include<string>
+#include <string>
+#include <rphp/analysis/pSourceModule.h>
 
 namespace rphp {
-
-class pSourceModule;
 
 namespace AST {
 
@@ -34,7 +33,7 @@ class pPass {
 
 private:
     // no copy constructor
-    pPass(const pPass& p) { }
+    pPass(const pPass& p): C(module_->context()) { }
 
 protected:
     std::string passName_;
@@ -42,9 +41,11 @@ protected:
 
     pSourceModule* module_;
 
+    pParseContext& C;
+
 public:
 
-    pPass(const char* n, const char* d, pSourceModule* m): passName_(n), passDesc_(d), module_(m) { }
+    pPass(const char* n, const char* d, pSourceModule* m): passName_(n), passDesc_(d), module_(m), C(module_->context()) { }
 
     virtual ~pPass(void) { }
 
