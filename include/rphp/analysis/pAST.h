@@ -47,6 +47,7 @@ namespace rphp {
 
 using llvm::isa;
 using llvm::dyn_cast;
+using llvm::cast;
 
 // These define how big our SmallVectors are, which means
 // this should be a good average length we expect to parse
