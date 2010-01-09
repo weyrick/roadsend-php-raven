@@ -93,6 +93,7 @@ void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
         break;
     case binaryOp::BOOLEAN_OR:
         currentElement_->SetAttribute("op", "BOOLEAN_OR");
+        break;
     case binaryOp::BOOLEAN_XOR:
         currentElement_->SetAttribute("op", "BOOLEAN_XOR");
         break;
