@@ -588,7 +588,7 @@ public:
             stmt* cond,
             stmt* inc,
             stmt* body):
-    stmt(forEachKind),
+    stmt(forStmtind),
     children_()
     {
 
