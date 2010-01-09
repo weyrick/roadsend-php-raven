@@ -157,7 +157,7 @@ public:
             doDestroy(C);
     }
 
-    stmt *retain() {
+    stmt* retain() {
       assert(refCount_ >= 1);
       ++refCount_;
       return this;
@@ -432,11 +432,19 @@ class ifStmt: public stmt {
     stmt* children_[END_EXPR];
 
 public:
-    ifStmt(expr* cond,
+    ifStmt(pParseContext& C,
+           expr* cond,
            stmt* trueBlock,
            stmt* falseBlock):
                stmt(ifStmtKind),
                children_() {
+
+        // enforce blocks to ease later traversal
+        if (trueBlock && !isa<block>(trueBlock))
+            trueBlock = new (C) block(C, trueBlock);
+
+        if (falseBlock && !isa<block>(falseBlock))
+            falseBlock = new (C) block(C, falseBlock);
 
         children_[CONDITION] = static_cast<stmt*>(cond);
         children_[TRUEBLOCK] = trueBlock;

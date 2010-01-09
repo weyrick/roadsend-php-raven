@@ -362,13 +362,13 @@ elseSingle(A) ::= T_ELSE statement(BODY).
 // elseif with (potential) single statement
 elseSeries(A) ::=  T_ELSEIF(EIF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSingle(ELSE).
 {
-    A = new (CTXT) AST::ifStmt(COND, TRUE, ELSE);
+    A = new (CTXT) AST::ifStmt(CTXT, COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(EIF));
 }
 // elseif series
 elseSeries(A) ::=  T_ELSEIF(EIF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSeries(ELSE).
 {
-    A = new (CTXT) AST::ifStmt(COND, TRUE, ELSE);
+    A = new (CTXT) AST::ifStmt(CTXT, COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(EIF));
 }
 
@@ -376,12 +376,12 @@ elseSeries(A) ::=  T_ELSEIF(EIF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(T
 %type ifBlock {AST::ifStmt*}
 ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSeries(ELSE).
 {
-    A = new (CTXT) AST::ifStmt(COND, TRUE, ELSE);
+    A = new (CTXT) AST::ifStmt(CTXT, COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(IF));
 }
 ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) elseSingle(ELSE).
 {
-    A = new (CTXT) AST::ifStmt(COND, TRUE, ELSE);
+    A = new (CTXT) AST::ifStmt(CTXT, COND, TRUE, ELSE);
     A->setLine(TOKEN_LINE(IF));
 }
 
