@@ -246,6 +246,7 @@ statement(A) ::= statementBlock(B). { A = B; }
 statement(A) ::= inlineHTML(B). { A = B; }
 statement(A) ::= staticDecl(B). { A = B; }
 statement(A) ::= functionDecl(B). { A = B; }
+statement(A) ::= classDecl(B). { A = B; }
 statement(A) ::= ifBlock(B). { A = B; }
 statement(A) ::= forEach(B). { A = B; }
 statement(A) ::= forStmt(B). { A = B; }
@@ -596,6 +597,237 @@ functionDecl(A) ::= T_FUNCTION signature(SIG) statementBlock(BODY).
 {
     A = new (CTXT) AST::functionDecl(SIG, BODY);
 }                    
+
+/** CLASSES **/
+%type classDecl {AST::classDecl*}
+classDecl(A) ::= T_CLASS(C) T_IDENTIFIER(NAME) classExtends(EXTENDS) classImplements(IMPLEMENTS)
+                 T_LEFTCURLY classStatements(MEMBERS) T_RIGHTCURLY(RC).
+{
+    A = new (CTXT) AST::classDecl(CTXT,
+                                  *NAME,
+                                  AST::classDecl::NORMAL,
+                                  EXTENDS,
+                                  IMPLEMENTS,
+                                  new (CTXT) AST::block(CTXT, MEMBERS));
+    A->setLine(TOKEN_LINE(C), TOKEN_LINE(RC));
+    if (EXTENDS)
+        delete EXTENDS;
+    if (IMPLEMENTS)
+        delete IMPLEMENTS;
+    delete MEMBERS;
+}
+classDecl(A) ::= T_FINAL T_CLASS(C) T_IDENTIFIER(NAME) classExtends(EXTENDS) classImplements(IMPLEMENTS)
+                 T_LEFTCURLY classStatements(MEMBERS) T_RIGHTCURLY(RC).
+{
+    A = new (CTXT) AST::classDecl(CTXT,
+                                  *NAME,
+                                  AST::classDecl::FINAL,
+                                  EXTENDS,
+                                  IMPLEMENTS,
+                                  new (CTXT) AST::block(CTXT, MEMBERS));
+    A->setLine(TOKEN_LINE(C), TOKEN_LINE(RC));
+    if (EXTENDS)
+        delete EXTENDS;
+    if (IMPLEMENTS)
+        delete IMPLEMENTS;
+    delete MEMBERS;
+}
+classDecl(A) ::= T_ABSTRACT T_CLASS(C) T_IDENTIFIER(NAME) classExtends(EXTENDS) classImplements(IMPLEMENTS)
+                 T_LEFTCURLY classStatements(MEMBERS) T_RIGHTCURLY(RC).
+{
+    A = new (CTXT) AST::classDecl(CTXT,
+                                  *NAME,
+                                  AST::classDecl::ABSTRACT,
+                                  EXTENDS,
+                                  IMPLEMENTS,
+                                  new (CTXT) AST::block(CTXT, MEMBERS));
+    A->setLine(TOKEN_LINE(C), TOKEN_LINE(RC));
+    if (EXTENDS)
+        delete EXTENDS;
+    if (IMPLEMENTS)
+        delete IMPLEMENTS;
+    delete MEMBERS;
+}
+classDecl(A) ::= T_INTERFACE(C) T_IDENTIFIER(NAME) interfaceExtends(EXTENDS)
+                 T_LEFTCURLY classStatements(MEMBERS) T_RIGHTCURLY(RC).
+{
+    A = new (CTXT) AST::classDecl(CTXT,
+                                  *NAME,
+                                  AST::classDecl::IFACE,
+                                  EXTENDS,
+                                  NULL, /* interfaces can't implement */
+                                  new (CTXT) AST::block(CTXT, MEMBERS));
+    A->setLine(TOKEN_LINE(C), TOKEN_LINE(RC));
+    if (EXTENDS)
+        delete EXTENDS;
+    delete MEMBERS;
+}
+
+%type classStatements {AST::statementList*}
+classStatements(A) ::= .
+{
+    A = new AST::statementList();
+
+}
+classStatements(A) ::= classStatements(LIST) classStatement(STMT).
+{
+    LIST->push_back(STMT);
+    A = LIST;
+}
+
+// things that can go inside of a class declaration
+%type classStatement {AST::stmt*}
+classStatement(A) ::= classVarFlags(FLAGS) classVar(VARS) T_SEMI.
+{
+    pUInt flags(0);
+    if (FLAGS) {
+        flags = *FLAGS;
+    }
+    // set flags on each var decl
+    for (AST::statementList::iterator i = VARS->begin();
+         i != VARS->end();
+         ++i)
+    {
+        static_cast<AST::propertyDecl*>((*i))->setFlags(flags);
+    }
+    if (VARS->size() == 1) {
+        // one var decl
+        A = VARS->at(0);
+    }
+    else {
+        // list, make a block
+        A = new (CTXT) AST::block(CTXT, VARS);
+    }
+    // all done with vector
+    delete VARS;
+}
+classStatement(A) ::= classConstant(CONST) T_SEMI.
+{
+
+}
+classStatement(A) ::= methodFlags(FLAGS) T_FUNCTION signature(SIG) methodBody(BODY).
+{
+    pUInt flags(0);
+    if (FLAGS) {
+        flags = *FLAGS;
+    }
+    A = new (CTXT) AST::methodDecl(SIG, flags, BODY);
+}
+classStatement(A) ::= methodFlags(FLAGS) T_AND T_FUNCTION signature(SIG) methodBody(BODY).
+{
+    pUInt flags(0);
+    if (FLAGS) {
+        flags = *FLAGS;
+    }
+    A = new (CTXT) AST::methodDecl(SIG, flags, BODY);
+}
+
+%type classVar {AST::statementList*}
+classVar(A) ::= classVar(LIST) T_COMMA T_VARIABLE(VAR).
+{
+    LIST->push_back(new (CTXT) AST::propertyDecl(CTXT, *VAR, NULL));
+    A = LIST;
+}
+classVar(A) ::= classVar(LIST) T_COMMA T_VARIABLE(VAR) T_ASSIGN literal(DEFAULT).
+{
+    LIST->push_back(new (CTXT) AST::propertyDecl(CTXT, *VAR, DEFAULT));
+    A = LIST;
+}
+classVar(A) ::= T_VARIABLE(VAR).
+{
+    A = new AST::statementList();
+    A->push_back(new (CTXT) AST::propertyDecl(CTXT, *VAR, NULL));
+}
+classVar(A) ::= T_VARIABLE(VAR) T_ASSIGN literal(DEFAULT).
+{
+    A = new AST::statementList();
+    A->push_back(new (CTXT) AST::propertyDecl(CTXT, *VAR, DEFAULT));
+}
+
+%type methodFlags {pUInt*}
+methodFlags(A) ::= .
+{
+    // empty
+    A = NULL;
+}
+methodFlags(A) ::= nonEmptyMemberFlags(F). { A = F; }
+
+%type classVarFlags {pUInt*}
+classVarFlags(A) ::= T_VAR.
+{
+    // empty
+    A = NULL;
+}
+classVarFlags(A) ::= nonEmptyMemberFlags(F).
+{
+    if (*F & AST::memberFlags::ABSTRACT) {
+        CTXT.parseError("Cannot declare class variables abstract");
+    }
+    A = F;
+}
+
+%type nonEmptyMemberFlags {pUInt*}
+nonEmptyMemberFlags(A) ::= memberFlag(F).
+{
+    A = new (CTXT) pUInt(*F); // freed by context
+}
+nonEmptyMemberFlags(A) ::= nonEmptyMemberFlags(L) memberFlag(R).
+{
+    *L |= *R;
+    A = L;
+}
+
+%type memberFlag {const pUInt*}
+memberFlag(A) ::= T_PUBLIC. { A = &AST::memberFlags::PUBLIC; }
+memberFlag(A) ::= T_PROTECTED. { A = &AST::memberFlags::PROTECTED; }
+memberFlag(A) ::= T_PRIVATE. { A = &AST::memberFlags::PRIVATE; }
+memberFlag(A) ::= T_STATIC. { A = &AST::memberFlags::STATIC; }
+memberFlag(A) ::= T_ABSTRACT. { A = &AST::memberFlags::ABSTRACT; }
+memberFlag(A) ::= T_FINAL. { A = &AST::memberFlags::FINAL; }
+
+// if a method body is null, it's abstract
+%type methodBody {AST::block*}
+methodBody(A) ::= T_SEMI. { A = NULL; }
+methodBody(A) ::= statementBlock(B). { A = B; }
+
+// class extends at most one id
+%type classExtends {AST::sourceRangeList*}
+classExtends(A) ::= . { A = NULL; }
+classExtends(A) ::= T_EXTENDS T_IDENTIFIER(NAME).
+{
+    A = new AST::sourceRangeList();
+    A->push_back(NAME);
+}
+
+// interface extends 0-n ids
+%type interfaceExtends {AST::sourceRangeList*}
+interfaceExtends(A) ::= . { A = NULL; }
+interfaceExtends(A) ::= T_EXTENDS idList(LIST).
+{
+    A = LIST;
+}
+
+// class implements 0-n ids
+%type classImplements {AST::sourceRangeList*}
+classImplements(A) ::= . { A = NULL; }
+classImplements(A) ::= T_IMPLEMENTS idList(LIST).
+{
+    A = LIST;
+}
+
+// 1-n identifiers, comma separated
+%type idList {AST::sourceRangeList*}
+idList(A) ::= T_IDENTIFIER(NAME).
+{
+    A = new AST::sourceRangeList();
+    A->push_back(NAME);
+}
+idList(A) ::= idList(LIST) T_COMMA T_IDENTIFIER(NAME).
+{
+    LIST->push_back(NAME);
+    A = LIST;
+}
+
 
 /****** EXPRESSIONS *********/
 %type expr {AST::expr*}

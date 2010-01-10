@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -31,6 +31,19 @@
 namespace rphp {
 
 namespace AST {
+
+void pParseContext::parseError(pStringRef msg) {
+    std::stringstream errorMsg;
+
+    errorMsg  << std::string(msg)
+              << " in ";
+    errorMsg  << owner_->source()->fileName();
+    errorMsg  << " on line "
+              << currentLineNum_
+              <<  std::endl;
+
+    throw pParseError(errorMsg.str());
+}
 
 void pParseContext::parseError(pSourceRange* r) {
 

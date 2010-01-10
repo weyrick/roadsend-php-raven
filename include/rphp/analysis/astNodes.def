@@ -43,6 +43,9 @@ STMT(globalStmt,   stmt)
 STMT(formalParam,     stmt)
 STMT(signature,       stmt)
 STMT(staticDecl,      stmt)
+STMT(classDecl,       stmt)
+STMT(methodDecl,      stmt)
+STMT(propertyDecl,    stmt)
 STMT(functionDecl,    stmt)
 // LAST DECL
 

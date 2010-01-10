@@ -425,6 +425,141 @@ public:
 
 };
 
+struct memberFlags {
+    // these are taken by address during parse
+    static const pUInt PUBLIC;
+    static const pUInt PROTECTED;
+    static const pUInt PRIVATE;
+    static const pUInt STATIC;
+    static const pUInt ABSTRACT;
+    static const pUInt FINAL;
+};
+
+// method declaration
+class methodDecl: public decl {
+
+    enum { SIG, BODY, END_EXPR };
+    pUInt flags_;
+    stmt* children_[END_EXPR];
+
+public:
+    methodDecl(signature* sig, pUInt flags, block* body):
+        decl(functionDeclKind),
+        flags_(flags),
+        children_()
+    {
+        children_[SIG] = sig;
+        children_[BODY] = body; // body may be null for abstract method
+        if (body == NULL)
+            flags_ &= memberFlags::ABSTRACT;
+    }
+
+    signature* sig(void) { return static_cast<signature*>(children_[SIG]); }
+    block* body(void) { return static_cast<block*>(children_[BODY]); }
+    pUInt flags(void) const { return flags_; }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    static bool classof(const methodDecl* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == methodDeclKind; }
+
+};
+
+// property declaration
+class propertyDecl: public decl {
+
+    pUInt flags_;
+    llvm::PooledStringPtr name_;
+    expr* default_;
+
+public:
+    propertyDecl(pParseContext& C,
+                 const pSourceRange& name,
+                 expr* def
+                 ):
+        decl(propertyDeclKind),
+        flags_(0),
+        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
+        default_(def)
+    {
+    }
+
+    void setFlags(pUInt f) { flags_ = f; }
+    pUInt flags(void) const { return flags_; }
+
+    stmt::child_iterator child_begin() { return (stmt**)&default_; }
+    stmt::child_iterator child_end() { return (stmt**)&default_+1; }
+
+    static bool classof(const propertyDecl* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == propertyDeclKind; }
+
+};
+
+typedef std::vector<const pSourceRange*> sourceRangeList;
+
+// class/interface declaration
+class classDecl: public decl {
+public:
+
+    enum classType { NORMAL, IFACE, FINAL, ABSTRACT };
+
+private:
+    llvm::PooledStringPtr name_;
+    std::vector<llvm::PooledStringPtr> extends_;
+    std::vector<llvm::PooledStringPtr> implements_;
+    classType type_;
+    block* members_;
+
+public:
+    classDecl(pParseContext& C,
+              const pSourceRange& name,
+              classType type,
+              sourceRangeList* extends, // may be null
+              sourceRangeList* implements, // may be null
+              block* members
+              ):
+        decl(classDeclKind),
+        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
+        extends_(),
+        implements_(),
+        type_(type),
+        members_(members)
+    {
+        // intern list of extends (if any)
+        if (extends) {
+            for (sourceRangeList::iterator i=extends->begin();
+            i != extends->end();
+            ++i) {
+                extends_.push_back(C.idPool().intern(
+                        pStringRef(
+                                (*i)->begin().base(), ((*i)->end() - (*i)->begin()))
+                        ));
+            }
+        }
+        // intern list of implements (if any)
+        if (implements) {
+            for (sourceRangeList::iterator i=implements->begin();
+            i != implements->end();
+            ++i) {
+                implements_.push_back(C.idPool().intern(
+                        pStringRef(
+                                (*i)->begin().base(), ((*i)->end() - (*i)->begin()))
+                        ));
+            }
+        }
+    }
+
+    block* members(void) { return members_; }
+
+    stmt::child_iterator child_begin() { return (stmt**)&members_; }
+    stmt::child_iterator child_end() { return (stmt**)&members_+1; }
+
+    static bool classof(const classDecl* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == classDeclKind; }
+
+};
+
 // if statement
 class ifStmt: public stmt {
 

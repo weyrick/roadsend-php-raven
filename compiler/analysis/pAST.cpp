@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2009-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -35,7 +35,14 @@ void stmt::doDestroy(pParseContext &C) {
   destroyChildren(C);
   this->~stmt();
   C.deallocate((void *)this);
+
 }
 
+const pUInt memberFlags::PUBLIC    = 0;
+const pUInt memberFlags::PROTECTED = 1;
+const pUInt memberFlags::PRIVATE   = 2;
+const pUInt memberFlags::STATIC    = 4;
+const pUInt memberFlags::ABSTRACT  = 8;
+const pUInt memberFlags::FINAL     = 16;
 
 } } // namespace

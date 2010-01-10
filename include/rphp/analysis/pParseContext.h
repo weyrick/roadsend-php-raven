@@ -110,6 +110,7 @@ public:
 
     // PARSE ERROR HANDLER
     void parseError(pSourceRange* r);
+    void parseError(pStringRef msg);
 
 };
 

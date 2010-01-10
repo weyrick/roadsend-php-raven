@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -147,6 +147,9 @@ int main(void) {
     langRules_.add("PHP", "public", T_PUBLIC, ".");
     langRules_.add("PHP", "private", T_PRIVATE, ".");
     langRules_.add("PHP", "protected", T_PROTECTED, ".");
+    langRules_.add("PHP", "abstract", T_ABSTRACT, ".");
+    langRules_.add("PHP", "final", T_FINAL, ".");
+    langRules_.add("PHP", "implements", T_IMPLEMENTS, ".");
     langRules_.add("PHP", "extends", T_EXTENDS, ".");
     langRules_.add("PHP", "return", T_RETURN, ".");
     langRules_.add("PHP", "global", T_GLOBAL, ".");
