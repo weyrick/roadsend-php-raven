@@ -38,11 +38,12 @@ void stmt::doDestroy(pParseContext &C) {
 
 }
 
-const pUInt memberFlags::PUBLIC    = 0;
-const pUInt memberFlags::PROTECTED = 1;
-const pUInt memberFlags::PRIVATE   = 2;
-const pUInt memberFlags::STATIC    = 4;
-const pUInt memberFlags::ABSTRACT  = 8;
-const pUInt memberFlags::FINAL     = 16;
+const pUInt memberFlags::PUBLIC    = 1;
+const pUInt memberFlags::PROTECTED = 2;
+const pUInt memberFlags::PRIVATE   = 4;
+const pUInt memberFlags::STATIC    = 8;
+const pUInt memberFlags::ABSTRACT  = 16;
+const pUInt memberFlags::FINAL     = 32;
+const pUInt memberFlags::CONST     = 64;
 
 } } // namespace

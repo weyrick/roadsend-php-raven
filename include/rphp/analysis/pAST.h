@@ -433,6 +433,7 @@ struct memberFlags {
     static const pUInt STATIC;
     static const pUInt ABSTRACT;
     static const pUInt FINAL;
+    static const pUInt CONST;
 };
 
 // method declaration
@@ -444,14 +445,14 @@ class methodDecl: public decl {
 
 public:
     methodDecl(signature* sig, pUInt flags, block* body):
-        decl(functionDeclKind),
+        decl(methodDeclKind),
         flags_(flags),
         children_()
     {
         children_[SIG] = sig;
         children_[BODY] = body; // body may be null for abstract method
         if (body == NULL)
-            flags_ &= memberFlags::ABSTRACT;
+            flags_ |= memberFlags::ABSTRACT;
     }
 
     signature* sig(void) { return static_cast<signature*>(children_[SIG]); }
@@ -487,6 +488,10 @@ public:
 
     void setFlags(pUInt f) { flags_ = f; }
     pUInt flags(void) const { return flags_; }
+    pIdentString name(void) const {
+        assert(name_);
+        return *name_;
+    }
 
     stmt::child_iterator child_begin() { return (stmt**)&default_; }
     stmt::child_iterator child_end() { return (stmt**)&default_+1; }
@@ -550,6 +555,10 @@ public:
         }
     }
 
+    pIdentString name(void) const {
+        assert(name_);
+        return *name_;
+    }
     block* members(void) { return members_; }
 
     stmt::child_iterator child_begin() { return (stmt**)&members_; }

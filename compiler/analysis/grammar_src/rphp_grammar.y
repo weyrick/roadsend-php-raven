@@ -701,9 +701,18 @@ classStatement(A) ::= classVarFlags(FLAGS) classVar(VARS) T_SEMI.
     // all done with vector
     delete VARS;
 }
-classStatement(A) ::= classConstant(CONST) T_SEMI.
+classStatement(A) ::= classConstant(VARS) T_SEMI.
 {
-
+    if (VARS->size() == 1) {
+        // one var decl
+        A = VARS->at(0);
+    }
+    else {
+        // list, make a block
+        A = new (CTXT) AST::block(CTXT, VARS);
+    }
+    // all done with vector
+    delete VARS;
 }
 classStatement(A) ::= methodFlags(FLAGS) T_FUNCTION signature(SIG) methodBody(BODY).
 {
@@ -725,23 +734,42 @@ classStatement(A) ::= methodFlags(FLAGS) T_AND T_FUNCTION signature(SIG) methodB
 %type classVar {AST::statementList*}
 classVar(A) ::= classVar(LIST) T_COMMA T_VARIABLE(VAR).
 {
-    LIST->push_back(new (CTXT) AST::propertyDecl(CTXT, *VAR, NULL));
+    // strip $
+    LIST->push_back(new (CTXT) AST::propertyDecl(CTXT, pSourceRange(++(*VAR).begin(), (*VAR).end()), NULL));
     A = LIST;
 }
 classVar(A) ::= classVar(LIST) T_COMMA T_VARIABLE(VAR) T_ASSIGN literal(DEFAULT).
 {
-    LIST->push_back(new (CTXT) AST::propertyDecl(CTXT, *VAR, DEFAULT));
+    // strip $
+    LIST->push_back(new (CTXT) AST::propertyDecl(CTXT, pSourceRange(++(*VAR).begin(), (*VAR).end()), DEFAULT));
     A = LIST;
 }
 classVar(A) ::= T_VARIABLE(VAR).
 {
     A = new AST::statementList();
-    A->push_back(new (CTXT) AST::propertyDecl(CTXT, *VAR, NULL));
+    // strip $
+    A->push_back(new (CTXT) AST::propertyDecl(CTXT, pSourceRange(++(*VAR).begin(), (*VAR).end()), NULL));
 }
 classVar(A) ::= T_VARIABLE(VAR) T_ASSIGN literal(DEFAULT).
 {
     A = new AST::statementList();
-    A->push_back(new (CTXT) AST::propertyDecl(CTXT, *VAR, DEFAULT));
+    // strip $
+    A->push_back(new (CTXT) AST::propertyDecl(CTXT, pSourceRange(++(*VAR).begin(), (*VAR).end()), DEFAULT));
+}
+%type classConstant {AST::statementList*}
+classConstant(A) ::= classConstant(LIST) T_COMMA T_IDENTIFIER(ID) T_ASSIGN literal(DEFAULT).
+{
+    AST::propertyDecl* prop = new (CTXT) AST::propertyDecl(CTXT, *ID, DEFAULT);
+    prop->setFlags(AST::memberFlags::CONST);
+    LIST->push_back(prop);
+    A = LIST;
+}
+classConstant(A) ::= T_CONST T_IDENTIFIER(ID) T_ASSIGN literal(DEFAULT).
+{
+    A = new AST::statementList();
+    AST::propertyDecl* prop = new (CTXT) AST::propertyDecl(CTXT, *ID, DEFAULT);
+    prop->setFlags(AST::memberFlags::CONST);
+    A->push_back(prop);
 }
 
 %type methodFlags {pUInt*}
@@ -752,11 +780,10 @@ methodFlags(A) ::= .
 }
 methodFlags(A) ::= nonEmptyMemberFlags(F). { A = F; }
 
-%type classVarFlags {pUInt*}
+%type classVarFlags {const pUInt*}
 classVarFlags(A) ::= T_VAR.
 {
-    // empty
-    A = NULL;
+    A = &AST::memberFlags::PUBLIC;
 }
 classVarFlags(A) ::= nonEmptyMemberFlags(F).
 {

@@ -69,6 +69,47 @@ void DumpAST::visit_pre_var(var* n) {
     currentElement_->SetAttribute("id",n->name());
 }
 
+void DumpAST::visit_pre_classDecl(classDecl* n) {
+    currentElement_->SetAttribute("id",n->name());
+}
+
+void DumpAST::visit_pre_methodDecl(methodDecl* n) {
+    pUInt flags = n->flags();
+    if (flags & memberFlags::ABSTRACT)
+        currentElement_->SetAttribute("ABSTRACT", "true");
+    if (flags & memberFlags::CONST)
+        currentElement_->SetAttribute("CONST", "true");
+    if (flags & memberFlags::FINAL)
+        currentElement_->SetAttribute("FINAL", "true");
+    if (flags & memberFlags::PRIVATE)
+        currentElement_->SetAttribute("PRIVATE", "true");
+    if (flags & memberFlags::PROTECTED)
+        currentElement_->SetAttribute("PROTECTED", "true");
+    if (flags & memberFlags::PUBLIC)
+        currentElement_->SetAttribute("PUBLIC", "true");
+    if (flags & memberFlags::STATIC)
+        currentElement_->SetAttribute("STATIC", "true");
+}
+
+void DumpAST::visit_pre_propertyDecl(propertyDecl* n) {
+    currentElement_->SetAttribute("id",n->name());
+    pUInt flags = n->flags();
+    if (flags & memberFlags::ABSTRACT)
+        currentElement_->SetAttribute("ABSTRACT", "true");
+    if (flags & memberFlags::CONST)
+        currentElement_->SetAttribute("CONST", "true");
+    if (flags & memberFlags::FINAL)
+        currentElement_->SetAttribute("FINAL", "true");
+    if (flags & memberFlags::PRIVATE)
+        currentElement_->SetAttribute("PRIVATE", "true");
+    if (flags & memberFlags::PROTECTED)
+        currentElement_->SetAttribute("PROTECTED", "true");
+    if (flags & memberFlags::PUBLIC)
+        currentElement_->SetAttribute("PUBLIC", "true");
+    if (flags & memberFlags::STATIC)
+        currentElement_->SetAttribute("STATIC", "true");
+}
+
 void DumpAST::visit_pre_unaryOp(unaryOp* n)  {
     switch (n->opKind()) {
     case unaryOp::LOGICALNOT:

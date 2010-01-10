@@ -50,6 +50,9 @@ public:
 
     void visit_pre_signature(signature* n);
     void visit_pre_formalParam(formalParam* n);
+    void visit_pre_classDecl(classDecl* n);
+    void visit_pre_methodDecl(methodDecl* n);
+    void visit_pre_propertyDecl(propertyDecl* n);
 
     void visit_pre_var(var* n);
     void visit_pre_unaryOp(unaryOp* n);
