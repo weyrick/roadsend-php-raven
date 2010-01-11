@@ -329,12 +329,12 @@ global(A) ::= T_GLOBAL globalItemList(B).
 }
 
 %type globalItemList {AST::globalItemList*}
-globalItemList(A) ::= lval(B).
+globalItemList(A) ::= lVal(B).
 {
     A = new AST::globalItemList();
     A->push_back(static_cast<AST::stmt*>(B)); // copy item into vector
 }
-globalItemList(A) ::= lval(B) T_COMMA globalItemList(C).
+globalItemList(A) ::= lVal(B) T_COMMA globalItemList(C).
 {
     C->push_back(static_cast<AST::stmt*>(B)); // copy item into vector
     A = C;
@@ -861,7 +861,8 @@ idList(A) ::= idList(LIST) T_COMMA T_IDENTIFIER(NAME).
 expr(A) ::= literal(B). { A = B; }
 expr(A) ::= assignment(B). { A = B; }
 expr(A) ::= opAssignment(B). { A = B; }
-expr(A) ::= lval(B). { A = B; }
+expr(A) ::= listAssignment(B). { A = B; }
+expr(A) ::= lVal(B). { A = B; }
 expr(A) ::= functionInvoke(B). { A = B; }
 expr(A) ::= constructorInvoke(B). { A = B; }
 expr(A) ::= unaryOp(B). { A = B; }
@@ -887,19 +888,19 @@ builtin(A) ::= T_EXIT T_LEFTPAREN T_RIGHTPAREN.
 }
 builtin(A) ::= T_EXIT T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
 {
-    AST::expressionList* rval = new AST::expressionList();
-    rval->push_back(RVAL);
-    A = new (CTXT) AST::builtin(CTXT, AST::builtin::EXIT, rval);
-    delete rval;
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::EXIT, rVal);
+    delete rVal;
     A->setLine(CURRENT_LINE);
 }
 // empty
-builtin(A) ::= T_EMPTY T_LEFTPAREN lval(RVAL) T_RIGHTPAREN.
+builtin(A) ::= T_EMPTY T_LEFTPAREN lVal(RVAL) T_RIGHTPAREN.
 {
-    AST::expressionList* rval = new AST::expressionList();
-    rval->push_back(RVAL);
-    A = new (CTXT) AST::builtin(CTXT, AST::builtin::EMPTY, rval);
-    delete rval;
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::EMPTY, rVal);
+    delete rVal;
     A->setLine(CURRENT_LINE);
 }
 // isset
@@ -919,20 +920,20 @@ builtin(A) ::= T_UNSET T_LEFTPAREN commaVarList(VARS) T_RIGHTPAREN.
 // print
 builtin(A) ::= T_PRINT expr(RVAL).
 {
-    AST::expressionList* rval = new AST::expressionList();
-    rval->push_back(RVAL);
-    A = new (CTXT) AST::builtin(CTXT, AST::builtin::PRINT, rval);
-    delete rval;
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::PRINT, rVal);
+    delete rVal;
     A->setLine(CURRENT_LINE);
 }
 
 %type commaVarList {AST::expressionList*}
-commaVarList(A) ::= lval(VAR).
+commaVarList(A) ::= lVal(VAR).
 {
     A = new AST::expressionList();
     A->push_back(VAR);
 }
-commaVarList(A) ::= commaVarList(LIST) T_COMMA lval(VAR).
+commaVarList(A) ::= commaVarList(LIST) T_COMMA lVal(VAR).
 {
     LIST->push_back(VAR);
     A = LIST;
@@ -1228,23 +1229,23 @@ binaryOp(A) ::= expr(L) T_AND expr(R).
 
 /** PRE/POST OP **/
 %type preOp {AST::preOp*}
-preOp(A) ::= T_INC lval(R).
+preOp(A) ::= T_INC lVal(R).
 {
     A = new (CTXT) AST::preOp(R, AST::preOp::INC);
     A->setLine(CURRENT_LINE);
 }
-preOp(A) ::= T_DEC lval(R).
+preOp(A) ::= T_DEC lVal(R).
 {
     A = new (CTXT) AST::preOp(R, AST::preOp::DEC);
     A->setLine(CURRENT_LINE);
 }
 %type postOp {AST::postOp*}
-postOp(A) ::= lval(R) T_INC.
+postOp(A) ::= lVal(R) T_INC.
 {
     A = new (CTXT) AST::postOp(R, AST::postOp::INC);
     A->setLine(CURRENT_LINE);
 }
-postOp(A) ::= lval(R) T_DEC.
+postOp(A) ::= lVal(R) T_DEC.
 {
     A = new (CTXT) AST::postOp(R, AST::postOp::DEC);
     A->setLine(CURRENT_LINE);
@@ -1252,69 +1253,103 @@ postOp(A) ::= lval(R) T_DEC.
 
 /** ASSIGNMENT **/
 %type assignment {AST::assignment*}
-assignment(A) ::= lval(L) T_ASSIGN(EQ_SIGN) expr(R).
+assignment(A) ::= lVal(L) T_ASSIGN(EQ_SIGN) expr(R).
 {
     A = new (CTXT) AST::assignment(L, R, false);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-assignment(A) ::= lval(L) T_ASSIGN T_AND(EQ_SIGN) lval(R).
+assignment(A) ::= lVal(L) T_ASSIGN T_AND(EQ_SIGN) lVal(R).
 {
     A = new (CTXT) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 
 %type opAssignment {AST::opAssignment*}
-opAssignment(A) ::= lval(L) T_AND_EQUAL(EQ_SIGN) expr(R).
+opAssignment(A) ::= lVal(L) T_AND_EQUAL(EQ_SIGN) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::AND);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-opAssignment(A) ::= lval(L) T_OR_EQUAL(EQ_SIGN) expr(R).
+opAssignment(A) ::= lVal(L) T_OR_EQUAL(EQ_SIGN) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::OR);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-opAssignment(A) ::= lval(L) T_XOR_EQUAL(EQ_SIGN) expr(R).
+opAssignment(A) ::= lVal(L) T_XOR_EQUAL(EQ_SIGN) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::XOR);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-opAssignment(A) ::= lval(L) T_CONCAT_EQUAL(OP) expr(R).
+opAssignment(A) ::= lVal(L) T_CONCAT_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::CONCAT);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lval(L) T_DIV_EQUAL(OP) expr(R).
+opAssignment(A) ::= lVal(L) T_DIV_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::DIV);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lval(L) T_MUL_EQUAL(OP) expr(R).
+opAssignment(A) ::= lVal(L) T_MUL_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::MULT);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lval(L) T_PLUS_EQUAL(OP) expr(R).
+opAssignment(A) ::= lVal(L) T_PLUS_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::ADD);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lval(L) T_MINUS_EQUAL(OP) expr(R).
+opAssignment(A) ::= lVal(L) T_MINUS_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::SUB);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lval(L) T_MOD_EQUAL(OP) expr(R).
+opAssignment(A) ::= lVal(L) T_MOD_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::MOD);
     A->setLine(TOKEN_LINE(OP));
 }
 
+%type listAssignment {AST::listAssignment*}
+listAssignment(A) ::= T_LIST(LIST) T_LEFTPAREN listAssignmentList(VARS) T_RIGHTPAREN T_ASSIGN expr(RVAL).
+{
+    AST::block* varList = new (CTXT) AST::block(CTXT, VARS);
+    A = new (CTXT) AST::listAssignment(varList, RVAL);
+    A->setLine(TOKEN_LINE(LIST));
+    delete VARS;
+}
+
+%type listAssignmentList {AST::statementList*}
+listAssignmentList(A) ::= listElement(E).
+{
+    A = new AST::statementList();
+    A->push_back(E);
+}
+listAssignmentList(A) ::= listAssignmentList(LIST) T_COMMA listElement(E).
+{
+    LIST->push_back(E);
+    A = LIST;
+}
+// note a listElement can be null
+%type listElement {AST::stmt*}
+// simple var, may include array indices
+listElement(A) ::= lVal(VAR). { A = VAR; }
+// nested list, return a block
+listElement(A) ::= T_LIST T_LEFTPAREN listAssignmentList(VARS) T_RIGHTPAREN.
+{
+    AST::block* varList = new (CTXT) AST::block(CTXT, VARS);
+    A = static_cast<AST::stmt*>(varList);
+    delete VARS;
+}
+// empty, i.e. skipped
+listElement(A) ::= . { A = NULL; }
 
 /** LVALS **/
-%type lval {AST::expr*}
-lval(A) ::= variable_lVal(B). { A = B; }
-lval(A) ::= array_lVal(B). { A = B; }
+// i.e., things that can take assignments
+%type lVal {AST::expr*}
+lVal(A) ::= variable_lVal(B). { A = B; }
+lVal(A) ::= array_lVal(B). { A = B; }
 
 %type variable_lVal {AST::var*}
 // $foo
@@ -1325,7 +1360,7 @@ variable_lVal(A) ::= T_VARIABLE(B).
     A->setLine(CURRENT_LINE);
 }
 // $foo->bar
-variable_lVal(A) ::= lval(TARGET) T_CLASSDEREF T_IDENTIFIER(ID).
+variable_lVal(A) ::= lVal(TARGET) T_CLASSDEREF T_IDENTIFIER(ID).
 {
     A = new (CTXT) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), CTXT, TARGET);
     A->setLine(CURRENT_LINE);
@@ -1340,7 +1375,7 @@ array_lVal(A) ::= T_VARIABLE(B) arrayIndices(C).
     delete C;
 }
 // $foo->bar[]
-variable_lVal(A) ::= lval(TARGET) T_CLASSDEREF T_IDENTIFIER(ID) arrayIndices(INDICES).
+variable_lVal(A) ::= lVal(TARGET) T_CLASSDEREF T_IDENTIFIER(ID) arrayIndices(INDICES).
 {
     A = new (CTXT) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), CTXT, INDICES, TARGET);
     A->setLine(CURRENT_LINE);
@@ -1401,7 +1436,7 @@ functionInvoke(A) ::= T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
     delete ARGS;
 }
 // $foo->bar()
-functionInvoke(A) ::= lval(LVAL) T_CLASSDEREF T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
+functionInvoke(A) ::= lVal(LVAL) T_CLASSDEREF T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
 {
     A = new (CTXT) AST::functionInvoke(*ID, // f name
                                                   CTXT,

@@ -1300,6 +1300,32 @@ public:
 
 };
 
+// NODE: list assignment
+class listAssignment: public expr {
+
+    enum { VARLIST, RVAL, END_EXPR };
+    stmt* children_[END_EXPR];
+
+public:
+    listAssignment(block* varList, expr* rVal):
+            expr(listAssignmentKind),
+            children_()
+    {
+        children_[VARLIST] = static_cast<stmt*>(varList);
+        children_[RVAL] = static_cast<stmt*>(rVal);
+    }
+
+    expr* varList(void) { return static_cast<expr*>(children_[VARLIST]); }
+    expr* rVal(void) { return static_cast<expr*>(children_[RVAL]); }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    static bool classof(const listAssignment* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == listAssignmentKind; }
+
+};
+
 // NODE: op assignment
 class opAssignment: public expr {
 
