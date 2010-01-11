@@ -45,7 +45,7 @@ add_executable( rphp-lexer-gen
                 lexer_src/rphp-lexer-gen.cpp )
 
 # we need rphp_grammar.h
-#SET_SOURCE_FILES_PROPERTIES(lexer_src/rphp-lexer-gen.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
+SET_SOURCE_FILES_PROPERTIES(lexer_src/rphp-lexer-gen.cpp OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/rphp_grammar.cpp)
 
 ADD_CUSTOM_COMMAND(
    COMMAND ${CMAKE_CURRENT_BINARY_DIR}/rphp-lexer-gen
