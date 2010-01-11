@@ -34,3 +34,12 @@ Implementation TODO Scratchpad
 - lambda functions (new pVar entry)
 - object system
 - file/stream system
+
+= pass system
+- a generator for unique variable names. LLVM has this as well, can we leverage some code there?
+- Early_Lower_Loops needs to do lowering for a special condition style in for loops
+- we should get some small vectors for expressionList and statementList for the passes.
+- I need to compare what's in each pass of phc for the HIR lowering and do a detailed writeup what's missing in rphp. 
+- We maybe want a pTransformerHelper class which implements things like arranging a range of expr* in a binop chain and other
+	stuff we have duplicate code for. It could also get the lTrue()/lFalse() code which currently lives in pBaseTransformer.
+	pBaseTransformer then just would initialize a pTransformerHelper object.
