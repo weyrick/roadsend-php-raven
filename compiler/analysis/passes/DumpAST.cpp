@@ -73,6 +73,10 @@ void DumpAST::visit_pre_classDecl(classDecl* n) {
     currentElement_->SetAttribute("id",n->name());
 }
 
+void DumpAST::visit_pre_literalID(literalID* n) {
+    currentElement_->SetAttribute("id",n->name());
+}
+
 void DumpAST::visit_pre_methodDecl(methodDecl* n) {
     pUInt flags = n->flags();
     if (flags & memberFlags::ABSTRACT)
@@ -185,6 +189,9 @@ void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
         break;
     case binaryOp::BIT_XOR:
         currentElement_->SetAttribute("op", "BIT_XOR");
+        break;
+    case binaryOp::INSTANCEOF:
+        currentElement_->SetAttribute("op", "INSTANCEOF");
         break;
     }
 }

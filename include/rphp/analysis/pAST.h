@@ -1218,6 +1218,51 @@ public:
 
 };
 
+// literal ID
+class literalID: public expr {
+
+    llvm::PooledStringPtr name_;
+
+public:
+    literalID(const pSourceRange& name, pParseContext& C):
+        expr(literalIDKind),
+        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin()))))
+    {
+    }
+
+    pIdentString name(void) const {
+        assert(name_);
+        return *name_;
+    }
+
+    stmt::child_iterator child_begin() { return child_iterator(); }
+    stmt::child_iterator child_end() { return child_iterator(); }
+
+    static bool classof(const literalID* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == literalIDKind; }
+
+};
+
+// dynamic ID, i.e. variable variable, or runtime class/method/function name
+// Reflection in phc
+class dynamicID: public expr {
+    expr* val_;
+public:
+    dynamicID(expr* val): expr (dynamicIDKind), val_(val)
+    {
+
+    }
+
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&val_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&val_+1); }
+
+    expr* val(void) { return val_; }
+
+    static bool classof(const dynamicID* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == dynamicIDKind; }
+
+};
+
 
 // NODE: var
 class var: public expr {
@@ -1567,7 +1612,8 @@ public:
                   NOT_IDENTICAL,
                   BIT_OR,
                   BIT_AND,
-                  BIT_XOR
+                  BIT_XOR,
+                  INSTANCEOF
               };
 
 private:

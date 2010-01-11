@@ -229,6 +229,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %left T_PLUS T_MINUS T_DOT.
 %left T_DIV T_MOD T_MULT.
 %right T_BOOLEAN_NOT.
+%nonassoc T_INSTANCEOF.
 %right T_INC T_DEC T_FLOAT_CAST T_STRING_CAST T_BINARY_CAST T_UNICODE_CAST T_ARRAY_CAST T_OBJECT_CAST T_INT_CAST T_BOOL_CAST T_UNSET_CAST.
 %nonassoc T_NEW.
 %left T_ELSE T_ELSEIF.
@@ -1236,6 +1237,11 @@ binaryOp(A) ::= expr(L) T_AND expr(R).
     A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BIT_AND);
     A->setLine(CURRENT_LINE);
 }
+binaryOp(A) ::= expr(L) T_INSTANCEOF className(R).
+{
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::INSTANCEOF);
+    A->setLine(CURRENT_LINE);
+}
 
 /** PRE/POST OP **/
 %type preOp {AST::preOp*}
@@ -1470,3 +1476,18 @@ constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAR
     delete C;
 }
 
+/* DYNAMIC IDENTIFIERS */
+// these are either identifiers or a variable representing one
+
+%type className {AST::expr*}
+// class names which may be literal or dynamic
+className(A) ::= T_IDENTIFIER(ID).
+{
+    A = new (CTXT) AST::literalID(*ID, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+className(A) ::= lVal(VAL).
+{
+    A = new (CTXT) AST::dynamicID(VAL);
+    A->setLine(CURRENT_LINE);
+}
