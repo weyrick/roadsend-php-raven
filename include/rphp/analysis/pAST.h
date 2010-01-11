@@ -1593,6 +1593,34 @@ public:
 
 };
 
+// ternary shorthand for ifs ?:
+class conditionalExpr: public expr {
+
+private:
+    enum { COND, TRUEEXPR, FALSEEXPR, END_EXPR };
+    stmt* children_[END_EXPR];
+
+public:
+
+    conditionalExpr(expr* condition, expr* trueexpr, expr* falseexpr): expr(conditionalExprKind), children_()
+    {
+        children_[COND] = static_cast<stmt*>(condition);
+        children_[TRUEEXPR] = static_cast<stmt*>(trueexpr);
+        children_[FALSEEXPR] = static_cast<stmt*>(falseexpr);
+    }
+
+    expr* condition(void) const{ return static_cast<expr*>(children_[COND]); }
+    expr* trueExpr(void) const{ return static_cast<expr*>(children_[TRUEEXPR]); }
+    expr* falseExpr(void) const{ return static_cast<expr*>(children_[FALSEEXPR]); }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+
+    static bool classof(const conditionalExpr* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == conditionalExprKind; }
+
+};
+
 
 } } // namespace
 
