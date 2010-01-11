@@ -64,7 +64,6 @@ public:
     void visit_pre_literalFloat(literalFloat* n);
     void visit_pre_literalBool(literalBool* n);
     void visit_pre_literalArray(literalArray* n);
-    void visit_pre_functionInvoke(functionInvoke* n);
 
 };
 

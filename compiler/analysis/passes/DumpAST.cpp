@@ -293,10 +293,6 @@ void DumpAST::visit_pre_literalArray(literalArray* n)  {
 }
 
 
-void DumpAST::visit_pre_functionInvoke(functionInvoke* n) {    
-    currentElement_->SetAttribute("id",n->name());
-}
-
 void DumpAST::visit_pre_signature(signature* n) {
     currentElement_->SetAttribute("id",n->name());
     currentElement_->SetAttribute("returnByRef", (n->returnByRef() ? "true" : "false") );

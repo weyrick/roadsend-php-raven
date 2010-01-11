@@ -1237,7 +1237,7 @@ binaryOp(A) ::= expr(L) T_AND expr(R).
     A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BIT_AND);
     A->setLine(CURRENT_LINE);
 }
-binaryOp(A) ::= expr(L) T_INSTANCEOF className(R).
+binaryOp(A) ::= expr(L) T_INSTANCEOF maybeDynamicID(R).
 {
     A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::INSTANCEOF);
     A->setLine(CURRENT_LINE);
@@ -1442,36 +1442,39 @@ arrayIndices(A) ::= arrayIndices(B) T_LEFTSQUARE T_RIGHTSQUARE.
 /** FUNCTION/METHOD INVOKE **/
 %type functionInvoke {AST::functionInvoke*}
 // foo()
-functionInvoke(A) ::= T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
+functionInvoke(A) ::= maybeDynamicID(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
 {
-    A = new (CTXT) AST::functionInvoke(*ID, // f name
-                                                  CTXT,
-                                                  ARGS  // expression list: arguments, copied
-                                                  );
+    A = new (CTXT) AST::functionInvoke(ID, // f name
+                                       CTXT,
+                                       ARGS  // expression list: arguments, copied
+                                       );
     A->setLine(CURRENT_LINE);
     delete ARGS;
 }
+
 // $foo->bar()
+/*
 functionInvoke(A) ::= lVal(LVAL) T_CLASSDEREF T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
 {
     A = new (CTXT) AST::functionInvoke(*ID, // f name
-                                                  CTXT,
-                                                  ARGS,  // expression list: arguments, copied
-                                                  LVAL
-                                                  );
+                                       CTXT,
+                                       ARGS,  // expression list: arguments, copied
+                                       LVAL
+                                       );
     A->setLine(CURRENT_LINE);
     delete ARGS;
 }
+*/
 
 
 /** CONSTRUCTOR INVOKE **/
 %type constructorInvoke {AST::functionInvoke*}
-constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAREN.
+constructorInvoke(A) ::= T_NEW maybeDynamicID(ID) T_LEFTPAREN argList(C) T_RIGHTPAREN.
 {
-    A = new (CTXT) AST::functionInvoke(*B, // f name
-                                                  CTXT,
-                                                  C  // expression list: arguments, copied
-                                                  );
+    A = new (CTXT) AST::functionInvoke(ID, // f name
+                                       CTXT,
+                                       C  // expression list: arguments, copied
+                                       );
     A->setLine(CURRENT_LINE);
     delete C;
 }
@@ -1479,14 +1482,14 @@ constructorInvoke(A) ::= T_NEW T_IDENTIFIER(B) T_LEFTPAREN argList(C) T_RIGHTPAR
 /* DYNAMIC IDENTIFIERS */
 // these are either identifiers or a variable representing one
 
-%type className {AST::expr*}
-// class names which may be literal or dynamic
-className(A) ::= T_IDENTIFIER(ID).
+%type maybeDynamicID {AST::expr*}
+
+maybeDynamicID(A) ::= T_IDENTIFIER(ID).
 {
     A = new (CTXT) AST::literalID(*ID, CTXT);
     A->setLine(CURRENT_LINE);
 }
-className(A) ::= lVal(VAL).
+maybeDynamicID(A) ::= lVal(VAL).
 {
     A = new (CTXT) AST::dynamicID(VAL);
     A->setLine(CURRENT_LINE);

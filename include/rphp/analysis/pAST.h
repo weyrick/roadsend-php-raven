@@ -1235,6 +1235,10 @@ public:
         return *name_;
     }
 
+    static literalID* create(pStringRef name, pParseContext& C) {
+        return new (C) literalID(pSourceRange(name.begin(),name.end()), C);
+    }
+
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
@@ -1417,57 +1421,48 @@ public:
 // NODE: function invoke
 class functionInvoke: public expr {
 
-    llvm::PooledStringPtr name_;
+    enum { NAME=0, TARGET=1, INDICES=2 };
 
-    // children_[0] is always target, which may be null. the rest will be array indices
+    // children_[0] is always expr for name, which may be literalID or dynamicID
+    // children_[1] is always target, which may be null. the rest will be array indices
     // numChildren_ is always 1 + number of indices
     stmt** children_;
     pUInt numChildren_;
 
 public:
-    functionInvoke(const pSourceRange& name, pParseContext& C, expressionList* argList, expr* target = NULL):
+    functionInvoke(expr* name, pParseContext& C, expressionList* argList, expr* target = NULL):
         expr(functionInvokeKind),
-        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
         children_(NULL),
-        numChildren_(1+argList->size())
+        numChildren_(2+argList->size())
     {
         children_ = new (C) stmt*[numChildren_];
-        children_[0] = target;
-        if (numChildren_ > 1) {
-            memcpy(children_+1, &(argList->front()), (numChildren_-1) * sizeof(stmt*));
+        children_[NAME] = name;
+        children_[TARGET] = target;
+        if (numChildren_ > 2) {
+            memcpy(children_+2, &(argList->front()), (numChildren_-2) * sizeof(stmt*));
         }
     }
-    functionInvoke(const pIdentString& name, pParseContext& C, expressionList* argList, expr* target = NULL):
+    functionInvoke(expr* name, pParseContext& C, expr* arg1, expr* target = NULL):
         expr(functionInvokeKind),
-        name_(C.idPool().intern(pStringRef(name))),
         children_(NULL),
-        numChildren_(1+argList->size())
-    {
-    	children_ = new (C) stmt*[numChildren_];
-        children_[0] = target;
-        if (numChildren_ > 1) {
-            memcpy(children_+1, &(argList->front()), (numChildren_-1) * sizeof(stmt*));
-    	}
-    }
-    functionInvoke(const pIdentString& name, pParseContext& C, expr* arg1, expr* target = NULL):
-        expr(functionInvokeKind),
-        name_(C.idPool().intern(pStringRef(name))),
-        children_(NULL),
-        numChildren_(2)
+        numChildren_(3)
     {
         children_ = new (C) stmt*[numChildren_];
-        children_[0] = target;
-        memcpy(children_+1, &arg1, sizeof(stmt*));
+        children_[NAME] = name;
+        children_[TARGET] = target;
+        memcpy(children_+2, &arg1, sizeof(stmt*));
     }
 
-    pIdentString name(void) const {
-        assert(name_);
-        return *name_;
+    bool isDynamic(void) const { return isa<dynamicID>(children_[NAME]); }
+
+    expr* name(void) {
+        assert(isa<literalID>(children_[NAME]) || isa<dynamicID>(children_[NAME]));
+        return static_cast<expr*>(children_[NAME]);
     }
 
     expr* target(void) {
-        assert((children_[0] == NULL || isa<expr>(children_[0])) && "unknown object in target");
-        return static_cast<expr*>(children_[0]);
+        assert((children_[TARGET] == NULL || isa<expr>(children_[TARGET])) && "unknown object in target");
+        return static_cast<expr*>(children_[TARGET]);
     }
 
     pUInt numArgs(void) const { return numChildren_-1; }
@@ -1475,8 +1470,8 @@ public:
     stmt::child_iterator child_begin() { return &children_[0]; }
     stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
 
-    stmt::child_iterator args_begin() { return &children_[1]; }
-    stmt::child_iterator args_end() { return &children_[1]+(numChildren_-1); }
+    stmt::child_iterator args_begin() { return &children_[INDICES]; }
+    stmt::child_iterator args_end() { return &children_[INDICES]+(numChildren_-INDICES); }
 
     stmt::child_range args() { return stmt::child_range(args_begin(), args_end()); }
 
