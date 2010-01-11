@@ -36,8 +36,28 @@ private:
     static dispatchFunction preDispatchTable_[];
     static dispatchFunction postDispatchTable_[];
 
+    literalBool* literalTrue_;
+    literalBool* literalFalse_;
+protected:
+    literalBool* lTrue() {
+        if(literalTrue_) {
+            literalTrue_->retain();
+        }
+        else
+            literalTrue_ = new (C) literalBool(true);
+        return literalTrue_;
+    }
+    literalBool* lFalse() {
+        if(literalFalse_) {
+            literalFalse_->retain();
+        }
+        else
+            literalFalse_ = new (C) literalBool(false);
+        return literalFalse_;
+    }
+
 public:
-    pBaseTransformer(const char* name, const char* desc, pSourceModule* m): pPass(name,desc,m) { }
+    pBaseTransformer(const char* name, const char* desc, pSourceModule* m): pPass(name,desc,m), literalTrue_(NULL), literalFalse_(NULL) { }
     virtual ~pBaseTransformer() { }
 
     // pass
