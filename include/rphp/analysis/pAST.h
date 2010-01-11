@@ -2,6 +2,7 @@
 ;; Roadsend PHP Compiler
 ;;
 ;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2010 Cornelius Riemenschneider <c.r1@gmx.de>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -218,7 +219,7 @@ class expr: public stmt {
 
 public:
     // see astNodes.def
-    static const nodeKind firstExprKind = assignmentKind;
+    static const nodeKind firstExprKind = exprReduceKind;
     static const nodeKind lastExprKind = unaryOpKind;
 
     expr(nodeKind k): stmt(k) { }
@@ -266,7 +267,6 @@ public:
     static bool classof(const stmt* s) { return s->kind() == blockKind; }
 
 };
-
 
 // declaration base class
 class decl: public stmt {
@@ -759,10 +759,10 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
-    stmt* init(void) { return children_[INIT]; }
-    stmt* condition(void) { return children_[COND]; }
-    stmt* increment(void) { return children_[INC]; }
-    block* body(void) { return static_cast<block*>(children_[BODY]); }
+    stmt* init(void) const { return children_[INIT]; }
+    stmt* condition(void) const { return children_[COND]; }
+    stmt* increment(void) const { return children_[INC]; }
+    block* body(void) const { return static_cast<block*>(children_[BODY]); }
 
     static bool classof(const forStmt* s) { return true; }
     static bool classof(const stmt* s) { return s->kind() == forStmtKind; }
@@ -978,6 +978,9 @@ public:
             memcpy(children_, &(s->front()), numChildren_ * sizeof(*children_));
         }
     }
+
+    opKind opKind() const { return opKind_; }
+    pUInt numArgs() const { return numChildren_; }
 
     stmt::child_iterator child_begin() { return &children_[0]; }
     stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
@@ -1621,6 +1624,35 @@ public:
 
 };
 
+// This class is needed for some transforms. It represents a block of statements of which the last one needs to be an
+// expression. This class is used when lowering some expressions into some statements, which still have to evaluate to
+// _something_. This can even be used to evaluate to a variable (which is then the last instruction in the statementList).
+// !!!This class is not intended for use by the parser!!!
+class exprReduce: public expr {
+private:
+    block* statements_;
+public:
+
+    exprReduce(pParseContext& C, statementList* ptStatements): expr(exprReduceKind), statements_(NULL)
+    {
+        assert(!ptStatements->empty());
+        assert(isa<expr>(ptStatements->back()) && "The last statement of a list of statements for an evalExpr needs to be an expression!");
+        statements_ = new (C) block(C, ptStatements);
+    }
+    exprReduce(pParseContext& C, const expressionList* ptExpressions): expr(exprReduceKind), statements_(NULL)
+    {
+        assert(!ptExpressions->empty());
+        statements_ = new (C) block(C, ptExpressions);
+    }
+    block* statements(void) const { return statements_; }
+
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&statements_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&statements_+1); }
+
+    static bool classof(const exprReduce* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == exprReduceKind; }
+
+};
 
 } } // namespace
 

@@ -2,6 +2,7 @@
 ;; Roadsend PHP Compiler
 ;;
 ;; Copyright (c) 2009-2010 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2010 Cornelius Riemenschneider <c.r1@gmx.de>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -51,6 +52,7 @@ STMT(functionDecl,    stmt)
 
 // expr (see expr::first and last kind constants)
 // FIRST EXPR
+EXPR(exprReduce,     expr)
 EXPR(assignment,     expr)
 EXPR(builtin,        expr)
 EXPR(opAssignment,   expr)
