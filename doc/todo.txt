@@ -9,10 +9,6 @@ Implementation TODO Scratchpad
 
 - namespaces
 
-- see if it makes sense to use some llvm containers and other functionality:
-  http://llvm.org/docs/SystemLibrary.html
-  http://llvm.org/docs/ProgrammersManual.html
-  
 - exceptions
   http://llvm.org/docs/ExceptionHandling.html
 
@@ -31,24 +27,10 @@ Implementation TODO Scratchpad
 
 = parser = 
 
-- conditionals: if, switch
-- loops: for, foreach, while
-- class decl/instanceof/clone
-- try/catch/throw
-- include/require
-- constants
-- operators
-- isset/unset/empty
+- error support and diagnostics, warnings
  
 = runtime =
 
-- do pvar by const ref
-- error manager, function tracing
-- configuration manager. basic php.ini type settings support. unicode settings.
 - lambda functions (new pVar entry)
 - object system
 - file/stream system
-- resources
-- constants
-- operators
-- globals
