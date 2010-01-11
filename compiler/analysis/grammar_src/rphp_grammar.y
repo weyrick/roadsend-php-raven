@@ -219,6 +219,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %left T_BOOLEAN_AND_LIT.
 %right T_PRINT.
 %left T_ASSIGN T_CONCAT_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_PLUS_EQUAL T_MINUS_EQUAL T_MOD_EQUAL T_DIV_EQUAL T_MUL_EQUAL.
+%left T_QUESTION T_COLON.
 %left T_BOOLEAN_AND T_BOOLEAN_OR.
 %left T_PIPE.
 %left T_CARET.
@@ -871,6 +872,7 @@ expr(A) ::= builtin(B). { A = B; }
 expr(A) ::= typeCast(B). { A = B; }
 expr(A) ::= preOp(B). { A = B; }
 expr(A) ::= postOp(B). { A = B; }
+expr(A) ::= conditionalExpr(B). { A = B; }
 expr(A) ::= T_LEFTPAREN expr(B) T_RIGHTPAREN. { A = B; }
 
 /** BUILTINS **/
@@ -949,6 +951,14 @@ commaExprList(A) ::= commaExprList(LIST) T_COMMA expr(E).
 {
     LIST->push_back(E);
     A = LIST;
+}
+
+// ternary operator
+%type conditionalExpr {AST::conditionalExpr*}
+conditionalExpr(A) ::= expr(COND) T_QUESTION expr(TRUE) T_COLON expr(FALSE).
+{
+    A = new (CTXT) AST::conditionalExpr(COND, TRUE, FALSE);
+    A->setLine(CURRENT_LINE);
 }
 
 /** TYPECASTS **/
