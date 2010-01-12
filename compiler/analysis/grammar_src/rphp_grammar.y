@@ -1395,6 +1395,7 @@ variable_lVal(A) ::= lVal(TARGET) T_CLASSDEREF T_IDENTIFIER(ID) arrayIndices(IND
 {
     A = new (CTXT) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), CTXT, INDICES, TARGET);
     A->setLine(CURRENT_LINE);
+    delete INDICES;
 }
 
 /** ARGLIST **/
