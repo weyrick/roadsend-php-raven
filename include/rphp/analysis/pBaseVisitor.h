@@ -37,9 +37,6 @@ private:
     static dispatchFunction postDispatchTable_[];
     static childDispatchFunction childrenDispatchTable_[];
 
-protected:
-    static const char* nodeDescTable_[];
-
 public:
     pBaseVisitor(const char* name, const char* desc, pSourceModule* m): pPass(name,desc,m) { }
     virtual ~pBaseVisitor(void) { }

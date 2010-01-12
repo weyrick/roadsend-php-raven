@@ -78,6 +78,7 @@ set(PARSER_SRC_FILES
   pLexer.cpp
   pParser.cpp
   pSourceModule.cpp
+  pPass.cpp
   pPassManager.cpp
   # passes
   passes/SimplifyStrings.cpp

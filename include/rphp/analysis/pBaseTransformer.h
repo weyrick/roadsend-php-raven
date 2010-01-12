@@ -26,6 +26,7 @@
 #include "rphp/analysis/pAST.h"
 #include "rphp/analysis/pParseContext.h"
 #include "rphp/analysis/pPass.h"
+#include "rphp/analysis/pTransformHelper.h"
 
 namespace rphp { namespace AST {
 
@@ -37,28 +38,11 @@ private:
     static dispatchFunction preDispatchTable_[];
     static dispatchFunction postDispatchTable_[];
 
-    literalBool* literalTrue_;
-    literalBool* literalFalse_;
 protected:
-    literalBool* lTrue() {
-        if(literalTrue_) {
-            literalTrue_->retain();
-        }
-        else
-            literalTrue_ = new (C) literalBool(true);
-        return literalTrue_;
-    }
-    literalBool* lFalse() {
-        if(literalFalse_) {
-            literalFalse_->retain();
-        }
-        else
-            literalFalse_ = new (C) literalBool(false);
-        return literalFalse_;
-    }
+    pTransformHelper h_;
 
 public:
-    pBaseTransformer(const char* name, const char* desc, pSourceModule* m): pPass(name,desc,m), literalTrue_(NULL), literalFalse_(NULL) { }
+    pBaseTransformer(const char* name, const char* desc, pSourceModule* m): pPass(name,desc,m), h_(C_) { }
     virtual ~pBaseTransformer() { }
 
     // pass

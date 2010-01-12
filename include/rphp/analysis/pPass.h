@@ -2,6 +2,7 @@
 ;; Roadsend PHP Compiler
 ;;
 ;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2010 Cornelius Riemenschneider <c.r1@gmx.de>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -33,7 +34,7 @@ class pPass {
 
 private:
     // no copy constructor
-    pPass(const pPass& p): C(module_->context()) { }
+    pPass(const pPass& p): C_(module_->context()) { }
 
 protected:
     std::string passName_;
@@ -41,11 +42,12 @@ protected:
 
     pSourceModule* module_;
 
-    pParseContext& C;
+    pParseContext& C_;
 
+    static const char* nodeDescTable_[];
 public:
 
-    pPass(const char* n, const char* d, pSourceModule* m): passName_(n), passDesc_(d), module_(m), C(module_->context()) { }
+    pPass(const char* n, const char* d, pSourceModule* m): passName_(n), passDesc_(d), module_(m), C_(module_->context()) { }
 
     virtual ~pPass(void) { }
 
@@ -55,6 +57,7 @@ public:
 
 
 };
+
 
 } } // namespace
 

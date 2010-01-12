@@ -49,11 +49,6 @@ pBaseVisitor::childDispatchFunction pBaseVisitor::childrenDispatchTable_[] = {
 
 };
 
-const char* pBaseVisitor::nodeDescTable_[] = {
-#define STMT(CLASS, PARENT) #CLASS,
-#include "rphp/analysis/astNodes.def"
-};
-
 void pBaseVisitor::run(void) {
     module_->applyVisitor(this);
 }
