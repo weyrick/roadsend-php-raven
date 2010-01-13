@@ -139,8 +139,8 @@ void parseSourceFile(pSourceModule* pMod, bool debug=false) {
     }
 
     // finish parse
-    context.finishParse();
-    rphpParse(pParser, 0, 0, pMod);
+    rphpParse(pParser, 0, 0, pMod); // note, this may generate a parse error still
+    context.finishParse(); // so don't finish until here
     rphpParseFree(pParser, free);
 
 }

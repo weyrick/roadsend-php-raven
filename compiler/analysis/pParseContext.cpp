@@ -54,13 +54,29 @@ void pParseContext::parseError(pSourceRange* r) {
     pSourceString problem;
     std::stringstream errorMsg;
 
+    assert(lastToken_);
+
+    // this only happens when there's a parse error due to a non matching production where
+    // lastToken_ that caused the no-match is the last token in the script
+    // in this case, r is null and is called from lemon. we call error again with lastToken
+    // as the parseError
+    bool endOfSource(false);
+    if (lastToken_->end() == owner_->source()->contents().end())
+        endOfSource = true;
+
     if (r) {
         probsize = (*r).end()-(*r).begin();
         problem.append((*r).begin(), (*r).end());
     }
     else {
-        probsize = 1;
-        problem.append(lastToken_->end(), lastToken_->end()+1);
+        if (endOfSource) {
+            probsize = 0;
+            problem.append(lastToken_->begin(), lastToken_->end());
+        }
+        else {
+            probsize = 1;
+            problem.append(lastToken_->end(), lastToken_->end()+1);
+        }
     }
 
     pSourceCharIterator eLineStart(lastNewline_+1);
@@ -78,7 +94,7 @@ void pParseContext::parseError(pSourceRange* r) {
         errorLine.append(eLineStart, eLineStop);
 
     // error line with arrow
-    if (!errorLine.empty()) {
+    if (!errorLine.empty() && !endOfSource) {
         // convert tabs to spaces so arrow lines up
         for (unsigned i=0; i != errorLine.length(); i++) {
             if (errorLine[i] == '\t')
