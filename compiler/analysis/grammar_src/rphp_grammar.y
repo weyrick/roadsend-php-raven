@@ -1422,8 +1422,19 @@ arrayIndices(A) ::= T_LEFTSQUARE expr(B) T_RIGHTSQUARE.
     A = new AST::expressionList();
     A->push_back(B);
 }
+arrayIndices(A) ::= T_LEFTCURLY expr(B) T_RIGHTCURLY.
+{
+    A = new AST::expressionList();
+    A->push_back(B);
+}
 arrayIndices(A) ::= arrayIndices(B) T_LEFTSQUARE expr(C) T_RIGHTSQUARE.
 {
+    B->push_back(C);
+    A = B;
+}
+arrayIndices(A) ::= arrayIndices(B) T_LEFTCURLY expr(C) T_RIGHTCURLY.
+{
+    // XXX unparse needs to know curly
     B->push_back(C);
     A = B;
 }
