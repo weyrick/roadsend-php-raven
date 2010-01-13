@@ -947,7 +947,7 @@ public:
 };
 
 // builtins: language constructs that seem like function calls, but aren't.
-// exit, isset, unset, empty, echo, print, include, require
+// exit, isset, unset, empty, echo, print, include, require, clone
 class builtin: public expr {
 public:
     enum opKind {
@@ -955,6 +955,7 @@ public:
                   ISSET,
                   UNSET,
                   EMPTY,
+                  CLONE,
                   PRINT, // expr
                   ECHO   // statement, not an expr (unlike print)
                 };

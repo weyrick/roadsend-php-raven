@@ -231,7 +231,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %right T_BOOLEAN_NOT.
 %nonassoc T_INSTANCEOF.
 %right T_INC T_DEC T_FLOAT_CAST T_STRING_CAST T_BINARY_CAST T_UNICODE_CAST T_ARRAY_CAST T_OBJECT_CAST T_INT_CAST T_BOOL_CAST T_UNSET_CAST.
-%nonassoc T_NEW.
+%nonassoc T_NEW T_CLONE.
 %left T_ELSE T_ELSEIF.
 
 /** GOAL **/
@@ -926,6 +926,15 @@ builtin(A) ::= T_PRINT expr(RVAL).
     AST::expressionList* rVal = new AST::expressionList();
     rVal->push_back(RVAL);
     A = new (CTXT) AST::builtin(CTXT, AST::builtin::PRINT, rVal);
+    delete rVal;
+    A->setLine(CURRENT_LINE);
+}
+// clone
+builtin(A) ::= T_CLONE expr(RVAL).
+{
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::CLONE, rVal);
     delete rVal;
     A->setLine(CURRENT_LINE);
 }
