@@ -946,18 +946,98 @@ public:
 
 };
 
+// catch
+class catchStmt: public stmt {
+
+    llvm::PooledStringPtr className_;
+    llvm::PooledStringPtr varName_;
+    block* body_;
+
+public:
+    catchStmt(const pSourceRange& className,
+              const pSourceRange& varName,
+              pParseContext& C,
+              block* body):
+    stmt(catchStmtKind),
+    className_(C.idPool().intern(pStringRef(className.begin().base(), (className.end()-className.begin())))),
+    varName_(C.idPool().intern(pStringRef(varName.begin().base(), (varName.end()-varName.begin())))),
+    body_(body)
+    {
+    }
+
+    pIdentString className(void) const {
+        assert(className_);
+        return *className_;
+    }
+
+    pIdentString varName(void) const {
+        assert(varName_);
+        return *varName_;
+    }
+
+    stmt::child_iterator child_begin() { return (stmt**)&body_; }
+    stmt::child_iterator child_end() { return (stmt**)&body_+1; }
+
+    static bool classof(const catchStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == catchStmtKind; }
+
+};
+
+
+// try
+class tryStmt: public stmt {
+
+    enum { BODY=0, CATCHLIST=1 };
+
+    // children_[0] is always body. the rest are catch blocks
+    // numChildren_ is always 1 + number of catch blocks
+    stmt** children_;
+    pUInt numChildren_;
+
+public:
+    tryStmt(pParseContext& C, block* body, statementList* catchList):
+        stmt(tryStmtKind),
+        children_(NULL),
+        numChildren_(1+catchList->size())
+    {
+        children_ = new (C) stmt*[numChildren_];
+        children_[BODY] = body;
+        if (numChildren_ > 1) {
+            memcpy(children_+1, &(catchList->front()), (numChildren_-1) * sizeof(stmt*));
+        }
+    }
+
+    block* body(void) {
+        return static_cast<block*>(children_[BODY]);
+    }
+
+    stmt::child_iterator child_begin() { return &children_[0]; }
+    stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
+
+    pUInt numCatches(void) const { return numChildren_-1; }
+
+    stmt::child_iterator catches_begin() { return &children_[CATCHLIST]; }
+    stmt::child_iterator catches_end() { return &children_[CATCHLIST]+(numChildren_-1); }
+
+    static bool classof(const tryStmt* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == tryStmtKind; }
+
+};
+
+
 // builtins: language constructs that seem like function calls, but aren't.
-// exit, isset, unset, empty, echo, print, include, require, clone
+// exit, isset, unset, empty, echo, print, include, require, clone, throw
 class builtin: public expr {
 public:
     enum opKind {
-                  EXIT,
+                  EXIT, // start expr
                   ISSET,
                   UNSET,
                   EMPTY,
                   CLONE,
-                  PRINT, // expr
-                  ECHO   // statement, not an expr (unlike print)
+                  PRINT, // end expr
+                  ECHO,   // start statements
+                  THROW   // end statements
                 };
 
 private:
@@ -1272,6 +1352,8 @@ public:
 // NODE: var
 class var: public expr {
 
+    enum { TARGET=0, INDICES=1 };
+
     llvm::PooledStringPtr name_;
 
     // children_[0] is always target, which may be null. the rest will be array indices
@@ -1287,7 +1369,7 @@ public:
         numChildren_(1)
     {
         children_ = new (C) stmt*[1];
-        children_[0] = target;
+        children_[TARGET] = target;
     }
 
     var(const pSourceRange& name, pParseContext& C, expressionList* indices, expr* target = NULL):
@@ -1297,7 +1379,7 @@ public:
         numChildren_(1+indices->size())
     {
         children_ = new (C) stmt*[numChildren_];
-        children_[0] = target;
+        children_[TARGET] = target;
         if (numChildren_ > 1) {
             memcpy(children_+1, &(indices->front()), (numChildren_-1) * sizeof(stmt*));
         }
@@ -1309,17 +1391,17 @@ public:
     }
 
     expr* target(void) {
-        assert((children_[0] == NULL || isa<expr>(children_[0])) && "unknown object in target");
-        return static_cast<expr*>(children_[0]);
+        assert((children_[TARGET] == NULL || isa<expr>(children_[TARGET])) && "unknown object in target");
+        return static_cast<expr*>(children_[TARGET]);
     }
 
-    stmt::child_iterator child_begin() { return &children_[0]; }
-    stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
+    stmt::child_iterator child_begin() { return &children_[TARGET]; }
+    stmt::child_iterator child_end() { return &children_[TARGET]+numChildren_; }
 
     pUInt numIndices(void) const { return numChildren_-1; }
 
-    stmt::child_iterator indices_begin() { return &children_[1]; }
-    stmt::child_iterator indices_end() { return &children_[1]+(numChildren_-1); }
+    stmt::child_iterator indices_begin() { return &children_[INDICES]; }
+    stmt::child_iterator indices_end() { return &children_[INDICES]+(numChildren_-1); }
 
     static bool classof(const var* s) { return true; }
     static bool classof(const stmt* s) { return s->kind() == varKind; }

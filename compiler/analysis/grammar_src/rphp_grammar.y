@@ -255,7 +255,9 @@ statement(A) ::= forStmt(B). { A = B; }
 statement(A) ::= doStmt(B). { A = B; }
 statement(A) ::= whileStmt(B). { A = B; }
 statement(A) ::= switchStmt(B). { A = B; }
+statement(A) ::= tryCatch(B). { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
+statement(A) ::= throw(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
 statement(A) ::= return(B) T_SEMI. { A = B; }
 statement(A) ::= break(B) T_SEMI. { A = B; }
@@ -282,6 +284,17 @@ echo(A) ::= T_ECHO commaExprList(EXPRS).
    A = new (CTXT) AST::builtin(CTXT, AST::builtin::ECHO, EXPRS);
    A->setLine(CURRENT_LINE);
    delete EXPRS;
+}
+
+// throw
+%type throw {AST::builtin*}
+throw(A) ::= T_THROW expr(RVAL).
+{
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::THROW, rVal);
+    delete rVal;
+    A->setLine(CURRENT_LINE);
 }
 
 // return
@@ -347,6 +360,55 @@ globalItemList(A) ::= lVal(B) T_COMMA globalItemList(C).
 inlineHTML(A) ::= T_INLINE_HTML(B).
 {
     A = new (CTXT) AST::inlineHtml(*B);
+    A->setLine(CURRENT_LINE);
+}
+
+// try/catch
+%type tryCatch {AST::tryStmt*}
+tryCatch(A) ::= T_TRY statementBlock(BODY)
+                catch(COMP) moreCatches(MORECATCHES).
+{
+
+    AST::statementList catchList;
+    catchList.push_back(COMP); // compulsory
+
+    // copy in additional catches, if any
+    if (MORECATCHES != NULL) {
+      for(AST::statementList::iterator i = MORECATCHES->begin();
+          i != MORECATCHES->end();
+          ++i) {
+            catchList.push_back(*i);
+      }
+      delete MORECATCHES;
+    }
+
+    A = new (CTXT) AST::tryStmt(CTXT, new (CTXT) AST::block(CTXT, BODY), &catchList);
+    A->setLine(CURRENT_LINE);
+    // catchList goes out of scope and frees
+
+}
+
+%type moreCatches {AST::statementList*}
+moreCatches(A) ::= . { A = NULL; }
+moreCatches(A) ::= nonEmptyCatches(B). { A = B; }
+
+%type nonEmptyCatches {AST::statementList*}
+nonEmptyCatches(A) ::= catch(C).
+{
+    A = new AST::statementList();
+    A->push_back(C);
+}
+nonEmptyCatches(A) ::= nonEmptyCatches(LIST) catch(C).
+{
+    LIST->push_back(C);
+    A = LIST;
+}
+
+%type catch {AST::catchStmt*}
+catch(A) ::= T_CATCH T_LEFTPAREN T_IDENTIFIER(CLASSNAME) T_VARIABLE(VAR) T_RIGHTPAREN
+             statementBlock(CATCHBODY).
+{
+    A = new (CTXT) AST::catchStmt(*CLASSNAME, *VAR, CTXT, new (CTXT) AST::block(CTXT, CATCHBODY));
     A->setLine(CURRENT_LINE);
 }
 
