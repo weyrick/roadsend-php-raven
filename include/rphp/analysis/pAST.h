@@ -1442,10 +1442,10 @@ class assignment: public expr {
 
     enum { LVAL, RVAL, END_EXPR };
     stmt* children_[END_EXPR];
-    bool isRef_;
+    bool byRef_;
 
 public:
-    assignment(expr* lVal, expr* rVal, bool r): expr(assignmentKind), children_(), isRef_(r)
+    assignment(expr* lVal, expr* rVal, bool r): expr(assignmentKind), children_(), byRef_(r)
     {
         children_[LVAL] = static_cast<stmt*>(lVal);
         children_[RVAL] = static_cast<stmt*>(rVal);
@@ -1454,7 +1454,7 @@ public:
     expr* lVal(void) { return static_cast<expr*>(children_[LVAL]); }
     expr* rVal(void) { return static_cast<expr*>(children_[RVAL]); }
 
-    bool isRef(void) const { return isRef_; }
+    bool byRef(void) const { return byRef_; }
 
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }

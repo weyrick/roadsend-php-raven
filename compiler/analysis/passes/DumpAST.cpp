@@ -77,6 +77,10 @@ void DumpAST::visit_pre_literalID(literalID* n) {
     currentElement_->SetAttribute("id",n->name());
 }
 
+void DumpAST::visit_pre_assignment(assignment* n) {
+    currentElement_->SetAttribute("byRef", (n->byRef() ? "true" : "false") );
+}
+
 void DumpAST::visit_pre_methodDecl(methodDecl* n) {
     pUInt flags = n->flags();
     if (flags & memberFlags::ABSTRACT)

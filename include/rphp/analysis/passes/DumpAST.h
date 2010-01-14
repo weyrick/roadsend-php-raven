@@ -54,6 +54,7 @@ public:
     void visit_pre_methodDecl(methodDecl* n);
     void visit_pre_propertyDecl(propertyDecl* n);
 
+    void visit_pre_assignment(assignment* n);
     void visit_pre_literalID(literalID* n);
     void visit_pre_var(var* n);
     void visit_pre_unaryOp(unaryOp* n);

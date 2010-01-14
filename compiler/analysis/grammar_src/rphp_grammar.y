@@ -1356,6 +1356,11 @@ assignment(A) ::= lVal(L) T_ASSIGN T_AND(EQ_SIGN) lVal(R).
     A = new (CTXT) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
+assignment(A) ::= lVal(L) T_ASSIGN T_AND(EQ_SIGN) functionInvoke(R).
+{
+    A = new (CTXT) AST::assignment(L, R, true);
+    A->setLine(TOKEN_LINE(EQ_SIGN));
+}
 
 %type opAssignment {AST::opAssignment*}
 opAssignment(A) ::= lVal(L) T_AND_EQUAL(EQ_SIGN) expr(R).
