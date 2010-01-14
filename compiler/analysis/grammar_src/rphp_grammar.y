@@ -1524,12 +1524,23 @@ arrayIndices(A) ::= arrayIndices(B) T_LEFTSQUARE T_RIGHTSQUARE.
 
 /** FUNCTION/METHOD INVOKE **/
 %type functionInvoke {AST::functionInvoke*}
-// foo()
+// foo() or $foo() or $foo[1]() ...
 functionInvoke(A) ::= maybeDynamicID(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
 {
     A = new (CTXT) AST::functionInvoke(ID, // f name
                                        CTXT,
                                        ARGS  // expression list: arguments, copied
+                                       );
+    A->setLine(CURRENT_LINE);
+    delete ARGS;
+}
+// foo::bar() (or self:: or parent::)
+functionInvoke(A) ::= T_IDENTIFIER(TARGET) T_DBL_COLON T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
+{
+    A = new (CTXT) AST::functionInvoke(new (CTXT) AST::literalID(*ID, CTXT), // f name
+                                       CTXT,
+                                       ARGS,  // expression list: arguments, copied
+                                       new (CTXT) AST::literalID(*TARGET, CTXT)
                                        );
     A->setLine(CURRENT_LINE);
     delete ARGS;

@@ -1501,7 +1501,7 @@ public:
 
 };
 
-// NODE: function invoke
+// NODE: function/method invoke
 class functionInvoke: public expr {
 
     enum { NAME=0, TARGET=1, INDICES=2 };
