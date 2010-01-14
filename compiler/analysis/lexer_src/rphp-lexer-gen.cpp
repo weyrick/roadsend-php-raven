@@ -132,6 +132,9 @@ int main(void) {
     langRules_.add("PHP", "\\?>", T_CLOSE_TAG, ".");
     langRules_.add("PHP", "=>", T_ARROWKEY, ".");
     langRules_.add("PHP", "->", T_CLASSDEREF, ".");
+    langRules_.add("PHP", "true", T_TRUE, ".");
+    langRules_.add("PHP", "false", T_FALSE, ".");
+    langRules_.add("PHP", "null", T_NULL, ".");
     langRules_.add("PHP", "list", T_LIST, ".");
     langRules_.add("PHP", "if", T_IF, ".");
     langRules_.add("PHP", "for", T_FOR, ".");

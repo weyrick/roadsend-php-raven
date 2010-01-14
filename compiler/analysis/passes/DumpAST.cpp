@@ -219,6 +219,10 @@ void DumpAST::visit_pre_literalBool(literalBool* n)  {
     currentElement_->SetAttribute("value", (n->getBoolVal() ? "true" : "false") );
 }
 
+void DumpAST::visit_pre_literalConstant(literalConstant* n)  {
+    currentElement_->SetAttribute("id", n->name());
+}
+
 //void DumpAST::visit_pre_functionDecl(functionDecl* n) {
 //    std::cout << "# line " << n->startLineNum() << "\n";
 //    std::cout << "pre_functionDecl\n";

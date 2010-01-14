@@ -78,6 +78,7 @@ EXPR(literalFloat,  expr)
 EXPR(literalNull,   expr)
 EXPR(literalBool,   expr)
 EXPR(literalArray,  expr)
+EXPR(literalConstant, expr)
 EXPR(inlineHtml,    expr)
 // LAST LITERALEXPR
 // LAST EXPR

@@ -1111,25 +1111,31 @@ literal(A) ::= T_DNUMBER(B).
     A->setLine(CURRENT_LINE);    
 }
 
-// literal identifier: null, true, false or string
+// literal identifier: null, true, false or constant
+literal(A) ::= T_TRUE.
+{
+    A = new (CTXT) AST::literalBool(true);
+    A->setLine(CURRENT_LINE);
+}
+literal(A) ::= T_FALSE.
+{
+    A = new (CTXT) AST::literalBool(false);
+    A->setLine(CURRENT_LINE);
+}
+literal(A) ::= T_NULL.
+{
+    A = new (CTXT) AST::literalNull();
+    A->setLine(CURRENT_LINE);
+}
+
 literal(A) ::= T_IDENTIFIER(B).
 {
-    // case insensitive checks
-    pSourceString ciTmp((*B).begin(), (*B).end());
-    transform(ciTmp.begin(), ciTmp.end(), ciTmp.begin(), toupper);
-    if (ciTmp == "NULL") {
-        A = new (CTXT) AST::literalNull();
-    }
-    else if (ciTmp == "TRUE") {
-        A = new (CTXT) AST::literalBool(true);
-    }
-    else if (ciTmp == "FALSE") {
-        A = new (CTXT) AST::literalBool(false);
-    }
-    else {
-        // default to normal string
-        A = new (CTXT) AST::literalString(*B);
-    }
+    A = new (CTXT) AST::literalConstant(*B, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+literal(A) ::= T_IDENTIFIER(TARGET) T_DBL_COLON T_IDENTIFIER(ID).
+{
+    A = new (CTXT) AST::literalConstant(*ID, CTXT, new (CTXT) AST::literalID(*TARGET, CTXT));
     A->setLine(CURRENT_LINE);
 }
 

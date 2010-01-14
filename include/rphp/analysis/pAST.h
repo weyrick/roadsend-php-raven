@@ -1299,7 +1299,7 @@ public:
 
 };
 
-// literal ID
+// literal ID (always represents a class or function symbol name)
 class literalID: public expr {
 
     llvm::PooledStringPtr name_;
@@ -1325,6 +1325,35 @@ public:
 
     static bool classof(const literalID* s) { return true; }
     static bool classof(const stmt* s) { return s->kind() == literalIDKind; }
+
+};
+
+// literal constant (always represents a runtime value symbol. optional target for static class)
+class literalConstant: public literalExpr {
+
+    llvm::PooledStringPtr name_;
+    expr* target_;
+
+public:
+    literalConstant(const pSourceRange& name, pParseContext& C, expr* target = NULL):
+        literalExpr(literalConstantKind),
+        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
+        target_(target)
+    {
+    }
+
+    pIdentString name(void) const {
+        assert(name_);
+        return *name_;
+    }
+
+    expr* target(void) const { return target_; }
+
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&target_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&target_+1); }
+
+    static bool classof(const literalConstant* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == literalConstantKind; }
 
 };
 
