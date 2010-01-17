@@ -118,6 +118,7 @@ void DumpAST::visit_pre_propertyDecl(propertyDecl* n) {
         currentElement_->SetAttribute("STATIC", "true");
 }
 
+
 void DumpAST::visit_pre_unaryOp(unaryOp* n)  {
     switch (n->opKind()) {
     case unaryOp::LOGICALNOT:

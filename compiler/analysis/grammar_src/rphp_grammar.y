@@ -335,24 +335,12 @@ continue(A) ::= T_CONTINUE expr(B).
 }
 
 // global
-%type global {AST::globalStmt*}
-global(A) ::= T_GLOBAL globalItemList(B).
+%type global {AST::globalDecl*}
+global(A) ::= T_GLOBAL commaVarList(B).
 {
-    A = new (CTXT) AST::globalStmt(CTXT, B);
+    A = new (CTXT) AST::globalDecl(B, CTXT);
     A->setLine(CURRENT_LINE);
     delete B;
-}
-
-%type globalItemList {AST::globalItemList*}
-globalItemList(A) ::= lVal(B).
-{
-    A = new AST::globalItemList();
-    A->push_back(static_cast<AST::stmt*>(B)); // copy item into vector
-}
-globalItemList(A) ::= lVal(B) T_COMMA globalItemList(C).
-{
-    C->push_back(static_cast<AST::stmt*>(B)); // copy item into vector
-    A = C;
 }
 
 // inline html
@@ -583,17 +571,18 @@ caseSeparator ::= T_SEMI.
 
 /** STATIC **/
 %type staticDecl {AST::staticDecl*}
-staticDecl(A) ::= T_STATIC T_VARIABLE(ID).
+staticDecl(A) ::= T_STATIC commaVarList(VARLIST).
 {
-    A = new (CTXT) AST::staticDecl(pSourceRange(++(*ID).begin(), (*ID).end()), CTXT);
+    A = new (CTXT) AST::staticDecl(VARLIST, CTXT);
     A->setLine(CURRENT_LINE);
+    delete VARLIST;
 }
 
-staticDecl(A) ::= T_STATIC T_VARIABLE(ID) T_ASSIGN literal(DEF).
+staticDecl(A) ::= T_STATIC commaVarList(VARLIST) T_ASSIGN literal(DEF).
 {
-    A = new (CTXT) AST::staticDecl(pSourceRange(++(*ID).begin(), (*ID).end()),
-    CTXT, DEF);
+    A = new (CTXT) AST::staticDecl(VARLIST, CTXT, DEF);
     A->setLine(CURRENT_LINE);
+    delete VARLIST;
 }
 
 
@@ -969,14 +958,14 @@ builtin(A) ::= T_EMPTY T_LEFTPAREN lVal(RVAL) T_RIGHTPAREN.
     A->setLine(CURRENT_LINE);
 }
 // isset
- builtin(A) ::= T_ISSET T_LEFTPAREN commaVarList(VARS) T_RIGHTPAREN.
+ builtin(A) ::= T_ISSET T_LEFTPAREN commaLvalList(VARS) T_RIGHTPAREN.
 {
    A = new (CTXT) AST::builtin(CTXT, AST::builtin::ISSET, VARS);
    A->setLine(CURRENT_LINE);
    delete VARS;
 }
 // unset
-builtin(A) ::= T_UNSET T_LEFTPAREN commaVarList(VARS) T_RIGHTPAREN.
+builtin(A) ::= T_UNSET T_LEFTPAREN commaLvalList(VARS) T_RIGHTPAREN.
 {
    A = new (CTXT) AST::builtin(CTXT, AST::builtin::UNSET, VARS);
    A->setLine(CURRENT_LINE);
@@ -1001,15 +990,28 @@ builtin(A) ::= T_CLONE expr(RVAL).
     A->setLine(CURRENT_LINE);
 }
 
-%type commaVarList {AST::expressionList*}
-commaVarList(A) ::= lVal(VAR).
+%type commaLvalList {AST::expressionList*}
+commaLvalList(A) ::= lVal(VAR).
 {
     A = new AST::expressionList();
     A->push_back(VAR);
 }
-commaVarList(A) ::= commaVarList(LIST) T_COMMA lVal(VAR).
+commaLvalList(A) ::= commaLvalList(LIST) T_COMMA lVal(VAR).
 {
     LIST->push_back(VAR);
+    A = LIST;
+}
+
+%type commaVarList {AST::expressionList*}
+commaVarList(A) ::= T_VARIABLE(B).
+{
+    A = new AST::expressionList();
+    A->push_back(new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT));
+}
+commaVarList(A) ::= commaVarList(LIST) T_COMMA T_VARIABLE(B).
+{
+    // strip $
+    LIST->push_back(new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT));
     A = LIST;
 }
 

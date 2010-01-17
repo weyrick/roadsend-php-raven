@@ -51,16 +51,18 @@ using llvm::isa;
 using llvm::dyn_cast;
 using llvm::cast;
 
-// These define how big our SmallVectors are, which means
-// this should be a good average length we expect to parse
-
-// global declaration
-#define RPHP_GLOBAL_VECTOR_SIZE 5
-#define RPHP_FORMAL_PARAM_VECTOR_SIZE 5
-
 class pSourceModule;
 
 namespace AST {
+
+// These define how big our SmallVectors are, which means
+// this should be a good average length we expect to parse
+const int RPHP_IDLIST_SIZE = 5; // list of ids, used by extends, implements
+const int RPHP_FORMAL_PARAM_VECTOR_SIZE = 5; // formal parameters in function/method decl
+
+// a list of symbols, used for extends, implements
+typedef llvm::SmallVector<llvm::PooledStringPtr,RPHP_IDLIST_SIZE> idList;
+typedef std::vector<const pSourceRange*> sourceRangeList;
 
 enum nodeKind {
 #define STMT(CLASS, PARENT) CLASS##Kind,
@@ -286,26 +288,64 @@ public:
 
 };
 
-class staticDecl: public decl {
 
-    llvm::PooledStringPtr name_;
-    stmt* default_;
+// global
+class globalDecl: public stmt {
+
+    stmt** children_;
+    pUInt numChildren_;
 
 public:
-    staticDecl(const pSourceRange& name, pParseContext& C, expr* def=NULL):
-        decl(staticDeclKind),
-        name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
-        default_(def)
+
+    globalDecl(const expressionList* varList,
+               pParseContext& C):
+            stmt(globalDeclKind),
+            children_(0),
+            numChildren_(varList->size())
     {
+        children_ = new (C) stmt*[numChildren_];
+        memcpy(children_, &(varList->front()), (numChildren_) * sizeof(stmt*));
     }
 
-    pIdentString name(void) const {
-        assert(name_);
-        return *name_;
+    stmt::child_iterator child_begin() { return &children_[0]; }
+    stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
+
+    static bool classof(const globalDecl* s) { return true; }
+    static bool classof(const stmt* s) { return s->kind() == globalDeclKind; }
+
+};
+
+class staticDecl: public decl {
+
+    enum { DEFAULT=0, VARS=1 };
+
+    stmt** children_;
+    pUInt numChildren_;
+
+public:
+    staticDecl(const expressionList* varList,
+               pParseContext& C,
+               expr* def=NULL):
+        decl(staticDeclKind),
+        children_(0),
+        numChildren_(1+varList->size())
+    {
+        children_ = new (C) stmt*[numChildren_];
+        children_[DEFAULT] = def;
+        if (numChildren_ > 1) {
+            memcpy(children_+1, &(varList->front()), (numChildren_-1) * sizeof(stmt*));
+        }
     }
 
-    stmt::child_iterator child_begin() { return &default_; }
-    stmt::child_iterator child_end() { return &default_+1; }
+    expr* defaultExpr(void) {
+        return static_cast<expr*>(children_[DEFAULT]);
+    }
+
+    stmt::child_iterator child_begin() { return &children_[DEFAULT]; }
+    stmt::child_iterator child_end() { return &children_[DEFAULT]+numChildren_; }
+
+    stmt::child_iterator var_begin() { return &children_[VARS]; }
+    stmt::child_iterator var_end() { return &children_[VARS]+(numChildren_-1); }
 
     static bool classof(const staticDecl* s) { return true; }
     static bool classof(const stmt* s) { return s->kind() == staticDeclKind; }
@@ -501,7 +541,7 @@ public:
 
 };
 
-typedef std::vector<const pSourceRange*> sourceRangeList;
+
 
 // class/interface declaration
 class classDecl: public decl {
@@ -511,8 +551,8 @@ public:
 
 private:
     llvm::PooledStringPtr name_;
-    std::vector<llvm::PooledStringPtr> extends_;
-    std::vector<llvm::PooledStringPtr> implements_;
+    idList extends_;
+    idList implements_;
     classType type_;
     block* members_;
 
@@ -520,8 +560,8 @@ public:
     classDecl(pParseContext& C,
               const pSourceRange& name,
               classType type,
-              sourceRangeList* extends, // may be null
-              sourceRangeList* implements, // may be null
+              const sourceRangeList* extends, // may be null
+              const sourceRangeList* implements, // may be null
               block* members
               ):
         decl(classDeclKind),
@@ -533,7 +573,7 @@ public:
     {
         // intern list of extends (if any)
         if (extends) {
-            for (sourceRangeList::iterator i=extends->begin();
+            for (sourceRangeList::const_iterator i=extends->begin();
             i != extends->end();
             ++i) {
                 extends_.push_back(C.idPool().intern(
@@ -544,7 +584,7 @@ public:
         }
         // intern list of implements (if any)
         if (implements) {
-            for (sourceRangeList::iterator i=implements->begin();
+            for (sourceRangeList::const_iterator i=implements->begin();
             i != implements->end();
             ++i) {
                 implements_.push_back(C.idPool().intern(
@@ -840,28 +880,6 @@ public:
 };
 
 
-typedef llvm::SmallVector<stmt*,RPHP_GLOBAL_VECTOR_SIZE> globalItemList;
-
-// global
-class globalStmt: public stmt {
-    stmt** varList_;
-    pUInt numVars_;
-public:
-
-    globalStmt(pParseContext& C, const globalItemList* s): stmt(globalStmtKind), varList_(0), numVars_(s->size()) {
-        if (numVars_) {
-            varList_ = new (C) stmt*[numVars_];
-            memcpy(varList_, &(s->front()), numVars_ * sizeof(*varList_));
-        }
-    }
-
-    stmt::child_iterator child_begin() { return &varList_[0]; }
-    stmt::child_iterator child_end() { return &varList_[0]+numVars_; }
-
-    static bool classof(const globalStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == globalStmtKind; }
-
-};
 
 // type cast
 class typeCast: public expr {

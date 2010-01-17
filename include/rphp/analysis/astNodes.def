@@ -39,7 +39,7 @@ STMT(switchCase,   stmt)
 STMT(switchStmt,   stmt)
 STMT(catchStmt,    stmt)
 STMT(tryStmt,      stmt)
-STMT(globalStmt,   stmt)
+STMT(globalDecl,   stmt)
 
 // decl (see decl::first and last kind constants)
 // FIRST DECL
