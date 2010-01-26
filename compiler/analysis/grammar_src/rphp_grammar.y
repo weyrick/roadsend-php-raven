@@ -129,10 +129,10 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 %type T_PUBLIC {int}
 %type T_PRIVATE {int}
 %type T_PROTECTED {int}
-//%type T_INCLUDE {int}
-//%type T_INCLUDE_ONCE {int}
-//%type T_REQUIRE {int}
-//%type T_REQUIRE_ONCE {int}
+%type T_INCLUDE {int}
+%type T_INCLUDE_ONCE {int}
+%type T_REQUIRE {int}
+%type T_REQUIRE_ONCE {int}
 %type T_IDENTICAL {int}
 %type T_NOT_IDENTICAL {int}
 %type T_QUESTION {int}
@@ -213,6 +213,7 @@ AST::literalExpr* extractLiteralString(pSourceRange* B, pSourceModule* pMod, boo
 }   
 
 /** ASSOCIATIVITY AND PRECEDENCE (low to high) **/
+%left T_INCLUDE T_INCLUDE_ONCE T_REQUIRE T_REQUIRE_ONCE.
 %left T_COMMA.
 %left T_BOOLEAN_OR_LIT.
 %left T_BOOLEAN_XOR_LIT.
@@ -986,6 +987,39 @@ builtin(A) ::= T_CLONE expr(RVAL).
     AST::expressionList* rVal = new AST::expressionList();
     rVal->push_back(RVAL);
     A = new (CTXT) AST::builtin(CTXT, AST::builtin::CLONE, rVal);
+    delete rVal;
+    A->setLine(CURRENT_LINE);
+}
+// include/require
+builtin(A) ::= T_REQUIRE expr(RVAL).
+{
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::REQUIRE, rVal);
+    delete rVal;
+    A->setLine(CURRENT_LINE);
+}
+builtin(A) ::= T_REQUIRE_ONCE expr(RVAL).
+{
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::REQUIRE_ONCE, rVal);
+    delete rVal;
+    A->setLine(CURRENT_LINE);
+}
+builtin(A) ::= T_INCLUDE expr(RVAL).
+{
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::INCLUDE, rVal);
+    delete rVal;
+    A->setLine(CURRENT_LINE);
+}
+builtin(A) ::= T_INCLUDE_ONCE expr(RVAL).
+{
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::INCLUDE_ONCE, rVal);
     delete rVal;
     A->setLine(CURRENT_LINE);
 }

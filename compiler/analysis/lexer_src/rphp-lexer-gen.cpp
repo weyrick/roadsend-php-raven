@@ -184,12 +184,10 @@ int main(void) {
     langRules_.add("PHP", "goto", T_GOTO, ".");
     langRules_.add("PHP", "const", T_CONST, ".");
     langRules_.add("PHP", "static", T_STATIC, ".");
-    /*
     langRules_.add("PHP", "include", T_INCLUDE, ".");
     langRules_.add("PHP", "include_once", T_INCLUDE_ONCE, ".");
     langRules_.add("PHP", "require", T_REQUIRE, ".");
     langRules_.add("PHP", "require_once", T_REQUIRE_ONCE, ".");
-    */
     langRules_.add("PHP", "__FILE__", T_MAGIC_FILE, ".");
     langRules_.add("PHP", "__LINE__", T_MAGIC_LINE, ".");
     langRules_.add("PHP", "__CLASS__", T_MAGIC_CLASS, ".");

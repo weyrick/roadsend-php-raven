@@ -1053,6 +1053,10 @@ public:
                   UNSET,
                   EMPTY,
                   CLONE,
+                  INCLUDE,
+                  INCLUDE_ONCE,
+                  REQUIRE,
+                  REQUIRE_ONCE,
                   PRINT, // end expr
                   ECHO,   // start statements
                   THROW   // end statements
