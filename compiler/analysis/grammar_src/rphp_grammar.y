@@ -589,31 +589,60 @@ staticDecl(A) ::= T_STATIC commaVarList(VARLIST) T_ASSIGN literal(DEF).
 
 /** FUNCTION FORMAL PARAMS **/
 %type formalParam {AST::formalParam*}
-formalParam(A) ::= T_VARIABLE(PARAM).
+formalParam(A) ::= maybeHint(HINT) T_VARIABLE(PARAM).
 {
     A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
                               CTXT, false/*ref*/);
+    if (HINT == (pSourceRange*)0x1) {
+        A->setArrayHint();
+    }
+    else if (HINT) {
+        A->setClassHint(*HINT, CTXT);
+    }
     A->setLine(TOKEN_LINE(PARAM));
 }
-formalParam(A) ::= T_AND T_VARIABLE(PARAM).
+formalParam(A) ::= maybeHint(HINT) T_AND T_VARIABLE(PARAM).
 {
     A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
                               CTXT, true/*ref*/);
+    if (HINT == (pSourceRange*)0x1) {
+        A->setArrayHint();
+    }
+    else if (HINT) {
+        A->setClassHint(*HINT, CTXT);
+    }
     A->setLine(TOKEN_LINE(PARAM));
 }
-formalParam(A) ::= T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
+formalParam(A) ::= maybeHint(HINT) T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
 {
     A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
                               CTXT, false/*ref*/, DEF);
+    if (HINT == (pSourceRange*)0x1) {
+        A->setArrayHint();
+    }
+    else if (HINT) {
+        A->setClassHint(*HINT, CTXT);
+    }
     A->setLine(TOKEN_LINE(PARAM));
 }
-formalParam(A) ::= T_AND T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
+formalParam(A) ::= maybeHint(HINT) T_AND T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
 {
     A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
                               CTXT, true/*ref*/, DEF);
+    if (HINT == (pSourceRange*)0x1) {
+        A->setArrayHint();
+    }
+    else if (HINT) {
+        A->setClassHint(*HINT, CTXT);
+    }
     A->setLine(TOKEN_LINE(PARAM));
 }
 
+// this will be NULL (no hint), integral 1 (array hint) or an identifier
+%type maybeHint {pSourceRange*}
+maybeHint(A) ::= . { A = NULL; }
+maybeHint(A) ::= T_ARRAY. { A = (pSourceRange*)0x1; }
+maybeHint(A) ::= T_IDENTIFIER(B). { A = B; }
 
 %type formalParamList {AST::formalParamList*}
 formalParamList(A) ::= formalParam(PARAM).

@@ -310,6 +310,10 @@ void DumpAST::visit_pre_signature(signature* n) {
 void DumpAST::visit_pre_formalParam(formalParam* n) {
     currentElement_->SetAttribute("id",n->name());
     currentElement_->SetAttribute("byRef", (n->byRef() ? "true" : "false") );
+    currentElement_->SetAttribute("arrayHint", (n->arrayHint() ? "true" : "false") );
+    pIdentString hint = n->classHint();
+    if (hint.length())
+        currentElement_->SetAttribute("classHint",hint);
 }
 
 } } } // namespace

@@ -381,6 +381,8 @@ public:
 
     bool optional(void) const {  return default_ != NULL; }
 
+    void setArrayHint(void) { flags_ ^= arrayHintBit; }
+
     void setClassHint(const pSourceRange& name, pParseContext& C) {
         classHint_ = C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())));
     }
@@ -388,6 +390,13 @@ public:
     pIdentString name(void) const {
         assert(name_);
         return *name_;
+    }
+
+    pIdentString classHint(void) const {
+        if (classHint_)
+            return *classHint_;
+        else
+            return "";
     }
 
     stmt::child_iterator child_begin() { return &default_; }
