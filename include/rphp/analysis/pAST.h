@@ -1415,6 +1415,7 @@ class var: public expr {
     enum { TARGET=0, INDICES=1 };
 
     llvm::PooledStringPtr name_;
+    pUInt indirectionCount_; // layers of indirection, i.e. variable variables
 
     // children_[0] is always target, which may be null. the rest will be array indices
     // numChildren_ is always 1 + number of indices
@@ -1425,6 +1426,7 @@ public:
     var(const pSourceRange& name, pParseContext& C, expr* target = NULL):
         expr(varKind),
         name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
+        indirectionCount_(0),
         children_(NULL),
         numChildren_(1)
     {
@@ -1435,6 +1437,7 @@ public:
     var(const pSourceRange& name, pParseContext& C, expressionList* indices, expr* target = NULL):
         expr(varKind),
         name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
+        indirectionCount_(0),
         children_(NULL),
         numChildren_(1+indices->size())
     {
@@ -1450,10 +1453,18 @@ public:
         return *name_;
     }
 
+    void setTarget(expr *t) {
+        children_[TARGET] = t;
+    }
+
+    void setIndirectionCount(pUInt c) { indirectionCount_ = c; }
+
     expr* target(void) {
         assert((children_[TARGET] == NULL || isa<expr>(children_[TARGET])) && "unknown object in target");
         return static_cast<expr*>(children_[TARGET]);
     }
+
+    pUInt indirectionCount(void) const { return indirectionCount_; }
 
     stmt::child_iterator child_begin() { return &children_[TARGET]; }
     stmt::child_iterator child_end() { return &children_[TARGET]+numChildren_; }
@@ -1597,6 +1608,10 @@ public:
     }
 
     bool isDynamic(void) const { return isa<dynamicID>(children_[NAME]); }
+
+    void setTarget(expr *t) {
+        children_[TARGET] = t;
+    }
 
     expr* name(void) {
         assert(isa<literalID>(children_[NAME]) || isa<dynamicID>(children_[NAME]));

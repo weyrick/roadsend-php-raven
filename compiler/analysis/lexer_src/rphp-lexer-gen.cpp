@@ -101,6 +101,7 @@ int main(void) {
     langRules_.add("PHP", "\\@", T_AT, ".");
     langRules_.add("PHP", "\\?", T_QUESTION, ".");
     langRules_.add("PHP", "\\:", T_COLON, ".");
+    langRules_.add("PHP", "\\$", T_DOLLAR, ".");
     langRules_.add("PHP", ">=", T_GREATER_OR_EQUAL, ".");
     langRules_.add("PHP", "<=", T_LESS_OR_EQUAL, ".");
     langRules_.add("PHP", "<<", T_SL, ".");

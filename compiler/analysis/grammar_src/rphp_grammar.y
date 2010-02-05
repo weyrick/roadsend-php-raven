@@ -784,7 +784,7 @@ classStatement(A) ::= classVarFlags(FLAGS) classVar(VARS) T_SEMI.
     // all done with vector
     delete VARS;
 }
-classStatement(A) ::= classConstant(VARS) T_SEMI.
+classStatement(A) ::= classConstantDecl(VARS) T_SEMI.
 {
     if (VARS->size() == 1) {
         // one var decl
@@ -821,7 +821,7 @@ classVar(A) ::= classVar(LIST) T_COMMA T_VARIABLE(VAR).
     LIST->push_back(new (CTXT) AST::propertyDecl(CTXT, pSourceRange(++(*VAR).begin(), (*VAR).end()), NULL));
     A = LIST;
 }
-classVar(A) ::= classVar(LIST) T_COMMA T_VARIABLE(VAR) T_ASSIGN literal(DEFAULT).
+classVar(A) ::= classVar(LIST) T_COMMA T_VARIABLE(VAR) T_ASSIGN staticScalar(DEFAULT).
 {
     // strip $
     LIST->push_back(new (CTXT) AST::propertyDecl(CTXT, pSourceRange(++(*VAR).begin(), (*VAR).end()), DEFAULT));
@@ -833,21 +833,21 @@ classVar(A) ::= T_VARIABLE(VAR).
     // strip $
     A->push_back(new (CTXT) AST::propertyDecl(CTXT, pSourceRange(++(*VAR).begin(), (*VAR).end()), NULL));
 }
-classVar(A) ::= T_VARIABLE(VAR) T_ASSIGN literal(DEFAULT).
+classVar(A) ::= T_VARIABLE(VAR) T_ASSIGN staticScalar(DEFAULT).
 {
     A = new AST::statementList();
     // strip $
     A->push_back(new (CTXT) AST::propertyDecl(CTXT, pSourceRange(++(*VAR).begin(), (*VAR).end()), DEFAULT));
 }
-%type classConstant {AST::statementList*}
-classConstant(A) ::= classConstant(LIST) T_COMMA T_IDENTIFIER(ID) T_ASSIGN literal(DEFAULT).
+%type classConstantDecl {AST::statementList*}
+classConstantDecl(A) ::= classConstantDecl(LIST) T_COMMA T_IDENTIFIER(ID) T_ASSIGN staticScalar(DEFAULT).
 {
     AST::propertyDecl* prop = new (CTXT) AST::propertyDecl(CTXT, *ID, DEFAULT);
     prop->setFlags(AST::memberFlags::CONST);
     LIST->push_back(prop);
     A = LIST;
 }
-classConstant(A) ::= T_CONST T_IDENTIFIER(ID) T_ASSIGN literal(DEFAULT).
+classConstantDecl(A) ::= T_CONST T_IDENTIFIER(ID) T_ASSIGN staticScalar(DEFAULT).
 {
     A = new AST::statementList();
     AST::propertyDecl* prop = new (CTXT) AST::propertyDecl(CTXT, *ID, DEFAULT);
@@ -940,22 +940,25 @@ idList(A) ::= idList(LIST) T_COMMA T_IDENTIFIER(NAME).
 
 
 /****** EXPRESSIONS *********/
-%type expr {AST::expr*}
-expr(A) ::= literal(B). { A = B; }
-expr(A) ::= assignment(B). { A = B; }
-expr(A) ::= opAssignment(B). { A = B; }
-expr(A) ::= listAssignment(B). { A = B; }
-expr(A) ::= lVal(B). { A = B; }
-expr(A) ::= functionInvoke(B). { A = B; }
-expr(A) ::= constructorInvoke(B). { A = B; }
-expr(A) ::= unaryOp(B). { A = B; }
-expr(A) ::= binaryOp(B). { A = B; }
-expr(A) ::= builtin(B). { A = B; }
-expr(A) ::= typeCast(B). { A = B; }
-expr(A) ::= preOp(B). { A = B; }
-expr(A) ::= postOp(B). { A = B; }
-expr(A) ::= conditionalExpr(B). { A = B; }
-expr(A) ::= T_LEFTPAREN expr(B) T_RIGHTPAREN. { A = B; }
+%type baseExpr {AST::expr*} // expr_without_variable
+baseExpr(A) ::= assignment(B). { A = B; }
+baseExpr(A) ::= opAssignment(B). { A = B; }
+baseExpr(A) ::= listAssignment(B). { A = B; }
+baseExpr(A) ::= functionInvoke(B). { A = B; }
+baseExpr(A) ::= constructorInvoke(B). { A = B; }
+baseExpr(A) ::= unaryOp(B). { A = B; }
+baseExpr(A) ::= binaryOp(B). { A = B; }
+baseExpr(A) ::= builtin(B). { A = B; }
+baseExpr(A) ::= typeCast(B). { A = B; }
+baseExpr(A) ::= preOp(B). { A = B; }
+baseExpr(A) ::= postOp(B). { A = B; }
+baseExpr(A) ::= conditionalExpr(B). { A = B; }
+baseExpr(A) ::= scalar(B). { A = B; }
+baseExpr(A) ::= T_LEFTPAREN expr(B) T_RIGHTPAREN. { A = B; }
+
+%type expr {AST::expr*} // expr
+expr(A) ::= baseExpr(B). { A = B; }
+expr(A) ::= rVar(B). { A = B; }
 
 /** BUILTINS **/
 %type builtin {AST::builtin*}
@@ -979,7 +982,7 @@ builtin(A) ::= T_EXIT T_LEFTPAREN expr(RVAL) T_RIGHTPAREN.
     A->setLine(CURRENT_LINE);
 }
 // empty
-builtin(A) ::= T_EMPTY T_LEFTPAREN lVal(RVAL) T_RIGHTPAREN.
+builtin(A) ::= T_EMPTY T_LEFTPAREN var(RVAL) T_RIGHTPAREN.
 {
     AST::expressionList* rVal = new AST::expressionList();
     rVal->push_back(RVAL);
@@ -1054,12 +1057,12 @@ builtin(A) ::= T_INCLUDE_ONCE expr(RVAL).
 }
 
 %type commaLvalList {AST::expressionList*}
-commaLvalList(A) ::= lVal(VAR).
+commaLvalList(A) ::= var(VAR).
 {
     A = new AST::expressionList();
     A->push_back(VAR);
 }
-commaLvalList(A) ::= commaLvalList(LIST) T_COMMA lVal(VAR).
+commaLvalList(A) ::= commaLvalList(LIST) T_COMMA var(VAR).
 {
     LIST->push_back(VAR);
     A = LIST;
@@ -1147,9 +1150,34 @@ typeCast(A) ::= T_BOOL_CAST expr(rVal).
 }
 
 
-/** LITERALS **/
-%type literal {AST::literalExpr*}
+/** SCALAR **/
+%type scalar {AST::literalExpr*}
+scalar(A) ::= literal(B). { A = B; }
+// static constant
+scalar(A) ::= T_IDENTIFIER(B).
+{
+    A = new (CTXT) AST::literalConstant(*B, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+// static class constant
+scalar(A) ::= T_IDENTIFIER(TARGET) T_DBL_COLON T_IDENTIFIER(ID).
+{
+    A = new (CTXT) AST::literalConstant(*ID, CTXT, new (CTXT) AST::literalID(*TARGET, CTXT));
+    A->setLine(CURRENT_LINE);
+}
 
+// same as a scalar except can be +, - and array
+%type staticScalar {AST::expr*}
+staticScalar(A) ::= scalar(B). { A = B; }
+staticScalar(A) ::= literalArray(B). { A = B; }
+staticScalar ::= T_PLUS staticScalar. // ignore
+staticScalar(A) ::= T_MINUS staticScalar(R).
+{
+    A = new (CTXT) AST::unaryOp(R, AST::unaryOp::NEGATIVE);
+    A->setLine(CURRENT_LINE);
+}
+
+%type literal {AST::literalExpr*} // common_scalar
 // literal string
 literal(A) ::= T_SQ_STRING(B).
 {
@@ -1193,17 +1221,6 @@ literal(A) ::= T_NULL.
     A->setLine(CURRENT_LINE);
 }
 
-literal(A) ::= T_IDENTIFIER(B).
-{
-    A = new (CTXT) AST::literalConstant(*B, CTXT);
-    A->setLine(CURRENT_LINE);
-}
-literal(A) ::= T_IDENTIFIER(TARGET) T_DBL_COLON T_IDENTIFIER(ID).
-{
-    A = new (CTXT) AST::literalConstant(*ID, CTXT, new (CTXT) AST::literalID(*TARGET, CTXT));
-    A->setLine(CURRENT_LINE);
-}
-
 /** LITERAL ARRAY ITEMS **/
 %type arrayItemList {AST::arrayList*}
 arrayItemList(A) ::= arrayItem(B).
@@ -1242,7 +1259,8 @@ arrayItem(A) ::= expr(KEY) T_ARROWKEY T_AND expr(VAL).
 }
 
 // literal array
-literal(A) ::= T_ARRAY(ARY) T_LEFTPAREN arrayItemList(B) T_RIGHTPAREN.
+%type literalArray {AST::literalExpr*}
+literalArray(A) ::= T_ARRAY(ARY) T_LEFTPAREN arrayItemList(B) T_RIGHTPAREN.
 {
     A = new (CTXT) AST::literalArray(B);
     A->setLine(TOKEN_LINE(ARY));
@@ -1387,23 +1405,23 @@ binaryOp(A) ::= expr(L) T_INSTANCEOF maybeDynamicID(R).
 
 /** PRE/POST OP **/
 %type preOp {AST::preOp*}
-preOp(A) ::= T_INC lVal(R).
+preOp(A) ::= T_INC var(R).
 {
     A = new (CTXT) AST::preOp(R, AST::preOp::INC);
     A->setLine(CURRENT_LINE);
 }
-preOp(A) ::= T_DEC lVal(R).
+preOp(A) ::= T_DEC var(R).
 {
     A = new (CTXT) AST::preOp(R, AST::preOp::DEC);
     A->setLine(CURRENT_LINE);
 }
 %type postOp {AST::postOp*}
-postOp(A) ::= lVal(R) T_INC.
+postOp(A) ::= var(R) T_INC.
 {
     A = new (CTXT) AST::postOp(R, AST::postOp::INC);
     A->setLine(CURRENT_LINE);
 }
-postOp(A) ::= lVal(R) T_DEC.
+postOp(A) ::= var(R) T_DEC.
 {
     A = new (CTXT) AST::postOp(R, AST::postOp::DEC);
     A->setLine(CURRENT_LINE);
@@ -1411,69 +1429,69 @@ postOp(A) ::= lVal(R) T_DEC.
 
 /** ASSIGNMENT **/
 %type assignment {AST::assignment*}
-assignment(A) ::= lVal(L) T_ASSIGN(EQ_SIGN) expr(R).
+assignment(A) ::= var(L) T_ASSIGN(EQ_SIGN) expr(R).
 {
     A = new (CTXT) AST::assignment(L, R, false);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-assignment(A) ::= lVal(L) T_ASSIGN T_AND(EQ_SIGN) lVal(R).
+assignment(A) ::= var(L) T_ASSIGN T_AND(EQ_SIGN) var(R).
 {
     A = new (CTXT) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-assignment(A) ::= lVal(L) T_ASSIGN T_AND(EQ_SIGN) functionInvoke(R).
+assignment(A) ::= var(L) T_ASSIGN T_AND(EQ_SIGN) functionInvoke(R).
 {
     A = new (CTXT) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-assignment(A) ::= lVal(L) T_ASSIGN T_AND(EQ_SIGN) constructorInvoke(R).
+assignment(A) ::= var(L) T_ASSIGN T_AND(EQ_SIGN) constructorInvoke(R).
 {
     A = new (CTXT) AST::assignment(L, R, true);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
 
 %type opAssignment {AST::opAssignment*}
-opAssignment(A) ::= lVal(L) T_AND_EQUAL(EQ_SIGN) expr(R).
+opAssignment(A) ::= var(L) T_AND_EQUAL(EQ_SIGN) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::AND);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-opAssignment(A) ::= lVal(L) T_OR_EQUAL(EQ_SIGN) expr(R).
+opAssignment(A) ::= var(L) T_OR_EQUAL(EQ_SIGN) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::OR);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-opAssignment(A) ::= lVal(L) T_XOR_EQUAL(EQ_SIGN) expr(R).
+opAssignment(A) ::= var(L) T_XOR_EQUAL(EQ_SIGN) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::XOR);
     A->setLine(TOKEN_LINE(EQ_SIGN));
 }
-opAssignment(A) ::= lVal(L) T_CONCAT_EQUAL(OP) expr(R).
+opAssignment(A) ::= var(L) T_CONCAT_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::CONCAT);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lVal(L) T_DIV_EQUAL(OP) expr(R).
+opAssignment(A) ::= var(L) T_DIV_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::DIV);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lVal(L) T_MUL_EQUAL(OP) expr(R).
+opAssignment(A) ::= var(L) T_MUL_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::MULT);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lVal(L) T_PLUS_EQUAL(OP) expr(R).
+opAssignment(A) ::= var(L) T_PLUS_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::ADD);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lVal(L) T_MINUS_EQUAL(OP) expr(R).
+opAssignment(A) ::= var(L) T_MINUS_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::SUB);
     A->setLine(TOKEN_LINE(OP));
 }
-opAssignment(A) ::= lVal(L) T_MOD_EQUAL(OP) expr(R).
+opAssignment(A) ::= var(L) T_MOD_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::MOD);
     A->setLine(TOKEN_LINE(OP));
@@ -1502,7 +1520,7 @@ listAssignmentList(A) ::= listAssignmentList(LIST) T_COMMA listElement(E).
 // note a listElement can be null
 %type listElement {AST::stmt*}
 // simple var, may include array indices
-listElement(A) ::= lVal(VAR). { A = VAR; }
+listElement(A) ::= var(VAR). { A = VAR; }
 // nested list, return a block
 listElement(A) ::= T_LIST T_LEFTPAREN listAssignmentList(VARS) T_RIGHTPAREN.
 {
@@ -1513,42 +1531,178 @@ listElement(A) ::= T_LIST T_LEFTPAREN listAssignmentList(VARS) T_RIGHTPAREN.
 // empty, i.e. skipped
 listElement(A) ::= . { A = NULL; }
 
-/** LVALS **/
-// i.e., things that can take assignments
-%type lVal {AST::expr*}
-lVal(A) ::= variable_lVal(B). { A = B; }
-lVal(A) ::= array_lVal(B). { A = B; }
+/** VARIABLES **/
+%type rVar {AST::expr*}
+rVar(A) ::= var(B). { A = B; }
+/*
+%type wVar {AST::expr*}
+wVar(A) ::= var(B). { A = B; }
+%type rwVar {AST::expr*}
+rwVar(A) ::= var(B). { A = B; }
+*/
 
-%type variable_lVal {AST::var*}
-// $foo
-variable_lVal(A) ::= T_VARIABLE(B).
+%type var {AST::expr*}
+var(A) ::= varWithFunCalls(B). { A = B; }
+
+/* xx imported from matching phc rule xx
+ *
+ * The original rule read
+ *
+ * variable ::= base_variable_with_function_calls O_SINGLEARROW object_property
+ *     method_or_not variable_properties
+ *
+ * However, this duplicates work done in variable_properties, because
+ * variable_properties is a list of variable_property's, and
+ *
+ * variable_property ::= O_SINGLEARROW object_property method_or_not
+ *
+ * Now, in the original grammar, variable_properties allows for an empty list;
+ * that's now changed, so that it requires at least one variable_property.
+ *
+ * We don't normally change the grammar, but this rule is difficult enough
+ * as it is, so that we don't want to be duplicating code.
+ */
+var(A) ::= varWithFunCalls(TARGET) varPropertyList(PROPS).
+{
+  for (AST::expressionList::iterator i = PROPS->begin();
+       i != PROPS->end();
+       ++i) {
+
+      AST::var* v = dyn_cast<AST::var>(*i);
+      if (v) {
+          v->setTarget(TARGET);
+          // XXX phc checks for function params attribute here and
+          // makes a new method call if it finds them, otherwise returning the var
+          // we just do the var here so far
+          TARGET = v;
+      }
+      else {
+          AST::functionInvoke* f = dyn_cast<AST::functionInvoke>(*i);
+          assert(f && "expected function invoke");
+          f->setTarget(TARGET);
+          TARGET = f;
+      }
+
+  }
+  A = TARGET;
+
+}
+
+%type varPropertyList {AST::expressionList*}
+varPropertyList(A) ::= varPropertyList(LIST) varProperty(PROP).
+{
+    LIST->push_back(PROP);
+    A = LIST;
+}
+varPropertyList(A) ::= varProperty(PROP).
+{
+    A = new AST::expressionList();
+    A->push_back(PROP);
+}
+
+/* xx imported from matching phc rule xx
+ *
+ * We decide to synthesise an Variable or an Method_invocation
+ * based on the absence or presence of a parameter list (method_or_not).
+ * If there is a parameter list, we _try_ to generate a method invocation.
+ *
+ * To do this, we take the name of the variable synthesised by
+ * object_property, and use it for the name of the method invocation. That is,
+ * if the name of the variable is VarName[x], we convert it to FnName[x];
+ * otherwise, it must be an expression and we use the name as-is.
+ *
+ * However, this fails to work if the variable has array indices. This is
+ * the case, for example, in "$x->f[]()" (i.e., "f[]()" as far as
+ * variable_property is concerned). In this case, the name of the method
+ * is "$x->f[]"; however, we cannot generate this here because we don't
+ * know the "$x" part. Instead, we synthesise up "f[]" (Variable), and
+ * we set a private attribute in Variable, called "function_params", to
+ * the parameters of the method. The rule "variable ::= " must check for
+ * this attribute, and generate the correct method invocation if set.
+ */
+%type varProperty {AST::expr*}
+varProperty(A) ::= T_CLASSDEREF objProperty(PROP) maybeMethodInvoke(ARGS).
+{
+    if (ARGS) {
+        // XXX phc checks for array indices on PROP
+        AST::functionInvoke* f = new (CTXT) AST::functionInvoke(new (CTXT) AST::literalID(PROP->name(), CTXT), CTXT, ARGS);        
+        A = f;
+        // PROP is now orphaned
+        PROP->destroy(CTXT);
+    }
+    else {
+        // var
+        A = PROP;
+    }
+}
+
+%type maybeMethodInvoke {AST::expressionList*}
+maybeMethodInvoke(A) ::= T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
+{
+    A = ARGS;
+}
+maybeMethodInvoke(A) ::= . { A  = NULL; }
+
+%type varNoObjects {AST::var*}
+varNoObjects(A) ::= refVar(VAR). { A = VAR; }
+varNoObjects(A) ::= varVar(COUNT) refVar(VAR).
+{
+    VAR->setIndirectionCount(*COUNT);
+    delete COUNT;
+    A = VAR;
+}
+
+// foo::$bar
+%type staticMember {AST::expr*}
+staticMember(A) ::= T_IDENTIFIER(TARGET) T_DBL_COLON varNoObjects(VAR).
+{
+    VAR->setTarget(new (CTXT) AST::literalID(*TARGET, CTXT));
+    A = VAR;
+}
+
+%type varWithFunCalls {AST::expr*}
+varWithFunCalls(A) ::= baseVar(VAR). { A = VAR; }
+varWithFunCalls(A) ::= functionInvoke(FUN). { A = FUN; }
+
+%type baseVar {AST::expr*}
+baseVar(A) ::= varNoObjects(VAR). { A = VAR; }
+baseVar(A) ::= staticMember(B). { A = B; }
+
+%type refVar {AST::var*}
+refVar(A) ::= T_VARIABLE(B).
 {
     // strip $
     A = new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT);
     A->setLine(CURRENT_LINE);
 }
-// $foo->bar
-variable_lVal(A) ::= lVal(TARGET) T_CLASSDEREF T_IDENTIFIER(ID).
-{
-    A = new (CTXT) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), CTXT, TARGET);
-    A->setLine(CURRENT_LINE);
-}
-// $foo[]
-%type array_lVal {AST::var*}
-array_lVal(A) ::= T_VARIABLE(B) arrayIndices(C).
+refVar(A) ::= T_VARIABLE(B) arrayIndices(C).
 {
     // strip $
     A = new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT, C);
     A->setLine(CURRENT_LINE);
     delete C;
 }
-// $foo->bar[]
-variable_lVal(A) ::= lVal(TARGET) T_CLASSDEREF T_IDENTIFIER(ID) arrayIndices(INDICES).
+// XXX refVar: support ${expr} syntax here?
+/////
+
+%type objProperty {AST::var*}
+objProperty(A) ::= T_IDENTIFIER(ID).
 {
-    A = new (CTXT) AST::var(pSourceRange(++(*ID).begin(), (*ID).end()), CTXT, INDICES, TARGET);
+    A = new (CTXT) AST::var(*ID, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+objProperty(A) ::= T_IDENTIFIER(ID) arrayIndices(INDICES).
+{
+    A = new (CTXT) AST::var(*ID, CTXT, INDICES);
     A->setLine(CURRENT_LINE);
     delete INDICES;
 }
+// XXX objProperty: support $foo->$bar here?
+// XXX objProperty: support $foo->${baz} here?
+
+%type varVar {pUInt*}
+varVar(A) ::= T_DOLLAR. { A = new pUInt(1); }
+varVar(A) ::= varVar(COUNT) T_DOLLAR. { (*COUNT)++; A = COUNT; }
 
 /** ARGLIST **/
 %type argList {AST::expressionList*}
@@ -1626,21 +1780,25 @@ functionInvoke(A) ::= T_IDENTIFIER(TARGET) T_DBL_COLON T_IDENTIFIER(ID) T_LEFTPA
     A->setLine(CURRENT_LINE);
     delete ARGS;
 }
-
-// $foo->bar()
-/*
-functionInvoke(A) ::= lVal(LVAL) T_CLASSDEREF T_IDENTIFIER(ID) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
+functionInvoke(A) ::= T_IDENTIFIER(TARGET) T_DBL_COLON varNoObjects(DNAME) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
 {
-    A = new (CTXT) AST::functionInvoke(*ID, // f name
+    A = new (CTXT) AST::functionInvoke(DNAME, // f name
                                        CTXT,
                                        ARGS,  // expression list: arguments, copied
-                                       LVAL
+                                       new (CTXT) AST::literalID(*TARGET, CTXT)
                                        );
     A->setLine(CURRENT_LINE);
     delete ARGS;
 }
-*/
-
+functionInvoke(A) ::= varNoObjects(DNAME) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN.
+{
+    A = new (CTXT) AST::functionInvoke(DNAME, // f name
+                                       CTXT,
+                                       ARGS  // expression list: arguments, copied
+                                       );
+    A->setLine(CURRENT_LINE);
+    delete ARGS;
+}
 
 /** CONSTRUCTOR INVOKE **/
 %type constructorInvoke {AST::functionInvoke*}
@@ -1657,14 +1815,15 @@ constructorInvoke(A) ::= T_NEW maybeDynamicID(ID) T_LEFTPAREN argList(C) T_RIGHT
 /* DYNAMIC IDENTIFIERS */
 // these are either identifiers or a variable representing one
 
-%type maybeDynamicID {AST::expr*}
-
-maybeDynamicID(A) ::= T_IDENTIFIER(ID).
+%type literalID {AST::expr*}
+literalID(A) ::= T_IDENTIFIER(ID).
 {
     A = new (CTXT) AST::literalID(*ID, CTXT);
     A->setLine(CURRENT_LINE);
 }
-maybeDynamicID(A) ::= lVal(VAL).
+%type maybeDynamicID {AST::expr*}
+maybeDynamicID(A) ::= literalID(B). { A = B; }
+maybeDynamicID(A) ::= baseVar(VAL).
 {
     A = new (CTXT) AST::dynamicID(VAL);
     A->setLine(CURRENT_LINE);
