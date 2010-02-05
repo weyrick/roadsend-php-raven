@@ -44,9 +44,11 @@ void parseSourceFile(pSourceModule* pMod, bool debug=false) {
 
     void* pParser = rphpParseAlloc(malloc);
 
+#ifndef NDEBUG
     // DEBUG
     if (debug)
         rphpParseTrace(stderr, (char*)"trace: ");
+#endif
 
     // start at begining of source file
     AST::pParseContext& context = pMod->context();

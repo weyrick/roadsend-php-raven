@@ -86,7 +86,9 @@ int main()
 	InitializeNativeTarget();
 	llvm::DwarfExceptionHandling = true;
 	llvm::UnwindTablesMandatory = true;
-	llvm::JITEmitDebugInfo = true;
+#if (LLVM_VERSION >= 2007000)
+        llvm::JITEmitDebugInfo = true;
+#endif
 
 	// Load the cpp mock runtime
 	/*
