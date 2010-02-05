@@ -13,6 +13,8 @@ set(LLVM_MIN_VERSION       "2006000")
 set(LLVM_MIN_VERSION_TEXT  "2.6")
 set(BOOST_MIN_VERSION      "103800")
 set(BOOST_MIN_VERSION_TEXT "1.38")
+set(ICU_MIN_VERSION        "4002000")
+set(ICU_MIN_VERSION_TEXT   "4.2")
 
 set(RPHP_SHARED_LIBS       0)
 
@@ -44,8 +46,13 @@ Find_Package(Doxygen) # optional
 
 set(TINYXML_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/tinyxml")
 
+# require ICU 4.2
+IF(ICU_VERSION LESS ${ICU_MIN_VERSION})
+  MESSAGE(FATAL_ERROR "ICU version ${ICU_STRING_VERSION} is too old, please install ${ICU_MIN_VERSION_TEXT} or greater!")
+ENDIF(ICU_VERSION LESS ${ICU_MIN_VERSION})
+
 IF( LLVM_VERSION LESS ${LLVM_MIN_VERSION} )
-  MESSAGE(FATAL_ERROR "LLVM version ${LLVM_STRING_VERSION} too old, please install ${LLVM_MIN_VERSION_TEXT} of greater!")
+  MESSAGE(FATAL_ERROR "LLVM version ${LLVM_STRING_VERSION} is too old, please install ${LLVM_MIN_VERSION_TEXT} of greater!")
 ENDIF( LLVM_VERSION LESS ${LLVM_MIN_VERSION} )
 add_definitions(-DLLVM_VERSION=${LLVM_VERSION})
 

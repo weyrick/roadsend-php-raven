@@ -29,11 +29,23 @@ find_library(
   DOC "Libraries to link against for the common parts of ICU")
 mark_as_advanced(ICU_LIBRARY)
 
+find_program(ICU_CONFIG_EXECUTABLE
+    NAMES icu-config
+    PATHS
+    /opt/local/bin
+)
+
 # Copy the results to the output variables.
 if(ICU_INCLUDE_DIR AND ICU_LIBRARY)
   set(ICU_FOUND 1)
   set(ICU_LIBRARIES ${ICU_LIBRARY})
   set(ICU_INCLUDE_DIRS ${ICU_INCLUDE_DIR})
+
+  INCLUDE(TransformVersion)
+  exec_program(${ICU_CONFIG_EXECUTABLE} ARGS --version OUTPUT_VARIABLE ICU_STRING_VERSION )
+  MESSAGE(STATUS "ICU version: " ${ICU_STRING_VERSION})
+  transform_version(ICU_VERSION ${ICU_STRING_VERSION})
+  #MESSAGE(STATUS "ICU version num: " ${ICU_VERSION})
 
   # Look for the ICU internationalization libraries
   find_library(
