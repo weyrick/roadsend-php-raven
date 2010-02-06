@@ -1584,6 +1584,15 @@ class functionInvoke: public expr {
     pUInt numChildren_;
 
 public:
+    functionInvoke(expr* name, pParseContext& C):
+        expr(functionInvokeKind),
+        children_(NULL),
+        numChildren_(2)
+    {
+        children_ = new (C) stmt*[numChildren_];
+        children_[NAME] = name;
+        children_[TARGET] = NULL;
+    }
     functionInvoke(expr* name, pParseContext& C, expressionList* argList, expr* target = NULL):
         expr(functionInvokeKind),
         children_(NULL),

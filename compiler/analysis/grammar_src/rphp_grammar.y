@@ -337,7 +337,7 @@ continue(A) ::= T_CONTINUE expr(B).
 
 // global
 %type global {AST::globalDecl*}
-global(A) ::= T_GLOBAL commaVarList(B).
+global(A) ::= T_GLOBAL globalVarList(B).
 {
     A = new (CTXT) AST::globalDecl(B, CTXT);
     A->setLine(CURRENT_LINE);
@@ -572,14 +572,14 @@ caseSeparator ::= T_SEMI.
 
 /** STATIC **/
 %type staticDecl {AST::staticDecl*}
-staticDecl(A) ::= T_STATIC commaVarList(VARLIST).
+staticDecl(A) ::= T_STATIC staticVarList(VARLIST).
 {
     A = new (CTXT) AST::staticDecl(VARLIST, CTXT);
     A->setLine(CURRENT_LINE);
     delete VARLIST;
 }
 
-staticDecl(A) ::= T_STATIC commaVarList(VARLIST) T_ASSIGN literal(DEF).
+staticDecl(A) ::= T_STATIC staticVarList(VARLIST) T_ASSIGN staticScalar(DEF).
 {
     A = new (CTXT) AST::staticDecl(VARLIST, CTXT, DEF);
     A->setLine(CURRENT_LINE);
@@ -613,7 +613,7 @@ formalParam(A) ::= maybeHint(HINT) T_AND T_VARIABLE(PARAM).
     }
     A->setLine(TOKEN_LINE(PARAM));
 }
-formalParam(A) ::= maybeHint(HINT) T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
+formalParam(A) ::= maybeHint(HINT) T_VARIABLE(PARAM) T_ASSIGN staticScalar(DEF).
 {
     A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
                               CTXT, false/*ref*/, DEF);
@@ -954,6 +954,7 @@ baseExpr(A) ::= preOp(B). { A = B; }
 baseExpr(A) ::= postOp(B). { A = B; }
 baseExpr(A) ::= conditionalExpr(B). { A = B; }
 baseExpr(A) ::= scalar(B). { A = B; }
+baseExpr(A) ::= literalArray(B). { A = B; }
 baseExpr(A) ::= T_LEFTPAREN expr(B) T_RIGHTPAREN. { A = B; }
 
 %type expr {AST::expr*} // expr
@@ -991,14 +992,14 @@ builtin(A) ::= T_EMPTY T_LEFTPAREN var(RVAL) T_RIGHTPAREN.
     A->setLine(CURRENT_LINE);
 }
 // isset
- builtin(A) ::= T_ISSET T_LEFTPAREN commaLvalList(VARS) T_RIGHTPAREN.
+ builtin(A) ::= T_ISSET T_LEFTPAREN commaVarList(VARS) T_RIGHTPAREN.
 {
    A = new (CTXT) AST::builtin(CTXT, AST::builtin::ISSET, VARS);
    A->setLine(CURRENT_LINE);
    delete VARS;
 }
 // unset
-builtin(A) ::= T_UNSET T_LEFTPAREN commaLvalList(VARS) T_RIGHTPAREN.
+builtin(A) ::= T_UNSET T_LEFTPAREN commaVarList(VARS) T_RIGHTPAREN.
 {
    A = new (CTXT) AST::builtin(CTXT, AST::builtin::UNSET, VARS);
    A->setLine(CURRENT_LINE);
@@ -1056,25 +1057,49 @@ builtin(A) ::= T_INCLUDE_ONCE expr(RVAL).
     A->setLine(CURRENT_LINE);
 }
 
-%type commaLvalList {AST::expressionList*}
-commaLvalList(A) ::= var(VAR).
+%type commaVarList {AST::expressionList*}
+commaVarList(A) ::= var(VAR).
 {
     A = new AST::expressionList();
     A->push_back(VAR);
 }
-commaLvalList(A) ::= commaLvalList(LIST) T_COMMA var(VAR).
+commaVarList(A) ::= commaVarList(LIST) T_COMMA var(VAR).
 {
     LIST->push_back(VAR);
     A = LIST;
 }
 
-%type commaVarList {AST::expressionList*}
-commaVarList(A) ::= T_VARIABLE(B).
+%type globalVarList {AST::expressionList*}
+globalVarList(A) ::= globalVar(B).
+{
+    A = new AST::expressionList();
+    A->push_back(B);
+}
+globalVarList(A) ::= globalVarList(LIST) T_COMMA globalVar(B).
+{
+    LIST->push_back(B);
+    A = LIST;
+}
+%type globalVar {AST::expr*}
+globalVar(A) ::= T_VARIABLE(B).
+{
+    // strip $
+    A = new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT);
+}
+globalVar(A) ::= T_DOLLAR rVar(B).
+{
+    AST::dynamicID* r = new (CTXT) AST::dynamicID(B);
+    A = r;
+}
+// XXX support ${expr} format for globals here?
+
+%type staticVarList {AST::expressionList*}
+staticVarList(A) ::= T_VARIABLE(B).
 {
     A = new AST::expressionList();
     A->push_back(new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT));
 }
-commaVarList(A) ::= commaVarList(LIST) T_COMMA T_VARIABLE(B).
+staticVarList(A) ::= staticVarList(LIST) T_COMMA T_VARIABLE(B).
 {
     // strip $
     LIST->push_back(new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT));
@@ -1811,6 +1836,15 @@ constructorInvoke(A) ::= T_NEW maybeDynamicID(ID) T_LEFTPAREN argList(C) T_RIGHT
     A->setLine(CURRENT_LINE);
     delete C;
 }
+constructorInvoke(A) ::= T_NEW maybeDynamicID(ID).
+{
+    A = new (CTXT) AST::functionInvoke(ID, // f name
+                                       CTXT
+                                       );
+    A->setLine(CURRENT_LINE);
+}
+
+
 
 /* DYNAMIC IDENTIFIERS */
 // these are either identifiers or a variable representing one

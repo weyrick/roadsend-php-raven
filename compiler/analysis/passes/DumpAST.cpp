@@ -67,6 +67,9 @@ void DumpAST::visit_post_stmt(stmt* n) {
 
 void DumpAST::visit_pre_var(var* n) {
     currentElement_->SetAttribute("id",n->name());
+    if (n->indirectionCount()) {
+        currentElement_->SetAttribute("indirectionCount",n->indirectionCount());
+    }
 }
 
 void DumpAST::visit_pre_classDecl(classDecl* n) {
