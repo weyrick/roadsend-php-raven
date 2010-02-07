@@ -33,7 +33,8 @@ MESSAGE( STATUS "RPHP_LIB_DIR: " ${RPHP_LIB_DIR} )
 MESSAGE( STATUS "CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR} )
 
 Find_Package(Boost REQUIRED)
-include_directories(${RPHP_INCLUDE_DIR} ${Boost_INCLUDE_DIR})
+
+
 IF( Boost_VERSION LESS ${BOOST_MIN_VERSION} )
   MESSAGE(FATAL_ERROR "Boost version ${Boost_VERSION} too old, please install ${BOOST_MIN_VERSION_TEXT} or greater!")
 ENDIF( Boost_VERSION LESS ${BOOST_MIN_VERSION} )
@@ -43,6 +44,12 @@ Find_Package(LLVM REQUIRED)
 Find_Package(GMP REQUIRED)
 Find_Package(CppUnit) # optional
 Find_Package(Doxygen) # optional
+
+#set(RPHP_INCLUDE_FULL ${RPHP_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${ICU_INCLUDE_DIRS} ${GMP_INCLUDE_DIR} ${LLVM_INCLUDE_DIR})
+#Message(STATUS "Includes: ${RPHP_INCLUDE_FULL}")
+
+include_directories(${RPHP_INCLUDE_DIR} ${Boost_INCLUDE_DIR} ${ICU_INCLUDE_DIRS} ${GMP_INCLUDE_DIR} ${LLVM_INCLUDE_DIR})
+link_directories(${ICU_LIB_DIRS})
 
 set(TINYXML_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/3rdparty/tinyxml")
 

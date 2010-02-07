@@ -5,10 +5,6 @@ add_definitions(${LLVM_COMPILE_FLAGS})
 
 include_directories (${CMAKE_SOURCE_DIR} 
                      ${CMAKE_BINARY_DIR} 
-                     ${RPHP_INCLUDE_DIR}
-                     ${Boost_INCLUDE_DIRS}
-                     ${LLVM_INCLUDE_DIR}
-                     ${GMP_INCLUDE_DIR}
                      # this one is for rphp_grammar generated files
                      ${PROJECT_BINARY_DIR}/compiler/analysis
                     )
@@ -49,7 +45,7 @@ target_link_libraries( rphp
                        rphp-runtime
 #                       ${LLVM_LIBS_CORE}
                        ${LLVM_LIBS_JIT}
-                       ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
+                       ${ICU_LIBRARIES}
                       ) 
 #target_link_libraries( rphpi
 #                       rphp-llvm-jit
@@ -57,12 +53,12 @@ target_link_libraries( rphp
 #                       rphp-analysis
 #                       rphp-runtime
 #                       ${LLVM_LIBS_JIT}
-#                       ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
+#                       ${ICU_LIBRARIES}
 #                       )                       
 
 target_link_libraries ( rphp-analyzer
                         rphp-analysis
                         tinyxml
                        ${LLVM_LIBS_SUPPORT} 
-                       ${ICU_LIBRARIES} ${ICU_I18_LIBRARIES} ${ICU_IO_LIBRARIES}
+                       ${ICU_LIBRARIES}
 			)

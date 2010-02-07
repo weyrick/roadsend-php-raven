@@ -41,7 +41,6 @@
 using namespace llvm;
 
 
-
 Function* createCallFunc(Module* mod)
 {
 	// Create the function which we JIT and call.
@@ -134,3 +133,4 @@ int main()
 	llvm_shutdown();
 	return 0;
 }
+

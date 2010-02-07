@@ -3,8 +3,6 @@ MESSAGE( STATUS "sandbox: cpp-exception check" )
 
 add_definitions(${LLVM_COMPILE_FLAGS})
 
-include_directories (${LLVM_INCLUDE_DIR})
-
 # a simple cpp library that throws exceptions
 set(SB_CPPE_LIB_SRC_FILES
   cpp-lib.cpp

@@ -2,12 +2,6 @@
 MESSAGE( STATUS "compiler: IR check" )
 
 include_directories (
-                     ${ICU_INCLUDE_DIRS}/unicode
-                     ${ICU_INCLUDE_DIRS}
-                     ${RPHP_INCLUDE_DIR}
-                     ${LLVM_INCLUDE_DIR}
-                     ${Boost_INCLUDE_DIRS}
-                     ${GMP_INCLUDE_DIR}
                      # FIXME: this is for rphp_grammar.h. need a better place
                      ${CMAKE_CURRENT_BINARY_DIR}/../analysis/                     
                     )

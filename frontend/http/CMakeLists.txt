@@ -4,7 +4,7 @@ MESSAGE( STATUS "HTTP frontend check" )
 include_directories (${CMAKE_SOURCE_DIR} 
                      ${CMAKE_BINARY_DIR} 
                      ${ASIO_INCLUDE_DIR}
-                     ${Boost_INCLUDE_DIRS} )
+			)
 
 set(RPHPWEB_SRC_FILES
   connection.cpp
