@@ -201,6 +201,12 @@ void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
     case binaryOp::INSTANCEOF:
         currentElement_->SetAttribute("op", "INSTANCEOF");
         break;
+    case binaryOp::SHIFT_LEFT:
+        currentElement_->SetAttribute("op", "SHIFT_LEFT");
+        break;
+    case binaryOp::SHIFT_RIGHT:
+        currentElement_->SetAttribute("op", "SHIFT_RIGHT");
+        break;
     }
 }
 

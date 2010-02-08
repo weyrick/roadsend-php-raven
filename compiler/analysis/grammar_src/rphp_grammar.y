@@ -1422,6 +1422,16 @@ binaryOp(A) ::= expr(L) T_AND expr(R).
     A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::BIT_AND);
     A->setLine(CURRENT_LINE);
 }
+binaryOp(A) ::= expr(L) T_SL expr(R).
+{
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::SHIFT_LEFT);
+    A->setLine(CURRENT_LINE);
+}
+binaryOp(A) ::= expr(L) T_SR expr(R).
+{
+    A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::SHIFT_RIGHT);
+    A->setLine(CURRENT_LINE);
+}
 binaryOp(A) ::= expr(L) T_INSTANCEOF maybeDynamicID(R).
 {
     A = new (CTXT) AST::binaryOp(L, R, AST::binaryOp::INSTANCEOF);
@@ -1519,6 +1529,16 @@ opAssignment(A) ::= var(L) T_MINUS_EQUAL(OP) expr(R).
 opAssignment(A) ::= var(L) T_MOD_EQUAL(OP) expr(R).
 {
     A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::MOD);
+    A->setLine(TOKEN_LINE(OP));
+}
+opAssignment(A) ::= var(L) T_SL_EQUAL(OP) expr(R).
+{
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::SHIFT_LEFT);
+    A->setLine(TOKEN_LINE(OP));
+}
+opAssignment(A) ::= var(L) T_SR_EQUAL(OP) expr(R).
+{
+    A = new (CTXT) AST::opAssignment(L, R, AST::opAssignment::SHIFT_RIGHT);
     A->setLine(TOKEN_LINE(OP));
 }
 

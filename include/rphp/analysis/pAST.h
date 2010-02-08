@@ -1544,7 +1544,9 @@ public:
                   SUB,
                   OR,
                   XOR,
-                  AND
+                  AND,
+                  SHIFT_LEFT,
+                  SHIFT_RIGHT
                 };
 
 private:
@@ -1775,7 +1777,9 @@ public:
                   BIT_OR,
                   BIT_AND,
                   BIT_XOR,
-                  INSTANCEOF
+                  INSTANCEOF,
+                  SHIFT_LEFT,
+                  SHIFT_RIGHT
               };
 
 private:
