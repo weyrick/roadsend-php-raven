@@ -133,6 +133,9 @@ void DumpAST::visit_pre_unaryOp(unaryOp* n)  {
     case unaryOp::POSITIVE:
         currentElement_->SetAttribute("op", "POSITIVE");
         break;
+    case unaryOp::BITWISENOT:
+        currentElement_->SetAttribute("op", "BITWISENOT");
+        break;
     }
 }
 

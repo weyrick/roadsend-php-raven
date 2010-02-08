@@ -1294,39 +1294,58 @@ literalMagic(A) ::= T_MAGIC_NS(ID).
 
 /** LITERAL ARRAY ITEMS **/
 %type arrayItemList {AST::arrayList*}
-arrayItemList(A) ::= arrayItem(B).
-{
-    A = new AST::arrayList();
-    A->push_back(*B); // copy item into vector
-    // note no delete here because it's in ast pool
-}
-arrayItemList(A) ::= arrayItem(B) T_COMMA arrayItemList(C).
-{
-    C->push_back(*B); // copy item into vector
-    A = C;
-    // note no delete here because it's in ast pool
-}
 arrayItemList(A) ::= .
 {
     A = new AST::arrayList();
 }
+arrayItemList(A) ::= arrayItems(LIST) maybeComma.
+{
+    A = LIST;
+}
 
-%type arrayItem {AST::arrayItem*}
-arrayItem(A) ::= expr(B).
+maybeComma ::= T_COMMA.
+maybeComma ::= .
+
+%type arrayItems {AST::arrayList*}
+arrayItems(A) ::= expr(B).
 {
-    A = new (CTXT) AST::arrayItem(NULL, B, false);
+    A = new AST::arrayList();
+    A->push_back(AST::arrayItem(NULL, B, false));
 }
-arrayItem(A) ::= T_AND expr(B).
+arrayItems(A) ::= T_AND expr(B).
 {
-    A = new (CTXT) AST::arrayItem(NULL, B, true);
+    A = new AST::arrayList();
+    A->push_back(AST::arrayItem(NULL, B, true));
 }
-arrayItem(A) ::= expr(KEY) T_ARROWKEY expr(VAL).
+arrayItems(A) ::= expr(KEY) T_ARROWKEY expr(VAL).
 {
-    A = new (CTXT) AST::arrayItem(KEY, VAL, false);
+    A = new AST::arrayList();
+    A->push_back(AST::arrayItem(KEY, VAL, false));
 }
-arrayItem(A) ::= expr(KEY) T_ARROWKEY T_AND expr(VAL).
+arrayItems(A) ::= expr(KEY) T_ARROWKEY T_AND expr(VAL).
 {
-    A = new (CTXT) AST::arrayItem(KEY, VAL, true);
+    A = new AST::arrayList();
+    A->push_back(AST::arrayItem(KEY, VAL, true));
+}
+arrayItems(A) ::= arrayItems(LIST) T_COMMA expr(B).
+{
+    LIST->push_back(AST::arrayItem(NULL, B, false));
+    A = LIST;
+}
+arrayItems(A) ::= arrayItems(LIST) T_COMMA T_AND expr(B).
+{
+    LIST->push_back(AST::arrayItem(NULL, B, true));
+    A = LIST;
+}
+arrayItems(A) ::= arrayItems(LIST) T_COMMA expr(KEY) T_ARROWKEY expr(VAL).
+{
+    LIST->push_back(AST::arrayItem(KEY, VAL, false));
+    A = LIST;
+}
+arrayItems(A) ::= arrayItems(LIST) T_COMMA expr(KEY) T_ARROWKEY T_AND expr(VAL).
+{
+    LIST->push_back(AST::arrayItem(KEY, VAL, true));
+    A = LIST;
 }
 
 // literal array
