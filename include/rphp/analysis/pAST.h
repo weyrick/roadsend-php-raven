@@ -1669,7 +1669,7 @@ public:
 class unaryOp: public expr {
 
 public:
-    enum opKind { NEGATIVE, POSITIVE, LOGICALNOT };
+    enum opKind { NEGATIVE, POSITIVE, LOGICALNOT, BITWISENOT };
 
 private:
     expr* rVal_;
