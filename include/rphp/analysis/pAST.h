@@ -1053,7 +1053,7 @@ public:
 
 
 // builtins: language constructs that seem like function calls, but aren't.
-// exit, isset, unset, empty, echo, print, include, require, clone, throw
+// exit, isset, unset, empty, echo, print, include, require, clone, throw, @
 class builtin: public expr {
 public:
     enum opKind {
@@ -1068,6 +1068,7 @@ public:
                   REQUIRE_ONCE,
                   PRINT, // end expr
                   ECHO,   // start statements
+                  IGNORE_WARNING,
                   THROW   // end statements
                 };
 

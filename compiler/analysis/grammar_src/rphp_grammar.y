@@ -625,7 +625,7 @@ formalParam(A) ::= maybeHint(HINT) T_VARIABLE(PARAM) T_ASSIGN staticScalar(DEF).
     }
     A->setLine(TOKEN_LINE(PARAM));
 }
-formalParam(A) ::= maybeHint(HINT) T_AND T_VARIABLE(PARAM) T_ASSIGN literal(DEF).
+formalParam(A) ::= maybeHint(HINT) T_AND T_VARIABLE(PARAM) T_ASSIGN staticScalar(DEF).
 {
     A = new (CTXT) AST::formalParam(pSourceRange(++(*PARAM).begin(), (*PARAM).end()),
                               CTXT, true/*ref*/, DEF);
@@ -1056,6 +1056,14 @@ builtin(A) ::= T_INCLUDE_ONCE expr(RVAL).
     delete rVal;
     A->setLine(CURRENT_LINE);
 }
+builtin(A) ::= T_AT expr(RVAL).
+{
+    AST::expressionList* rVal = new AST::expressionList();
+    rVal->push_back(RVAL);
+    A = new (CTXT) AST::builtin(CTXT, AST::builtin::IGNORE_WARNING, rVal);
+    delete rVal;
+    A->setLine(CURRENT_LINE);
+}
 
 %type commaVarList {AST::expressionList*}
 commaVarList(A) ::= var(VAR).
@@ -1176,8 +1184,9 @@ typeCast(A) ::= T_BOOL_CAST expr(rVal).
 
 
 /** SCALAR **/
-%type scalar {AST::literalExpr*}
+%type scalar {AST::expr*}
 scalar(A) ::= literal(B). { A = B; }
+scalar(A) ::= literalMagic(B). { A = B; }
 // static constant
 scalar(A) ::= T_IDENTIFIER(B).
 {
@@ -1245,6 +1254,39 @@ literal(A) ::= T_NULL.
     A = new (CTXT) AST::literalNull();
     A->setLine(CURRENT_LINE);
 }
+
+%type literalMagic {AST::expr*}
+literalMagic(A) ::= T_MAGIC_FILE(ID).
+{
+    A = new (CTXT) AST::literalID(*ID, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+literalMagic(A) ::= T_MAGIC_LINE(ID).
+{
+    A = new (CTXT) AST::literalID(*ID, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+literalMagic(A) ::= T_MAGIC_CLASS(ID).
+{
+    A = new (CTXT) AST::literalID(*ID, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+literalMagic(A) ::= T_MAGIC_METHOD(ID).
+{
+    A = new (CTXT) AST::literalID(*ID, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+literalMagic(A) ::= T_MAGIC_FUNCTION(ID).
+{
+    A = new (CTXT) AST::literalID(*ID, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+literalMagic(A) ::= T_MAGIC_NS(ID).
+{
+    A = new (CTXT) AST::literalID(*ID, CTXT);
+    A->setLine(CURRENT_LINE);
+}
+
 
 /** LITERAL ARRAY ITEMS **/
 %type arrayItemList {AST::arrayList*}
