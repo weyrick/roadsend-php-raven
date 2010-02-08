@@ -1811,7 +1811,12 @@ objProperty(A) ::= T_IDENTIFIER(ID) arrayIndices(INDICES).
     A->setLine(CURRENT_LINE);
     delete INDICES;
 }
-// XXX objProperty: support $foo->$bar here?
+// $foo->$bar
+objProperty(A) ::= varNoObjects(VAR).
+{
+    VAR->setIndirectionCount(1);
+    A = VAR;
+}
 // XXX objProperty: support $foo->${baz} here?
 
 %type varVar {pUInt*}
