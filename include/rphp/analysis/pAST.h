@@ -126,6 +126,15 @@ struct constStmtIterator : public stmtIteratorImpl<constStmtIterator,
     stmtIteratorImpl<constStmtIterator,const stmt*>(RHS) {}
 };
 
+// This macro implements the clone method and llvm::cast<> support (classof methods)
+// for leaf nodes.
+#define IMPLEMENT_SUPPORT_MEMBERS(CLASS)      virtual CLASS * clone(pParseContext& C) const {\
+                                                 return new (C) CLASS(*this, C);\
+                                              }\
+                                              static bool classof(const CLASS * s) { return true; }\
+                                              static bool classof(const stmt* s) { return s->kind() == CLASS##Kind; }
+
+
 // statement base class
 class stmt {
 
@@ -144,13 +153,35 @@ protected:
   void operator delete(void* data) throw() {
     assert(0 && "stmt cannot be released with regular 'delete'.");
   }
+  void* operator new[](size_t bytes) throw() {
+    assert(0 && "stmt cannot be allocated with regular 'new[]'.");
+    return 0;
+  }
+  void operator delete[](void* data) throw() {
+    assert(0 && "stmt cannot be released with regular 'delete[]'.");
+  }
 
   // overridden by extending classes to perform class specific destruction
   // note you should still always call Stmt::doDestroy
   virtual void doDestroy(pParseContext& C);
 
   void destroyChildren(pParseContext& C);
-
+  
+  stmt(const stmt& other): kind_(other.kind_), refCount_(1),
+          startLineNum_(other.startLineNum_), endLineNum_(other.endLineNum_) {}
+    
+  // This method assists in deep-copys of stmt**'s which are present for example in block nodes.
+  void deepCopyChildren(stmt**& newChildren, stmt** const& oldChildren, pUInt numChildren, pParseContext& C) {
+      if(numChildren) {
+          newChildren = new (C) stmt*[numChildren];
+          for(pUInt i = 0; i < numChildren; ++i) {
+              if(oldChildren[i])
+                  newChildren[i] = oldChildren[i]->clone(C);
+              else
+                  newChildren[i] = 0;
+          }
+      }
+  }
 public:
     stmt(nodeKind k): kind_(k), refCount_(1), startLineNum_(0), endLineNum_(0) { }
 
@@ -208,6 +239,11 @@ public:
 
     pUInt startLineNum(void) const { return startLineNum_; }
     pUInt endLineNum(void) const { return endLineNum_; }
+    
+    // Polymorphic deep copying.
+    virtual stmt* clone(pParseContext& C) const = 0;/*{
+    	return new (C) stmt(*this);
+    }*/
 
     // LLVM isa<T> and casting support
     static bool classof(const stmt* s) { return true; }
@@ -231,7 +267,12 @@ public:
         return s->kind() >= firstExprKind &&
                s->kind() <= lastExprKind;
     }
-
+    
+    // We include that clone here so we get a clone which returns expr*.
+    virtual expr* clone(pParseContext& C) const = 0;
+    
+protected:
+    expr(const expr& other): stmt(other) {}
 };
 
 typedef std::vector<expr*> expressionList;
@@ -240,6 +281,13 @@ typedef std::vector<expr*> expressionList;
 class block: public stmt {
     stmt** block_;
     pUInt numStmts_;
+    
+protected:
+    block(const block& other, pParseContext& C): stmt(other), block_(0), 
+            numStmts_(other.numStmts_)
+    {
+    	deepCopyChildren(block_, other.block_, numStmts_, C);
+    }
 public:
 
     // build a block with a single expression
@@ -265,14 +313,16 @@ public:
     stmt::child_iterator child_begin() { return &block_[0]; }
     stmt::child_iterator child_end() { return &block_[0]+numStmts_; }
 
-    static bool classof(const block* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == blockKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(block);
 
 };
 
 // declaration base class
 class decl: public stmt {
-
+    
+protected:
+    decl(const decl& other, pParseContext& C): stmt(other) {}
+    
 public:
     // see astNodes.def
     static const nodeKind firstDeclKind = formalParamKind;
@@ -286,6 +336,7 @@ public:
                s->kind() <= lastDeclKind;
     }
 
+    // We do not implement clone here because decl is an abstract base.
 };
 
 
@@ -295,6 +346,12 @@ class globalDecl: public stmt {
     stmt** children_;
     pUInt numChildren_;
 
+protected:
+    globalDecl(const globalDecl& other, pParseContext& C): stmt(other), children_(0),
+        numChildren_(other.numChildren_)
+    {
+        deepCopyChildren(children_, other.children_, numChildren_, C);
+    }
 public:
 
     globalDecl(const expressionList* varList,
@@ -310,8 +367,7 @@ public:
     stmt::child_iterator child_begin() { return &children_[0]; }
     stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
 
-    static bool classof(const globalDecl* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == globalDeclKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(globalDecl);
 
 };
 
@@ -322,6 +378,13 @@ class staticDecl: public decl {
     stmt** children_;
     pUInt numChildren_;
 
+protected:
+    staticDecl(const staticDecl& other, pParseContext& C): decl(other), children_(0),
+        numChildren_(other.numChildren_)
+    {
+        deepCopyChildren(children_, other.children_, numChildren_, C);
+    }
+    
 public:
     staticDecl(const expressionList* varList,
                pParseContext& C,
@@ -347,8 +410,7 @@ public:
     stmt::child_iterator var_begin() { return &children_[VARS]; }
     stmt::child_iterator var_end() { return &children_[VARS]+(numChildren_-1); }
 
-    static bool classof(const staticDecl* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == staticDeclKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(staticDecl);
 
 };
 
@@ -362,6 +424,12 @@ class formalParam: public decl {
     pUInt flags_;
     stmt* default_;
 
+    formalParam(const formalParam& other, pParseContext& C): decl(other),
+            name_(other.name_), classHint_(other.classHint_), flags_(other.flags_)
+    {
+        if(other.default_)
+            default_ = other.default_->clone(C);
+    }
 public:
     formalParam(const pSourceRange& name, pParseContext& C, bool ref, expr* def=NULL):
         decl(formalParamKind),
@@ -402,8 +470,7 @@ public:
     stmt::child_iterator child_begin() { return &default_; }
     stmt::child_iterator child_end() { return &default_+1; }
 
-    static bool classof(const formalParam* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == formalParamKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(formalParam);
 
 };
 
@@ -416,6 +483,13 @@ class signature: public decl {
     pUInt numParams_;
     bool returnByRef_;
 
+protected:
+    signature(const signature& other, pParseContext& C): decl(other), name_(other.name_),
+        formalParamList_(0), numParams_(other.numParams_), returnByRef_(other.returnByRef_)
+    {
+        deepCopyChildren(formalParamList_, other.formalParamList_, numParams_, C);
+    }
+    
 public:
     signature(const pSourceRange& name,
               pParseContext& C,
@@ -443,9 +517,7 @@ public:
     stmt::child_iterator child_begin() { return &formalParamList_[0]; }
     stmt::child_iterator child_end() { return &formalParamList_[0]+numParams_; }
 
-    static bool classof(const signature* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == signatureKind; }
-
+    IMPLEMENT_SUPPORT_MEMBERS(signature);
 };
 
 // function declaration
@@ -453,6 +525,16 @@ class functionDecl: public decl {
 
     enum { SIG, BODY, END_EXPR };
     stmt* children_[END_EXPR];
+    
+protected:
+    functionDecl(const functionDecl& other, pParseContext& C): decl(other)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[SIG])
+            children_[SIG] = other.children_[SIG]->clone(C);
+        if(other.children_[BODY])
+            children_[BODY] = other.children_[BODY]->clone(C);
+    }
 
 public:
     functionDecl(signature* sig, block* body):
@@ -469,8 +551,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
-    static bool classof(const functionDecl* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == functionDeclKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(functionDecl);
 
 };
 
@@ -492,6 +573,17 @@ class methodDecl: public decl {
     pUInt flags_;
     stmt* children_[END_EXPR];
 
+protected:
+    methodDecl(const methodDecl& other, pParseContext& C): decl(other),
+        flags_(other.flags_)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[SIG])
+            children_[SIG] = other.children_[SIG]->clone(C);
+        if(other.children_[BODY])
+            children_[BODY] = other.children_[BODY]->clone(C);
+    }
+    
 public:
     methodDecl(signature* sig, pUInt flags, block* body):
         decl(methodDeclKind),
@@ -511,8 +603,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
-    static bool classof(const methodDecl* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == methodDeclKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(methodDecl);
 
 };
 
@@ -522,7 +613,15 @@ class propertyDecl: public decl {
     pUInt flags_;
     llvm::PooledStringPtr name_;
     expr* default_;
-
+    
+protected:
+    propertyDecl(const propertyDecl& other, pParseContext& C): decl(other),
+        flags_(other.flags_), name_(other.name_), default_(0)
+    {
+        if(other.default_)
+            default_ = other.default_->clone(C);
+    }
+    
 public:
     propertyDecl(pParseContext& C,
                  const pSourceRange& name,
@@ -545,9 +644,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&default_; }
     stmt::child_iterator child_end() { return (stmt**)&default_+1; }
 
-    static bool classof(const propertyDecl* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == propertyDeclKind; }
-
+    IMPLEMENT_SUPPORT_MEMBERS(propertyDecl);
 };
 
 
@@ -564,7 +661,18 @@ private:
     idList implements_;
     classType type_;
     block* members_;
-
+    
+protected:
+    // We copy the SmallVectors here, this works for PooledStringPtrs but wouldn't for 
+    // stmt*s!
+    classDecl(const classDecl& other, pParseContext& C): decl(other),
+        name_(other.name_), extends_(other.extends_), implements_(other.implements_),
+        type_(other.type_), members_(0)
+    {
+        if(other.members_)
+            members_ = other.members_->clone(C);
+    }
+    
 public:
     classDecl(pParseContext& C,
               const pSourceRange& name,
@@ -613,8 +721,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&members_; }
     stmt::child_iterator child_end() { return (stmt**)&members_+1; }
 
-    static bool classof(const classDecl* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == classDeclKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(classDecl);
 
 };
 
@@ -624,6 +731,17 @@ class ifStmt: public stmt {
     enum { CONDITION, TRUEBLOCK, FALSEBLOCK, END_EXPR };
     stmt* children_[END_EXPR];
 
+protected:
+    ifStmt(const ifStmt& other, pParseContext& C): stmt(other)
+    {
+        memset(children_, 0, sizeof(children_));
+        children_[CONDITION] = other.children_[CONDITION]->clone(C);
+        if(other.children_[TRUEBLOCK])
+            children_[TRUEBLOCK] = other.children_[TRUEBLOCK]->clone(C);
+        if(other.children_[FALSEBLOCK])
+            children_[FALSEBLOCK] = other.children_[FALSEBLOCK]->clone(C);
+    }
+    
 public:
     ifStmt(pParseContext& C,
            expr* cond,
@@ -652,8 +770,7 @@ public:
     stmt* trueBlock(void) { return children_[TRUEBLOCK]; }
     stmt* falseBlock(void) { return children_[FALSEBLOCK]; }
 
-    static bool classof(const ifStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == ifStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(ifStmt);
 
 };
 
@@ -663,6 +780,16 @@ class switchCase: public stmt {
     enum { COND, BODY, END_EXPR };
     stmt* children_[END_EXPR];
 
+protected:
+    switchCase(const switchCase& other, pParseContext& C): stmt(other)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[COND])
+            children_[COND] = other.children_[COND]->clone(C);
+        if(other.children_[BODY])
+            children_[BODY] = other.children_[BODY]->clone(C);
+    }
+    
 public:
     switchCase(expr* cond,
                block* body):
@@ -682,8 +809,7 @@ public:
     expr* condition(void) { return static_cast<expr*>(children_[COND]); }
     block* body(void) { return static_cast<block*>(children_[BODY]); }
 
-    static bool classof(const switchCase* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == switchCaseKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(switchCase);
 
 };
 
@@ -693,6 +819,16 @@ class switchStmt: public stmt {
     enum { RVAL, CASEBLOCK, END_EXPR };
     stmt* children_[END_EXPR];
 
+protected:
+    switchStmt(const switchStmt& other, pParseContext& C): stmt(other)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[RVAL])
+            children_[RVAL] = other.children_[RVAL]->clone(C);
+        if(other.children_[CASEBLOCK])
+            children_[CASEBLOCK] = other.children_[CASEBLOCK]->clone(C);
+    }
+    
 public:
     switchStmt(expr* rVal,
                block* caseBlock):
@@ -710,8 +846,7 @@ public:
     expr* rVal(void) { return static_cast<expr*>(children_[RVAL]); }
     block* caseBlock(void) { return static_cast<block*>(children_[CASEBLOCK]); }
 
-    static bool classof(const switchStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == switchStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(switchStmt);
 
 };
 
@@ -725,6 +860,17 @@ class forEach: public stmt {
     llvm::PooledStringPtr key_; // may be empty
     bool byRef_;
 
+protected:
+    forEach(const forEach& other, pParseContext& C): stmt(other), value_(other.value_),
+        key_(other.key_), byRef_(other.byRef_)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[RVAL])
+            children_[RVAL] = other.children_[RVAL]->clone(C);
+        if(other.children_[BODY])
+            children_[BODY] = other.children_[BODY]->clone(C);
+    }
+    
 public:
     forEach(expr* rVal,
             stmt* body,
@@ -772,8 +918,7 @@ public:
         return *value_;
     }
 
-    static bool classof(const forEach* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == forEachKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(forEach);
 
 };
 
@@ -782,6 +927,20 @@ class forStmt: public stmt {
 
     enum { INIT, COND, INC, BODY, END_EXPR };
     stmt* children_[END_EXPR];
+
+protected:
+    forStmt(const forStmt& other, pParseContext& C): stmt(other)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[INIT])
+            children_[INIT] = other.children_[INIT]->clone(C);
+        if(other.children_[COND])
+            children_[COND] = other.children_[COND]->clone(C);
+        if(other.children_[INC])
+            children_[INC] = other.children_[INC]->clone(C);
+        if(other.children_[BODY])
+            children_[BODY] = other.children_[BODY]->clone(C);
+    }
 
 public:
     forStmt(pParseContext& C,
@@ -813,9 +972,7 @@ public:
     stmt* increment(void) const { return children_[INC]; }
     block* body(void) const { return static_cast<block*>(children_[BODY]); }
 
-    static bool classof(const forStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == forStmtKind; }
-
+    IMPLEMENT_SUPPORT_MEMBERS(forStmt);
 };
 
 // do statement
@@ -823,6 +980,16 @@ class doStmt: public stmt {
 
     enum { COND, BODY, END_EXPR };
     stmt* children_[END_EXPR];
+
+protected:
+    doStmt(const doStmt& other, pParseContext& C): stmt(other)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[COND])
+            children_[COND] = other.children_[COND]->clone(C);
+        if(other.children_[BODY])
+            children_[BODY] = other.children_[BODY]->clone(C);
+    }
 
 public:
     doStmt(pParseContext& C,
@@ -848,8 +1015,7 @@ public:
     expr* condition(void) { return static_cast<expr*>(children_[COND]); }
     block* body(void) { return static_cast<block*>(children_[BODY]); }
 
-    static bool classof(const doStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == doStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(doStmt);
 
 };
 
@@ -858,6 +1024,16 @@ class whileStmt: public stmt {
 
     enum { COND, BODY, END_EXPR };
     stmt* children_[END_EXPR];
+
+protected:
+    whileStmt(const whileStmt& other, pParseContext& C): stmt(other)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[COND])
+            children_[COND] = other.children_[COND]->clone(C);
+        if(other.children_[BODY])
+            children_[BODY] = other.children_[BODY]->clone(C);
+    }
 
 public:
     whileStmt(pParseContext& C,
@@ -883,8 +1059,7 @@ public:
     expr* condition(void) { return static_cast<expr*>(children_[COND]); }
     block* body(void) { return static_cast<block*>(children_[BODY]); }
 
-    static bool classof(const whileStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == whileStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(whileStmt);
 
 };
 
@@ -899,6 +1074,14 @@ private:
     expr* rVal_;
     castKindType castKind_;
 
+protected:
+    typeCast(const typeCast& other, pParseContext& C): expr(other),
+            rVal_(0), castKind_(other.castKind_)
+    {
+        if(other.rVal_)
+            rVal_ = other.rVal_->clone(C);
+    }
+
 public:
     typeCast(castKindType kind, expr* rVal): expr(typeCastKind), rVal_(rVal), castKind_(kind)
     {
@@ -911,14 +1094,22 @@ public:
     expr* rVal(void) { return rVal_; }
     castKindType castKind(void) const { return castKind_; }
 
-    static bool classof(const typeCast* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == typeCastKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(typeCast);
 
 };
 
 // return statement
 class returnStmt: public stmt {
+
     expr* rVal_;
+    
+protected:
+    returnStmt(const returnStmt& other, pParseContext& C): stmt(other), rVal_(0)
+    {
+        if(other.rVal_)
+            rVal_ = other.rVal_->clone(C);
+    }
+
 public:
     returnStmt(expr* rVal): stmt(returnStmtKind), rVal_(rVal)
     {
@@ -930,14 +1121,22 @@ public:
 
     expr* rVal(void) { return rVal_; }
 
-    static bool classof(const returnStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == returnStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(returnStmt);
 
 };
 
 // break statement
 class breakStmt: public stmt {
+    
     expr* rVal_;
+    
+protected:
+    breakStmt(const breakStmt& other, pParseContext& C): stmt(other), rVal_(0)
+    {
+        if(other.rVal_)
+            rVal_ = other.rVal_->clone(C);
+    }
+
 public:
     breakStmt(expr* rVal): stmt(breakStmtKind), rVal_(rVal)
     {
@@ -949,14 +1148,22 @@ public:
 
     expr* rVal(void) { return rVal_; }
 
-    static bool classof(const breakStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == breakStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(breakStmt);
 
 };
 
 // continue statement
 class continueStmt: public stmt {
+    
     expr* rVal_;
+    
+protected:
+    continueStmt(const continueStmt& other, pParseContext& C): stmt(other), rVal_(0)
+    {
+        if(other.rVal_)
+            rVal_ = other.rVal_->clone(C);
+    }
+
 public:
     continueStmt(expr* rVal): stmt(continueStmtKind), rVal_(rVal)
     {
@@ -968,8 +1175,7 @@ public:
 
     expr* rVal(void) { return rVal_; }
 
-    static bool classof(const continueStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == continueStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(continueStmt);
 
 };
 
@@ -979,6 +1185,14 @@ class catchStmt: public stmt {
     llvm::PooledStringPtr className_;
     llvm::PooledStringPtr varName_;
     block* body_;
+    
+protected:
+    catchStmt(const catchStmt& other, pParseContext& C): stmt(other),
+        className_(other.className_), varName_(other.varName_), body_(0)
+    {
+        if(other.body_)
+            body_ = other.body_->clone(C);
+    }
 
 public:
     catchStmt(const pSourceRange& className,
@@ -1005,8 +1219,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&body_; }
     stmt::child_iterator child_end() { return (stmt**)&body_+1; }
 
-    static bool classof(const catchStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == catchStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(catchStmt);
 
 };
 
@@ -1021,6 +1234,13 @@ class tryStmt: public stmt {
     stmt** children_;
     pUInt numChildren_;
 
+protected:
+    tryStmt(const tryStmt& other, pParseContext& C): stmt(other), children_(0),
+        numChildren_(other.numChildren_)
+    {
+        deepCopyChildren(children_, other.children_, numChildren_, C);
+    }
+    
 public:
     tryStmt(pParseContext& C, block* body, statementList* catchList):
         stmt(tryStmtKind),
@@ -1046,8 +1266,7 @@ public:
     stmt::child_iterator catches_begin() { return &children_[CATCHLIST]; }
     stmt::child_iterator catches_end() { return &children_[CATCHLIST]+(numChildren_-1); }
 
-    static bool classof(const tryStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == tryStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(tryStmt);
 
 };
 
@@ -1077,6 +1296,13 @@ private:
     pUInt numChildren_;
     opKind opKind_;
 
+protected:
+    builtin(const builtin& other, pParseContext& C): expr(other), children_(0),
+        numChildren_(other.numChildren_), opKind_(other.opKind_)
+    {
+        deepCopyChildren(children_, other.children_, numChildren_, C);
+    }
+    
 public:
 
     builtin(pParseContext& C, opKind op, const expressionList* s=NULL):
@@ -1098,17 +1324,19 @@ public:
     stmt::child_iterator child_begin() { return &children_[0]; }
     stmt::child_iterator child_end() { return &children_[0]+numChildren_; }
 
-    static bool classof(const builtin* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == builtinKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(builtin);
 
 };
 
 // literal expression base class
+//TODO: do we want literalExpr to be abstract?
 class literalExpr: public expr {
 
 protected:
     pSourceString stringVal_;
-
+    literalExpr(const literalExpr& other, pParseContext& C): expr(other),
+            stringVal_(other.stringVal_) {}
+    
 public:
 
     // see astNodes.def
@@ -1130,6 +1358,10 @@ public:
         return s->kind() >= firstLiteralKind &&
                s->kind() <= lastLiteralKind;
     }
+    
+    virtual literalExpr* clone(pParseContext& C) const {
+        return new (C) literalExpr(*this, C);
+    }
 
 };
 
@@ -1143,6 +1375,14 @@ class literalString: public literalExpr {
     // during a pass and therefore doesn't exist in the original source
     pSourceString* artificial_;
 
+protected:
+    literalString(const literalString& other, pParseContext& C): literalExpr(other),
+            isBinary_(other.isBinary_), isSimple_(other.isSimple_), artificial_(0)
+    {
+        if(other.artificial_)
+            artificial_ = new pSourceString(*other.artificial_);
+    }
+    
 public:
 
     // empty source string
@@ -1202,8 +1442,7 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
-    static bool classof(const literalString* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == literalStringKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(literalString);
 
 };
 
@@ -1212,6 +1451,10 @@ class literalInt: public literalExpr {
 
     bool negative_;
 
+protected:
+    literalInt(const literalInt& other, pParseContext& C): literalExpr(other),
+            negative_(other.negative_) {}
+    
 public:
     literalInt(const pSourceRange& v): literalExpr(literalIntKind, v), negative_(false) { }
 
@@ -1221,22 +1464,23 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
-    static bool classof(const literalInt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == literalIntKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(literalInt);
 
 };
 
 // NODE: literal float
 class literalFloat: public literalExpr {
 
+protected:
+    literalFloat(const literalFloat& other, pParseContext& C): literalExpr(other) {}
+    
 public:
     literalFloat(const pSourceRange& v): literalExpr(literalFloatKind, v) { }
 
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
-    static bool classof(const literalFloat* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == literalFloatKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(literalFloat);
 
 };
 
@@ -1245,6 +1489,10 @@ class literalBool: public literalExpr {
 
     bool boolVal_;
 
+protected:
+    literalBool(const literalBool& other, pParseContext& C): literalExpr(other),
+            boolVal_(other.boolVal_) {}
+    
 public:
     literalBool(bool v): literalExpr(literalBoolKind), boolVal_(v) { }
 
@@ -1253,8 +1501,7 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
-    static bool classof(const literalBool* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == literalBoolKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(literalBool);
 
 };
 
@@ -1277,6 +1524,19 @@ class literalArray: public literalExpr {
 
     arrayList itemList_;
 
+protected:
+    literalArray(const literalArray& other, pParseContext& C): literalExpr(other),
+            itemList_(other.itemList_)
+    {
+        // We have copied all array items by value, now we have to deep-copy the
+        // expressions in the array items.
+        foreach(arrayItem& item, itemList_) {
+            if(item.key)
+                item.key = item.key->clone(C);
+            if(item.val)
+                item.val = item.val->clone(C);
+        }
+    }
 public:
     literalArray(arrayList* items):
         literalExpr(literalArrayKind),
@@ -1285,10 +1545,10 @@ public:
 
     virtual void doDestroy(pParseContext& C) {
         for (arrayList::iterator i = itemList_.begin(); i != itemList_.end(); ++i) {
-            if ((*i).key) {
-                (*i).key->destroy(C);
+            if (i->key) {
+                i->key->destroy(C);
             }
-            (*i).val->destroy(C);
+            i->val->destroy(C);
         }
         stmt::doDestroy(C);
     }
@@ -1296,8 +1556,7 @@ public:
     arrayList& itemList(void) { return itemList_; }
     const arrayList& itemList(void) const { return itemList_; }
 
-    static bool classof(const literalArray* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == literalArrayKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(literalArray);
 
 };
 
@@ -1305,14 +1564,16 @@ public:
 // NODE: inline html
 class inlineHtml: public literalString {
 
+protected:
+    inlineHtml(const inlineHtml& other, pParseContext& C): literalString(other) {}
+    
 public:
     inlineHtml(const pSourceRange& v): literalString(v, inlineHtmlKind) { }
 
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
-    static bool classof(const inlineHtml* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == inlineHtmlKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(inlineHtml);
 
 };
 
@@ -1320,22 +1581,28 @@ public:
 // NODE: literal null
 class literalNull: public literalExpr {
 
+protected:
+    literalNull(const literalNull& other, pParseContext& C): literalExpr(other) {}
+    
 public:
     literalNull(void): literalExpr(literalNullKind) { }
 
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
-    static bool classof(const literalNull* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == literalNullKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(literalNull);
 
 };
 
 // literal ID (always represents a class or function symbol name)
+//TODO: doesn't inherit by literalExpr?
 class literalID: public expr {
 
     llvm::PooledStringPtr name_;
 
+protected:
+    literalID(const literalID& other, pParseContext& C): expr(other), name_(other.name_) {}
+    
 public:
     literalID(const pSourceRange& name, pParseContext& C):
         expr(literalIDKind),
@@ -1355,8 +1622,7 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
-    static bool classof(const literalID* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == literalIDKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(literalID);
 
 };
 
@@ -1366,6 +1632,14 @@ class literalConstant: public literalExpr {
     llvm::PooledStringPtr name_;
     expr* target_;
 
+protected:
+    literalConstant(const literalConstant& other, pParseContext& C): literalExpr(other),
+            name_(other.name_), target_(0)
+    {
+        if(other.target_)
+            target_ = other.target_->clone(C);
+    }
+    
 public:
     literalConstant(const pSourceRange& name, pParseContext& C, expr* target = NULL):
         literalExpr(literalConstantKind),
@@ -1384,15 +1658,23 @@ public:
     stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&target_); }
     stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&target_+1); }
 
-    static bool classof(const literalConstant* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == literalConstantKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(literalConstant);
 
 };
 
 // dynamic ID, i.e. variable variable, or runtime class/method/function name
 // Reflection in phc
 class dynamicID: public expr {
+    
     expr* val_;
+
+protected:
+    dynamicID(const dynamicID& other, pParseContext& C): expr(other), val_(0)
+    {
+        if(other.val_)
+            val_ = other.val_->clone(C);
+    }
+    
 public:
     dynamicID(expr* val): expr (dynamicIDKind), val_(val)
     {
@@ -1404,8 +1686,7 @@ public:
 
     expr* val(void) { return val_; }
 
-    static bool classof(const dynamicID* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == dynamicIDKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(dynamicID);
 
 };
 
@@ -1423,6 +1704,14 @@ class var: public expr {
     stmt** children_;
     pUInt numChildren_;
 
+protected:
+    var(const var& other, pParseContext& C): expr(other), name_(other.name_),
+            indirectionCount_(other.indirectionCount_), children_(other.children_),
+            numChildren_(other.numChildren_)
+    {
+        deepCopyChildren(children_, other.children_, numChildren_, C);
+    }
+    
 public:
     var(const pSourceRange& name, pParseContext& C, expr* target = NULL):
         expr(varKind),
@@ -1475,8 +1764,7 @@ public:
     stmt::child_iterator indices_begin() { return &children_[INDICES]; }
     stmt::child_iterator indices_end() { return &children_[INDICES]+(numChildren_-1); }
 
-    static bool classof(const var* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == varKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(var);
 
 };
 
@@ -1487,6 +1775,16 @@ class assignment: public expr {
     stmt* children_[END_EXPR];
     bool byRef_;
 
+protected:
+    assignment(const assignment& other, pParseContext& C): expr(other),
+            byRef_(other.byRef_)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[LVAL])
+            children_[LVAL] = other.children_[LVAL]->clone(C);
+        if(other.children_[RVAL])
+            children_[RVAL] = other.children_[RVAL]->clone(C);    }
+    
 public:
     assignment(expr* lVal, expr* rVal, bool r): expr(assignmentKind), children_(), byRef_(r)
     {
@@ -1502,8 +1800,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
-    static bool classof(const assignment* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == assignmentKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(assignment);
 
 };
 
@@ -1513,6 +1810,16 @@ class listAssignment: public expr {
     enum { VARLIST, RVAL, END_EXPR };
     stmt* children_[END_EXPR];
 
+protected:
+    listAssignment(const listAssignment& other, pParseContext& C): expr(other)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[VARLIST])
+            children_[VARLIST] = other.children_[VARLIST]->clone(C);
+        if(other.children_[RVAL])
+            children_[RVAL] = other.children_[RVAL]->clone(C);
+    }
+    
 public:
     listAssignment(block* varList, expr* rVal):
             expr(listAssignmentKind),
@@ -1528,8 +1835,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
-    static bool classof(const listAssignment* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == listAssignmentKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(listAssignment);
 
 };
 
@@ -1555,6 +1861,17 @@ private:
     stmt* children_[END_EXPR];
     opKind opKind_;
 
+protected:
+    opAssignment(const opAssignment& other, pParseContext& C): expr(other),
+            opKind_(other.opKind_)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[LVAL])
+            children_[LVAL] = other.children_[LVAL]->clone(C);
+        if(other.children_[RVAL])
+            children_[RVAL] = other.children_[RVAL]->clone(C);
+    }
+    
 public:
     opAssignment(expr* lVal, expr* rVal, opKind op): expr(assignmentKind), children_(), opKind_(op)
     {
@@ -1570,8 +1887,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
-    static bool classof(const opAssignment* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == opAssignmentKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(opAssignment);
 
 };
 
@@ -1586,6 +1902,13 @@ class functionInvoke: public expr {
     stmt** children_;
     pUInt numChildren_;
 
+protected:
+    functionInvoke(const functionInvoke& other, pParseContext& C): expr(other),
+            children_(0), numChildren_(other.numChildren_)
+    {
+        deepCopyChildren(children_, other.children_, numChildren_, C);
+    }
+    
 public:
     functionInvoke(expr* name, pParseContext& C):
         expr(functionInvokeKind),
@@ -1645,14 +1968,16 @@ public:
 
     stmt::child_range args() { return stmt::child_range(args_begin(), args_end()); }
 
-    static bool classof(const functionInvoke* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == functionInvokeKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(functionInvoke);
 
 };
 
 // NOP statement such as ;;
 class emptyStmt: public stmt {
 
+protected:
+    emptyStmt(const emptyStmt& other, pParseContext& C): stmt(other) {}
+    
 public:
 	emptyStmt() : stmt(emptyStmtKind) {}
 
@@ -1660,8 +1985,7 @@ public:
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 
-    static bool classof(const emptyStmt* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == emptyStmtKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(emptyStmt);
 
 };
 
@@ -1675,6 +1999,14 @@ private:
     expr* rVal_;
     opKind opKind_;
 
+protected:
+    unaryOp(const unaryOp& other, pParseContext& C): expr(other), rVal_(0),
+            opKind_(other.opKind_)
+    {
+        if(other.rVal_)
+            rVal_ = other.rVal_->clone(C);
+    }
+    
 public:
 
     unaryOp(expr* rVal, opKind k): expr(unaryOpKind), rVal_(rVal), opKind_(k) {
@@ -1692,8 +2024,7 @@ public:
 
     opKind opKind(void) const { return opKind_; }
 
-    static bool classof(const unaryOp* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == unaryOpKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(unaryOp);
 
 };
 
@@ -1707,6 +2038,14 @@ private:
     expr* rVal_;
     opKind opKind_;
 
+protected:
+    preOp(const preOp& other, pParseContext& C): expr(other), rVal_(0),
+            opKind_(other.opKind_)
+    {
+        if(other.rVal_)
+            rVal_ = other.rVal_->clone(C);
+    }
+    
 public:
 
     preOp(expr* rVal, opKind k): expr(preOpKind), rVal_(rVal), opKind_(k)
@@ -1720,8 +2059,7 @@ public:
 
     opKind opKind(void) const { return opKind_; }
 
-    static bool classof(const preOp* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == preOpKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(preOp);
 
 };
 
@@ -1735,6 +2073,14 @@ private:
     expr* rVal_;
     opKind opKind_;
 
+protected:
+    postOp(const postOp& other, pParseContext& C): expr(other), rVal_(0),
+            opKind_(other.opKind_)
+    {
+        if(other.rVal_)
+            rVal_ = other.rVal_->clone(C);
+    }
+    
 public:
 
     postOp(expr* rVal, opKind k): expr(postOpKind), rVal_(rVal), opKind_(k)
@@ -1748,8 +2094,7 @@ public:
 
     opKind opKind(void) const { return opKind_; }
 
-    static bool classof(const postOp* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == postOpKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(postOp);
 
 };
 
@@ -1788,6 +2133,16 @@ private:
     stmt* children_[END_EXPR];
     opKind opKind_;
 
+protected:
+    binaryOp(const binaryOp& other, pParseContext& C): expr(other), opKind_(other.opKind_)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[LVAL])
+            children_[LVAL] = other.children_[LVAL]->clone(C);
+        if(other.children_[RVAL])
+            children_[RVAL] = other.children_[RVAL]->clone(C);
+    }
+    
 public:
 
     binaryOp(expr* lVal, expr* rVal, opKind k): expr(binaryOpKind), children_(), opKind_(k)
@@ -1802,8 +2157,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
-    static bool classof(const binaryOp* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == binaryOpKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(binaryOp);
 
     opKind opKind(void) const { return opKind_; }
 
@@ -1816,6 +2170,18 @@ private:
     enum { COND, TRUEEXPR, FALSEEXPR, END_EXPR };
     stmt* children_[END_EXPR];
 
+protected:
+    conditionalExpr(const conditionalExpr& other, pParseContext& C): expr(other)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[COND])
+            children_[COND] = other.children_[COND]->clone(C);
+        if(other.children_[TRUEEXPR])
+            children_[TRUEEXPR] = other.children_[TRUEEXPR]->clone(C);
+        if(other.children_[FALSEEXPR])
+            children_[FALSEEXPR] = other.children_[FALSEEXPR]->clone(C);
+    }
+    
 public:
 
     conditionalExpr(expr* condition, expr* trueexpr, expr* falseexpr): expr(conditionalExprKind), children_()
@@ -1832,8 +2198,7 @@ public:
     stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
-    static bool classof(const conditionalExpr* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == conditionalExprKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(conditionalExpr);
 
 };
 
@@ -1842,8 +2207,15 @@ public:
 // _something_. This can even be used to evaluate to a variable (which is then the last instruction in the statementList).
 // !!!This class is not intended for use by the parser!!!
 class exprReduce: public expr {
-private:
+    
     block* statements_;
+
+protected:
+    exprReduce(const exprReduce& other, pParseContext& C): expr(other), statements_(0)
+    {
+        statements_ = other.statements_->clone(C);
+    }
+    
 public:
 
     exprReduce(pParseContext& C, statementList* ptStatements): expr(exprReduceKind), statements_(NULL)
@@ -1862,8 +2234,7 @@ public:
     stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&statements_); }
     stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&statements_+1); }
 
-    static bool classof(const exprReduce* s) { return true; }
-    static bool classof(const stmt* s) { return s->kind() == exprReduceKind; }
+    IMPLEMENT_SUPPORT_MEMBERS(exprReduce);
 
 };
 
