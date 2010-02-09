@@ -81,9 +81,14 @@ set(PARSER_SRC_FILES
   pPass.cpp
   pPassManager.cpp
   # passes
+  passes/CheckMemoryManagement.cpp
   passes/SimplifyStrings.cpp
   passes/DumpAST.cpp
   passes/DumpStats.cpp
+  passes/Split_Builtins.cpp
+  passes/Early_Lower_Loops.cpp
+  passes/Lower_Binary_Op.cpp
+  passes/Lower_Conditional_Expr.cpp
 )
 
 # PASSES

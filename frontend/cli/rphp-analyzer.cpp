@@ -2,6 +2,7 @@
 ;; Roadsend PHP Compiler
 ;;
 ;; Copyright (c) 2009-2010 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2010 Cornelius Riemenschneider <c.r1@gmx.de>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -33,9 +34,15 @@
 #include "rphp/analysis/pSourceFile.h"
 #include "rphp/analysis/pLexer.h"
 
+#include "rphp/analysis/passes/CheckMemoryManagement.h"
 #include "rphp/analysis/passes/DumpAST.h"
 #include "rphp/analysis/passes/DumpStats.h"
 #include "rphp/analysis/passes/SimplifyStrings.h"
+#include "rphp/analysis/passes/Split_Builtins.h"
+#include "rphp/analysis/passes/Early_Lower_Loops.h"
+#include "rphp/analysis/passes/Lower_Binary_Op.h"
+#include "rphp/analysis/passes/Lower_Conditional_Expr.h"
+
 
 using namespace llvm;
 using namespace rphp;
@@ -91,6 +98,7 @@ int main( int argc, char* argv[] )
             passManager.addPass<AST::Pass::SimplifyStrings>();
             passManager.addPass<AST::Pass::DumpAST>();
             passManager.addPass<AST::Pass::DumpStats>();
+            passManager.addPass<AST::Pass::CheckMemoryManagement>();
         }
         else if (!passListText.empty()) {
             // custom list of passes
@@ -101,9 +109,28 @@ int main( int argc, char* argv[] )
             ++i) {
                 if (*i == "dumpast") {
                     passManager.addPass<AST::Pass::DumpAST>();
+                    passManager.addPass<AST::Pass::DumpStats>();
+                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
                 }
                 else if (*i == "simplifystrings") {
                     passManager.addPass<AST::Pass::SimplifyStrings>();
+                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
+                }
+                else if (*i == "split-builtins") {
+                    passManager.addPass<AST::Pass::Split_Builtins>();
+                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
+                }
+                else if (*i == "early-lower-loops") {
+                    passManager.addPass<AST::Pass::Early_Lower_Loops>();
+                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
+                }
+                else if (*i == "lower-binary-ops") {
+                    passManager.addPass<AST::Pass::Lower_Binary_Op>();
+                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
+                }
+                else if (*i == "lower-conditional-exprs") {
+                    passManager.addPass<AST::Pass::Lower_Conditional_Expr>();
+                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
                 }
             }
         }

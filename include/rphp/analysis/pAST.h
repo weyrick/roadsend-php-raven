@@ -132,8 +132,12 @@ struct constStmtIterator : public stmtIteratorImpl<constStmtIterator,
                                                  return new (C) CLASS(*this, C);\
                                               }\
                                               static bool classof(const CLASS * s) { return true; }\
-                                              static bool classof(const stmt* s) { return s->kind() == CLASS##Kind; }
+                                              static bool classof(const stmt* s) { return s->kind() == CLASS##Kind; }\
+                                              CLASS * retain() { stmt::retain(); return this; }
 
+namespace Pass {
+class CheckMemoryManagement;
+}
 
 // statement base class
 class stmt {
@@ -144,7 +148,10 @@ class stmt {
 
     pUInt startLineNum_;
     pUInt endLineNum_;
-
+    
+    // We need this because we access refCount_ over there.
+    friend class Pass::CheckMemoryManagement;
+    
 protected:
   void* operator new(size_t bytes) throw() {
     assert(0 && "stmt cannot be allocated with regular 'new'.");
@@ -241,9 +248,7 @@ public:
     pUInt endLineNum(void) const { return endLineNum_; }
     
     // Polymorphic deep copying.
-    virtual stmt* clone(pParseContext& C) const = 0;/*{
-    	return new (C) stmt(*this);
-    }*/
+    virtual stmt* clone(pParseContext& C) const = 0;
 
     // LLVM isa<T> and casting support
     static bool classof(const stmt* s) { return true; }
@@ -270,6 +275,7 @@ public:
     
     // We include that clone here so we get a clone which returns expr*.
     virtual expr* clone(pParseContext& C) const = 0;
+    expr* retain() { stmt::retain(); return this; }
     
 protected:
     expr(const expr& other): stmt(other) {}
@@ -1362,6 +1368,8 @@ public:
     virtual literalExpr* clone(pParseContext& C) const {
         return new (C) literalExpr(*this, C);
     }
+    
+    literalExpr* retain() { stmt::retain(); return this; }
 
 };
 

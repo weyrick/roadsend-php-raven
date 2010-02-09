@@ -28,66 +28,44 @@
 
 namespace rphp { namespace AST {
 class pTransformHelper {
-    pParseContext& C;
-
-    literalBool* literalTrue_;
-    literalBool* literalFalse_;
+    pParseContext& C_;
 
 public:
-    pTransformHelper(pParseContext& C): C(C), literalTrue_(NULL), literalFalse_(NULL)
-        {
-
-        }
+    pTransformHelper(pParseContext& C): C_(C) {}
 
     // lTrue and lFalse provide an easy way to get a literal true or false in the code.
     literalBool* lTrue() {
-        if(literalTrue_) {
-            literalTrue_->retain();
-        }
-        else
-            literalTrue_ = new (C) literalBool(true);
-        return literalTrue_;
+        return new (C_) literalBool(true);
     }
     literalBool* lFalse() {
-        if(literalFalse_) {
-            literalFalse_->retain();
-        }
-        else
-            literalFalse_ = new (C) literalBool(false);
-        return literalFalse_;
+        return new (C_) literalBool(false);
     }
     // This method gets several expr*s which are chained together in a list of binaryOp*s.
     // You normally want to use this with binaryOp::BOOLEAN_AND
-    // retainExprs allows you do safely delete the source of the expressionList/statementList, for example a block.
-    expr* chainExpressions(expressionList* expressions, enum binaryOp::opKind operationType, bool retainExprs = false) {
+    // This function copys all expr's it's using clone().
+    expr* chainExpressions(const expressionList* expressions, enum binaryOp::opKind operationType) {
         assert(!expressions->empty());
         assert(expressions->size() > 1);
 
-        expressionList::iterator it = expressions->begin();
-        expr* prevExpr = *it++;
-        if(retainExprs)
-            prevExpr->retain();
-        for(expressionList::iterator end = expressions->end(); it != end; ++it)
-            if (retainExprs)
-                (*it)->retain();
-            prevExpr = new (C) binaryOp(prevExpr, *it, operationType);
+        expressionList::const_iterator it = expressions->begin();
+        expr* prevExpr = (*it)->clone(C_);
+        ++it;
+        for(expressionList::const_iterator end = expressions->end(); it != end; ++it)
+            prevExpr = new (C_) binaryOp(prevExpr, (*it)->clone(C_), operationType);
 
         return prevExpr;
     }
     // That function is currently a slightly modified version of the one above with the whole code duplicated. Very bad.
-    expr* chainExpressionsFromBlock(stmt::child_range statements, enum binaryOp::opKind operationType, bool retainExprs = false) {
+    expr* chainExpressionsFromBlock(stmt::const_child_range statements, enum binaryOp::opKind operationType) {
         assert(!statements.empty());
         assert(++statements.begin() != statements.end() && " To chain expressions, you need at least two of them!");
 
-        stmt::child_iterator it = statements.begin();
-        expr* prevExpr = cast<expr>(*it++);
-        if(retainExprs)
-            prevExpr->retain();
-        for(stmt::child_iterator end = statements.end(); it != end; ++it) {
-            if (retainExprs)
-                (*it)->retain();
-            prevExpr = new (C) binaryOp(prevExpr, cast<expr>(*it), operationType);
-        }
+        stmt::const_child_iterator it = statements.begin();
+        expr* prevExpr = cast<expr>(it->clone(C_));
+        ++it;
+        for(stmt::const_child_iterator end = statements.end(); it != end; ++it)
+            prevExpr = new (C_) binaryOp(prevExpr, cast<expr>(it->clone(C_)), operationType);
+
         return prevExpr;
     }
 };
