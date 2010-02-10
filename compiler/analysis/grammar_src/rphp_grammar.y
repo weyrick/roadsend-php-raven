@@ -251,7 +251,6 @@ statement_list(A) ::= statement_list(B) statement(C). { B->push_back(C); A = B; 
 %type statement {AST::stmt*}
 statement(A) ::= statementBlock(B). { A = B; }
 statement(A) ::= inlineHTML(B). { A = B; }
-statement(A) ::= staticDecl(B). { A = B; }
 statement(A) ::= functionDecl(B). { A = B; }
 statement(A) ::= classDecl(B). { A = B; }
 statement(A) ::= ifBlock(B). { A = B; }
@@ -261,6 +260,7 @@ statement(A) ::= doStmt(B). { A = B; }
 statement(A) ::= whileStmt(B). { A = B; }
 statement(A) ::= switchStmt(B). { A = B; }
 statement(A) ::= tryCatch(B). { A = B; }
+statement(A) ::= staticDecl(B) T_SEMI. { A = B; }
 statement(A) ::= echo(B) T_SEMI. { A = B; }
 statement(A) ::= throw(B) T_SEMI. { A = B; }
 statement(A) ::= expr(B) T_SEMI. { A = B; }
@@ -309,7 +309,7 @@ return(A) ::= T_RETURN.
     A = new (CTXT) AST::returnStmt(NULL);
     A->setLine(CURRENT_LINE);
 }
-return(A) ::= T_RETURN expr(B).
+return(A) ::= T_RETURN baseExpr(B).
 {
     A = new (CTXT) AST::returnStmt(B);
     A->setLine(CURRENT_LINE);
@@ -446,25 +446,25 @@ ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) else
 // foreach
 %type forEach {AST::forEach*}
 // foreach($expr as $val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN baseExpr(RVAL) T_AS T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
 {
     A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, false /*by ref*/ );
     A->setLine(TOKEN_LINE(F));
 }
 // foreach($expr as $key => $val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN baseExpr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
 {
     A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, false /*by ref*/, KEY);
     A->setLine(TOKEN_LINE(F));
 }
 // foreach($expr as &$val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_AND T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN baseExpr(RVAL) T_AS T_AND T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
 {
     A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, true /*by ref*/);
     A->setLine(TOKEN_LINE(F));
 }
 // foreach($expr as $key => &$val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_AND T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN baseExpr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_AND T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
 {
     A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, true /*by ref*/, KEY);
     A->setLine(TOKEN_LINE(F));
@@ -1924,6 +1924,7 @@ functionInvoke(A) ::= varNoObjects(DNAME) T_LEFTPAREN argList(ARGS) T_RIGHTPAREN
     A->setLine(CURRENT_LINE);
     delete ARGS;
 }
+
 
 /** CONSTRUCTOR INVOKE **/
 %type constructorInvoke {AST::functionInvoke*}
