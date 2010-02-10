@@ -35,6 +35,9 @@ class DumpAST: public pBaseVisitor {
     TiXmlDocument*doc_;
     TiXmlElement* currentElement_;
 
+    void doComment(const char*);
+    void doNullChild(void);
+
 public:
     DumpAST(pSourceModule* m):
             pBaseVisitor("AST Dump","Basic dump of the AST", m),
@@ -53,6 +56,8 @@ public:
     void visit_pre_classDecl(classDecl* n);
     void visit_pre_methodDecl(methodDecl* n);
     void visit_pre_propertyDecl(propertyDecl* n);
+
+    bool visit_children_staticDecl(staticDecl* n);
 
     void visit_pre_assignment(assignment* n);
     void visit_pre_literalID(literalID* n);

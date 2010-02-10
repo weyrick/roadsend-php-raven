@@ -47,6 +47,7 @@ public:
     // root dispatch
     void visit(stmt*);
     virtual void visitChildren(stmt*);
+    virtual void visitChildren(stmt::child_iterator begin, stmt::child_iterator end);
 
     virtual void visit_pre_stmt(stmt* ) { }
     virtual void visit_post_stmt(stmt* ) { }

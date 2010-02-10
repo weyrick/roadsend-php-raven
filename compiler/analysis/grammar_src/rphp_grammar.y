@@ -1097,10 +1097,12 @@ globalVar(A) ::= T_VARIABLE(B).
 {
     // strip $
     A = new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT);
+    A->setLine(CURRENT_LINE);
 }
 globalVar(A) ::= T_DOLLAR rVar(B).
 {
     AST::dynamicID* r = new (CTXT) AST::dynamicID(B);
+    r->setLine(CURRENT_LINE);
     A = r;
 }
 // XXX support ${expr} format for globals here?
@@ -1109,12 +1111,16 @@ globalVar(A) ::= T_DOLLAR rVar(B).
 staticVarList(A) ::= T_VARIABLE(B).
 {
     A = new AST::expressionList();
-    A->push_back(new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT));
+    AST::var* V= new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT);
+    V->setLine(CURRENT_LINE);
+    A->push_back(V);
 }
 staticVarList(A) ::= staticVarList(LIST) T_COMMA T_VARIABLE(B).
 {
     // strip $
-    LIST->push_back(new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT));
+    AST::var* V= new (CTXT) AST::var(pSourceRange(++(*B).begin(), (*B).end()), CTXT);
+    V->setLine(CURRENT_LINE);
+    LIST->push_back(V);
     A = LIST;
 }
 

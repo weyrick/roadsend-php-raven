@@ -88,5 +88,16 @@ void pBaseVisitor::visitChildren(stmt* s) {
 
 }
 
+void pBaseVisitor::visitChildren(stmt::child_iterator begin, stmt::child_iterator end) {
+
+    stmt* child(0);
+    for (stmt::child_iterator i = begin, e = end; i != e; ) {
+      if ( (child = *i++) ) {
+          visit(child);
+      }
+    }
+
+}
+
 } } // namespace
 

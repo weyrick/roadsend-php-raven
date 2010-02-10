@@ -65,6 +65,16 @@ void DumpAST::visit_post_stmt(stmt* n) {
     currentElement_ = static_cast<TiXmlElement*>(xnode);
 }
 
+void DumpAST::doComment(const char* c) {
+    TiXmlComment* node = new TiXmlComment(c);
+    currentElement_->LinkEndChild(node);
+}
+
+void DumpAST::doNullChild(void) {
+    TiXmlElement* node = new TiXmlElement("NULL");
+    currentElement_->LinkEndChild(node);
+}
+
 void DumpAST::visit_pre_var(var* n) {
     currentElement_->SetAttribute("id",n->name());
     if (n->indirectionCount()) {
@@ -82,6 +92,19 @@ void DumpAST::visit_pre_literalID(literalID* n) {
 
 void DumpAST::visit_pre_assignment(assignment* n) {
     currentElement_->SetAttribute("byRef", (n->byRef() ? "true" : "false") );
+}
+
+bool DumpAST::visit_children_staticDecl(staticDecl* n) {
+    doComment("default value");
+    if (n->defaultExpr()) {
+        visit(n->defaultExpr());
+    }
+    else {
+        doNullChild();
+    }
+    doComment("variable list");
+    visitChildren(n->var_begin(), n->var_end());
+    return true;
 }
 
 void DumpAST::visit_pre_methodDecl(methodDecl* n) {
