@@ -16,28 +16,26 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program; if not, write to the Free Software
 ;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
-   ***** END LICENSE BLOCK *****
-*/
+ ***** END LICENSE BLOCK *****
+ */
 
-#include "rphp/analysis/passes/CheckMemoryManagement.h"
-#include "rphp/analysis/passes/DumpAST.h"
+#include "rphp/analysis/passes/Desugar.h"
 #include "rphp/analysis/pSourceModule.h"
-
-#include <iostream>
 
 namespace rphp { namespace AST { namespace Pass {
 
-
-void CheckMemoryManagement::visit_pre_stmt(stmt* s) {
-    if(s && s->getRefCount() != 1) {
-        std::cerr << "The following AST Node has a refCount of " << s->getRefCount() << std::endl; 
-        DumpAST dump(module_);
-        dump.pre_run();
-        dump.visit(s);
-        dump.post_run();
-    }
+/**
+ * Transform
+ * 			return;
+ * into
+ * 			return NULL;
+ */
+stmt* Desugar::transform_post_returnStmt(returnStmt* n) {
+    if(n->rVal() != NULL)
+        return n;
+    // add the NULL;
+    n->setRVal(C_, new (C_) literalNull());
+    return n;
 }
 
-
 } } } // namespace
-

@@ -83,6 +83,7 @@ set(PARSER_SRC_FILES
   # passes
   passes/CheckMemoryManagement.cpp
   passes/SimplifyStrings.cpp
+  passes/Desugar.cpp
   passes/DumpAST.cpp
   passes/DumpStats.cpp
   passes/Split_Builtins.cpp

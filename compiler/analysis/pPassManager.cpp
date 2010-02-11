@@ -22,6 +22,7 @@
 #include "rphp/analysis/pPassManager.h"
 #include "rphp/analysis/pPass.h"
 #include "rphp/analysis/pSourceModule.h"
+#include "rphp/analysis/passes/CheckMemoryManagement.h"
 
 namespace rphp {
 
@@ -45,7 +46,13 @@ void pPassManager::run(void) {
         (*i)->run();
         (*i)->post_run();
     }
+}
 
+void pPassManager::addPass(AST::pPass* p) {
+    passQueue_.push_back(p);
+#ifdef DEBUG
+    passQueue_.push_back(new AST::Pass::CheckMemoryManagement);
+#endif
 }
 
 

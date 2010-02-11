@@ -35,6 +35,7 @@
 #include "rphp/analysis/pLexer.h"
 
 #include "rphp/analysis/passes/CheckMemoryManagement.h"
+#include "rphp/analysis/passes/Desugar.h"
 #include "rphp/analysis/passes/DumpAST.h"
 #include "rphp/analysis/passes/DumpStats.h"
 #include "rphp/analysis/passes/SimplifyStrings.h"
@@ -61,6 +62,7 @@ int main( int argc, char* argv[] )
     cl::opt<bool> dumpToks ("dump-toks", cl::desc("Dump tokens from lexer"));
     cl::opt<bool> dumpAST ("dump-ast", cl::desc("Dump AST"));
     cl::opt<bool> debugParse ("debug-parse", cl::desc("Debug output from parser"));
+    cl::opt<bool> runPasses ("lower", cl::desc("Lowers the AST and dumps it after lowering"));
 
     cl::opt<std::string> passListText ("passes", cl::desc("List of passes to run"));
 
@@ -98,7 +100,30 @@ int main( int argc, char* argv[] )
             passManager.addPass<AST::Pass::SimplifyStrings>();
             passManager.addPass<AST::Pass::DumpAST>();
             passManager.addPass<AST::Pass::DumpStats>();
+        }
+        else if(runPasses) {
+            // make all variables etc in strings accessible to passes which need them
+            passManager.addPass<AST::Pass::SimplifyStrings>();
             passManager.addPass<AST::Pass::CheckMemoryManagement>();
+            
+            // TODO: get variable names here or use variable names which the zend engine
+            // doesn't allow for internal variables.
+            
+            // uses boolean && and ||
+            passManager.addPass<AST::Pass::Split_Builtins>();
+            // uses boolean !
+            passManager.addPass<AST::Pass::Early_Lower_Loops>();
+            // uses conditionals
+            passManager.addPass<AST::Pass::Lower_Binary_Op>();
+
+            passManager.addPass<AST::Pass::Lower_Conditional_Expr>();
+            
+            // do this one late in case other passes are creating return's for whatever reason...
+            passManager.addPass<AST::Pass::Desugar>();
+            
+            // debug output
+            passManager.addPass<AST::Pass::DumpAST>();
+            passManager.addPass<AST::Pass::DumpStats>();
         }
         else if (!passListText.empty()) {
             // custom list of passes
@@ -110,27 +135,21 @@ int main( int argc, char* argv[] )
                 if (*i == "dumpast") {
                     passManager.addPass<AST::Pass::DumpAST>();
                     passManager.addPass<AST::Pass::DumpStats>();
-                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
                 }
                 else if (*i == "simplifystrings") {
                     passManager.addPass<AST::Pass::SimplifyStrings>();
-                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
                 }
                 else if (*i == "split-builtins") {
                     passManager.addPass<AST::Pass::Split_Builtins>();
-                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
                 }
                 else if (*i == "early-lower-loops") {
                     passManager.addPass<AST::Pass::Early_Lower_Loops>();
-                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
                 }
                 else if (*i == "lower-binary-ops") {
                     passManager.addPass<AST::Pass::Lower_Binary_Op>();
-                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
                 }
                 else if (*i == "lower-conditional-exprs") {
                     passManager.addPass<AST::Pass::Lower_Conditional_Expr>();
-                    passManager.addPass<AST::Pass::CheckMemoryManagement>();
                 }
             }
         }

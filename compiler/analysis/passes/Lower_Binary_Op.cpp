@@ -96,6 +96,7 @@ expr* Lower_Binary_Op::transform_pre_binaryOp(binaryOp* n) {
         }
         case binaryOp::GREATER_OR_EQUAL:
         case binaryOp::GREATER_THAN:
+            //TODO: file+line numbers?
             return new (C_) binaryOp(n->rVal()->retain(),
                              n->lVal()->retain(),
                              (n->opKind() == binaryOp::GREATER_THAN) ? binaryOp::LESS_THAN : binaryOp::LESS_OR_EQUAL);

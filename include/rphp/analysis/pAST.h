@@ -135,10 +135,6 @@ struct constStmtIterator : public stmtIteratorImpl<constStmtIterator,
                                               static bool classof(const stmt* s) { return s->kind() == CLASS##Kind; }\
                                               CLASS * retain() { stmt::retain(); return this; }
 
-namespace Pass {
-class CheckMemoryManagement;
-}
-
 // statement base class
 class stmt {
 
@@ -148,9 +144,6 @@ class stmt {
 
     pUInt startLineNum_;
     pUInt endLineNum_;
-    
-    // We need this because we access refCount_ over there.
-    friend class Pass::CheckMemoryManagement;
     
 protected:
   void* operator new(size_t bytes) throw() {
@@ -202,6 +195,10 @@ public:
       assert(refCount_ >= 1);
       ++refCount_;
       return this;
+    }
+    
+    pUInt getRefCount() const {
+        return refCount_;
     }
 
     virtual ~stmt(void) { }
@@ -1106,7 +1103,7 @@ public:
 
 // return statement
 class returnStmt: public stmt {
-
+    
     expr* rVal_;
     
 protected:
@@ -1126,6 +1123,7 @@ public:
     stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&rVal_+1); }
 
     expr* rVal(void) { return rVal_; }
+    void setRVal(pParseContext& C, expr* r) { if(rVal_) rVal_->destroy(C); rVal_= r; }
 
     IMPLEMENT_SUPPORT_MEMBERS(returnStmt);
 

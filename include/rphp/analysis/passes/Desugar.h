@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2010 Cornelius Riemenschneider <c.r1@gmx.de>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -19,49 +19,25 @@
    ***** END LICENSE BLOCK *****
 */
 
-#ifndef RPHP_PPASSMANAGER_H_
-#define RPHP_PPASSMANAGER_H_
+#ifndef RPHP_DESUGAR_H_
+#define RPHP_DESUGAR_H_
 
-#include <vector>
+#include "rphp/analysis/pBaseTransformer.h"
 
-namespace rphp {
+namespace rphp { namespace AST { namespace Pass {
 
-class pSourceModule;
-
-namespace AST {
-class pPass;
-}
-
-class pPassManager {
-public:
-    typedef std::vector<AST::pPass*> queueType;
-
-private:
-
-    queueType passQueue_;
-    pSourceModule* module_;
-
-    // no copy constructor
-    pPassManager(const pPassManager&);
+class Desugar: public pBaseTransformer {
 
 public:
-
-    pPassManager(pSourceModule* m): passQueue_(), module_(m) { }
-    ~pPassManager(void);
-
-    /// add a pass. takes ownership.
-    void addPass(AST::pPass* p);
-
-    template <typename PassType>
-    void addPass(void) {
-        PassType* P = new PassType(module_);
-        addPass(P);
+    Desugar(pSourceModule *m):
+            pBaseTransformer("Desugar","Currently turns return; into return NULL;", m)
+    {
     }
 
-    void run(void);
+    stmt* transform_post_returnStmt(returnStmt* n);
 
 };
 
-} // namespace
+} } } // namespace
 
-#endif /* RPHP_PPASSMANAGER_H_ */
+#endif /* RPHP_DESUGAR_H_ */
