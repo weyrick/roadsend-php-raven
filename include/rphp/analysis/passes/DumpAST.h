@@ -38,6 +38,8 @@ class DumpAST: public pBaseVisitor {
     void doComment(const char*);
     void doNullChild(void);
 
+    void visitOrNullChild(stmt*);
+
 public:
     DumpAST(pSourceModule* m):
             pBaseVisitor("AST Dump","Basic dump of the AST", m),
@@ -53,8 +55,10 @@ public:
 
     void visit_pre_signature(signature* n);
     void visit_pre_formalParam(formalParam* n);
+    bool visit_children_formalParam(formalParam* n);
     void visit_pre_classDecl(classDecl* n);
     void visit_pre_methodDecl(methodDecl* n);
+    bool visit_children_methodDecl(methodDecl* n);
     void visit_pre_propertyDecl(propertyDecl* n);
 
     bool visit_children_staticDecl(staticDecl* n);

@@ -446,6 +446,10 @@ public:
         }
     }
 
+    expr* defaultExpr(void) {
+        return static_cast<expr*>(default_);
+    }
+
     bool byRef(void) const { return flags_ & byRefBit; }
 
     bool arrayHint(void) const { return flags_ & arrayHintBit; }

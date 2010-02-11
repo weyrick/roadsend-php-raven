@@ -65,6 +65,14 @@ void DumpAST::visit_post_stmt(stmt* n) {
     currentElement_ = static_cast<TiXmlElement*>(xnode);
 }
 
+
+void DumpAST::visitOrNullChild(stmt* n) {
+    if (n)
+        visit(n);
+    else
+        doNullChild();
+}
+
 void DumpAST::doComment(const char* c) {
     TiXmlComment* node = new TiXmlComment(c);
     currentElement_->LinkEndChild(node);
@@ -96,12 +104,7 @@ void DumpAST::visit_pre_assignment(assignment* n) {
 
 bool DumpAST::visit_children_staticDecl(staticDecl* n) {
     doComment("default value");
-    if (n->defaultExpr()) {
-        visit(n->defaultExpr());
-    }
-    else {
-        doNullChild();
-    }
+    visitOrNullChild(n->defaultExpr());
     doComment("variable list");
     visitChildren(n->var_begin(), n->var_end());
     return true;
@@ -123,6 +126,13 @@ void DumpAST::visit_pre_methodDecl(methodDecl* n) {
         currentElement_->SetAttribute("PUBLIC", "true");
     if (flags & memberFlags::STATIC)
         currentElement_->SetAttribute("STATIC", "true");
+}
+
+bool DumpAST::visit_children_methodDecl(methodDecl* n) {
+    visit(n->sig());
+    doComment("method body");
+    visitOrNullChild(n->body());
+    return true;
 }
 
 void DumpAST::visit_pre_propertyDecl(propertyDecl* n) {
@@ -349,6 +359,12 @@ void DumpAST::visit_pre_formalParam(formalParam* n) {
     pIdentString hint = n->classHint();
     if (hint.length())
         currentElement_->SetAttribute("classHint",hint);
+}
+
+bool DumpAST::visit_children_formalParam(formalParam* n) {
+    doComment("default value");
+    visitOrNullChild(n->defaultExpr());
+    return true;
 }
 
 } } } // namespace
