@@ -45,6 +45,7 @@ public:
     stmt* transform_post_whileStmt(whileStmt* n);
     stmt* transform_post_doStmt(doStmt* n);
     stmt* transform_post_forStmt(forStmt* n);
+    stmt* transform_post_forEach(forEach* n);
     stmt* transform_pre_switchStmt(switchStmt* n);
 
 };

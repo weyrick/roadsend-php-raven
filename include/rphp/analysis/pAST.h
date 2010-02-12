@@ -1759,9 +1759,18 @@ public:
 
     void setIndirectionCount(pUInt c) { indirectionCount_ = c; }
 
-    expr* target(void) {
+    expr* target(void) const {
         assert((children_[TARGET] == NULL || isa<expr>(children_[TARGET])) && "unknown object in target");
         return static_cast<expr*>(children_[TARGET]);
+    }
+    
+    /**
+     * Whether a variable is simple (just $x) or complex, like $x["a"] or ${"xxx"} 
+     */
+    bool isSimpleVar() const {
+        if(indirectionCount() == 0 && numIndices() == 0 && target() == NULL)
+            return true;
+        return false;
     }
 
     pUInt indirectionCount(void) const { return indirectionCount_; }

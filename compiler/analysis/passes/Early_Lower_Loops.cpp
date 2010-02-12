@@ -178,6 +178,14 @@ stmt* Early_Lower_Loops::transform_post_forStmt(forStmt* n) {
     return newReplacementBlock;
 }
 
+/**
+ * Currently the AST node for forEach's is weird, so i can't implement this transformation.
+ */
+stmt* Early_Lower_Loops::transform_post_forEach(forEach* n) {
+
+    return n;
+}
+
 
 /* A switch statement is not an easy thing to replace, due to myriads of corner
  * cases, mostly involving fall-through.
