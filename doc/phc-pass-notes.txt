@@ -9,6 +9,7 @@ Note_top_level_declarations: I'm unsure how we deal with declarations at all. an
 								Note: We got a codegen pass for decls as well, from the old rphp design.
 Constant_folding: a) we don't have a match() function in rphp b) We don't call to zend php for folding constant expressions
 Remove_concat_null: Our parser shouldn't create these concats, so this issue is phc specific.
+TODO: reevaluate now that teh parser _does_ support classes+interfaces.
 Desugar *implemented Desugar* : - and/or renaming to && and || happens already in our parser
 			- we don't have classes yet (no need to replace self:: and parent:: yet)
 			- same for interfaces
@@ -16,13 +17,14 @@ Desugar *implemented Desugar* : - and/or renaming to && and || happens already i
 			- we need this to replace return; with return NULL;
 			- i'm unsure whether we want to transform - x to 0 - x
 Split_multiple_arguments: We got a better facility to iterate over children nodes, so we don't need this imho.
-Split_unset_isset *implemented Split_Builtins*: this one makes more sense, but we need a facility to return an expression list first (sth block-like)
+Split_unset_isset *implemented Split_Builtins*: this one makes more sense
 Echo_split *implemented Split_Builtins*: we definitly want this for the reason given in Echo_split.cpp, but see S-u-i...
 Early_lower_control_flow *implemented Early_lower_control_flow except switch and foreach!*: we want this at least partially because it simplifies loop codegen later on, but we've to be
 							 super careful with continue. Probably the transformations by phc can be used, but we want to
 							 sure they are optimized later if the loop body doesn't contain a continue;.
-Lower_expr_flow *implemented in Lower_Binary_Op and Lower_Conditional_Expr* and: We want everything except the comma-seperated list transform. We need an EXPR_LIST anyways, i'd like
-					to have one which is not binary but uses a std::vector or sth like that
+					
+TODO: why do they split these comma lists?
+Lower_expr_flow *implemented in Lower_Binary_Op and Lower_Conditional_Expr* and: We want everything except the comma-seperated list transform
 List_shredder: We want this one :)
 AST_shredder: we definitly want the array assign stuff, but i'm unsure if we need/want the temp var creation for
 				 nearly everything.
@@ -30,3 +32,14 @@ Pre_post_op_shredder: makes sense, but is a bit more complex.
 Switch_bin_op *implented in Lower_Binary_Op*: should simplify codegen a bit :)
 Remove_solo_exprs: because we don't have an Eval_expr facility, we can't really do this pass so easily as phc can.
 					  I'm unsure whether we want to support this or not.
+		
+HIR to MIR:
+Copy_propagation: I'd let this handle the general optimizer later.
+Dead_temp_cleanup: We'd neet the def-use web for that one, it also should be handled by a general optimizer later on
+Lower_dynamic_definitions: Needs to be converted when we want to support nested functions, currently we need to get other stuff going.
+Lower_method_invocations: I don't understand the reason behind that pass.
+Lower_control_flow: Very important for codegen!
+Lift_functions_and_classes: That one moves all global code into a __MAIN__ method. It would simplify lower_control_flow so it should get in before we do lower_control_flow.
+							This __MAIN__ also holds the global symbol table implicitly. 
+Clarify: dunno about that
+
