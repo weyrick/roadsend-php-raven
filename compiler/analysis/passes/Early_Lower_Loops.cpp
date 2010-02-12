@@ -179,4 +179,173 @@ stmt* Early_Lower_Loops::transform_post_forStmt(forStmt* n) {
 }
 
 
+/* A switch statement is not an easy thing to replace, due to myriads of corner
+ * cases, mostly involving fall-through.
+ *
+ * Break and continue are supported by wrapping the statements in a do {..}
+ * while (0) loop. break $x is also supported by this.
+ *
+ * There can be multiple default statements. In this case, only the last one
+ * can be matched. But other case statements can fall-through into a default
+ * which doesnt match.
+ *
+ * Fall-through edges are tricky. Because there may be a break, and its
+ * non-trivial (in the general case) to find out if theres a break, so we
+ * always let code fall-through. If there is a break, it will catch. If not,
+ * check that we have matched already.
+ *
+ * All blocks are added in order, so they may fall-through. However, we should
+ * not evaluate the condition for a fall-through, as it may have side-effects.
+ *
+ * The last default block gets all subsequent code blocks added to it. This
+ * leads to some code duplication, but we'll let the optimizer deal with it.
+ * 
+ * Convert
+ *      switch (expr)
+ *      {
+ *          case expr1:
+ *              x1 ();
+ *
+ *          default:
+ *              xD1;
+ *              break;
+ *
+ *          case expr2:
+ *              x2 ();
+ *              break;
+ *          ...
+ *          default: // only the last default counts
+ *              xD2 ();
+ *
+ *          case expr3:
+ *              x3 ();
+ *      }
+ *
+ *  into
+ *      val = expr;
+ *      matched = false;
+ *      do
+ *      {
+ *          // case expr1
+ *          if (!matched)
+ *          {
+ *              val1 = expr1;
+ *              if (val == val1)
+ *                  matched = true;
+ *          }
+ *          if (matched)
+ *              x1 ();
+ *
+ *
+ *          // default - put the code for the default, in case of fall-through
+ *          // (even though a later default overrides a possible match)
+ *          if (matched)
+ *              xD1 ();
+ *
+ *
+ *          // case expr2
+ *          if (!matched)
+ *          {
+ *              val2 = expr2;
+ *              if (val == val2)
+ *                  matched = true;
+ *          }
+ *          if (matched)
+ *          {
+ *              x2 ();
+ *              break; // this will break the outer loop
+ *          }
+ *
+ *
+ *          // case expr3
+ *          if (!matched)
+ *          {
+ *              val3 = expr3;
+ *              if (val == val3)
+ *                  matched = true;
+ *          }
+ *
+ *          // default
+ *      if (matched)
+ *              xD1 ();
+ *
+ *          if (matched)
+ *          {
+ *              x3 ();
+ *          }
+ *
+ *          // default with actual matching
+ *          if (!matched)
+ *          {
+ *              matched = true;
+ *          }
+ *          xD ();
+ *
+ *          if (!matched)
+ *          {
+ *              xD2 ();
+ *              x3 ();
+ *          }
+ *      } while (0)
+ *
+ *  Use a pre_switch so that the do_while can be lowered in the post_do.
+ */
+stmt* Early_Lower_Loops::transform_pre_switchStmt(switchStmt* n) {
+    // TODO: variable names
+    statementList loweredStmts;
+    
+    // switch_val = expr
+    var* switchVal = new (C_) var("switch_val", C_);
+    assignment* switchValAssignment = new (C_) assignment(switchVal, n->rVal()->retain(), false /*ref*/);
+    loweredStmts.push_back(switchValAssignment);
+    
+    // matched = false
+    var* matchedVal = new (C_) var("matched", C_);
+    assignment* matchedValInit = new (C_) assignment(matchedVal, h_.lFalse(), false /*ref*/);
+    loweredStmts.push_back(matchedValInit);
+    
+    // All stmt*s inside the do... while(false) loop
+    statementList loopStmts;
+    
+    foreach(stmt* caseStmtStmt, n->caseBlock()->children()) {
+        assert(isa<switchCase>(caseStmtStmt) && "Statement inside of switch block isn't a case");
+        switchCase* caseStmt = cast<switchCase>(caseStmtStmt);
+        // TODO: is this legal php?
+        assert(caseStmt->condition() && "Case has no expression");
+        
+        // Build the condition evaluating block
+        // matched == false
+        binaryOp* matchedFalseComparison = new (C_) binaryOp(matchedVal->clone(C_), h_.lFalse(), binaryOp::IDENTICAL);
+        
+        // Evaluate the condition of this case if we've not already matched a case.
+        statementList evaluateConditionStmts;
+
+        var* caseCondition = new (C_) var("caseCondition", C_);
+        assignment* caseConditionInit = new (C_) assignment(caseCondition, caseStmt->condition()->retain(), false /*ref*/);
+        evaluateConditionStmts.push_back(caseConditionInit);
+
+        // if (caseCondition == switch_val) matched = true;
+        binaryOp* caseConditionSwitchValComparison = new (C_) binaryOp(caseCondition->clone(C_), switchVal->clone(C_), binaryOp::EQUAL);
+        assignment* matchedTrueAssign = new (C_) assignment(matchedVal->clone(C_), h_.lTrue(), false/*ref*/);
+        ifStmt* ifCaseConditionMatches = new (C_) ifStmt(C_, caseConditionSwitchValComparison, matchedTrueAssign, NULL);
+        evaluateConditionStmts.push_back(ifCaseConditionMatches);
+        block* evaluateCondition = new (C_) block(C_, &evaluateConditionStmts);
+        
+        // put together the whole case expression evaluation
+        ifStmt* ifNotMatchedEvaluateCondition = new (C_) ifStmt(C_, matchedFalseComparison, evaluateCondition, NULL);
+        loopStmts.push_back(ifNotMatchedEvaluateCondition);
+        
+        // Build the actual doing block of the case in case we matched.
+        ifStmt* ifMatchedDoStuff = new (C_) ifStmt(C_, matchedVal->clone(C_), caseStmt->body()->retain(), NULL);
+        loopStmts.push_back(ifMatchedDoStuff);
+    }
+    // Build the do ... while(false) loop
+    block* wrapperLoopBody = new (C_) block(C_, &loopStmts);
+    doStmt* wrapperLoop = new (C_) doStmt(C_, h_.lFalse(), wrapperLoopBody);
+    loweredStmts.push_back(wrapperLoop);
+    
+    block* switchReplacement = new (C_) block(C_, &loweredStmts);
+    return switchReplacement;
+}
+
 } } } // namespace
