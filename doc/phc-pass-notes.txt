@@ -19,7 +19,7 @@ Desugar *implemented Desugar* : - and/or renaming to && and || happens already i
 Split_multiple_arguments: We got a better facility to iterate over children nodes, so we don't need this imho.
 Split_unset_isset *implemented Split_Builtins*: this one makes more sense
 Echo_split *implemented Split_Builtins*: we definitly want this for the reason given in Echo_split.cpp, but see S-u-i...
-Early_lower_control_flow *implemented Early_lower_control_flow except switch and foreach!*: we want this at least partially because it simplifies loop codegen later on, but we've to be
+Early_lower_control_flow *implemented Early_lower_control_flow except foreach!*: we want this at least partially because it simplifies loop codegen later on, but we've to be
 							 super careful with continue. Probably the transformations by phc can be used, but we want to
 							 sure they are optimized later if the loop body doesn't contain a continue;.
 					
