@@ -64,10 +64,12 @@ void pSourceModule::setAST(const AST::statementList* list) {
 }
 
 void pSourceModule::applyVisitor(AST::pBaseVisitor* v) {
+    assert(ast_);
     v->visit(ast_);
 }
 
 void pSourceModule::applyTransform(AST::pBaseTransformer* t) {
+    assert(ast_);
     t->transform(ast_);
 }
 

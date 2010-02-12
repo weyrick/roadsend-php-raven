@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -23,8 +23,8 @@
 
 #include "rphp/analysis/pSourceModule.h"
 #include "rphp/analysis/pLexer.h"
-//#include "rphp/IR/pGenerator.h"
-//#include "rphp/IR/pGenSupport.h"
+#include "rphp/IR/pGenerator.h"
+#include "rphp/IR/pGenSupport.h"
 
 #include <llvm/Module.h>
 #include <llvm/Analysis/Verifier.h>
@@ -45,9 +45,10 @@ void pDumpTarget::execute(void) {
 
 // dump the generated IR code from the given source file
 void pDumpTarget::dumpIR(void) {
-/*
+
     pSourceModule  m(sourceFile_);
-    IR::pGenerator codeGen(m, llvm::getGlobalContext());
+    m.parse(false);
+    IR::pGenerator codeGen(&m, llvm::getGlobalContext());
     llvm::Module* ir = codeGen.getIR();
     IR::pGenSupport::dumpIR(ir);
     std::string errMsg;
@@ -55,7 +56,7 @@ void pDumpTarget::dumpIR(void) {
         std::cout << "*** IR verify failed: " << errMsg << std::endl;
     }
     delete ir;
-*/
+
 }
 
 } // namespace

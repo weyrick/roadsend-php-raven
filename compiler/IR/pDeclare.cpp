@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2009-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -36,10 +36,11 @@ using namespace llvm;
 namespace rphp { namespace IR {
 
 
-void pDeclare::visit_functionDecl(AST::functionDecl* n) {
+void pDeclare::visit_pre_functionDecl(AST::functionDecl* n) {
 
     FunctionType* funType;
-    switch (n->functionDef()->maxArity()) {
+    AST::signature* sig = n->sig();
+    switch (sig->numParams()) {
         case 0:
             funType = IRHelper_.pUserFunction0();
             break;
@@ -62,7 +63,7 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     Function *userFun = Function::Create(funType,
                                          Function::ExternalLinkage,
                                          pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),
-                                                                             n->functionDef()->name()),
+                                                                             sig->name()),
                                          llvmModule_);
 
     Function::arg_iterator a = userFun->arg_begin();
@@ -72,9 +73,8 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     a++;
 
     // name args. this is not just for debug, but also used by codeGen symtab
-    for (pUInt i=0; a != userFun->arg_end(); ++a, i++) {
-        assert(i < n->functionDef()->maxArity() && "functionDecl has arity mismatch");
-        a->setName(n->functionDef()->param(i)->name());
+    for (AST::stmt::child_iterator i = sig->child_begin(), e = sig->child_end(); i != e; ++i) {
+        a->setName(cast<AST::formalParam>(*i)->name());
     }
     
     // entry block
@@ -87,7 +87,7 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     block.SetInsertPoint(&initFunction_->getEntryBlock());
 
     Function* registerFun;
-    switch (n->functionDef()->maxArity()) {
+    switch (sig->numParams()) {
         case 0:
             registerFun = llvmModule_->getFunction("rphp_registerUserFun0");
             break;
@@ -112,7 +112,7 @@ void pDeclare::visit_functionDecl(AST::functionDecl* n) {
     
     block.CreateCall3(registerFun, 
                       &(*initFunction_->arg_begin())/* runtime */, 
-                      IRHelper_.byteArrayConstant(n->functionDef()->name()),
+                      IRHelper_.byteArrayConstant(sig->name()),
                       userFun);
     
 }

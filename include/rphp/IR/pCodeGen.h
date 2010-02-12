@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2009-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -31,7 +31,7 @@
 #include <llvm/Support/IRBuilder.h>
 
 #include "rphp/IR/pIRHelper.h"
-#include "rphp/analysis/pASTVisitors.h"
+#include "rphp/analysis/pBaseVisitor.h"
 
 namespace llvm {
     class Module;
@@ -45,7 +45,7 @@ typedef boost::unordered_map<pIdentString, llvm::Value*> symbolTableType;
 
 class pIRHelper;
 
-class pCodeGen: public AST::baseVisitor {
+class pCodeGen: public AST::pBaseVisitor {
 
 public:
     typedef std::vector<llvm::Value*> valueVectorType;
@@ -77,29 +77,28 @@ private:
 
     void updateSourceLocation(const AST::stmt*);
 
-    llvm::Value* newVarOnStack(const char*);
+    llvm::Value* newVarOnStack(pStringRef);
     llvm::BasicBlock* visitInOwnBlock(AST::stmt* n, const std::string &Name = "");
 public:
-
-    pCodeGen(llvm::Module* mod, const pIdentString& funSym);
+    pCodeGen(pSourceModule* m, llvm::Module* mod, const pIdentString& funSym);
     ~pCodeGen(void);
 
     void finalize(void);
 
     // nodes
-    void visit_echoStmt(AST::echoStmt*);
-    void visit_inlineHtml(AST::inlineHtml*);
-    void visit_literalString(AST::literalString*);
-    void visit_literalInt(AST::literalInt*);
-    void visit_literalFloat(AST::literalFloat*);
-    void visit_literalBool(AST::literalBool*);
-    void visit_literalNull(AST::literalNull*);
-    void visit_literalArray(AST::literalArray*);
-    void visit_assignment(AST::assignment*);
-    void visit_var(AST::var*);
-    void visit_functionInvoke(AST::functionInvoke*);
-    void visit_ifStmt(AST::ifStmt*);
-    void visit_unaryArithmeticOp(AST::unaryArithmeticOp* n);
+    void visit_pre_builtin(AST::builtin*);
+    //void visit_inlineHtml(AST::inlineHtml*);
+    void visit_pre_literalString(AST::literalString*);
+    void visit_pre_literalInt(AST::literalInt*);
+    void visit_pre_literalFloat(AST::literalFloat*);
+    void visit_pre_literalBool(AST::literalBool*);
+    void visit_pre_literalNull(AST::literalNull*);
+    void visit_pre_literalArray(AST::literalArray*);
+    void visit_pre_assignment(AST::assignment*);
+    void visit_pre_var(AST::var*);
+    void visit_pre_functionInvoke(AST::functionInvoke*);
+    void visit_pre_ifStmt(AST::ifStmt*);
+    void visit_pre_unaryOp(AST::unaryOp* n);
 
 };
 

@@ -36,7 +36,8 @@ using namespace llvm;
 
 namespace rphp { namespace IR {
 
-pCodeGen::pCodeGen(llvm::Module* mod, const pIdentString& funSym):
+pCodeGen::pCodeGen(pSourceModule* m, llvm::Module* mod, const pIdentString& funSym):
+    pBaseVisitor("IR generation","Convert a lowered AST to LLVM IR", m),
     llvmModule_(mod),
     functionSymbol_(funSym),
     IRHelper_(mod),
@@ -119,11 +120,12 @@ void pCodeGen::finalize(void) {
 
 // create a pVar on the stack. this handles construction
 // at the start of the current function, and destruction at it's end
-Value* pCodeGen::newVarOnStack(const char* name) {
-	BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
-	currentBlock_.SetInsertPoint(allocBlock);
+Value* pCodeGen::newVarOnStack(pStringRef name) {
 
-	Value* pVarTmp = currentBlock_.CreateAlloca(IRHelper_.pVarType(), 0, name);
+    BasicBlock* oldBlock = currentBlock_.GetInsertBlock();
+    currentBlock_.SetInsertPoint(allocBlock);
+
+    Value* pVarTmp = currentBlock_.CreateAlloca(IRHelper_.pVarType(), 0, name);
 
     // rphp::pVar::pVar()
     Function* constructor = llvmModule_->getFunction("_ZN4rphp4pVarC1Ev");
@@ -154,7 +156,7 @@ void pCodeGen::updateSourceLocation(const AST::stmt* n) {
 
     // TODO: it makes maybe more sense to implement this as a pre-visitor for all stmts?
     // if we already emitted for this line, skip it
-    if (n->getStartLine() == lastSourceLoc_)
+    if (n->startLineNum() == lastSourceLoc_)
         return;
 
     // TODO check current pConfig, avoid this if optimizing
@@ -163,10 +165,10 @@ void pCodeGen::updateSourceLocation(const AST::stmt* n) {
     // TODO we can cache this here since it will never change
     filestrPtr = IRHelper_.byteArrayConstant(llvmModule_->getModuleIdentifier());
 
-    lastSourceLoc_ = n->getStartLine();
+    lastSourceLoc_ = n->startLineNum();
 
     ConstantInt* lineNo = ConstantInt::get(llvmModule_->getContext(),
-            APInt(wordSize_, n->getStartLine()));
+            APInt(wordSize_, n->startLineNum()));
 
     Function* f = llvmModule_->getFunction("rphp_setSourceLocation");
     assert(f != NULL);
@@ -175,7 +177,7 @@ void pCodeGen::updateSourceLocation(const AST::stmt* n) {
 
 }
 
-void pCodeGen::visit_literalString(AST::literalString* n) {
+void pCodeGen::visit_pre_literalString(AST::literalString* n) {
 
     updateSourceLocation(n);
 
@@ -198,7 +200,7 @@ void pCodeGen::visit_literalString(AST::literalString* n) {
 
 }
 
-void pCodeGen::visit_literalInt(AST::literalInt* n) {
+void pCodeGen::visit_pre_literalInt(AST::literalInt* n) {
 
     updateSourceLocation(n);
 
@@ -251,7 +253,7 @@ void pCodeGen::visit_literalInt(AST::literalInt* n) {
 
 }
 
-void pCodeGen::visit_literalFloat(AST::literalFloat* n) {
+void pCodeGen::visit_pre_literalFloat(AST::literalFloat* n) {
 
     updateSourceLocation(n);
 
@@ -271,7 +273,7 @@ void pCodeGen::visit_literalFloat(AST::literalFloat* n) {
 }
 
 
-void pCodeGen::visit_literalBool(AST::literalBool* n) {
+void pCodeGen::visit_pre_literalBool(AST::literalBool* n) {
 
     updateSourceLocation(n);
 
@@ -290,7 +292,7 @@ void pCodeGen::visit_literalBool(AST::literalBool* n) {
 
 }
 
-void pCodeGen::visit_literalNull(AST::literalNull* n) {
+void pCodeGen::visit_pre_literalNull(AST::literalNull* n) {
 
     updateSourceLocation(n);
 
@@ -304,7 +306,7 @@ void pCodeGen::visit_literalNull(AST::literalNull* n) {
     valueStack_.push(pVarTmp);
 }
 
-void pCodeGen::visit_literalArray(AST::literalArray* n) {
+void pCodeGen::visit_pre_literalArray(AST::literalArray* n) {
 
     updateSourceLocation(n);
 
@@ -358,7 +360,7 @@ void pCodeGen::visit_literalArray(AST::literalArray* n) {
     // push to stack
     valueStack_.push(pHashTmp);
 }
-
+/*
 void pCodeGen::visit_inlineHtml(AST::inlineHtml* n) {
 
     Function *f = llvmModule_->getFunction("rphp_print_cstr");
@@ -367,22 +369,32 @@ void pCodeGen::visit_inlineHtml(AST::inlineHtml* n) {
     currentBlock_.CreateCall2(f, runtimeEngine_, IRHelper_.byteArrayConstant(n->getStringVal()));
 
 }
+*/
 
-void pCodeGen::visit_echoStmt(AST::echoStmt* n) {
+void pCodeGen::visit_pre_builtin(AST::builtin* n) {
 
-    updateSourceLocation(n);
+    if (n->opKind() == AST::builtin::ECHO) {
 
-    visit(n->rVal());
-    Value* rVal = valueStack_.top();
-    valueStack_.pop();
+        for (AST::stmt::child_iterator i = n->child_begin(), e = n->child_end(); i != e; ++i) {
 
-    Function *f = llvmModule_->getFunction("rphp_print_pVar");
-    assert(f != NULL);
+            updateSourceLocation(n);
 
-    currentBlock_.CreateCall2(f, runtimeEngine_, rVal);
+            visit(*i);
+            Value* rVal = valueStack_.top();
+            valueStack_.pop();
+
+            Function *f = llvmModule_->getFunction("rphp_print_pVar");
+            assert(f != NULL);
+
+            currentBlock_.CreateCall2(f, runtimeEngine_, rVal);
+
+        }
+
+    }
+
 }
 
-void pCodeGen::visit_assignment(AST::assignment* n) {
+void pCodeGen::visit_pre_assignment(AST::assignment* n) {
 
     updateSourceLocation(n);
 
@@ -394,8 +406,7 @@ void pCodeGen::visit_assignment(AST::assignment* n) {
 
     // gen lval
     pIdentString name("lVal");
-    if (n->lVal()->getKind() == AST::varKind) {
-        AST::var* l = static_cast<AST::var*>(n->lVal());
+    if (AST::var* l = dyn_cast<AST::var>(n->lVal())) {
         name = l->name();
     }
     visit(n->lVal());
@@ -405,11 +416,12 @@ void pCodeGen::visit_assignment(AST::assignment* n) {
     Function* f = llvmModule_->getFunction("_ZN4rphp4pVaraSERKS0_");
     assert(f != NULL);
 
-    currentBlock_.CreateCall2(f, lVal, rVal, name.c_str());
-    //@TODO: push the return to the stack, make the assignement function to adhere php's standards here.
+    Value* ret = currentBlock_.CreateCall2(f, lVal, rVal, name);
+    valueStack_.push(ret);
+
 }
 
-void pCodeGen::visit_var(AST::var* n) {
+void pCodeGen::visit_pre_var(AST::var* n) {
 
     updateSourceLocation(n);
 
@@ -426,10 +438,10 @@ void pCodeGen::visit_var(AST::var* n) {
 
 }
 
-void pCodeGen::visit_functionInvoke(AST::functionInvoke* n) {
+void pCodeGen::visit_pre_functionInvoke(AST::functionInvoke* n) {
 
     Function *f;
-    switch (n->argList().size()) {
+    switch (n->numArgs()) {
         case 0:
             f = llvmModule_->getFunction("rphp_funCall0");
         break;
@@ -456,14 +468,18 @@ void pCodeGen::visit_functionInvoke(AST::functionInvoke* n) {
 
     updateSourceLocation(n);
 
+    // XXX support dynamic ids
+    assert(isa<AST::literalID>(n->name()));
+    AST::literalID* fname = cast<AST::literalID>(n->name());
+
     Value* retval = newVarOnStack("retval");
     std::vector<Value*> callArgList;
     callArgList.push_back(retval);
     callArgList.push_back(runtimeEngine_);
-    callArgList.push_back(IRHelper_.byteArrayConstant(n->name()));
+    callArgList.push_back(IRHelper_.byteArrayConstant(fname->name()));
 
-    // visit arguments in reverse order, add to call arg list as we go
-    for (AST::expressionList::reverse_iterator i = n->argList().rbegin(); i != n->argList().rend(); ++i) {
+    // visit arguments in XXX reverse order, add to call arg list as we go
+    for (AST::stmt::child_iterator i = n->args_begin(), e = n->args_end(); i != e; ++i) {
         visit(*i);
         callArgList.push_back(valueStack_.top());
         valueStack_.pop();
@@ -474,7 +490,7 @@ void pCodeGen::visit_functionInvoke(AST::functionInvoke* n) {
     valueStack_.push(retval);
 }
 
-void pCodeGen::visit_ifStmt(AST::ifStmt* n) {
+void pCodeGen::visit_pre_ifStmt(AST::ifStmt* n) {
 
 	// Keep track of the level of recursion, so we can adjust the afterConds accordingly.
 	ifRecursionDepth_++;
@@ -534,7 +550,7 @@ void pCodeGen::visit_ifStmt(AST::ifStmt* n) {
 
 }
 
-void pCodeGen::visit_unaryArithmeticOp(AST::unaryArithmeticOp* n)  {
+void pCodeGen::visit_pre_unaryOp(AST::unaryOp* n)  {
 
     updateSourceLocation(n);
 
@@ -545,7 +561,7 @@ void pCodeGen::visit_unaryArithmeticOp(AST::unaryArithmeticOp* n)  {
 
     // if this wasn't a simple integer, we may need to arithmetically negate the expression
     // (if it was a literal int, this is already done during codegen of the literal)
-    if (n->negative() && (n->getKind() != AST::literalIntKind)) {
+    if (n->opKind() == AST::unaryOp::NEGATIVE && (!isa<AST::literalInt>(n->rVal()))) {
         // TODO call to pVar - operator on this expression
     }
     valueStack_.push(rVal);

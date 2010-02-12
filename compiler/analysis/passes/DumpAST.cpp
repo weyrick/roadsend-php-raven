@@ -273,48 +273,6 @@ void DumpAST::visit_pre_literalConstant(literalConstant* n)  {
     currentElement_->SetAttribute("id", n->name());
 }
 
-//void DumpAST::visit_pre_functionDecl(functionDecl* n) {
-//    std::cout << "# line " << n->startLineNum() << "\n";
-//    std::cout << "pre_functionDecl\n";
-//    /*
-//    showindent();
-//    std::cout << "# line " << n->startLineNum() << std::endl;
-//    showindent();
-//    std::cout << "(function declare: " << n->functionDef()->name() << std::endl;
-//
-//    indent();
-//    showindent();
-//    std::cout << "(arguments: " << std::endl;
-//    indent();
-//    for (pFunction::paramListType::size_type i = 0; i < n->functionDef()->numParams(); i++) {
-//        showindent();
-//        std::cout << i+1 << ": $" << n->functionDef()->param(i)->name() << std::endl;
-//        // TODO more info on params
-//    }
-//    unindent();
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    unindent();
-//
-//
-//    indent();
-//    showindent();
-//    std::cout << "(body: " << std::endl;
-//
-//    indent();
-//    visit(n->body());
-//    unindent();
-//
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    unindent();
-//
-//    showindent();
-//    std::cout << ")" << std::endl;
-//    */
-//}
-//
-
 void DumpAST::visit_pre_literalArray(literalArray* n)  {
 
     TiXmlElement* element(NULL);

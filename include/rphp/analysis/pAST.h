@@ -521,6 +521,8 @@ public:
 
     bool returnByRef(void) const { return returnByRef_; }
 
+    pUInt numParams(void) const { return numParams_; }
+
     stmt::child_iterator child_begin() { return &formalParamList_[0]; }
     stmt::child_iterator child_end() { return &formalParamList_[0]+numParams_; }
 

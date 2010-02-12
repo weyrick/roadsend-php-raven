@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -23,7 +23,7 @@
 #define RPHP_PGENERATOR_H_
 
 #include "rphp/analysis/pSourceModule.h"
-#include "rphp/analysis/pASTVisitors.h"
+#include "rphp/analysis/pBaseVisitor.h"
 #include "rphp/IR/pIRHelper.h"
 
 #include <llvm/LLVMContext.h>
@@ -36,11 +36,12 @@ namespace llvm {
 
 namespace rphp { namespace IR {
 
-class pGenerator: public AST::baseVisitor {
+class pGenerator {
 
 private:
     llvm::Module* llvmModule_; // won't free
-    pSourceModule& sourceModule_;
+    pSourceModule* sourceModule_;
+
     /// entry point of execution into this module
     llvm::Function* entryFunction_;
     /// startup procedures such as registering user defined functions and classes. called upon entry.
@@ -48,8 +49,8 @@ private:
     pIRHelper IRHelper_;
 
 public:
+    pGenerator(pSourceModule* mod, llvm::LLVMContext& c);
 
-    pGenerator(pSourceModule& mod, llvm::LLVMContext& c);
     void loadAndLinkRuntimeIR(void);
     void createEntryPoint(void);
     void runPasses();

@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2010 Shannon Weyrick <weyrick@roadsend.com>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -34,8 +34,8 @@ using namespace llvm;
 
 namespace rphp { namespace IR {
 
-pGenerator::pGenerator(pSourceModule& mod, LLVMContext& c):
-    llvmModule_(new Module(mod.fileName(), c)),
+pGenerator::pGenerator(pSourceModule* mod, LLVMContext& c):
+    llvmModule_(new Module(mod->fileName(), c)),
     sourceModule_(mod),
     entryFunction_(NULL),
     initFunction_(NULL),
@@ -53,33 +53,31 @@ void pGenerator::runPasses() {
     assert(entryFunction_ != NULL);
     assert(initFunction_ != NULL);
 
-    pDeclare* declarePass = new pDeclare(llvmModule_, initFunction_);
-    sourceModule_.applyVisitor(declarePass);
+    pDeclare* declarePass = new pDeclare(sourceModule_, llvmModule_, initFunction_);
+    sourceModule_->applyVisitor(declarePass);
     delete declarePass;
 
     // declare is over, terminate init function
     initFunction_->getEntryBlock().getInstList().push_back(ReturnInst::Create(llvmModule_->getContext()));
 
-    AST::statementList& topStmts = sourceModule_.getAST();
+    AST::block* topStmts = sourceModule_->getAST();
     pCodeGen* codeGenPass;
 
     // first codegen all declarations (i.e. functions, classes and methods)
-    for (AST::statementList::iterator i = topStmts.begin();
-         i != topStmts.end();
-         ++i) {
-        if ((*i)->getKind() == AST::functionDeclKind) {
-            AST::functionDecl* f = static_cast<AST::functionDecl*>(*i);
-            codeGenPass = new pCodeGen(llvmModule_,
+    for (AST::stmt::child_iterator i = topStmts->child_begin(), e = topStmts->child_end(); i != e; ++i) {
+        if (AST::functionDecl* f = dyn_cast<AST::functionDecl>(*i)) {
+            codeGenPass = new pCodeGen(sourceModule_,
+                                       llvmModule_,
                                        pGenSupport::mangleUserFunctionName(llvmModule_->getModuleIdentifier(),
-                                                                           f->functionDef()->name()));
+                                                                           f->sig()->name()));
             codeGenPass->visit(f->body());
             delete codeGenPass;
         }
     }
 
     // now global
-    codeGenPass = new pCodeGen(llvmModule_, entryFunction_->getName());
-    sourceModule_.applyVisitor(codeGenPass);
+    codeGenPass = new pCodeGen(sourceModule_, llvmModule_, entryFunction_->getName());
+    sourceModule_->applyVisitor(codeGenPass);
     delete codeGenPass;
 
     //verifyModule(*llvmModule_, PrintMessageAction);
