@@ -862,20 +862,20 @@ public:
 // foreach statement
 class forEach: public stmt {
 
-    enum { RVAL, BODY, END_EXPR };
+    enum { RVAL, KEY, VAL, BODY, END_EXPR };
     stmt* children_[END_EXPR];
-
-    llvm::PooledStringPtr value_;
-    llvm::PooledStringPtr key_; // may be empty
-    bool byRef_;
+    bool byRef_; // value
 
 protected:
-    forEach(const forEach& other, pParseContext& C): stmt(other), value_(other.value_),
-        key_(other.key_), byRef_(other.byRef_)
+    forEach(const forEach& other, pParseContext& C): stmt(other), byRef_(other.byRef_)
     {
         memset(children_, 0, sizeof(children_));
         if(other.children_[RVAL])
             children_[RVAL] = other.children_[RVAL]->clone(C);
+        if(other.children_[KEY])
+            children_[KEY] = other.children_[KEY]->clone(C);
+        if(other.children_[VAL])
+            children_[VAL] = other.children_[VAL]->clone(C);
         if(other.children_[BODY])
             children_[BODY] = other.children_[BODY]->clone(C);
     }
@@ -884,13 +884,11 @@ public:
     forEach(expr* rVal,
             stmt* body,
             pParseContext& C,
-            const pSourceRange& val,            
+            expr* val,
             bool byRef,
-            const pSourceRange* key=NULL):
+            expr* key=NULL):
     stmt(forEachKind),
     children_(),
-    value_(C.idPool().intern(pStringRef(val.begin().base(), (val.end()-val.begin())))),
-    key_(),
     byRef_(byRef)
     {
 
@@ -900,10 +898,9 @@ public:
         }
 
         children_[RVAL] = static_cast<stmt*>(rVal);
+        children_[KEY] = static_cast<stmt*>(key);
+        children_[VAL] = static_cast<stmt*>(val);
         children_[BODY] = static_cast<stmt*>(body);
-        if (key) {
-            key_ = C.idPool().intern(pStringRef(key->begin().base(), (key->end()-key->begin())));
-        }
 
     }
 
@@ -911,21 +908,11 @@ public:
     stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
 
     expr* rVal(void) { return static_cast<expr*>(children_[RVAL]); }
+    expr* key(void) { return static_cast<expr*>(children_[KEY]); }
+    expr* val(void) { return static_cast<expr*>(children_[VAL]); }
     block* body(void) { return static_cast<block*>(children_[BODY]); }
 
-    bool hasKey(void) const { return key_; }
-
-    pIdentString key(void) const {
-        if (key_)
-            return *key_;
-        else
-            return pIdentString();
-    }
-
-    pIdentString value(void) const {
-        assert(value_);
-        return *value_;
-    }
+    bool hasKey(void) const { return (bool)children_[KEY]; }
 
     IMPLEMENT_SUPPORT_MEMBERS(forEach);
 

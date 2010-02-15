@@ -446,27 +446,27 @@ ifBlock(A) ::= T_IF(IF) T_LEFTPAREN expr(COND) T_RIGHTPAREN statement(TRUE) else
 // foreach
 %type forEach {AST::forEach*}
 // foreach($expr as $val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS var(VAL) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, false /*by ref*/ );
+    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, VAL, false /*by ref*/ );
     A->setLine(TOKEN_LINE(F));
 }
 // foreach($expr as $key => $val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS var(KEY) T_ARROWKEY var(VAL) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, false /*by ref*/, KEY);
+    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, VAL, false /*by ref*/, KEY);
     A->setLine(TOKEN_LINE(F));
 }
 // foreach($expr as &$val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_AND T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_AND var(VAL) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, true /*by ref*/);
+    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, VAL, true /*by ref*/);
     A->setLine(TOKEN_LINE(F));
 }
 // foreach($expr as $key => &$val)
-forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS T_VARIABLE(KEY) T_ARROWKEY T_AND T_VARIABLE(VAL) T_RIGHTPAREN statement(BODY).
+forEach(A) ::= T_FOREACH(F) T_LEFTPAREN expr(RVAL) T_AS var(KEY) T_ARROWKEY T_AND var(VAL) T_RIGHTPAREN statement(BODY).
 {
-    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, *VAL, true /*by ref*/, KEY);
+    A = new (CTXT) AST::forEach(RVAL, BODY, CTXT, VAL, true /*by ref*/, KEY);
     A->setLine(TOKEN_LINE(F));
 }
 
