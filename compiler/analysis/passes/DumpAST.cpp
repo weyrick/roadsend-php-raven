@@ -91,7 +91,64 @@ void DumpAST::visit_pre_var(var* n) {
 }
 
 void DumpAST::visit_pre_classDecl(classDecl* n) {
+
     currentElement_->SetAttribute("id",n->name());
+    TiXmlElement* sub, *node;
+
+    switch (n->classType()) {
+    case classDecl::ABSTRACT:
+        currentElement_->SetAttribute("type","ABSTRACT");
+        break;
+    case classDecl::FINAL:
+        currentElement_->SetAttribute("type","FINAL");
+        break;
+    case classDecl::IFACE:
+        currentElement_->SetAttribute("type","INTERFACE");
+        break;
+    case classDecl::NORMAL:
+        currentElement_->SetAttribute("type","NORMAL");
+        break;
+    }
+
+    if (n->implementsCount()) {
+
+        sub = new TiXmlElement("implements");
+        for (AST::idList::iterator i = n->implements_begin();
+             i != n->implements_end();
+             ++i)
+        {
+            // synthesize literal id nodes here
+            node = new TiXmlElement("literalID");
+            node->SetAttribute("id", *(*i));
+            sub->LinkEndChild(node);
+        }
+        currentElement_->LinkEndChild(sub);
+
+    }
+    else {
+        doComment("implements none");
+    }
+
+    if (n->extendsCount()) {
+
+        sub = new TiXmlElement("extends");
+        for (AST::idList::iterator i = n->extends_begin();
+             i != n->extends_end();
+             ++i)
+        {
+            // synthesize literal id nodes here
+            node = new TiXmlElement("literalID");
+            node->SetAttribute("id", *(*i));
+            sub->LinkEndChild(node);
+        }
+        currentElement_->LinkEndChild(sub);
+
+    }
+    else {
+        doComment("extends none");
+    }
+
+
 }
 
 void DumpAST::visit_pre_literalID(literalID* n) {

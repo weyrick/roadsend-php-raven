@@ -662,13 +662,16 @@ public:
 class classDecl: public decl {
 public:
 
-    enum classType { NORMAL, IFACE, FINAL, ABSTRACT };
+    enum classTypes { NORMAL,
+                      IFACE, // "INTERFACE" is keyword? throws error
+                      FINAL,
+                      ABSTRACT };
 
 private:
     llvm::PooledStringPtr name_;
     idList extends_;
     idList implements_;
-    classType type_;
+    classTypes classType_;
     block* members_;
     
 protected:
@@ -676,7 +679,7 @@ protected:
     // stmt*s!
     classDecl(const classDecl& other, pParseContext& C): decl(other),
         name_(other.name_), extends_(other.extends_), implements_(other.implements_),
-        type_(other.type_), members_(0)
+        classType_(other.classType_), members_(0)
     {
         if(other.members_)
             members_ = other.members_->clone(C);
@@ -685,7 +688,7 @@ protected:
 public:
     classDecl(pParseContext& C,
               const pSourceRange& name,
-              classType type,
+              classTypes type,
               const sourceRangeList* extends, // may be null
               const sourceRangeList* implements, // may be null
               block* members
@@ -694,7 +697,7 @@ public:
         name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
         extends_(),
         implements_(),
-        type_(type),
+        classType_(type),
         members_(members)
     {
         // intern list of extends (if any)
@@ -725,10 +728,22 @@ public:
         assert(name_);
         return *name_;
     }
+
     block* members(void) { return members_; }
+
+    classTypes classType(void) const { return classType_; }
+
+    pUInt implementsCount(void) const { return implements_.size(); }
+    pUInt extendsCount(void) const { return extends_.size(); }
 
     stmt::child_iterator child_begin() { return (stmt**)&members_; }
     stmt::child_iterator child_end() { return (stmt**)&members_+1; }
+
+    idList::iterator extends_begin() { return extends_.begin(); }
+    idList::iterator extends_end() { return extends_.end(); }
+
+    idList::iterator implements_begin() { return implements_.begin(); }
+    idList::iterator implements_end() { return implements_.end(); }
 
     IMPLEMENT_SUPPORT_MEMBERS(classDecl);
 
