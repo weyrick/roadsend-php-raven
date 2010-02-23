@@ -229,6 +229,50 @@ void DumpAST::visit_pre_unaryOp(unaryOp* n)  {
     }
 }
 
+void DumpAST::visit_pre_builtin(builtin* n)  {
+    switch (n->opKind()) {
+    case builtin::CLONE:
+        currentElement_->SetAttribute("op", "CLONE");
+        break;
+    case builtin::ECHO:
+        currentElement_->SetAttribute("op", "ECHO");
+        break;
+    case builtin::EMPTY:
+        currentElement_->SetAttribute("op", "EMPTY");
+        break;
+    case builtin::EXIT:
+        currentElement_->SetAttribute("op", "EXIT");
+        break;
+    case builtin::ISSET:
+        currentElement_->SetAttribute("op", "ISSET");
+        break;
+    case builtin::UNSET:
+        currentElement_->SetAttribute("op", "UNSET");
+        break;
+    case builtin::PRINT:
+        currentElement_->SetAttribute("op", "PRINT");
+        break;
+    case builtin::THROW:
+        currentElement_->SetAttribute("op", "THROW");
+        break;
+    case builtin::IGNORE_WARNING:
+        currentElement_->SetAttribute("op", "IGNORE_WARNING");
+        break;
+    case builtin::INCLUDE:
+        currentElement_->SetAttribute("op", "INCLUDE");
+        break;
+    case builtin::INCLUDE_ONCE:
+        currentElement_->SetAttribute("op", "INCLUDE_ONCE");
+        break;
+    case builtin::REQUIRE:
+        currentElement_->SetAttribute("op", "REQUIRE");
+        break;
+    case builtin::REQUIRE_ONCE:
+        currentElement_->SetAttribute("op", "REQUIRE_ONCE");
+        break;
+    }
+}
+
 void DumpAST::visit_pre_binaryOp(binaryOp* n)  {
     switch (n->opKind()) {
     case binaryOp::CONCAT:

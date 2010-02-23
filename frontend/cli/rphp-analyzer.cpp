@@ -132,11 +132,11 @@ int main( int argc, char* argv[] )
             for (std::vector<std::string>::iterator i = passes.begin();
             i != passes.end();
             ++i) {
-                if (*i == "dumpast") {
+                if (*i == "dump-ast") {
                     passManager.addPass<AST::Pass::DumpAST>();
                     passManager.addPass<AST::Pass::DumpStats>();
                 }
-                else if (*i == "simplifystrings") {
+                else if (*i == "simplify-strings") {
                     passManager.addPass<AST::Pass::SimplifyStrings>();
                 }
                 else if (*i == "split-builtins") {
