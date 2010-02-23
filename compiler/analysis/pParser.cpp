@@ -79,8 +79,12 @@ void parseSourceFile(pSourceModule* pMod, bool debug=false) {
             case 0:
                 // end of input (success)
                 break;
-            case T_OPEN_TAG:
             case T_CLOSE_TAG:
+                // we swallow one newline if it follows
+                if ((tokEnd != sourceEnd) && (*tokEnd == '\n'))
+                    ++tokEnd;
+                break;
+            case T_OPEN_TAG:
                 // state change (no parse), but count newlines from OPEN tag
                 goto handleNewlines;
             case boost::lexer::npos:
