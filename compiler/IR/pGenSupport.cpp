@@ -25,7 +25,9 @@
 #include "rphp/IR/pCompileError.h"
 
 #include <llvm/Module.h>
+#if (LLVM_VERSION < 2007000)
 #include <llvm/ModuleProvider.h>
+#endif
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/DerivedTypes.h>
@@ -96,16 +98,25 @@ Module* pGenSupport::readBitcode(std::string fileName, LLVMContext& context) {
         throw pCompileError("error loading runtime IR file [" + fileName + "]: " + errMsg);
     }
 
+    Module* mod;
+
+#if (LLVM_VERSION >= 2007000)
+    mod = getLazyBitcodeModule(mb, context, &errMsg);
+#else
     ModuleProvider* mp = getBitcodeModuleProvider(mb, context, &errMsg);
+#endif
+
     if (errMsg.length()) {
         throw pCompileError("error parsing bitcode file [" + fileName + "]: " + errMsg);
     }
 
-    Module* mod =  mp->getModule();
+#if (LLVM_VERSION < 2007000)
+    mod =  mp->getModule();
 
     // caller takes control of module
     mp->releaseModule();
     delete mp;
+#endif
 
     return mod;
 
