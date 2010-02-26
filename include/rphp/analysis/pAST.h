@@ -131,8 +131,8 @@ struct constStmtIterator : public stmtIteratorImpl<constStmtIterator,
 #define IMPLEMENT_SUPPORT_MEMBERS(CLASS)      virtual CLASS * clone(pParseContext& C) const {\
                                                  return new (C) CLASS(*this, C);\
                                               }\
-                                              static bool classof(const CLASS * s) { return true; }\
-                                              static bool classof(const stmt* s) { return s->kind() == CLASS##Kind; }\
+                                              static bool classof(const CLASS *) const { return true; }\
+                                              static bool classof(const stmt* s) const { return s->kind() == CLASS##Kind; }\
                                               CLASS * retain() { stmt::retain(); return this; }
 
 // statement base class
