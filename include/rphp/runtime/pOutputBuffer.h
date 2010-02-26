@@ -91,6 +91,7 @@ public:
             case bufTypeUnicode:
                 return (const char*)uBuffer_->getTerminatedBuffer();
         }
+        assert(0 && "unreachable!");
     }
 
     void newline() {
