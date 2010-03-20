@@ -1463,18 +1463,49 @@ public:
 // NODE: literal int
 class literalInt: public literalExpr {
 
+    //TODO: use bitfield here
     bool negative_;
+    bool isBig_;
+    bool isParsed_;
+    pInt val_;
+    pBigInt bigVal_;
 
+    void parse() {
+        // GMP parses base + sign just fine, but it doesn't allow literals like
+        // 098 (invalid octal number) and throws an std::invalid_argument exception.
+        // we catch it and will throw our own error here.
+        // Additionally, GMP supports the 0[bB] prefix for binary numbers.
+        try {
+            bigVal_ = pBigInt(stringVal_);
+        } catch(std::invalid_argument& arg) {
+            // TODO: better error message
+            assert(0 && "Invalid literal integer constant in line xxx of file xxx.");
+        }
+        isBig_ = true;
+        if(bigVal_.fits_slong_p()) {
+            isBig_ = false;
+            val_ = bigVal_.get_si();
+        }
+        isParsed_ = true;
+    }
 protected:
     literalInt(const literalInt& other, pParseContext& C): literalExpr(other),
-            negative_(other.negative_) {}
+            negative_(other.negative_), isBig_(other.isBig_), isParsed_(other.isParsed_),
+            val_(other.val_), bigVal_(other.bigVal_)
+    {}
     
 public:
-    literalInt(const pSourceRange& v): literalExpr(literalIntKind, v), negative_(false) { }
+    literalInt(const pSourceRange& v): literalExpr(literalIntKind, v), negative_(false),
+            isBig_(false), isParsed_(false), val_(0)
+    {}
 
     bool negative(void) const { return negative_; }
-    void setNegative(bool n) { negative_ = n; }
+    void setNegative(bool n) { negative_ = n; isParsed_ = false;}
 
+    bool isBigInt() { if(!isParsed_) parse(); return isBig_; }
+    pInt getInt() { if(!isParsed_) parse(); assert(!isBig_ && "value doesn't fit in integer!"); return val_; }
+    pBigInt getBigInt() { if(!isParsed_) parse(); return bigVal_; }
+    
     stmt::child_iterator child_begin() { return child_iterator(); }
     stmt::child_iterator child_end() { return child_iterator(); }
 

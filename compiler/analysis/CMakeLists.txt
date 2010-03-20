@@ -101,3 +101,5 @@ set_source_files_properties( ${PARSER_SRC_FILES}
 
 # STATIC
 add_library( rphp-analysis ${PARSER_SRC_FILES} )
+target_link_libraries (rphp-analysis rphp-runtime)
+
