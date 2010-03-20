@@ -505,7 +505,7 @@ public:
             decl(signatureKind),
             name_(C.idPool().intern(pStringRef(name.begin().base(), (name.end()-name.begin())))),
             formalParamList_(0),
-            numParams_(s->size()),
+            numParams_(s ? s->size() : 0),
             returnByRef_(returnByRef)
     {
         if (numParams_) {
