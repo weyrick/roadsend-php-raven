@@ -70,7 +70,7 @@ void pSourceModule::applyVisitor(AST::pBaseVisitor* v) {
 
 void pSourceModule::applyTransform(AST::pBaseTransformer* t) {
     assert(ast_);
-    t->transform(ast_);
+    ast_ = cast<AST::block>(t->transform(ast_));
 }
 
 } // namespace
