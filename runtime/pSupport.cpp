@@ -61,5 +61,28 @@ char* convertCodepage(const pUString& s, const char* codepage) {
 
 }
 
+/**
+ * Edge cases: when we parse a literal float in a string (aka contains an [eE.])
+ * we just stop parsing the integer there, as php does. Especially exponents like 1e5 are
+ * parsed as 1, not 10000!
+ */
+pBigInt convertStringLiteralToBigInt(pSourceRange& s) {
+    pSourceRange::const_iterator pos = s.begin();
+    pSourceRange::const_iterator numEndPos = s.begin();
+    while(pos != s.end()) {
+        if(*pos == '-' || (*pos >= '0' && *pos <= '9')) {
+            numEndPos = pos;
+        }
+        ++pos;
+    }
+    // normal strings evaluate to 0.
+    if(s.begin() == numEndPos)
+        return pBigInt(0);
+    pSourceString stringNum(s.begin(), numEndPos);
+    // This should never throw because we made a valid number out of that string.
+    return pBigInt(stringNum, 10);
+}
+
+
 }
 

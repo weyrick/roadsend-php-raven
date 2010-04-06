@@ -41,6 +41,8 @@ pUString toLowerCopy(const pUString& v);
 // this will allocate using new[], and returns the allocated buffer which
 // the caller is responsible for deleteing
 char* convertCodepage(const pUString& s, const char* codepage);
+pBigInt convertStringLiteralToBigInt(pSourceString& s);
+
 
 }
 

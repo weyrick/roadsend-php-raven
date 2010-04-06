@@ -529,40 +529,6 @@ public:
     IMPLEMENT_SUPPORT_MEMBERS(signature);
 };
 
-// function declaration
-class functionDecl: public decl {
-
-    enum { SIG, BODY, END_EXPR };
-    stmt* children_[END_EXPR];
-    
-protected:
-    functionDecl(const functionDecl& other, pParseContext& C): decl(other)
-    {
-        memset(children_, 0, sizeof(children_));
-        if(other.children_[SIG])
-            children_[SIG] = other.children_[SIG]->clone(C);
-        if(other.children_[BODY])
-            children_[BODY] = other.children_[BODY]->clone(C);
-    }
-
-public:
-    functionDecl(signature* sig, block* body):
-        decl(functionDeclKind),
-        children_()
-    {
-        children_[SIG] = sig;
-        children_[BODY] = body;
-    }
-
-    signature* sig(void) { return static_cast<signature*>(children_[SIG]); }
-    block* body(void) { return static_cast<block*>(children_[BODY]); }
-
-    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
-    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
-
-    IMPLEMENT_SUPPORT_MEMBERS(functionDecl);
-
-};
 
 struct memberFlags {
     // these are taken by address during parse
@@ -2291,6 +2257,113 @@ public:
     IMPLEMENT_SUPPORT_MEMBERS(exprReduce);
 
 };
+
+// MIR nodes
+
+// A label is function-local, and a function-unique label id has to be obtained from the
+// functionDecl AST node.
+class label: public stmt {
+    
+    pInt labelNo_;
+    
+protected:
+    label(const label& other, pParseContext& C): stmt(other), labelNo_(other.labelNo_) {}
+    
+public:
+    label(pUInt labelNo): stmt(labelKind), labelNo_(labelNo) {}
+    pUInt labelNo() const { return labelNo_; }
+    void setLabelNo(pUInt n) { labelNo_ = n; }
+    
+    stmt::child_iterator child_begin() { return child_iterator(); }
+    stmt::child_iterator child_end() { return child_iterator(); }
+
+    IMPLEMENT_SUPPORT_MEMBERS(label);   
+};
+
+// A branch with no condition is an unconditional branch to trueLabel.
+// falseLabel is then -1
+class branch: public stmt {
+    
+    pInt trueLabel_;
+    pInt falseLabel_;
+    expr* condition_;
+    
+protected:
+    branch(const branch& other, pParseContext& C): stmt(other),
+            trueLabel_(other.trueLabel_), falseLabel_(other.falseLabel_), condition_(0)
+    {
+        if(other.condition_)
+            condition_ = other.condition_->clone(C);
+    }
+    
+public:
+    branch(expr* condition, pUInt trueLabel, pUInt falseLabel): stmt(branchKind),
+            trueLabel_(trueLabel), falseLabel_(falseLabel), condition_(condition) {}
+    branch(expr* condition, label* trueLabel, label* falseLabel): stmt(branchKind),
+                trueLabel_(trueLabel->labelNo()), falseLabel_(falseLabel->labelNo()),
+                condition_(condition) {}
+    branch(pUInt destinationLabel): stmt(branchKind),
+            trueLabel_(destinationLabel), falseLabel_(-1), condition_(0) {}
+    branch(label* destinationLabel): stmt(branchKind),
+            trueLabel_(destinationLabel->labelNo()), falseLabel_(-1), condition_(0) {}
+    pUInt trueLabel() const { return trueLabel_; }
+    void setTrueLabel(pUInt n) { trueLabel_ = n; }
+    void setTrueLabel(label* n) { trueLabel_ = n->labelNo(); }
+
+    pUInt falseLabel() const { return falseLabel_; }
+    void setFalseLabel(pUInt n) { falseLabel_ = n; }
+    void setFalseLabel(label* n) { falseLabel_ = n->labelNo(); }
+
+    expr* condition() const { return condition_; }
+    void setCondition(expr *n) {condition_ = n; }
+    
+    stmt::child_iterator child_begin() { return reinterpret_cast<stmt**>(&condition_); }
+    stmt::child_iterator child_end() { return reinterpret_cast<stmt**>(&condition_+1); }
+
+    IMPLEMENT_SUPPORT_MEMBERS(branch);
+};
+
+// This needs to be after the class label.
+// function declaration
+class functionDecl: public decl {
+
+    enum { SIG, BODY, END_EXPR };
+    stmt* children_[END_EXPR];
+    // This contains the id the next label will recieve, so a function has labelCount_-1 labels.
+    pUInt labelCount_;
+    
+protected:
+    functionDecl(const functionDecl& other, pParseContext& C): decl(other),
+            labelCount_(other.labelCount_)
+    {
+        memset(children_, 0, sizeof(children_));
+        if(other.children_[SIG])
+            children_[SIG] = other.children_[SIG]->clone(C);
+        if(other.children_[BODY])
+            children_[BODY] = other.children_[BODY]->clone(C);
+    }
+
+public:
+    functionDecl(signature* sig, block* body):
+        decl(functionDeclKind),
+        children_(), labelCount_(0)
+    {
+        children_[SIG] = sig;
+        children_[BODY] = body;
+    }
+
+    signature* sig(void) { return static_cast<signature*>(children_[SIG]); }
+    block* body(void) { return static_cast<block*>(children_[BODY]); }
+
+    stmt::child_iterator child_begin() { return (stmt**)&children_[0]; }
+    stmt::child_iterator child_end() { return (stmt**)&children_[0]+END_EXPR; }
+    
+    label* getNewLabel(pParseContext& C) { return new (C) label(labelCount_++); }
+
+    IMPLEMENT_SUPPORT_MEMBERS(functionDecl);
+
+};
+
 
 } } // namespace
 

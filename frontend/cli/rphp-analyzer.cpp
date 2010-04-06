@@ -43,6 +43,8 @@
 #include "rphp/analysis/passes/Early_Lower_Loops.h"
 #include "rphp/analysis/passes/Lower_Binary_Op.h"
 #include "rphp/analysis/passes/Lower_Conditional_Expr.h"
+#include "rphp/analysis/passes/Lower_Control_Flow.h"
+#include "rphp/analysis/passes/MainFunction.h"
 
 
 using namespace llvm;
@@ -104,11 +106,13 @@ int main( int argc, char* argv[] )
         else if(runPasses) {
             // make all variables etc in strings accessible to passes which need them
             passManager.addPass<AST::Pass::SimplifyStrings>();
-            passManager.addPass<AST::Pass::CheckMemoryManagement>();
             
             // TODO: get variable names here or use variable names which the zend engine
             // doesn't allow for internal variables.
             
+            //TODO: take care of conditional function definitions.
+            passManager.addPass<AST::Pass::MainFunction>();
+
             // uses boolean && and ||
             passManager.addPass<AST::Pass::Split_Builtins>();
             // uses boolean !
@@ -121,6 +125,8 @@ int main( int argc, char* argv[] )
             // do this one late in case other passes are creating return's for whatever reason...
             passManager.addPass<AST::Pass::Desugar>();
             
+            passManager.addPass<AST::Pass::Lower_Control_Flow>();
+
             // debug output
             passManager.addPass<AST::Pass::DumpAST>();
             passManager.addPass<AST::Pass::DumpStats>();
@@ -153,6 +159,12 @@ int main( int argc, char* argv[] )
                 }
                 else if (*i == "desugar") {
                     passManager.addPass<AST::Pass::Desugar>();
+                }
+                else if (*i == "lower-control-flow") {
+                    passManager.addPass<AST::Pass::Lower_Control_Flow>();
+                }
+                else if (*i == "add-main-function") {
+                    passManager.addPass<AST::Pass::MainFunction>();
                 }
             }
         }

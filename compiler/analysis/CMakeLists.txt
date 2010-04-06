@@ -90,6 +90,8 @@ set(PARSER_SRC_FILES
   passes/Early_Lower_Loops.cpp
   passes/Lower_Binary_Op.cpp
   passes/Lower_Conditional_Expr.cpp
+  passes/Lower_Control_Flow.cpp
+  passes/MainFunction.cpp
 )
 
 # PASSES

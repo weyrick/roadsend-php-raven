@@ -46,6 +46,9 @@ namespace rphp { namespace AST { namespace Pass {
  *      }
  */
 stmt* Early_Lower_Loops::transform_post_whileStmt(whileStmt* n) {
+    if(literalBool* cond = dyn_cast<literalBool>(n->condition()))
+            if(cond->getBoolVal() == true)
+                return n;
     // break
     breakStmt* breakLoop = new (C_) breakStmt(NULL);
 

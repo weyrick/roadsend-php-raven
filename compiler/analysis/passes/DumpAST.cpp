@@ -426,5 +426,14 @@ bool DumpAST::visit_children_formalParam(formalParam* n) {
     return true;
 }
 
+void DumpAST::visit_pre_label(label* n) {
+    currentElement_->SetAttribute("id", n->labelNo());
+}
+
+void DumpAST::visit_pre_branch(branch* n) {
+    currentElement_->SetAttribute("trueLabel", n->trueLabel());
+    currentElement_->SetAttribute("falseLabel", n->falseLabel());
+}
+
 } } } // namespace
 
