@@ -25,13 +25,15 @@
 
 #include "rphp/analysis/pAST.h"
 #include "rphp/analysis/pParseContext.h"
+#include "rphp/analysis/pTempVar.h"
 
 namespace rphp { namespace AST {
 class pTransformHelper {
     pParseContext& C_;
+    pTempVar t_;
 
 public:
-    pTransformHelper(pParseContext& C): C_(C) {}
+    pTransformHelper(pParseContext& C): C_(C), t_(C) {}
 
     // lTrue and lFalse provide an easy way to get a literal true or false in the code.
     literalBool* lTrue() {
@@ -67,6 +69,9 @@ public:
             prevExpr = new (C_) binaryOp(prevExpr, cast<expr>(it->clone(C_)), operationType);
 
         return prevExpr;
+    }
+    var* tempVar(pStringRef name) {
+        return t_.getTempVar(name);
     }
 };
 

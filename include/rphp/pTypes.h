@@ -36,11 +36,15 @@
 #include <string>
 
 #include <llvm/ADT/StringRef.h>
+#include <llvm/ADT/Twine.h>
 
 namespace rphp {
 
 /// string ref, see llvm::StringRef
 typedef llvm::StringRef pStringRef;
+
+/// Twine for fast string concats, see llvm::Twine
+typedef llvm::Twine pTwine;
 
 /// signed (fast) integer type (used in pVar)
 typedef signed long pInt;

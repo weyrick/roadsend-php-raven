@@ -77,10 +77,9 @@ stmt* Early_Lower_Loops::transform_post_whileStmt(whileStmt* n) {
  *  difficult to handle otherwise.
  */
 stmt* Early_Lower_Loops::transform_post_doStmt(doStmt* n) {
-    // TODO: Get a unique variable name here!
     // The $firstRun = true part.
     // Get the variable firstRun
-    var* firstRun = new (C_) var("firstRun", C_);
+    var* firstRun = h_.tempVar("firstRun");
 
     // Do the assignment $firstRun = true;
     assignment* firstRunTrueAssignment = new (C_) assignment(firstRun, h_.lTrue(), false);
@@ -141,8 +140,7 @@ stmt* Early_Lower_Loops::transform_post_forStmt(forStmt* n) {
     statementList newWhileBodyStatements;
 
     if(n->increment()) {
-        //TODO unique variable name!
-        var* firstRun = new (C_) var("firstRun", C_);
+        var* firstRun = h_.tempVar("firstRun");
         assignment* firstRunTrueAssignement = new (C_) assignment(firstRun, h_.lTrue(), false);
 
         newWholeStatements.push_back(firstRunTrueAssignement);
@@ -299,16 +297,15 @@ stmt* Early_Lower_Loops::transform_post_forEach(forEach* n) {
  *  Use a pre_switch so that the do_while can be lowered in the post_do.
  */
 stmt* Early_Lower_Loops::transform_pre_switchStmt(switchStmt* n) {
-    // TODO: variable names
     statementList loweredStmts;
     
     // switch_val = expr
-    var* switchVal = new (C_) var("switch_val", C_);
+    var* switchVal = h_.tempVar("switch_val");
     assignment* switchValAssignment = new (C_) assignment(switchVal, n->rVal()->retain(), false /*ref*/);
     loweredStmts.push_back(switchValAssignment);
     
     // matched = false
-    var* matchedVal = new (C_) var("matched", C_);
+    var* matchedVal = h_.tempVar("matched");
     assignment* matchedValInit = new (C_) assignment(matchedVal, h_.lFalse(), false /*ref*/);
     loweredStmts.push_back(matchedValInit);
     
@@ -328,7 +325,7 @@ stmt* Early_Lower_Loops::transform_pre_switchStmt(switchStmt* n) {
         // Evaluate the condition of this case if we've not already matched a case.
         statementList evaluateConditionStmts;
 
-        var* caseCondition = new (C_) var("caseCondition", C_);
+        var* caseCondition = h_.tempVar("caseCondition");
         assignment* caseConditionInit = new (C_) assignment(caseCondition, caseStmt->condition()->retain(), false /*ref*/);
         evaluateConditionStmts.push_back(caseConditionInit);
 

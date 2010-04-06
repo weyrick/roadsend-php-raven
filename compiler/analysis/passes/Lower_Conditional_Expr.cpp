@@ -47,7 +47,7 @@ namespace rphp { namespace AST { namespace Pass {
  */
 expr* Lower_Conditional_Expr::transform_post_conditionalExpr(conditionalExpr* n) {
     // TODO: unique variable name!
-    var* retVar = new (C_) var("ret", C_);
+    var* retVar = h_.tempVar("ret");
 
     // trueexpr assignment
     assignment* trueAssign = new (C_) assignment(retVar, n->trueExpr()->retain(), false);

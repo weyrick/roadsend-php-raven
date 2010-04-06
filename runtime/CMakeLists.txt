@@ -26,5 +26,10 @@ set(RUNTIME_SRC_FILES
 
 add_subdirectory(test)
 
+set_source_files_properties( ${RUNTIME_SRC_FILES}
+                             PROPERTIES COMPILE_FLAGS ${LLVM_COMPILE_FLAGS}
+                            )
+
+
 add_library( rphp-runtime SHARED ${RUNTIME_SRC_FILES} )
 target_link_libraries( rphp-runtime ${ICU_LIBRARIES} ${GMP_LIBRARIES} ${GMPXX_LIBRARIES} ) 
