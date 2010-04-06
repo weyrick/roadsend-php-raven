@@ -151,6 +151,9 @@ int main( int argc, char* argv[] )
                 else if (*i == "lower-conditional-exprs") {
                     passManager.addPass<AST::Pass::Lower_Conditional_Expr>();
                 }
+                else if (*i == "desugar") {
+                    passManager.addPass<AST::Pass::Desugar>();
+                }
             }
         }
         else {
