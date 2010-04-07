@@ -53,7 +53,7 @@ namespace rphp { namespace AST { namespace Pass {
  *      ((($a && !$b) || ($b && !$a)) ? true : false)
 
  * This is in turn then feeded to the transforms above.
- * The conditionalExpr's generated are then lowered by the transform_post_conditionalExpr here.
+ * The conditionalExpr's generated are then lowered by the Lower_Conditional_Expr pass.
  *
  * Transform
  *      $a >= $b
