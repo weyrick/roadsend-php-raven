@@ -58,7 +58,7 @@ namespace rphp { namespace AST { namespace Pass {
  * Transform
  *      $a >= $b
  * into
- *      $b <= $
+ *      $b <= $a
  *
  * Transform
  *      $a > $b
