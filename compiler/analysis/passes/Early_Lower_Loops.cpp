@@ -183,7 +183,7 @@ stmt* Early_Lower_Loops::transform_post_forStmt(forStmt* n) {
  * Currently the AST node for forEach's is weird, so i can't implement this transformation.
  */
 stmt* Early_Lower_Loops::transform_post_forEach(forEach* n) {
-
+    assert(0 && "Foreach early_lower_loops is not implemented yet.");
     return n;
 }
 
@@ -297,7 +297,7 @@ stmt* Early_Lower_Loops::transform_post_forEach(forEach* n) {
  *          }
  *      } while (0)
  *
- *  Use a pre_switch so that the do_while can be lowered in the post_do.
+ *  Use a pre_switchStmt so that the do_while can be lowered in the post_do.
  */
 stmt* Early_Lower_Loops::transform_pre_switchStmt(switchStmt* n) {
     statementList loweredStmts;
