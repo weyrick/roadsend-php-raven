@@ -435,5 +435,39 @@ void DumpAST::visit_pre_branch(branch* n) {
     currentElement_->SetAttribute("falseLabel", n->falseLabel());
 }
 
+void DumpAST::visit_pre_typeCast(typeCast* n) {
+    switch(n->castKind()) {
+
+        case typeCast::STRING:
+            currentElement_->SetAttribute("castKind", "string");
+            break;
+        case typeCast::BINARY:
+            currentElement_->SetAttribute("castKind", "binary");
+            break;
+        case typeCast::UNICODE:
+            currentElement_->SetAttribute("castKind", "unicode");
+            break;
+        case typeCast::INT:
+            currentElement_->SetAttribute("castKind", "int");
+            break;
+        case typeCast::REAL:
+            currentElement_->SetAttribute("castKind", "float");
+            break;
+        case typeCast::BOOL:
+            currentElement_->SetAttribute("castKind", "bool");
+            break;
+        case typeCast::UNSET:
+            currentElement_->SetAttribute("castKind", "unset");
+            break;
+        case typeCast::ARRAY:
+            currentElement_->SetAttribute("castKind", "array");
+            break;
+        case typeCast::OBJECT:
+            currentElement_->SetAttribute("castKind", "object");
+            break;
+    }
+
+}
+
 } } } // namespace
 

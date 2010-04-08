@@ -78,6 +78,8 @@ public:
     void visit_pre_literalConstant(literalConstant* n);
     void visit_pre_label(label* n);
     void visit_pre_branch(branch* n);
+    void visit_pre_typeCast(typeCast* n);
+
 
 };
 
