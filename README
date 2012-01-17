@@ -1,9 +1,117 @@
+= Roadsend PHP: Raven (rphp) =
 
-Roadsend PHP (raven)
---------------------
+This is the development site for the rewrite of Roadsend PHP (rphp), based on LLVM and a new C++ runtime. It is an open source, liberally licensed project.
 
-This source tree is a C++ rewrite of the original Roadsend PHP written in Bigloo scheme.
+You can find the latest summary on recent developments on http://roadsend-php.blogspot.com
 
-To compile, it requires a recent C++ compiler, Boost, and LLVM. 
+Features/Goals include: 
+ * Highly optimized, JIT or static compiled native binaries (via LLVM)
+ * PHP source level analysis and optimization
+ * Rich diagnostics and error messages
+ * Modular design
+ * Clean and easy runtime and extension API
+ * Full unicode support
+ * Latest language features (e.g. PHP5 objects, exceptions, namespaces, lambda functions, etc)
+ * Portability, Speed, Security
+
+Unlike our previous project, we are not aiming for 100% compatibility with Zend Engine based PHP. 
+
+== Current Status ==
+
+ * CMake build system
+ * Runtime library
+  * Runtime variable representation
+  * Port of basic runtime system layout
+  * Standard Extension started
+ * Commandline front end
+  * Compile stand alone
+  * Run in JIT
+ * Compiler and Analysis
+  * Full unicode preprocessor/lexer/parser in place
+  * Pass system for AST tree traversal and transforming
+  * Some code (IR) generation (detailed progress list coming soon)
+  * Static analyzer which dumps (in XML)
+   * Tokens
+   * AST
+   * Generated IR
+   * Various analysis passes
+  * Port of [http://phpcompiler.org phc] optimizer passes
+ * Runtime Test Suite (CppUnit and PHP based)
+
+Development currently takes place on Linux x86 (32 and 64) and OSX, but other platforms will be supported.
+
+If you are looking for a fully functioning PHP compiler that works right now, please see our [http://code.roadsend.com/pcc original implementation] instead.
+
+If you'd like to contribute, please contact us or join us in #roadsend on irc.freenode.net
+
+== Requires ==
+
+ * [http://llvm.org LLVM] 2.6+, and llvm-g++ 4.2
+ * [http://boost.org Boost] 1.38+ (only headers required, no libraries)
+ * [http://cmake.org CMake] 2.6+
+ * [http://icu-project.org ICU] 4.2+ 
+ * [http://gmplib.org GMP] 4.3.1+
+
+== Docs ==
+
+ * [http://roadsend-php.blogspot.com Development Blog]
+ * [http://code.roadsend.com/docs/doxygen/annotated.html Doxygen Source Documentation]
+
+== Source ==
+
+Browse the source at:
+https://github.com/weyrick/roadsend-php-raven
+
+== Build ==
+
+rphp uses the CMake build system. Basic *nix instructions:
+
+ * create "build" directory inside of rphp
+ * in the build directory, type "cmake .."
+ * make
+
+Note that an in-tree build is not recommended, you should create a separate build directory.
+
+ * '''NOTE: There is a bug in LLVM 2.6 preventing rphp/lib/c-runtime.bc from working without first running rphp/lib/llvm-2.6-fixup.sh. This has been fixed in 2.7svn'''
+
+== Sample Checkout and Build Session ==
+
+Assuming you have the prerequisites installed, a sample checkout and build session might look like this:
+
+~$ cd rphp
+~rphp/$ mkdir build
+~rphp/$ cd build
+~rphp/build$ cmake ..
+(... output ...)
+~rphp/build$ make
+(... build output ...)
 
 
+All of the build files (including libraries and executables that are built) will be underneath this build directory.
+
+== Running ==
+
+ '''PLEASE NOTE that code generation is currently disabled while we finish rewriting the front end. Try rphp-analyzer instead!
+
+Before running, setup some environment variables so rphp can find its library files. The following is a .bashrc excerpt, but what's important is to define RPHP_IR_PATH, RPHP_RUNTIME_PATH, and LD_LIBRARY_PATH if you wan to try both compiling and interpreting.
+
+RPHP_PATH=~/rphp
+RPHP_IR_PATH=$RPHP_PATH/lib
+RPHP_RUNTIME_PATH=$RPHP_PATH/build/runtime/
+LD_LIBRARY_PATH=$RPHP_RUNTIME_PATH:$LD_LIBRARY_PATH
+export RPHP_IR_PATH RPHP_RUNTIME_PATH LD_LIBRARY_PATH
+
+The compiler binaries will be located in the build directory in frontend/cli/.
+"rphp" is the compiler and JIT interpreter. To execute a source file immediately (using JIT):
+
+$ frontend/cli/rphp -f helloworld.php
+
+To compile to a binary and run native:
+
+$ frontend/cli/rphp helloworld.php
+$ ./helloworld
+
+To dump the various passes:
+rphp-analyzer --dump-toks <file>
+rphp-analyzer --dump-ast <file>
+rphp --dump-ir <file>
