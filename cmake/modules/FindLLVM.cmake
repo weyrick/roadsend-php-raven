@@ -23,17 +23,17 @@ else (LLVM_INCLUDE_DIR)
       /opt/local/bin
   )
   
-  find_program(LLVM_GXX_EXECUTABLE
-      NAMES llvm-g++ llvmg++
+  find_program(LLVM_CLANGXX_EXECUTABLE
+      NAMES clang++
       PATHS
       /opt/local/bin
   )
 
-  if (LLVM_GXX_EXECUTABLE)
-      MESSAGE(STATUS "LLVM llvm-g++ found at: ${LLVM_GXX_EXECUTABLE}")
-  else(LLVM_GXX_EXECUTABLE)
-      MESSAGE(FATAL_ERROR "LLVM llvm-g++ is required, but not found!")
-  endif(LLVM_GXX_EXECUTABLE)
+  if (LLVM_CLANGXX_EXECUTABLE)
+      MESSAGE(STATUS "LLVM clang++ found at: ${LLVM_CLANGXX_EXECUTABLE}")
+  else(LLVM_CLANGXX_EXECUTABLE)
+      MESSAGE(FATAL_ERROR "LLVM clang++ is required, but not found!")
+  endif(LLVM_CLANGXX_EXECUTABLE)
   
   MACRO(FIND_LLVM_LIBS LLVM_CONFIG_EXECUTABLE _libname_ LIB_VAR OBJECT_VAR)
     exec_program( ${LLVM_CONFIG_EXECUTABLE} ARGS --libs ${_libname_}  OUTPUT_VARIABLE ${LIB_VAR} )
