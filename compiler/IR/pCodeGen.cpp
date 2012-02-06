@@ -485,7 +485,9 @@ void pCodeGen::visit_pre_functionInvoke(AST::functionInvoke* n) {
         valueStack_.pop();
     }
 
-    currentBlock_.CreateCall(f, callArgList.begin(), callArgList.end());
+    // XXX
+    //currentBlock_.CreateCall(f, callArgList.begin(), callArgList.end());
+    assert(0 && "port");
 
     valueStack_.push(retval);
 }

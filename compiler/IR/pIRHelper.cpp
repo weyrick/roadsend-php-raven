@@ -44,14 +44,14 @@ Type* pIRHelper::pVarPointerType() {
     return PointerType::get(mod_->getTypeByName("struct.rphp::pVar"), 0);
 }
 
-const Type* pIRHelper::pVarType() {
+Type* pIRHelper::pVarType() {
     return mod_->getTypeByName("struct.rphp::pVar");
 }
 
 // void (*)(pVar*)
 FunctionType* pIRHelper::pVarBaseFunType() {
 
-    std::vector<const Type*>args;
+    std::vector<Type*>args;
     args.push_back(pVarPointerType());
     FunctionType* funType = FunctionType::get(
     /*Result=*/Type::getVoidTy(mod_->getContext()),
@@ -65,7 +65,7 @@ FunctionType* pIRHelper::pVarBaseFunType() {
 // pVar* (*)(pVar*, pRuntimeEngine*)
 FunctionType* pIRHelper::pUserFunction0() {
 
-    std::vector<const Type*>args;
+    std::vector<Type*>args;
     args.push_back(pVarPointerType()); // retval
     args.push_back(runtimeEngineType());
     FunctionType* funType = FunctionType::get(
@@ -81,7 +81,7 @@ FunctionType* pIRHelper::pUserFunction0() {
 // pVar* (*)(pVar*, pRuntimeEngine*, pVar*)
 FunctionType* pIRHelper::pUserFunction1() {
 
-    std::vector<const Type*>args;
+    std::vector<Type*>args;
     args.push_back(pVarPointerType()); // retval
     args.push_back(runtimeEngineType());
     args.push_back(pVarPointerType());
@@ -98,7 +98,7 @@ FunctionType* pIRHelper::pUserFunction1() {
 // pVar* (*)(pVar*, pRuntimeEngine*, pVar*, pVar*)
 FunctionType* pIRHelper::pUserFunction2() {
 
-    std::vector<const Type*>args;
+    std::vector<Type*>args;
     args.push_back(pVarPointerType()); // retval
     args.push_back(runtimeEngineType());
     args.push_back(pVarPointerType());
@@ -116,7 +116,7 @@ FunctionType* pIRHelper::pUserFunction2() {
 // pVar* (*)(pVar*, pRuntimeEngine*, pVar*, pVar*, pVar*)
 FunctionType* pIRHelper::pUserFunction3() {
 
-    std::vector<const Type*>args;
+    std::vector<Type*>args;
     args.push_back(pVarPointerType()); // retval
     args.push_back(runtimeEngineType());
     args.push_back(pVarPointerType());
@@ -135,7 +135,7 @@ FunctionType* pIRHelper::pUserFunction3() {
 // pVar* (*)(pVar*, pRuntimeEngine*, pVar*, pVar*, pVar*, pVar*)
 FunctionType* pIRHelper::pUserFunction4() {
 
-    std::vector<const Type*>args;
+    std::vector<Type*>args;
     args.push_back(pVarPointerType()); // retval
     args.push_back(runtimeEngineType());
     args.push_back(pVarPointerType());
@@ -155,7 +155,7 @@ FunctionType* pIRHelper::pUserFunction4() {
 // pVar* (*)(pVar*, pRuntimeEngine*, pVar*, pVar*, pVar*, pVar*, pVar*)
 FunctionType* pIRHelper::pUserFunction5() {
 
-    std::vector<const Type*>args;
+    std::vector<Type*>args;
     args.push_back(pVarPointerType()); // retval
     args.push_back(runtimeEngineType());
     args.push_back(pVarPointerType());
@@ -178,7 +178,7 @@ FunctionType* pIRHelper::pUserFunction5() {
 FunctionType* pIRHelper::moduleEntryFunType() {
 
     // entry function type: void (*)(pVar*, pRuntimeEngine*)
-    std::vector<const Type*> efArgs;
+    std::vector<Type*> efArgs;
     efArgs.push_back(pVarPointerType()); // retval
     efArgs.push_back(runtimeEngineType());
     return FunctionType::get(Type::getVoidTy(mod_->getContext()), /* return type */
@@ -190,7 +190,7 @@ FunctionType* pIRHelper::moduleEntryFunType() {
 FunctionType* pIRHelper::moduleInitFunType() {
 
     // entry function type: void (*)(pRuntimeEngine*)
-    std::vector<const Type*> efArgs;
+    std::vector<Type*> efArgs;
     efArgs.push_back(runtimeEngineType());
     return FunctionType::get(Type::getVoidTy(mod_->getContext()), /* return type */
                              efArgs, /* arguments */
@@ -220,7 +220,10 @@ llvm::Constant* pIRHelper::byteArrayConstant(const StringRef& s) {
     indices.push_back(nullC);
     indices.push_back(nullC);
 
-    return ConstantExpr::getGetElementPtr(gVarStr, &indices[0], indices.size() );
+    // XXX port
+    //return ConstantExpr::getGetElementPtr(gVarStr, &indices[0], indices.size() );
+    assert(0 && "port");
+    return NULL;
 
 
 }

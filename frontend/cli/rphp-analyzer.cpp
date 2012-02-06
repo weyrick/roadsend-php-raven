@@ -25,7 +25,7 @@
 #include <vector>
 #include <string>
 #include <llvm/Support/CommandLine.h>
-#include <llvm/System/Path.h>
+#include <llvm/Support/PathV2.h>
 
 #include <boost/algorithm/string.hpp>
 

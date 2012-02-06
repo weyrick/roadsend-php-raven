@@ -1,7 +1,7 @@
 /* ***** BEGIN LICENSE BLOCK *****
 ;; Roadsend PHP Compiler
 ;;
-;; Copyright (c) 2008-2009 Shannon Weyrick <weyrick@roadsend.com>
+;; Copyright (c) 2008-2012 Shannon Weyrick <weyrick@mozek.us>
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License
@@ -25,9 +25,6 @@
 #include "rphp/IR/pCompileError.h"
 
 #include <llvm/Module.h>
-#if (LLVM_VERSION < 2007000)
-#include <llvm/ModuleProvider.h>
-#endif
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 #include <llvm/DerivedTypes.h>
@@ -36,7 +33,10 @@
 #include <llvm/Instructions.h>
 #include <llvm/Support/IRBuilder.h>
 #include <llvm/Support/raw_ostream.h>
-#include <llvm/System/Path.h>
+#include <llvm/Support/PathV2.h>
+#include <llvm/Support/system_error.h>
+#include <llvm/ADT/SmallString.h>
+#include <llvm/Support/FileSystem.h>
 
 #include <iostream>
 #include <fstream>
@@ -73,14 +73,9 @@ void pGenSupport::writeBitcode(Module* m, std::string outFile) {
     assert(m != NULL);
     assert(outFile.length() > 0);
 
-#if (LLVM_VERSION >= 2007000)
     std::string ErrInfo;
     raw_fd_ostream OS(outFile.c_str(), ErrInfo, raw_fd_ostream::F_Binary);
     if (ErrInfo.empty()) {
-#else
-    std::ofstream OS(outFile.c_str(), std::ios_base::out|std::ios::trunc|std::ios::binary);
-    if (!OS.fail()) {
-#endif
         WriteBitcodeToFile(m, OS);
     }
     else {
@@ -92,56 +87,39 @@ void pGenSupport::writeBitcode(Module* m, std::string outFile) {
 
 Module* pGenSupport::readBitcode(std::string fileName, LLVMContext& context) {
 
-    std::string errMsg;
-    MemoryBuffer* mb = MemoryBuffer::getFile(fileName.c_str(), &errMsg);
-    if (errMsg.length()) {
-        throw pCompileError("error loading runtime IR file [" + fileName + "]: " + errMsg);
+    OwningPtr<MemoryBuffer> fileBuf;
+    if (error_code ec = MemoryBuffer::getFile(fileName.c_str(), fileBuf)) {
+        throw pCompileError("error loading runtime IR file [" + fileName + "]: " + ec.message());
     }
 
-    Module* mod;
-
-#if (LLVM_VERSION >= 2007000)
-    mod = getLazyBitcodeModule(mb, context, &errMsg);
-#else
-    ModuleProvider* mp = getBitcodeModuleProvider(mb, context, &errMsg);
-#endif
-
-    if (errMsg.length()) {
+    std::string errMsg;
+    Module *module = getLazyBitcodeModule(fileBuf.take(),
+                                          getGlobalContext(),
+                                          &errMsg);
+    if (!module) {
         throw pCompileError("error parsing bitcode file [" + fileName + "]: " + errMsg);
     }
 
-#if (LLVM_VERSION < 2007000)
-    mod =  mp->getModule();
-
-    // caller takes control of module
-    mp->releaseModule();
-    delete mp;
-#endif
-
-    return mod;
+    return module;
 
 }
 
 Module* pGenSupport::getRuntimeIR(LLVMContext &c) {
 
-    sys::Path irFile;
+    SmallString<256> irFile;
 
     char* libPath = getenv("RPHP_IR_PATH");
     if (libPath) {
-        irFile.set(libPath);
+        irFile = libPath;
     }
     else {
         // assume build dir
-        irFile.set("../lib");
+        irFile = "../lib";
     }
-    irFile.appendComponent("c-runtime.bc");
+    sys::path::append(irFile, "c-runtime.bc");
 
-    if (irFile.exists()) {
-#if (LLVM_VERSION >= 2007000)
+    if (sys::fs::exists(irFile.str())) {
         return readBitcode(irFile.str(), c);
-#else
-        return readBitcode(irFile.toString(), c);
-#endif
     }
     else {
         throw pCompileError("unable to find c-runtime.bc - please set RPHP_IR_PATH environment variable to point to the directory containing this file.");
@@ -159,10 +137,8 @@ void pGenSupport::createMain(Module *llvmModule, const pIdentString& entryFuncti
     std::vector<const Type*>args;
     args.push_back(irHelper.pVarPointerType()); // retval
     args.push_back(irHelper.runtimeEngineType());
-    FunctionType* FT = FunctionType::get(
-    Type::getVoidTy(llvmModule->getContext()),
-    /*Params=*/args,
-    /*isVarArg=*/false);
+    FunctionType* FT = FunctionType::get(Type::getVoidTy(llvmModule->getContext()),
+                                         /*isVarArg=*/false);
 
     // this matches an extern in c-runtime.cpp
     Function *main = (Function*)llvmModule->getOrInsertFunction("rphp_mainEntry", FT);

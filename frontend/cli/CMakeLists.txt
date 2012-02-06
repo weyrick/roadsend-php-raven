@@ -46,7 +46,8 @@ target_link_libraries( rphp
 #                       ${LLVM_LIBS_CORE}
                        ${LLVM_LIBS_JIT}
                        ${ICU_LIBRARIES}
-                      ) 
+                        dl pthread
+                      )
 #target_link_libraries( rphpi
 #                       rphp-llvm-jit
 #                       rphp-llvm-ir
@@ -61,4 +62,5 @@ target_link_libraries ( rphp-analyzer
                         tinyxml
                        ${LLVM_LIBS_SUPPORT} 
                        ${ICU_LIBRARIES}
+                        dl pthread
 			)

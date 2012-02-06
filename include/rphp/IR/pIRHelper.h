@@ -56,7 +56,7 @@ public:
     llvm::FunctionType* moduleInitFunType();
     llvm::FunctionType* pVarBaseFunType();
     
-    const llvm::Type* pVarType();
+    llvm::Type* pVarType();
     llvm::Type* pVarPointerType();
 
     llvm::FunctionType* pUserFunction0();
