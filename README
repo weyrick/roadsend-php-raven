@@ -46,7 +46,7 @@ If you'd like to contribute, please contact us or join us in #roadsend on irc.fr
 
 == Requires ==
 
- * [http://llvm.org LLVM] 2.6+, and llvm-g++ 4.2
+ * [http://llvm.org LLVM] 3.0 with clang++
  * [http://boost.org Boost] 1.38+ (only headers required, no libraries)
  * [http://cmake.org CMake] 2.6+
  * [http://icu-project.org ICU] 4.2+ 
@@ -71,8 +71,6 @@ rphp uses the CMake build system. Basic *nix instructions:
  * make
 
 Note that an in-tree build is not recommended, you should create a separate build directory.
-
- * '''NOTE: There is a bug in LLVM 2.6 preventing rphp/lib/c-runtime.bc from working without first running rphp/lib/llvm-2.6-fixup.sh. This has been fixed in 2.7svn'''
 
 == Sample Checkout and Build Session ==
 
